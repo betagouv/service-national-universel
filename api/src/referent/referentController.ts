@@ -9,6 +9,8 @@ import fs from "fs";
 import fileUpload from "express-fileupload";
 
 import AuthObject from "../auth";
+import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../middlewares/rateLimit";
+import { requireJsonBody } from "../middlewares/requireJsonBody";
 import patches from "../controllers/patches";
 import ClasseStateManager from "../cle/classe/stateManager";
 
@@ -52,13 +54,12 @@ import {
   isYoung,
   inSevenDays,
   STEPS2023,
-  getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
   cancelPendingApplications,
   cancelPendingEquivalence,
 } from "../utils";
-import { validateId, idSchema, validateSelf, validateYoung, validateReferent } from "../utils/validator";
+import { validateId, idSchema, validateSelf, validateYoung, validateReferent, referentDepartmentSchema } from "../utils/validator";
 import { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } from "../utils/serializer";
 import { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION } from "../jwt-options";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../cookie-options";
@@ -80,7 +81,6 @@ import {
   canChangeYoungCohort,
   canSendTutorTemplate,
   canSearchSessionPhase1,
-  canCreateOrUpdateSessionPhase1,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -88,7 +88,6 @@ import {
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
-  translateFileStatusPhase1,
   canCheckIfRefExist,
   YOUNG_SOURCE,
   YOUNG_SOURCE_LIST,
@@ -105,7 +104,6 @@ import {
   isAdmin,
   isReferentReg,
   canValidateYoungToLP,
-  FILE_STATUS_PHASE1,
   ERRORS as ERRORS_LIB,
   ReferentType,
   PermissionDto,
@@ -118,6 +116,7 @@ import {
   SUB_ROLE_GOD,
   SUB_ROLES_LIST,
   VISITOR_SUB_ROLES_LIST,
+  WITHRAWN_REASONS,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -135,8 +134,17 @@ import { handleNotifForYoungWithdrawn } from "../young/youngService";
 import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
-import { isInvitationInUserScope, isReferentInUserScope } from "./referentScope";
-import { canEditYoungInScope, isYoungInReferentGeography } from "../young/youngScope";
+import { canContactTutorInScope, isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser, isReferentUpdateInUserScope } from "./referentScope";
+import { sanitizeEmailText } from "../email/emailInput";
+import {
+  canEditYoungInScope,
+  canViewYoungFileInScope,
+  getApplicationScopeFilter,
+  isYoungInUserScope,
+  isYoungInStructureScope,
+  isYoungInMilitaryPreparationStructureScope,
+} from "../young/youngScope";
+import { canReferentApplyYoungUpdate } from "../young/youngStatusTransitions";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -205,16 +213,21 @@ function cleanReferentData(referent) {
   return referent;
 }
 
-router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
-router.post("/signin-2fa", (req, res) => ReferentAuth.signin2FA(req, res));
+// Lot C de l'audit du 21/09/2026 : quota par IP sur les routes publiques d'auth.
+const referentSigninLimiter = signinRateLimiter();
+
+router.post("/signin", referentSigninLimiter, requireJsonBody, (req, res) => ReferentAuth.signin(req, res));
+router.post("/signin-2fa", referentSigninLimiter, requireJsonBody, (req, res) => ReferentAuth.signin2FA(req, res));
 router.post("/logout", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.logout(req, res));
 router.post("/signup", (_req, res) => {
   return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 });
 router.get("/signin_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.signinToken(req, res));
 router.get("/refresh_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.refreshToken(req, res));
-router.post("/forgot_password", async (req: UserRequest, res: Response) => ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`));
-router.post("/forgot_password_reset", async (req: UserRequest, res: Response) => ReferentAuth.forgotPasswordReset(req, res));
+router.post("/forgot_password", emailSendingRateLimiter("referent-forgot-password"), async (req: UserRequest, res: Response) =>
+  ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`),
+);
+router.post("/forgot_password_reset", referentSigninLimiter, async (req: UserRequest, res: Response) => ReferentAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) =>
   ReferentAuth.resetPassword(req, res),
 );
@@ -246,9 +259,17 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
     }
 
-    // On ne doit pas pouvoir prendre la place d'un compte supprimé/anonymisé.
+    // On ne doit pas pouvoir prendre la place d'un compte supprimé/anonymisé/désactivé.
     if (type === "young" && (user as YoungDocument).status === YOUNG_STATUS.DELETED) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    // Côté référent, aucun statut n'était vérifié avant de forger le jeton (audit 2026-09-21, L35) :
+    // passport rejette ensuite les comptes supprimés, mais pas les comptes désactivés.
+    if (type === "referent") {
+      const targetReferent = user as ReferentDocument;
+      if (targetReferent.status === ReferentStatus.INACTIVE || targetReferent.deletedAt) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
     }
 
     if (!canSigninAs(req.user, user, type)) {
@@ -272,7 +293,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     userToReturn.impersonateId = req.user._id;
     userToReturn.acl = acl;
 
-    return res.status(200).json({ ok: true, token, data: userToReturn });
+    return res.status(200).json({ ok: true, data: userToReturn });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -300,7 +321,7 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     const userSerialized = serializeReferent(user);
     userSerialized.acl = await getAcl(user);
-    return res.status(200).send({ ok: true, token, data: userSerialized });
+    return res.status(200).send({ ok: true, data: userSerialized });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -331,7 +352,7 @@ router.post(
           .allow(null, "")
           .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
         region: Joi.string().allow(null, ""),
-        department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+        department: referentDepartmentSchema(),
         structureId: Joi.string().allow(null, ""),
         structureName: Joi.string().allow(null, ""),
         cohesionCenterName: Joi.string().allow(null, ""),
@@ -352,6 +373,11 @@ router.post(
       if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       if (!(await isInvitationInUserScope(req.user, value))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      // CLE (H17) : ce parcours générique ne doit plus créer de compte ADMINISTRATEUR_CLE ni REFERENT_CLASSE.
+      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(value.role)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
 
       const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
       const referentProperties: Partial<ReferentType> = { roles: [] };
@@ -385,20 +411,12 @@ router.post(
       // @ts-ignore
       referentProperties.invitationExpires = inSevenDays();
 
-      if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) {
-        referentProperties.subRole = SUB_ROLES.referent_etablissement;
-        referentProperties.roles = [...referentProperties.roles!.filter((role) => role !== subRole), SUB_ROLES.referent_etablissement];
-      }
-
-      const referent = await ReferentModel.create(referentProperties);
+      // Comme au PUT : un compte invité ne garde que les champs de périmètre propres à son rôle.
+      const referent = await ReferentModel.create(cleanReferentData(referentProperties));
       if (!referent) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
       await updateTutorNameInMissionsAndApplications(referent, req.user);
 
-      let cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
-      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role || "")) {
-        // fixme: update url
-        cta = `${config.ADMIN_URL}/creer-mon-compte?token=${invitation_token}`;
-      }
+      const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
       const fromName = `${req.user.firstName} ${req.user.lastName}`;
       const toName = `${referent.firstName} ${referent.lastName}`;
 
@@ -416,7 +434,55 @@ router.post(
   },
 );
 
-router.post("/signup_retry", async (req: UserRequest, res: Response) => {
+/**
+ * Délai minimal entre deux renvois d'invitation pour un même compte. `invitationExpires` vaut
+ * toujours `inSevenDays()` au moment de l'envoi : la date du dernier envoi s'en déduit, sans
+ * ajouter de champ au modèle.
+ */
+const INVITATION_RESEND_DELAY_MS = 15 * 60 * 1000;
+
+function shouldResendInvitation(referent: ReferentDocument): boolean {
+  // Un compte déjà activé n'a plus d'invitation à recevoir : lui en régénérer une écrasait le jeton
+  // d'une invitation légitime en cours et permettait d'inonder sa boîte mail (audit 2026-09-21, M66).
+  if (referent.registredAt) return false;
+  if (referent.status === ReferentStatus.INACTIVE) return false;
+  if (referent.deletedAt) return false;
+
+  if (referent.invitationExpires) {
+    const lastSentAt = new Date(referent.invitationExpires).getTime() - 7 * 86400000;
+    if (Date.now() - lastSentAt < INVITATION_RESEND_DELAY_MS) return false;
+  }
+  return true;
+}
+
+/**
+ * Émet un nouveau jeton d'invitation et l'envoie par email. Le jeton précédent cesse de valoir :
+ * un lien d'invitation déjà diffusé ne doit pas rester utilisable indéfiniment (FM17).
+ */
+async function sendNewInvitation(referent: ReferentDocument, { fromName, fromUser, invitationExpires }: { fromName: string; fromUser: any; invitationExpires: Date | number }) {
+  const invitationToken = crypto.randomBytes(20).toString("hex");
+  referent.set({ invitationToken, invitationExpires });
+
+  const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`;
+  const toName = `${referent.firstName} ${referent.lastName}`;
+  const cohesionCenterName = referent.cohesionCenterName;
+  const region = referent.region;
+  const department = referent.department;
+  const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
+
+  await referent.save({ fromUser });
+  await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
+    emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+    params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
+  });
+}
+
+/**
+ * Renvoi d'une invitation expirée. Route non authentifiée : la réponse est identique quel que soit
+ * le sort de la demande. Un 404 sur adresse inconnue en faisait un oracle d'existence de compte
+ * référent, interrogeable par n'importe qui (audit 2026-09-21, M66).
+ */
+router.post("/signup_retry", emailSendingRateLimiter("referent-signup-retry"), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) {
@@ -425,25 +491,9 @@ router.post("/signup_retry", async (req: UserRequest, res: Response) => {
     }
 
     const referent = await ReferentModel.findOne({ email: value.email });
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
+    if (!referent || !shouldResendInvitation(referent)) return res.status(200).send({ ok: true });
 
-    const invitationToken = crypto.randomBytes(20).toString("hex");
-    referent.set({ invitationToken });
-    referent.set({ invitationExpires: inSevenDays() });
-
-    const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`;
-    const fromName = "L'équipe SNU";
-    const toName = `${referent.firstName} ${referent.lastName}`;
-    const cohesionCenterName = referent.cohesionCenterName;
-    const region = referent.region;
-    const department = referent.department;
-    const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
-
-    await referent.save({ fromUser: req.user });
-    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
-      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-      params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
-    });
+    await sendNewInvitation(referent, { fromName: "L'équipe SNU", fromUser: req.user, invitationExpires: inSevenDays() });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -452,7 +502,7 @@ router.post("/signup_retry", async (req: UserRequest, res: Response) => {
   }
 });
 
-router.post("/signup_verify", async (req: UserRequest, res: Response) => {
+router.post("/signup_verify", referentSigninLimiter, async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) {
@@ -460,11 +510,18 @@ router.post("/signup_verify", async (req: UserRequest, res: Response) => {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
+    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() }, deletedAt: { $exists: false } });
+    if (!referent || referent.status === ReferentStatus.INACTIVE) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    return res.status(200).send({ ok: true, token, data: serializeReferent(referent) });
+    // Cette route ne sert qu'à pré-remplir le formulaire d'activation : elle n'ouvre pas de session.
+    // Elle délivrait un JWT de session complet contre le seul jeton d'invitation, sans mot de passe
+    // ni 2FA (audit 2026-09-21, H62). C'est `signup_invite` qui authentifie, et cette route-là ne lit
+    // pas le JWT : elle revérifie le couple (email, invitationToken) puis pose le cookie de session.
+    // L'email n'est pas renvoyé : c'est le second élément que `signup_invite` exige avec le jeton,
+    // et le révéler ici réduisait l'activation au seul jeton d'invitation (FM17, audit des fronts
+    // du 23/09/2026). L'invité le saisit lui-même.
+    const { firstName, lastName, role, department } = referent;
+    return res.status(200).send({ ok: true, data: { firstName, lastName, role, department } });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -489,8 +546,17 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     }
     const { email, password, firstName, lastName, invitationToken, acceptCGU } = value;
 
-    const referent = await ReferentModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
+    const referent = await ReferentModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() }, deletedAt: { $exists: false } });
     if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+    // Un compte désactivé gardait son jeton d'invitation : l'activer ici rouvrait un accès
+    // qu'un administrateur venait de couper (FM17, audit des fronts du 23/09/2026).
+    if (referent.status === ReferentStatus.INACTIVE) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+
+    // CLE (H17) : cette route non authentifiée ne doit plus pouvoir activer de compte ADMINISTRATEUR_CLE ni REFERENT_CLASSE.
+    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role!)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     if (referent.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
     if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
@@ -536,7 +602,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
       });
     }
 
-    return res.status(200).send({ data: serializeReferent(referent), token, ok: true });
+    return res.status(200).send({ data: serializeReferent(referent), ok: true });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -568,6 +634,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     if (!(await canEditYoungInScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
     const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
+
+    // Statuts, cohorte et affectation : mêmes bornes par rôle que l'IHM, qui était seule à les appliquer
+    // (GOO-12 : FM13, FL2).
+    if (!canReferentApplyYoungUpdate(req.user, young, value, cohort)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
@@ -729,7 +802,23 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.roadCodeRefundDate = undefined;
     }
 
+    // L'historique des statuts est reconstruit ici, à partir de l'utilisateur authentifié. Il était
+    // auparavant accepté tel quel depuis le client, qui pouvait donc réécrire ou effacer tout le
+    // parcours du volontaire et s'attribuer une décision sous le nom d'un autre (cf. FM13).
+    const statusChanged = !!newYoung.status && newYoung.status !== young.status;
+
     young.set(newYoung);
+    if (statusChanged) {
+      const withdrawnLabel = WITHRAWN_REASONS.find((reason) => reason.value === newYoung.withdrawnReason)?.label;
+      young.historic.push({
+        phase: young.phase,
+        userName: `${req.user.firstName} ${req.user.lastName}`,
+        userId: req.user._id.toString(),
+        status: newYoung.status,
+        createdAt: new Date(),
+        note: newYoung.status === YOUNG_STATUS.WITHDRAWN ? [withdrawnLabel, newYoung.withdrawnMessage].filter(Boolean).join(" ") : "",
+      });
+    }
     await young.save({ fromUser: req.user });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
@@ -783,6 +872,13 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
     const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
     if (!youngs) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.BAD_REQUEST });
+
+    // `canValidateMultipleYoungsInClass` ne contrôle que le rôle : sans ce périmètre, un référent de
+    // classe valide ou refuse les volontaires de n'importe quelle classe (constat H63).
+    const inScope = await Promise.all(youngs.map((young) => isYoungInUserScope(req.user, young)));
+    if (inScope.some((allowed) => !allowed)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const classeIds = youngs.map((y) => y.classeId);
 
@@ -1166,9 +1262,15 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
     const { tutorId, template, subject, message, app, missionName } = value;
     const tutor = await ReferentModel.findById(tutorId);
     if (!tutor) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
-    if (tutor.status === ReferentStatus.INACTIVE) return res.status(200).send({ ok: true });
 
+    // L'autorisation passe avant le court-circuit sur les comptes inactifs, qui révélait sinon le
+    // statut d'un compte de référent à un appelant hors périmètre.
     if (!canSendTutorTemplate(req.user)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
+    // `canSendTutorTemplate` ne porte que le rôle : sans lien entre l'appelant et le tuteur, la
+    // route écrit à n'importe quel référent du pays avec un texte libre (constat M67).
+    if (!(await canContactTutorInScope(req.user, tutor))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (tutor.status === ReferentStatus.INACTIVE) return res.status(200).send({ ok: true });
 
     if (
       [
@@ -1181,10 +1283,11 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
         emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
         params: {
           cta: config.ADMIN_URL,
-          message,
-          missionName: missionName || app?.missionName,
-          youngFirstName: app?.youngFirstName,
-          youngLastName: app?.youngLastName,
+          // Texte libre recopié dans un mail officiel : on en retire tout balisage.
+          message: sanitizeEmailText(message),
+          missionName: sanitizeEmailText(missionName || app?.missionName),
+          youngFirstName: sanitizeEmailText(app?.youngFirstName),
+          youngLastName: sanitizeEmailText(app?.youngLastName),
         },
       });
     else {
@@ -1232,20 +1335,12 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
       }
       case ROLES.SUPERVISOR:
       case ROLES.RESPONSIBLE: {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-        if (!structures) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (!structures.reduce((acc, curr) => acc || canViewYoungFile(req.user, young, curr), false))
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-        // ? Use better check link between structure and young ! + Check for tutorId as well ?
-        // const test = await new Promise().any(
-        //   structures.eachAsync(async (structure) => {
-        //     const applications = await ApplicationModel.find({ structureId: structure._id.toString(), youngId: youngId });
-        //     return applications.length > 0 ? true : false;
-        //   }),
-        // );
-        // if (!test) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        // `canViewYoungFile(acteur, jeune, saPropreStructure)` ne comparait que l'acteur à SA PROPRE
+        // structure (`actor.region === structure.region`, `actor.department === structure.department`) :
+        // le volontaire n'intervenait jamais, et deux `undefined` suffisaient à valider. Seul le
+        // rattachement réel fait foi (constat H65, audit 2026-09-21).
+        if (!req.user.structureId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        if (!(await isYoungInStructureScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         break;
       }
       case ROLES.ADMIN:
@@ -1301,10 +1396,13 @@ router.get(
       const { youngId, key, fileName } = value;
 
       const young = await YoungModel.findById(youngId);
-      // if they are not admin nor referent, it is not allowed to access this route unless they are from a military preparation structure
-      if (!canViewYoungMilitaryPreparationFile(req.user, young)) {
-        const structure = await StructureModel.findById(req.user.structureId);
-        if (!structure || structure?.isMilitaryPreparation !== "true") return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Hors admin / référent territorial, l'accès suppose une structure de préparation militaire ET
+      // une candidature du volontaire dans cette structure. Le repli ne testait que
+      // `isMilitaryPreparation` sur la structure de l'acteur (constat H66, audit 2026-09-21).
+      if (!canViewYoungMilitaryPreparationFile(req.user, young) && !(await isYoungInMilitaryPreparationStructureScope(req.user, young))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       const downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${fileName}`);
@@ -1433,11 +1531,22 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     if (!canViewYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await YoungModel.findById(value);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const applicationsFromDb = await ApplicationModel.find({ youngId: data._id });
+    // `canViewYoung` ne contrôle que le rôle : sans ce périmètre, tout responsable de structure ou
+    // référent hors de son territoire lit le dossier de n'importe quel volontaire (constat H67).
+    if (!(await canViewYoungFileInScope(req.user, data))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Un responsable / superviseur ne voit que les candidatures de son périmètre, et les coordonnées
+    // du représentant de l'état de la structure ne sont jamais jointes : `GET /structure/:id` les
+    // refuse hors périmètre, le dossier ne doit pas servir de détour (GOO-41).
+    const applicationsFromDb = await ApplicationModel.find({ youngId: data._id, ...(await getApplicationScopeFilter(req.user)) });
     let applications: any[] = [];
     for (let application of applicationsFromDb) {
       const structure = await StructureModel.findById(application.structureId);
-      applications.push({ ...application.toObject(), structure: structure ? serializeStructure(structure, req.user) : null });
+      let serializedStructure: any = null;
+      if (structure) {
+        serializedStructure = serializeStructure(structure, req.user);
+        delete serializedStructure.structureManager;
+      }
+      applications.push({ ...application.toObject(), structure: serializedStructure });
     }
 
     let etablissement: EtablissementDocument | null = null;
@@ -1450,7 +1559,9 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
       if (!etablissement || !classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    return res.status(200).send({ ok: true, data: { ...data._doc, applications, etablissement, classe } });
+    // Le document brut porte le mot de passe et tous les jetons (invitation, réinitialisation, 2FA,
+    // phase 3, représentants légaux) : la réponse doit passer par le sérialiseur.
+    return res.status(200).send({ ok: true, data: { ...serializeYoung(data, req.user), applications, etablissement, classe } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1473,7 +1584,14 @@ router.get(
       const referent = await ReferentModel.findById(id);
       if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const referentPatches = await patches.get(req, ReferentModel);
+      // `USER_HISTORY` est seedée sans policy et la route passe `ignorePolicy` : sans ce contrôle,
+      // l'historique (anciens emails, téléphones, changements de rôle et de structure, auteurs) de
+      // n'importe quel référent est lisible par tout responsable ou superviseur (H68).
+      if (!(await isReferentReadableByUser(req.user, referent))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const referentPatches = await patches.get(req, ReferentModel, referent);
       if (!referentPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({ ok: true, data: referentPatches });
     } catch (error) {
@@ -1523,7 +1641,12 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     let referent = await ReferentModel.findById(checkedId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // `canViewReferent` n'est qu'une matrice de rôles (tout responsable lit tout responsable de
+    // France) : le périmètre est porté par `isReferentReadableByUser`, côté serveur uniquement (H69).
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!(await isReferentReadableByUser(req.user, referent))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     referent = serializeReferent(referent);
 
     await populateReferent(referent);
@@ -1632,6 +1755,11 @@ router.put(
       if (!(await isReferentInUserScope(req.user, referent))) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
+      // Le périmètre ci-dessus porte sur la cible avant modification : les valeurs demandées
+      // (géographie, statut, email, sous-rôle de son propre compte) sont bornées à part.
+      if (!isReferentUpdateInUserScope(req.user, referent, value)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
       // `roles` est recalculé ci-dessous à partir de `subRole` : un sous-rôle étranger au rôle de la
       // cible lui donnerait les permissions de ce sous-rôle.
       if (!isSubRoleChangeAllowed({ role: value.role || referent.role, subRole: referent.subRole }, value.subRole)) {
@@ -1673,6 +1801,19 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    // Sous impersonation (`signin_as`), l'acteur n'est pas le titulaire du compte : lui laisser poser
+    // un email ou un mot de passe lui donnait une prise de contrôle définitive, sans autre trace que
+    // `fromUser` (audit 2026-09-21, H61). `reset_password` exige déjà le mot de passe courant ; cette
+    // route s'aligne. Renvoyer l'email courant reste sans effet (le formulaire de profil poste
+    // l'objet complet), mais l'effacer (`null`/`""`) est bien un changement et reste refusé.
+    if (req.user.impersonateId) {
+      const emailChanged = "email" in value && value.email !== user.email;
+      const passwordSubmitted = "password" in value && !!value.password;
+      if (emailChanged || passwordSubmitted) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
     user.set(value);
     user.set(cleanReferentData(user));
     await user.save({ fromUser: req.user });
@@ -1704,7 +1845,9 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
         resource: PERMISSION_RESOURCES.STRUCTURE,
         context: { structure: structure.toJSON() },
       }) ||
-      !canUpdateReferent({ actor: req.user, originalTarget: referent, structure })
+      // Le rattachement impose le rôle RESPONSIBLE : sans ce `modifiedTarget`, la matrice ne voyait pas le
+      // changement de rôle et un référent rétrogradait un pair départemental ou régional en responsable.
+      !canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: { role: ROLES.RESPONSIBLE } as ReferentType, structure })
     ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
@@ -1828,87 +1971,6 @@ router.get(
   },
 );
 
-router.put("/young/:id/phase1Status/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const keys = ["cohesionStayMedical", "imageRight", "rules"];
-    const { error: documentError, value: document } = Joi.string()
-      .required()
-      .valid(...keys)
-      .validate(req.params.document);
-    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const young = await YoungModel.findById(req.params.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    let value;
-    if (["imageRight"].includes(document)) {
-      const { error: bodyError, value: tempValue } = Joi.object({
-        [`${document}FilesStatus`]: Joi.string()
-          .trim()
-          .valid(FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED)
-          .required(),
-        [`${document}FilesComment`]: Joi.alternatives().conditional(`${document}FilesStatus`, {
-          is: FILE_STATUS_PHASE1.WAITING_CORRECTION,
-          then: Joi.string().trim().required(),
-          otherwise: Joi.isError(new Error()),
-        }),
-      }).validate(req.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      if (!tempValue[`${document}FilesComment`]) tempValue[`${document}FilesComment`] = undefined;
-      value = tempValue;
-    } else if (document === "cohesionStayMedical") {
-      const { error: bodyError, value: tempValue } = Joi.object({
-        cohesionStayMedicalFileReceived: Joi.string().trim().required().valid("true", "false"),
-        cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true", "false"),
-      }).validate(req.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      value = tempValue;
-    } else if (document === "rules") {
-      const { error: bodyError, value: tempValue } = Joi.object({
-        rulesYoung: Joi.string().trim().required().valid("true", "false"),
-      }).validate(req.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      value = tempValue;
-    } else {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
-
-    if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-    // `canCreateOrUpdateSessionPhase1` n'applique aucun périmètre aux référents dép./rég. : on le fait ici.
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(req.user.role) && !isYoungInReferentGeography(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    young.set(value);
-    await young.save({ fromUser: req.user });
-
-    if (["imageRight", "rules"].includes(document)) {
-      if ([FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED].includes(value[`${document}FilesStatus`])) {
-        const statusToMail = {
-          WAITING_VERIFICATION: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION,
-          WAITING_CORRECTION: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_CORRECTION,
-          VALIDATED: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_VALIDATED,
-        };
-
-        let cc = getCcOfYoung({ template: statusToMail[value[`${document}FilesStatus`]], young });
-        await sendTemplate(statusToMail[value[`${document}FilesStatus`]], {
-          emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-          params: { type_document: translateFileStatusPhase1(document), modif: value[`${document}FilesComment`] },
-          cc,
-        });
-      }
-    }
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
@@ -1932,27 +1994,28 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
 
     young.set({ [value.key]: value.filesList });
     await young.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
-router.post("/exist", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({ email: Joi.string().email() }).validate(req.body, { stripUnknown: true });
+// La réponse dit si un email correspond à un compte : quota par compte appelant, pour que la route
+// ne serve pas à balayer une liste d'emails (audit 2026-09-21, M70). L'usage légitime est une
+// vérification par structure créée.
+const referentExistLimiter = userRateLimiter({ prefix: "referent-exist", windowMs: 10 * 60 * 1000, limit: 20 });
 
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const where: any = {};
-    if (value.email) where.email = value.email;
+router.post("/exist", passport.authenticate(["referent"], { session: false, failWithError: true }), referentExistLimiter, async (req: UserRequest, res: Response) => {
+  try {
     if (!canCheckIfRefExist(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const referent = await ReferentModel.findOne(where);
-    if (referent) return res.status(200).send({ ok: true, data: true });
-    else return res.status(200).send({ ok: true, data: false });
+
+    // Email obligatoire : sans lui, la recherche partait sur `{}` et répondait toujours `true`.
+    const { error, value } = Joi.object({ email: Joi.string().trim().lowercase().email().required() }).validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const referent = await ReferentModel.exists({ email: value.email });
+    return res.status(200).send({ ok: true, data: !!referent });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1971,13 +2034,22 @@ router.post(
       const referent = await ReferentModel.findById(req.validatedParams.id);
       if (!referent) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND });
 
-      if (!referent.invitationExpires || !referent.invitationToken) {
+      // Un compte déjà activé n'a plus d'invitation. Un compte désactivé ou supprimé ne doit pas en
+      // recevoir : son jeton a été vidé à la désactivation.
+      if (referent.registredAt || referent.status === ReferentStatus.INACTIVE || referent.deletedAt) {
         return res.status(400).json({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
+      // Les comptes CLE s'activent par un autre parcours (`/creer-mon-compte`), que
+      // `/auth/signup/invite` refuse (H17) : un lien régénéré ici leur serait inutilisable.
+      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role!)) {
+        return res.status(400).json({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
 
+      // Le renouvellement prolongeait le même jeton d'un mois : un lien d'invitation intercepté
+      // restait valable aussi longtemps qu'on le renouvelait. On émet un nouveau jeton, envoyé par
+      // email, et l'ancien lien cesse de fonctionner (FM17, audit des fronts du 23/09/2026).
       const invitationExpires = addMonths(new Date(), 1);
-      referent.set({ invitationExpires });
-      await referent.save({ fromUser: req.user });
+      await sendNewInvitation(referent, { fromName: "L'équipe SNU", fromUser: req.user, invitationExpires });
 
       return res.status(200).json({ ok: true, data: { invitationExpires } });
     } catch (error) {

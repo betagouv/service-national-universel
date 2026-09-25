@@ -5,7 +5,7 @@ import fs from "fs";
 import Joi from "joi";
 import { v4 as uuid } from "uuid";
 
-import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES, ReferentStatus } from "snu-lib";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES, ReferentStatus, getSafeDownloadFileName } from "snu-lib";
 
 import slack from "../slack";
 import { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } from "../cookie-options";
@@ -18,34 +18,20 @@ import { YoungModel, ClasseModel, ReferentModel } from "../models";
 import { validateId } from "../utils/validator";
 import { encrypt, decrypt } from "../cryptoUtils";
 import { getUserAttributes } from "../services/support";
+import { normalizeFromPage, PUBLIC_FORM_ROLES, SCHEMA_SUPPORT_DEPARTMENT, SCHEMA_SUPPORT_REGION } from "../services/supportFormAttributes";
 import optionalAuth from "../middlewares/optionalAuth";
 import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
 import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { authRateLimiter } from "../middlewares/rateLimit";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { KNOWLEDGE_BASE_PUBLIC_RESTRICTION, KNOWLEDGE_BASE_RESTRICTIONS, knowledgeBaseReadableRoles } from "../services/knowledgeBaseReader";
+import { claimAttachments, consumeUploadQuota, MAX_FILES_PER_UPLOAD, rememberAttachment, SupportAttachment } from "../services/supportAttachments";
 
-const KNOWLEDGE_BASE_PUBLIC_RESTRICTION = "public";
-
-// Doit rester aligné sur l'énumération SCHEMA_ROLE de snupport-api (src/controllers/knowledgeBase.js).
-const KNOWLEDGE_BASE_RESTRICTIONS = [
-  KNOWLEDGE_BASE_PUBLIC_RESTRICTION,
-  "young",
-  "young_cle",
-  "structure",
-  "referent",
-  "referent_sanitaire",
-  "head_center",
-  "head_center_adjoint",
-  "visitor",
-  "transporter",
-  "referent_classe",
-  "admin",
-  "administrateur_cle",
-  "administrateur_cle_coordinateur_cle",
-  "administrateur_cle_referent_etablissement",
-  "responsible",
-];
+// Feedback sur un article de la base de connaissance : route publique, chaque appel écrit en base (M83).
+const knowledgeBaseFeedbackRateLimiter = authRateLimiter({ prefix: "kb-feedback", windowMs: 10 * 60 * 1000, limit: 10 });
+const KNOWLEDGE_BASE_FEEDBACK_COMMENT_MAX_LENGTH = 2000;
 
 interface File {
   name: string;
@@ -107,12 +93,47 @@ const router = express.Router();
 // l'utilisateur côté SNUpport), qui est aussi la seule d'où le front tire les identifiants qu'il envoie ici.
 // Cette liste est exhaustive : GET /v0/ticket (snupport-api/src/controllers/v0/ticket.js) renvoie tous les
 // tickets du contact, sans limite ni pagination. En cas de doute (support injoignable, réponse inattendue), on refuse.
-const isTicketOwner = async (user: UserRequest["user"], ticketId: string): Promise<boolean> => {
-  if (!user?.email) return false;
+const listOwnTickets = async (user: UserRequest["user"]): Promise<Ticket[]> => {
+  if (!user?.email) return [];
   const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(user.email)}`, { method: "GET", credentials: "include" });
-  if (!ok || !Array.isArray(data)) return false;
+  if (!ok || !Array.isArray(data)) return [];
+  return data;
+};
+
+const isTicketOwner = async (user: UserRequest["user"], ticketId: string): Promise<boolean> => {
+  const tickets = await listOwnTickets(user);
   // validateId accepte l'hexadécimal en majuscules : on compare sans tenir compte de la casse.
-  return data.some((ticket: Ticket) => String(ticket._id).toLowerCase() === ticketId.toLowerCase());
+  return tickets.some((ticket: Ticket) => String(ticket._id).toLowerCase() === ticketId.toLowerCase());
+};
+
+// Une pièce jointe n'est lisible que si un message d'un des tickets de l'utilisateur la référence (M39).
+const isAttachmentOwner = async (user: UserRequest["user"], path: string): Promise<boolean> => {
+  const tickets = await listOwnTickets(user);
+  const referenced = await Promise.all(
+    tickets.map(async (ticket) => {
+      const { ok, data } = await SNUpport.api(`/v0/ticket/withMessages?ticketId=${encodeURIComponent(String(ticket._id))}`, { method: "GET", credentials: "include" });
+      if (!ok || !Array.isArray(data?.messages)) return false;
+      return data.messages.some((message: { files?: File[]; attachments?: File[] }) =>
+        [...(message.files || []), ...(message.attachments || [])].some((file) => file?.path === path),
+      );
+    }),
+  );
+  return referenced.some(Boolean);
+};
+
+// Les pièces jointes d'un message sont désignées par le chemin renvoyé par POST /upload. Le nom et
+// l'URL éventuellement renvoyés par le client sont ignorés : on relaie l'enregistrement serveur (M36).
+const attachmentsSchema = Joi.array()
+  .max(MAX_FILES_PER_UPLOAD)
+  .items(Joi.object({ path: Joi.string().required() }).unknown());
+
+/** `undefined` si le message n'a pas de pièce jointe, `null` si l'une d'elles n'est pas un dépôt de l'utilisateur. */
+const resolveAttachments = async (user: UserRequest["user"], files?: Array<{ path: string }>): Promise<SupportAttachment[] | undefined | null> => {
+  if (!files?.length) return undefined;
+  return claimAttachments(
+    user._id.toString(),
+    files.map(({ path }) => path),
+  );
 };
 
 router.get(
@@ -148,6 +169,12 @@ router.get("/ticketsInfo", authMiddleware(["referent", "young"]), async (req: Us
 
 router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) => {
   try {
+    // Seuls les référents départementaux et régionaux ont un compte support. Un référent qui a
+    // changé de rôle garde son compte agent jusqu'à la réconciliation nocturne : l'accès lui est
+    // refusé ici dès le changement (GOO-13). Le statut INACTIVE est déjà refusé par passport.
+    if (!([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION] as string[]).includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     // On transmet l'identifiant SNU du référent : c'est lui qui désigne le compte agent côté
     // support, l'email seul ne suffit pas à prouver qu'il s'agit bien du même utilisateur.
     const { ok, data, token } = await SNUpport.api(
@@ -181,8 +208,11 @@ router.get("/knowledgeBase/search", optionalAuth, async (req: UserRequest, res) 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { restriction, search } = value;
 
-    // Hors base publique, la restriction donne accès à la documentation interne d'un rôle : réservée aux utilisateurs connectés.
-    if (restriction !== KNOWLEDGE_BASE_PUBLIC_RESTRICTION && !req.user) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Hors base publique, la restriction donne accès à la documentation interne d'un rôle : réservée
+    // aux comptes de ce rôle, pas à tout utilisateur connecté (M86).
+    if (restriction !== KNOWLEDGE_BASE_PUBLIC_RESTRICTION && !knowledgeBaseReadableRoles(req.user, isYoung(req.user)).includes(restriction)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const { ok, data } = await SNUpport.api(`/knowledge-base/${encodeURIComponent(restriction)}/search?search=${encodeURIComponent(search)}&status=PUBLISHED`, {
       method: "GET",
@@ -196,12 +226,23 @@ router.get("/knowledgeBase/search", optionalAuth, async (req: UserRequest, res) 
   }
 });
 
-router.post("/knowledgeBase/feedback", optionalAuth, async (req: UserRequest, res) => {
+router.post("/knowledgeBase/feedback", knowledgeBaseFeedbackRateLimiter, optionalAuth, async (req: UserRequest, res) => {
   try {
+    // Schéma fermé : seuls les champs du formulaire de la base de connaissance sont relayés (L22).
+    // L'email du contact, lui, ne peut venir que de la session.
+    const { error, value } = Joi.object({
+      isPositive: Joi.boolean().required(),
+      knowledgeBaseArticle: Joi.string().hex().length(24).required(),
+      comment: Joi.string().trim().allow("").max(KNOWLEDGE_BASE_FEEDBACK_COMMENT_MAX_LENGTH),
+    }).validate(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { isPositive, knowledgeBaseArticle, comment } = value;
+
     const { ok, data } = await SNUpport.api(`/feedback`, {
       method: "POST",
       credentials: "include",
-      body: JSON.stringify({ ...req.body, contactEmail: req.user?.email }),
+      // Un commentaire vide est omis : snupport-api le refuserait.
+      body: JSON.stringify({ isPositive, knowledgeBaseArticle, comment: comment || undefined, contactEmail: req.user?.email }),
     });
     if (!ok) return res.status(400).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
@@ -297,13 +338,7 @@ router.post(
         author: Joi.string(),
         formSubjectStep1: Joi.string(),
         formSubjectStep2: Joi.string(),
-        files: Joi.array().items(
-          Joi.object().keys({
-            name: Joi.string().required(),
-            url: Joi.string().required(),
-            path: Joi.string().required(),
-          }),
-        ),
+        files: attachmentsSchema,
       })
         .unknown()
         .validate(obj);
@@ -311,7 +346,9 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const { subject, message, author, formSubjectStep1, formSubjectStep2, files, parcours } = value;
+      const { subject, message, author, formSubjectStep1, formSubjectStep2, parcours } = value;
+      const files = await resolveAttachments(req.user, value.files);
+      if (files === null) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const userAttributes = await getUserAttributes(req.user);
       const response: ResponsePostTicket = await SNUpport.api("/v0/message", {
         method: "POST",
@@ -327,7 +364,7 @@ router.post(
           author,
           formSubjectStep1,
           formSubjectStep2,
-          attributes: [...userAttributes, { name: "page précédente", value: value.fromPage }],
+          attributes: [...userAttributes, { name: "page précédente", value: normalizeFromPage(value.fromPage) }],
           files,
         }),
       });
@@ -345,7 +382,12 @@ router.post(
   },
 );
 
-router.post("/ticket/form", async (req: UserRequest, res) => {
+// Formulaire de contact public, sans authentification : chaque envoi crée un ticket et déclenche un
+// email officiel du support vers l'adresse saisie. Plafonné par IP (M91) ; le quota reste large pour
+// les établissements dont les élèves partagent une même IP de sortie.
+const publicTicketFormLimiter = authRateLimiter({ prefix: "support-ticket-form", windowMs: 60 * 60 * 1000, limit: 20 });
+
+router.post("/ticket/form", publicTicketFormLimiter, async (req: UserRequest, res) => {
   try {
     let author: string | undefined;
 
@@ -388,19 +430,15 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       lastName: Joi.string().required(),
       parcours: Joi.string(),
       classeId: Joi.string().allow(null),
-      department: Joi.string().required(),
-      region: Joi.string().required(),
+      department: SCHEMA_SUPPORT_DEPARTMENT.required(),
+      region: SCHEMA_SUPPORT_REGION.required(),
       formSubjectStep1: Joi.string().required(),
       formSubjectStep2: Joi.string().required(),
-      role: Joi.string().required(),
+      role: Joi.string().valid(...PUBLIC_FORM_ROLES).required(),
       fromPage: Joi.string().allow(null),
-      files: Joi.array().items(
-        Joi.object().keys({
-          name: Joi.string().required(),
-          url: Joi.string().required(),
-          path: Joi.string().required(),
-        }),
-      ),
+      // Le dépôt de fichiers exige une session (M38) : un visiteur anonyme ne peut donc joindre
+      // aucun fichier qui soit le sien (M36).
+      files: Joi.array().max(0),
     })
       .unknown()
       .validate(obj);
@@ -408,13 +446,13 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, firstName, lastName, email, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours, classeId } = value;
+    const { subject, message, firstName, lastName, email, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, parcours, classeId } = value;
 
     const userAttributes = [
       { name: "departement", value: department },
       { name: "region", value: region },
       { name: "role", value: role },
-      { name: "page précédente", value: fromPage },
+      { name: "page précédente", value: normalizeFromPage(fromPage) },
     ];
 
     let body: Message = {
@@ -428,7 +466,6 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       attributes: userAttributes,
       formSubjectStep1,
       formSubjectStep2,
-      files,
       author,
     };
 
@@ -443,8 +480,14 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       credentials: "include",
       body: JSON.stringify(body),
     });
-    if (!response.ok) return res.status(400).send({ ok: false, code: response });
-    return res.status(200).send({ ok: true, data: response });
+    // Le ticket créé porte le groupe de contact dérivé de l'existence de l'email en base (« young exterior »,
+    // « admin exterior » ou « unknown ») : le renvoyer à un visiteur anonyme en ferait un oracle (M37).
+    // La réponse est donc la même quel que soit l'email, et ne contient rien du ticket.
+    if (!response.ok) {
+      slack.error({ title: "Create ticket via public form SNUpport", text: JSON.stringify(response.code) });
+      return res.status(400).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -463,16 +506,12 @@ router.post("/ticket/:id/message", authMiddleware(["referent", "young"]), async 
 
     const { error: validationError, value } = Joi.object({
       message: Joi.string().allow(null, ""),
-      files: Joi.array().items(
-        Joi.object().keys({
-          name: Joi.string().required(),
-          url: Joi.string().required(),
-          path: Joi.string().required(),
-        }),
-      ),
+      files: attachmentsSchema,
     }).validate(req.body, { stripUnknown: true });
     if (validationError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { message, files } = value;
+    const { message } = value;
+    const files = await resolveAttachments(req.user, value.files);
+    if (files === null) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const userAttributes = await getUserAttributes(req.user);
     const response = await SNUpport.api("/v0/message", {
@@ -496,89 +535,129 @@ router.post("/ticket/:id/message", authMiddleware(["referent", "young"]), async 
   }
 });
 
-router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }), async (req: UserRequest, res) => {
-  try {
-    const { error: filesError, value: files } = Joi.array()
-      .items(
-        Joi.alternatives().try(
-          Joi.object<UploadedFile>({
-            name: Joi.string().required(),
-            data: Joi.binary().required(),
-            tempFilePath: Joi.string().allow("").optional(),
-            mimetype: Joi.string(),
-          }).unknown(),
-          Joi.array().items(
+// Types acceptés, avec l'extension donnée à l'objet stocké : elle vient du type détecté, pas du nom fourni par le client.
+const UPLOAD_EXTENSIONS = new Map<string, string>([
+  ["image/jpeg", "jpg"],
+  ["image/png", "png"],
+  ["application/pdf", "pdf"],
+  ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"],
+  ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"],
+]);
+
+const removeTempFiles = (req: UserRequest) => {
+  for (const entry of Object.values(req.files || {})) {
+    for (const file of Array.isArray(entry) ? entry : [entry]) {
+      if (file?.tempFilePath && fs.existsSync(file.tempFilePath)) fs.unlinkSync(file.tempFilePath);
+    }
+  }
+};
+
+// Dépôt réservé aux jeunes et référents connectés, plafonné par requête et par utilisateur (M38). Chaque fichier
+// déposé est enregistré pour son auteur : c'est la seule source des pièces jointes acceptées ensuite (M36).
+router.post(
+  "/upload",
+  authMiddleware(["referent", "young"]),
+  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  async (req: UserRequest, res) => {
+    try {
+      const { error: filesError, value: files } = Joi.array()
+        .items(
+          Joi.alternatives().try(
             Joi.object<UploadedFile>({
               name: Joi.string().required(),
               data: Joi.binary().required(),
               tempFilePath: Joi.string().allow("").optional(),
               mimetype: Joi.string(),
             }).unknown(),
+            Joi.array().items(
+              Joi.object<UploadedFile>({
+                name: Joi.string().required(),
+                data: Joi.binary().required(),
+                tempFilePath: Joi.string().allow("").optional(),
+                mimetype: Joi.string(),
+              }).unknown(),
+            ),
           ),
-        ),
-      )
-      .validate(
-        Object.keys(req.files || {}).map((e) => req.files[e]),
-        { stripUnknown: true },
-      );
-    if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    const responseData: File[] = [];
-
-    for (let currentFile of files) {
-      if (Array.isArray(currentFile)) {
-        currentFile = currentFile[currentFile.length - 1];
+        )
+        .validate(
+          Object.keys(req.files || {}).map((e) => req.files[e]),
+          { stripUnknown: true },
+        );
+      if (filesError) {
+        removeTempFiles(req);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
-      const { name, tempFilePath, mimetype } = currentFile;
-      const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
-      const validTypes = [
-        "image/jpeg",
-        "image/png",
-        "application/pdf",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ];
-      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers!))) {
+      if (files.length > MAX_FILES_PER_UPLOAD) {
+        removeTempFiles(req);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
+      if (!(await consumeUploadQuota(req.user._id.toString(), files.length))) {
+        removeTempFiles(req);
+        return res.status(429).send({ ok: false, code: "TOO_MANY_REQUESTS" });
+      }
+
+      const responseData: File[] = [];
+
+      for (let currentFile of files) {
+        if (Array.isArray(currentFile)) {
+          currentFile = currentFile[currentFile.length - 1];
+        }
+        const { name, tempFilePath, mimetype } = currentFile;
+        const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
+        const extension = mimeFromMagicNumbers ? UPLOAD_EXTENSIONS.get(mimeFromMagicNumbers) : undefined;
+        if (!(UPLOAD_EXTENSIONS.has(mimetype) && extension)) {
+          removeTempFiles(req);
+          return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        }
+
+        const scanResult = await scanFile(tempFilePath, name);
+        if (scanResult.infected) {
+          removeTempFiles(req);
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        }
+
+        const data = fs.readFileSync(tempFilePath);
+        const path = `message/${uuid()}.${extension}`;
+        const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
+        const response = (await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG)) as UploadResponse;
+        // Le nom affiché et proposé au téléchargement prend l'extension du type détecté (FL6).
+        const attachment = { name: getSafeDownloadFileName(name, mimeFromMagicNumbers), url: response.Location, path: response.key };
+        await rememberAttachment(req.user._id.toString(), attachment);
+        responseData.push(attachment);
         fs.unlinkSync(tempFilePath);
-        return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
+      removeTempFiles(req);
 
-      const scanResult = await scanFile(tempFilePath, name);
-      if (scanResult.infected) {
-        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-      }
-
-      const data = fs.readFileSync(tempFilePath);
-      const path = getS3Path(name);
-      const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
-      const response = (await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG)) as UploadResponse;
-      responseData.push({ name, url: response.Location, path: response.key });
-      fs.unlinkSync(tempFilePath);
+      return res.status(200).send({ data: responseData, ok: true });
+    } catch (error) {
+      removeTempFiles(req);
+      capture(error);
+      if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    return res.status(200).send({ data: responseData, ok: true });
-  } catch (error) {
-    capture(error);
-    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.get("/s3file/:id", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
-    const file = await getFile(`message/${req.params.id}`, SUPPORT_BUCKET_CONFIG);
+    const { error, value: id } = Joi.string()
+      .pattern(/^[^/\\]+$/)
+      .max(255)
+      .required()
+      .validate(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const path = `message/${id}`;
+    if (!(await isAttachmentOwner(req.user, path))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const file = await getFile(path, SUPPORT_BUCKET_CONFIG);
     const buffer = decrypt(file.Body, config.FILE_ENCRYPTION_SECRET_SUPPORT);
     return res.status(200).send({ ok: true, data: buffer });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-const getS3Path = (fileName: string): string => {
-  const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-  return `message/${uuid()}.${extension}`;
-};
 
 const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean> => {
   if (!ticket) return false;
@@ -588,7 +667,8 @@ const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean>
   const department = ticketCreator.department;
   const departmentReferents = await ReferentModel.find({
     role: ROLES.REFERENT_DEPARTMENT,
-    department, status: ReferentStatus.ACTIVE,
+    department,
+    status: ReferentStatus.ACTIVE,
   });
 
   for (let referent of departmentReferents) {

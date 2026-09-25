@@ -28,7 +28,6 @@ import TabList from "@/components/views/TabList";
 import Title from "@/components/views/Title";
 import { appURL } from "@/config";
 import api from "@/services/api";
-import plausibleEvent from "@/services/plausible";
 import { Button } from "./Buttons";
 import { ChangeCohortPen } from "./ChangeCohortPen";
 import ConfirmationModal from "./ConfirmationModal";
@@ -159,15 +158,12 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   };
 
   async function changeStatus(status, withdrawnReason, withdrawnMessage) {
-    const note = status === YOUNG_STATUS.WITHDRAWN ? WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label + " " + withdrawnMessage : undefined;
-
     const payload = {
       status,
       lastStatusAt: new Date().toISOString(),
       withdrawnReason: status === YOUNG_STATUS.WITHDRAWN ? withdrawnReason : undefined,
       withdrawnMessage: status === YOUNG_STATUS.WITHDRAWN ? withdrawnMessage : undefined,
       phase: status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION ? YOUNG_PHASE.CONTINUE : undefined,
-      historic: [...young.historic, { phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note }],
     };
 
     mutate(payload, {
@@ -201,7 +197,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
     try {
-      plausibleEvent("Volontaires/CTA - Prendre sa place");
       await signinAs("young", young_id);
     } catch (e) {
       toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");

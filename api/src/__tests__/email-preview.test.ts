@@ -23,6 +23,14 @@ describe("Email Preview Controller", () => {
       expect(res.body.code).toBe(ERRORS.INVALID_PARAMS);
     });
 
+    it("refuse un identifiant de template non numérique (FL4)", async () => {
+      (getPreviewTemplate as jest.Mock).mockClear();
+      const res = await request(getAppHelper(userSuperAdmin)).get("/email-preview/template/..%2F..%2Faccount");
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe(ERRORS.INVALID_PARAMS);
+      expect(getPreviewTemplate).not.toHaveBeenCalled();
+    });
+
     it("should return 403 if user is not an admin", async () => {
       const res = await request(getAppHelper({ role: ROLES.REFERENT_DEPARTMENT })).get("/email-preview/template/123");
       expect(res.status).toBe(403);

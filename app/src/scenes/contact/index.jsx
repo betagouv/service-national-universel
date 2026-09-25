@@ -18,7 +18,6 @@ import Solutions from "./components/Solutions";
 import Alert from "@/components/dsfr/ui/Alert";
 import CardLink from "@/components/dsfr/ui/CardLink";
 import Button from "@codegouvfr/react-dsfr/Button";
-import plausibleEvent from "@/services/plausible";
 import MessageDelayed from "./components/MessageDelayed";
 
 export default function Contact() {
@@ -100,7 +99,6 @@ export default function Contact() {
               priority="secondary"
               onClick={() => {
                 setShowForm(true);
-                plausibleEvent("Besoin d'aide - Je n'ai pas trouve de reponse");
               }}>
               Ecrire au support
             </Button>

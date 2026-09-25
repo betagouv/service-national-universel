@@ -13,7 +13,7 @@ import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
 // eslint-disable-next-line import/extensions
-import { useSteps } from "./utils/steps.utils";
+import { STEPS, useSteps } from "./utils/steps.utils";
 import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
@@ -27,7 +27,10 @@ export default function Affected() {
   const { cohort } = useCohort();
   const { center, meetingPoint, isPending: loading, isError } = useAffectationInfo();
   const { data: contacts } = useContactsConvocation();
-  const { areAllStepsDone } = useSteps();
+  const { areAllStepsDone, isStepDone } = useSteps();
+  // Les étapes « participation », « convocation » et « fiche sanitaire » ne peuvent plus être validées depuis l'espace volontaire :
+  // le résumé du voyage et la liste « A préparer » ne dépendent plus que du point de rassemblement existant.
+  const showTravelInfo = isStepDone(STEPS.PDR);
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const title = `Mon séjour de cohésion ${getCohortPeriod(cohort)}`;
   const shouldDisplayContactConvocation = isPast(subDays(cohort?.dateStart ?? new Date(), 1)) && !!contacts?.length;
@@ -66,7 +69,7 @@ export default function Affected() {
           )}
         </div>
       </HomeHeader>
-      {areAllStepsDone && (
+      {showTravelInfo && (
         <div className="mt-8 gap-12 grid grid-cols-1 md:grid-cols-3">
           <div>
             <TravelInfo />

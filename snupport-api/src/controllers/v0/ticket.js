@@ -7,6 +7,7 @@ const TicketModel = require("../../models/ticket");
 const ContactModel = require("../../models/contact");
 const MessageModel = require("../../models/message");
 const { SCHEMA_ID } = require("../../schemas");
+const { serializeTicketForContact, serializeMessageForContact } = require("../../utils/contactTicketSerializer");
 
 const NOT_FOUND = "NOT_FOUND";
 
@@ -24,7 +25,7 @@ router.get(
     const contact = await ContactModel.findOne(query);
     let tickets = [];
     if (contact) tickets = await TicketModel.find({ contactId: contact._id });
-    return res.status(200).send({ ok: true, data: tickets });
+    return res.status(200).send({ ok: true, data: tickets.map(serializeTicketForContact) });
   }
 );
 
@@ -41,7 +42,7 @@ router.get(
     const messages = await MessageModel.find({ ticketId: ticket._id });
 
     if (!messages.length) return res.status(404).send({ ok: false, code: NOT_FOUND });
-    return res.status(200).send({ ok: true, data: { ticket, messages } });
+    return res.status(200).send({ ok: true, data: { ticket: serializeTicketForContact(ticket), messages: messages.map(serializeMessageForContact) } });
   }
 );
 
@@ -79,7 +80,7 @@ router.post(
     const pipeline = [{ $match: queryOpenAndNew }, { $group: { _id: "$status", total: { $sum: 1 } } }];
     const tickets = await TicketModel.aggregate(pipeline);
     if (!tickets) return res.status(404).send({ ok: false, code: NOT_FOUND });
-    return res.status(200).send({ ok: true, data: tickets });
+    return res.status(200).send({ ok: true, data: tickets.map(serializeTicketForContact) });
   }
 );
 

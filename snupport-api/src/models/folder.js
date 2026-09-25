@@ -13,7 +13,7 @@ const Schema = new mongoose.Schema({
   userRole: {
     type: String,
     required: true,
-    enum: ["AGENT", "ADMIN", "REFERENT_DEPARTMENT", "REFERENT_REGION"],
+    enum: ["AGENT", "REFERENT_DEPARTMENT", "REFERENT_REGION"],
     documentation: {
       description: "Rôle de l'agent qui utilise le dossier",
     },

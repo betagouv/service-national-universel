@@ -1,6 +1,6 @@
 import { YoungModel } from "../../models";
 import { handler } from "../../crons/deleteLegalRepresentatives";
-import { dbConnect, dbClose } from "../helpers/db";
+import { dbConnect, dbClose, mockTransaction } from "../helpers/db";
 import { getYoungWithCompleteParentsFixture } from "../fixtures/young";
 import { createYoungHelper } from "../helpers/young";
 import YoungPatchModel from "../../../src/crons/patch/models/youngPatch";
@@ -8,6 +8,11 @@ import mongoose from "mongoose";
 
 jest.mock("../../brevo", () => ({
   deleteContact: jest.fn().mockResolvedValue(undefined),
+  // Les hooks mongoose du modèle jeune (`post("save")`, `post("findOneAndUpdate")`,
+  // `post("deleteOne")`) appellent `brevo.sync` / `brevo.unsync`. Un bouchon partiel du module les
+  // laissait à `undefined` : `createYoungHelper` échouait sur `brevo.sync is not a function`.
+  sync: jest.fn().mockResolvedValue(undefined),
+  unsync: jest.fn().mockResolvedValue(undefined),
 }));
 
 jest.mock("../../rateLimiters", () => ({
@@ -25,7 +30,14 @@ const buildBirthdateForAge = (years: number, daysOffset: number = 0): Date => {
   return targetDate;
 };
 
-beforeAll(async () => await dbConnect(__filename.slice(__dirname.length + 1, -3)));
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  // `processYoung` écrit dans une transaction. Le MongoDB des tests est un nœud autonome, pas un
+  // replica set : la transaction échoue (« Transaction numbers are only allowed on a replica set
+  // member or mongos »), l'erreur est avalée par le `catch` du handler et aucun volontaire n'est
+  // traité — la suite testait donc un no-op.
+  mockTransaction();
+});
 afterAll(async () => await dbClose());
 
 beforeEach(async () => {

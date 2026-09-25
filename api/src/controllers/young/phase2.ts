@@ -2,22 +2,20 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 import { capture } from "../../sentry";
-import { YoungModel } from "../../models";
-import { ERRORS } from "../../utils";
-import { canEditYoung } from "snu-lib";
-import { validateId, validatePhase2Preference } from "../../utils/validator";
-import { MILITARY_PREPARATION_FILES_STATUS } from "snu-lib";
-import { UserRequest } from "../request";
+import { ERRORS, isYoung } from "../../utils";
+import { validatePhase2Preference } from "../../utils/validator";
+import { MILITARY_PREPARATION_FILES_STATUS, canViewYoungMilitaryPreparationFile } from "snu-lib";
+import { serializeYoung } from "../../utils/serializer";
+import { YoungPerimeterRequest } from "./youngPerimeterMiddleware";
 import { notifyReferentMilitaryPreparationFilesSubmitted } from "../../application/applicationNotificationService";
 
 const router = express.Router({ mergeParams: true });
 
 router.use("/equivalence", require("../../equivalence/equivalenceController"));
 
-router.put("/militaryPreparation/status", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.put("/militaryPreparation/status", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req: YoungPerimeterRequest, res) => {
   try {
     const { error, value } = Joi.object({
-      id: Joi.string().required(),
       statusMilitaryPreparationFiles: Joi.string()
         .required()
         .valid(
@@ -35,11 +33,21 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     );
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    const young = await YoungModel.findById(value.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    // L'appartenance (jeune = lui-même, référent = son périmètre) est contrôlée par le middleware monté
+    // sur /young/:id/phase2 ; la route ne faisait auparavant aucune vérification (constat C18).
+    const young = req.targetYoung!;
+
+    // Le volontaire dépose son dossier ; il ne peut pas le valider, le refuser ni le renvoyer en
+    // correction. Ces décisions reviennent aux référents qui peuvent consulter les pièces du
+    // dossier (cf. FM1 : la restriction n'existait que dans l'app volontaire).
+    if (value.statusMilitaryPreparationFiles !== MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION) {
+      if (isYoung(req.user) || !canViewYoungMilitaryPreparationFile(req.user, young)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
 
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
 
@@ -48,29 +56,24 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     }
 
     await young.save({ fromUser: req.user });
-    res.status(200).send({ ok: true, data: young });
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
-router.put("/preference", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.put("/preference", passport.authenticate("referent", { session: false, failWithError: true }), async (req: YoungPerimeterRequest, res) => {
   try {
-    const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorBody, value: checkedBody } = validatePhase2Preference(req.body);
-    if (errorId || errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const young = await YoungModel.findById(checkedId);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const young = req.targetYoung!;
 
-    if (!canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
     young.set(checkedBody);
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: young });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

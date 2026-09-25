@@ -2,7 +2,6 @@ import hero from "../../assets/hero/home.png";
 import React from "react";
 import useAuth from "@/services/useAuth";
 import { Link } from "react-router-dom";
-import plausibleEvent from "../../services/plausible";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
 
@@ -21,8 +20,7 @@ export default function HomePhase2() {
         <div className="grid grid-cols-1 mt-8 gap-2 md:max-w-xs">
           <Link
             to="/phase2"
-            className="text-center rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
-            onClick={() => plausibleEvent("Phase 2/CTA - Realiser ma mission")}>
+            className="text-center rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600">
             Je m&apos;engage
           </Link>
 

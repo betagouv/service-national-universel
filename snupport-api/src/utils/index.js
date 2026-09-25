@@ -1,11 +1,12 @@
 const AWS = require("aws-sdk");
-const passwordValidator = require("password-validator");
+const { validatePassword } = require("./password");
 const MessageModel = require("../models/message");
 const AgentModel = require("../models/agent");
 const ContactModel = require("../models/contact");
 const TicketModel = require("../models/ticket");
 const cron = require("node-cron");
 const { decrypt } = require("../utils/crypto");
+const { sanitizeMessageHtml } = require("./messageHtml");
 
 const { sendEmail, sendTemplate } = require("../brevo");
 
@@ -27,17 +28,6 @@ const SENDINBLUE_TEMPLATES = {
   TICKET_REPORT: "1386",
   SNUPPORT_CLOSED: "2416",
 };
-
-function validatePassword(password) {
-  const schema = new passwordValidator();
-  schema.is().min(6); // Minimum length 6
-  // .is()
-  // .max(100) // Maximum length 100
-  // .has()
-  // .letters() // Must have letters
-  // .digits(); // Must have digits
-  return schema.validate(password);
-}
 
 const sendResponseTicket = async ({ ticket, copyRecipient, dest, attachment, messageHistory, lastMessageId }) => {
   try {
@@ -81,7 +71,7 @@ const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment
             content: buffer.toString("base64"),
             name: attachment.name,
           });
-        })
+        }),
       );
     } else if (messageHistory !== null && messageHistory !== undefined) mailTicket = await getLastAndSpecificIdMessageFromTicket(lastMessageId, messageHistory);
     else mailTicket = await getLastMessageFromTicket(lastMessageId);
@@ -95,7 +85,9 @@ const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment
       return { email: recipient };
     });
 
-    await sendEmail([{ email: dest }], ticket.subject + " [#" + ticket.number + "]", formatMessageForReading(mailTicket), {
+    // L'historique concatène des messages stockés avant l'assainissement à l'entrée, et des noms
+    // d'auteurs non échappés : on assainit le HTML final juste avant l'envoi (M92).
+    await sendEmail([{ email: dest }], ticket.subject + " [#" + ticket.number + "]", sanitizeMessageHtml(formatMessageForReading(mailTicket)), {
       cc: copyDest ?? [],
       attachment: attachmentsEmail.length > 0 ? attachmentsEmail : undefined,
     });
@@ -113,11 +105,12 @@ const sendNotif = async ({ ticket, templateId, message, attachment }) => {
       : `https://admin.snu.gouv.fr/besoin-d-aide/ticket/${ticket._id}`;
 
     const params = { cta: ticketUrl };
+    // Le message est injecté dans le template Brevo officiel : il est assaini avant l'envoi (M92).
     if (templateId === SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED) {
-      params.message = message;
+      params.message = sanitizeMessageHtml(message);
     }
     if (templateId === SENDINBLUE_TEMPLATES.ANSWER_RECEIVED) {
-      params.message = message;
+      params.message = sanitizeMessageHtml(message);
     }
     await sendTemplate(templateId, {
       emailTo: [{ email: ticket.contactEmail }],
@@ -280,9 +273,13 @@ function uploadAttachment(path, file) {
   });
 }
 
-function getSignedUrl(path) {
+// `download` force le navigateur à télécharger le fichier au lieu de le rendre : une pièce
+// jointe provient d'un tiers, elle ne doit jamais s'exécuter dans l'origine de l'agent.
+function getSignedUrl(path, { download = false } = {}) {
   const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT_SUPPORT, accessKeyId: config.CELLAR_KEYID_SUPPORT, secretAccessKey: config.CELLAR_KEYSECRET_SUPPORT });
-  return s3bucket.getSignedUrl("getObject", { Bucket: config.PUBLIC_BUCKET_NAME_SUPPORT, Key: path, Expires: 60 * 5 });
+  const params = { Bucket: config.PUBLIC_BUCKET_NAME_SUPPORT, Key: path, Expires: 60 * 5 };
+  if (download) params.ResponseContentDisposition = "attachment";
+  return s3bucket.getSignedUrl("getObject", params);
 }
 
 const getFile = (path, bucket) => {

@@ -2,8 +2,18 @@ const express = require("express");
 const router = express.Router();
 const ShortcutModel = require("../models/shortcut");
 const { agentGuard } = require("../middlewares/authenticationGuards");
+const { requireRole } = require("../middlewares/userRoleGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const Joi = require("joi");
+const { ERRORS } = require("../errors");
+const { SCHEMA_SLATE_CONTENT, sanitizeUserHtml } = require("../utils/userContent");
+const { buildSignatureQuery, canManageShortcut } = require("../utils/shortcutScope");
+const { autocompleteRegex } = require("../utils/searchRegex");
+
+// Le HTML d'un module de texte est assaini à l'écriture : il est relu par l'éditeur d'autres comptes.
+const SCHEMA_SHORTCUT_HTML = Joi.string()
+  .trim()
+  .custom((value) => sanitizeUserHtml(value));
 
 router.use(agentGuard);
 
@@ -32,10 +42,7 @@ router.get(
     })
   ),
   async (req, res) => {
-    const query = {};
-    if (req.cleanQuery.signatureDest) {
-      query.dest = { $in: [req.cleanQuery.signatureDest] };
-    }
+    const query = buildSignatureQuery(req.user, req.cleanQuery.signatureDest);
     const data = await ShortcutModel.findOne(query);
     if (data) {
       data.content = await updateChildrenRecursive(data.content ? data.content : [], req.user);
@@ -49,7 +56,7 @@ router.get(
   "/search",
   validateQuery(
     Joi.object({
-      q: Joi.string().trim(),
+      q: Joi.string().trim().max(128),
     })
   ),
   async (req, res) => {
@@ -58,21 +65,21 @@ router.get(
     if (req.user.role === "REFERENT_DEPARTMENT") {
       query = {
         $or: [
-          { userRole: req.user.role, userDepartment: req.user.departments, name: { $regex: q } },
-          { userRole: "AGENT", name: { $regex: q }, userVisibility: "ALL" },
+          { userRole: req.user.role, userDepartment: req.user.departments, name: { $regex: autocompleteRegex(q) } },
+          { userRole: "AGENT", name: { $regex: autocompleteRegex(q) }, userVisibility: "ALL" },
         ],
       };
     } else if (req.user.role === "REFERENT_REGION") {
       query = {
         $or: [
-          { userRole: req.user.role, userRegion: req.user.region, name: { $regex: q } },
-          { userRole: "AGENT", name: { $regex: q }, userVisibility: "ALL" },
+          { userRole: req.user.role, userRegion: req.user.region, name: { $regex: autocompleteRegex(q) } },
+          { userRole: "AGENT", name: { $regex: autocompleteRegex(q) }, userVisibility: "ALL" },
         ],
       };
     } else {
       query = {
         userRole: req.user.role,
-        name: { $regex: q },
+        name: { $regex: autocompleteRegex(q) },
       };
     }
     const hits = await ShortcutModel.find(query);
@@ -96,7 +103,7 @@ router.post(
   "/search",
   validateBody(
     Joi.object({
-      q: Joi.string().trim(),
+      q: Joi.string().trim().max(128),
       isSignature: Joi.boolean(),
       contactGroup: Joi.array().items(Joi.string().trim()),
     })
@@ -107,21 +114,21 @@ router.post(
     if (req.user.role === "REFERENT_DEPARTMENT") {
       query = {
         $or: [
-          { userRole: req.user.role, userDepartment: req.user.departments, name: { $regex: q } },
-          { userRole: "AGENT", name: { $regex: q }, userVisibility: "ALL" },
+          { userRole: req.user.role, userDepartment: req.user.departments, name: { $regex: autocompleteRegex(q) } },
+          { userRole: "AGENT", name: { $regex: autocompleteRegex(q) }, userVisibility: "ALL" },
         ],
       };
     } else if (req.user.role === "REFERENT_REGION") {
       query = {
         $or: [
-          { userRole: req.user.role, userRegion: req.user.region, name: { $regex: q } },
-          { userRole: "AGENT", name: { $regex: q }, userVisibility: "ALL" },
+          { userRole: req.user.role, userRegion: req.user.region, name: { $regex: autocompleteRegex(q) } },
+          { userRole: "AGENT", name: { $regex: autocompleteRegex(q) }, userVisibility: "ALL" },
         ],
       };
     } else {
       query = {
         userRole: req.user.role,
-        name: { $regex: q },
+        name: { $regex: autocompleteRegex(q) },
       };
     }
     if (req.cleanBody.contactGroup) {
@@ -158,15 +165,20 @@ router.post(
   }
 );
 
+// Les modules de texte et signatures ne s'administrent que depuis les paramètres de snupport-app,
+// réservés au rôle AGENT. Le modèle n'a pas de propriétaire : sans cette garde, un référent modifiait
+// les modules de tous les référents de son rôle et de son territoire (FH11, GOO-13).
 router.post(
   "/",
+  requireRole("AGENT"),
   validateBody(
     Joi.object({
-      content: Joi.array(),
+      content: SCHEMA_SLATE_CONTENT,
       dest: Joi.array().items(Joi.string().trim()),
       keyword: Joi.array().items(Joi.string().trim()),
       name: Joi.string().trim(),
-      text: Joi.string().trim(),
+      text: SCHEMA_SHORTCUT_HTML,
+      isSignature: Joi.boolean().optional(),
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
@@ -180,26 +192,33 @@ router.post(
 
 router.patch(
   "/:id",
+  requireRole("AGENT"),
   validateParams(idSchema),
   validateBody(
     Joi.object({
-      content: Joi.array(),
+      content: SCHEMA_SLATE_CONTENT,
       dest: Joi.array().items(Joi.string().trim()),
       keyword: Joi.array().items(Joi.string().trim()),
       name: Joi.string().trim(),
-      text: Joi.string().trim(),
+      text: SCHEMA_SHORTCUT_HTML,
       status: Joi.boolean(),
       userVisibility: Joi.string().valid("ALL", "AGENT"),
     }).min(1)
   ),
   async (req, res) => {
-    await ShortcutModel.findOneAndUpdate({ _id: req.cleanParams.id }, req.cleanBody);
+    const shortcut = await ShortcutModel.findById(req.cleanParams.id);
+    if (!shortcut) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canManageShortcut(req.user, shortcut)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    await ShortcutModel.findOneAndUpdate({ _id: shortcut._id }, req.cleanBody);
     return res.status(200).send({ ok: true });
   }
 );
 
-router.delete("/:id", validateParams(idSchema), async (req, res) => {
-  await ShortcutModel.findByIdAndDelete(req.cleanParams.id);
+router.delete("/:id", requireRole("AGENT"), validateParams(idSchema), async (req, res) => {
+  const shortcut = await ShortcutModel.findById(req.cleanParams.id);
+  if (!shortcut) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canManageShortcut(req.user, shortcut)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  await ShortcutModel.findByIdAndDelete(shortcut._id);
 
   return res.status(200).send({ ok: true });
 });

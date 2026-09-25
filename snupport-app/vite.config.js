@@ -1,18 +1,22 @@
-import { defineConfig } from "vite";
+import { defineConfig, loadEnv } from "vite";
 import react from "@vitejs/plugin-react";
 import { sentryVitePlugin } from "@sentry/vite-plugin";
 import path from "path";
 
 // https://vitejs.dev/config/
-export default ({ mode }) => {
+export default ({ command, mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  // Sans VITE_ENVIRONMENT, le bundle retombait sur « development » : Sentry coupé et contrôles réservés à la production désactivés.
+  if (command === "build" && !env.VITE_ENVIRONMENT) {
+    throw new Error("VITE_ENVIRONMENT est obligatoire pour construire l'application (production, staging, ci, custom…)");
+  }
+
   // plugins array
   let plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
 
   if (mode !== "development") {
     plugins.push(
       sentryVitePlugin({
-        include: ".",
-        ignore: ["node_modules", "vite.config.ts"],
         org: "betagouv",
         project: "snupport-app",
         authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -24,10 +28,9 @@ export default ({ mode }) => {
             env: mode,
           },
         },
-        sourceMaps: {
-          include: ["./dist/assets"],
-          ignore: ["node_modules"],
-          urlPrefix: "~/assets",
+        // Sourcemaps envoyées à Sentry, jamais publiées avec le build
+        sourcemaps: {
+          filesToDeleteAfterUpload: ["./build/**/*.map"],
         },
         setCommits: {
           auto: true,
@@ -42,7 +45,8 @@ export default ({ mode }) => {
       port: 8092,
     },
     build: {
-      sourcemap: true,
+      // "hidden" : pas de commentaire sourceMappingURL dans les bundles publiés
+      sourcemap: mode !== "development" ? "hidden" : false,
       outDir: "build",
       rollupOptions: {
         output: {

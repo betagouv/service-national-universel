@@ -24,7 +24,6 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { Info, Details } from "../../components/Panel";
 import Historic from "../../components/historic";
 import ContractLink from "../../components/ContractLink";
-import plausibleEvent from "../../services/plausible";
 import { ImQuotesLeft } from "react-icons/im";
 import ModalConfirmDeleteYoung from "../../components/modals/young/ModalConfirmDeleteYoung";
 import PanelV2 from "../../components/PanelV2";
@@ -79,7 +78,6 @@ export default function VolontairePanel({ onChange, value }) {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
     try {
-      plausibleEvent("Volontaires/CTA - Prendre sa place");
       await signinAs("young", young_id);
       window.open(appURL, "_blank");
     } catch (e) {
@@ -107,7 +105,7 @@ export default function VolontairePanel({ onChange, value }) {
               </div>
             ) : null}
             <div className="flex flex-wrap justify-around">
-              <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
+              <Link to={`/volontaire/${young._id}`}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
               {!isResponsableDeCentre(user) && young.status !== YOUNG_STATUS.DELETED && (

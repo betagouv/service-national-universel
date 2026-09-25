@@ -344,14 +344,95 @@ describe("Application", () => {
       // Failed update (not allowed)
       res = await request(await getAppHelperWithAcl(young, "young"))
         .put("/application")
-        .send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
+        .send({ priority: "1", status: APPLICATION_STATUS.ABANDON, _id: secondApplication._id.toString() });
       expect(res.status).toBe(403);
 
       // Failed update (wrong young id)
       res = await request(await getAppHelperWithAcl(young, "young"))
         .put("/application")
-        .send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
+        .send({ priority: "1", status: APPLICATION_STATUS.ABANDON, _id: application._id.toString(), youngId: secondYoung._id });
       expect(res.status).toBe(400);
+    });
+
+    // H2 : `status` était une chaîne libre pour le volontaire, qui pouvait valider sa propre phase 2.
+    it("ne devrait pas laisser un volontaire passer sa candidature en DONE", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id, missionDuration: "100" });
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put("/application")
+        .send({ _id: application._id.toString(), status: APPLICATION_STATUS.DONE });
+      expect(res.status).toBe(400);
+
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung!.statusPhase2).not.toBe(YOUNG_STATUS_PHASE2.VALIDATED);
+    });
+
+    // GOO-12 FL2 : les transitions d'un responsable n'étaient bornées que dans l'admin.
+    it("ne devrait pas laisser un responsable passer en DONE une candidature que le volontaire n'a pas acceptée", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const structureId = new ObjectId().toString();
+      const responsable = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId }));
+      const application = await createApplication({
+        ...getNewApplicationFixture(),
+        youngId: young._id,
+        missionId: mission._id,
+        structureId,
+        status: APPLICATION_STATUS.WAITING_ACCEPTATION,
+      });
+
+      const res = await request(await getAppHelperWithAcl(responsable, "referent"))
+        .put("/application")
+        .send({ _id: application._id.toString(), status: APPLICATION_STATUS.DONE, missionDuration: "100" });
+      expect(res.status).toBe(403);
+
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung!.statusPhase2).not.toBe(YOUNG_STATUS_PHASE2.VALIDATED);
+    });
+
+    it("devrait laisser un responsable valider une candidature en attente de validation", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const structureId = new ObjectId().toString();
+      const responsable = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId }));
+      const application = await createApplication({
+        ...getNewApplicationFixture(),
+        youngId: young._id,
+        missionId: mission._id,
+        structureId,
+        status: APPLICATION_STATUS.WAITING_VALIDATION,
+      });
+
+      const res = await request(await getAppHelperWithAcl(responsable, "referent"))
+        .put("/application")
+        .send({ _id: application._id.toString(), status: APPLICATION_STATUS.VALIDATED });
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe(APPLICATION_STATUS.VALIDATED);
+    });
+
+    it("ne devrait pas laisser un volontaire gonfler la durée de sa mission", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id, status: APPLICATION_STATUS.DONE });
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put("/application")
+        .send({ _id: application._id.toString(), missionDuration: "1000" });
+      expect(res.status).toBe(400);
+    });
+
+    it("devrait laisser un volontaire abandonner sa candidature", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put("/application")
+        .send({ _id: application._id.toString(), status: APPLICATION_STATUS.ABANDON, missionDuration: "0" });
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe(APPLICATION_STATUS.ABANDON);
     });
 
     it("should update young phase2NumberHoursEstimated and phase2NumberHoursDone", async () => {
@@ -398,14 +479,14 @@ describe("Application", () => {
   describe("POST /application/:id/notify/:template", () => {
     it("should return 404 when application is not found", async () => {
       const res = await request(await getAppHelperWithAcl())
-        .post(`/application/${notExistingApplicationId}/notify/foo`)
+        .post(`/application/${notExistingApplicationId}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`)
         .send({});
       expect(res.status).toBe(404);
     });
     it("should return 404 when young is not found", async () => {
       const application = await createApplication(getNewApplicationFixture());
       const res = await request(await getAppHelperWithAcl())
-        .post(`/application/${application._id}/notify/foo`)
+        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`)
         .send({});
       expect(res.status).toBe(404);
     });
@@ -413,11 +494,11 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
       const res = await request(await getAppHelperWithAcl())
-        .post(`/application/${application._id}/notify/foo`)
+        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`)
         .send({});
       expect(res.status).toBe(404);
     });
-    it("should return 404 when template is not found", async () => {
+    it("should return 400 when template is not handled", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const referent = await createReferentHelper(getNewReferentFixture());
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
@@ -426,7 +507,7 @@ describe("Application", () => {
       const res = await request(await getAppHelperWithAcl())
         .post(`/application/${application._id}/notify/foo`)
         .send({});
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(400);
     });
     it("should return 200 when template is found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());

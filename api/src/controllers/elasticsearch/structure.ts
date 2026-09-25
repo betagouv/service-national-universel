@@ -1,14 +1,20 @@
 import express, { Response } from "express";
-import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto, PERMISSION_RESOURCES, PERMISSION_ACTIONS, getPolicyElasticFilter } from "snu-lib";
 import { capture } from "../../sentry";
 import esClient from "../../es";
 import { ERRORS } from "../../utils";
 import { allRecords } from "../../es/utils";
 import { joiElasticSearch, buildNdJson, buildRequestBody } from "./utils";
 import { StructureModel } from "../../models";
+import { serializeMissions, serializeReferents, serializeStructures } from "../../utils/es-serializer";
 import { UserRequest } from "../request";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+
+// Seuls champs de l'équipe consommés par le front : le compte de responsables
+// dans la liste des structures et les colonnes nom/prénom/email de l'export.
+// `structureId` sert au rattachement structure <-> membre.
+const TEAM_FIELDS = ["firstName", "lastName", "email", "role", "structureId"];
 
 interface StructureContext {
   structureContextFilters?: any[];
@@ -21,6 +27,20 @@ interface StructureContext {
   };
 }
 
+/**
+ * Périmètre de l'index `structure`.
+ *
+ * Deux sources, réunies en un seul `should` :
+ *  - les policies IAM (`STRUCTURE_REGION`, `STRUCTURE_DEPARTEMENT`, `STRUCTURE_TETERESEAU`,
+ *    `STRUCTURE_SAME_STRUCTURE`), traduites en clauses ES. C'est la seule borne pour les référents
+ *    départementaux et régionaux, qui n'en avaient aucune : ils listaient toutes les structures de
+ *    France alors que leur permission est explicitement restreinte à leur géographie.
+ *  - les clauses historiques ci-dessous, qui accordent au responsable la tête de réseau de sa
+ *    structure et au superviseur l'ensemble de son réseau. Elles ne sont pas toutes dérivables des
+ *    policies : les conserver garantit qu'aucun périmètre existant n'est réduit.
+ *
+ * Fail-closed : sans aucune clause exploitable, la requête est refusée plutôt que laissée ouverte.
+ */
 async function buildStructureContext(user: UserDto): Promise<StructureContext> {
   const contextFilters: any[] = [];
 
@@ -44,7 +64,19 @@ async function buildStructureContext(user: UserDto): Promise<StructureContext> {
     contextFilters.push({ terms: { _id: data.map((e) => e._id.toString()) } });
   }
 
-  return { structureContextFilters: contextFilters };
+  const policyFilter = getPolicyElasticFilter({ user, resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ });
+
+  // `null` : une permission sans policy (administrateur) => aucune borne à ajouter.
+  if (policyFilter === null) return { structureContextFilters: contextFilters };
+
+  // Aucune permission exploitable et aucune borne historique : on refuse au lieu de tout ouvrir.
+  if (policyFilter === undefined && !contextFilters.length) {
+    return { structureContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+  }
+
+  // Les deux sources sont alternatives : une structure du périmètre historique OU du périmètre IAM.
+  const perimeterClauses = [...contextFilters, ...(policyFilter ? [policyFilter] : [])];
+  return { structureContextFilters: [{ bool: { should: perimeterClauses, minimum_should_match: 1 } }] };
 }
 
 const router = express.Router();
@@ -52,6 +84,9 @@ const router = express.Router();
 router.post(
   "/:action(search|export)",
   authMiddleware(["referent"]),
+  // `ignorePolicy` ne vaut ici que pour le filtrage grossier par rôle : la policy elle-même est
+  // appliquée par `buildStructureContext`, qui la traduit en filtre Elasticsearch (elle ne peut pas
+  // l'être ici, faute de document à évaluer).
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
   async (req: UserRequest, res: Response) => {
     try {
@@ -130,17 +165,27 @@ router.post(
       const structureIds = [...new Set(structures.map((item) => item._id).filter((e) => e))];
       if (structureIds.length > 0) {
         // --- fill team
-        const referents = await allRecords("referent", {
-          bool: {
-            must: {
-              match_all: {},
+        // La projection est demandée à Elasticsearch : le document referent complet
+        // (téléphone, mobile, horodatages de connexion, metadata) ne transite pas.
+        const referents = await allRecords(
+          "referent",
+          {
+            bool: {
+              must: {
+                match_all: {},
+              },
+              filter: [{ terms: { "structureId.keyword": structureIds } }],
             },
-            filter: [{ terms: { "structureId.keyword": structureIds } }],
           },
-        });
+          esClient,
+          TEAM_FIELDS,
+        );
         if (referents.length > 0) {
+          // Les documents de l'index `referent` sont recopiés dans la réponse : ils passent par le
+          // sérialiseur de leur propre index, sans quoi rien ne les filtrerait ici.
+          const serializedReferents = serializeReferents(referents);
           for (let structure of structures) {
-            structure._source.team = referents.filter((r) => r.structureId === structure._id);
+            structure._source.team = serializedReferents.filter((r) => r.structureId === structure._id);
           }
         }
 
@@ -154,16 +199,17 @@ router.post(
           },
         });
         if (missions.length > 0) {
+          const serializedMissions = serializeMissions(missions);
           for (let structure of structures) {
-            structure._source.missions = missions.filter((m) => m.structureId === structure._id);
+            structure._source.missions = serializedMissions.filter((m) => m.structureId === structure._id);
           }
         }
       }
 
       if (req.params.action === "export") {
-        return res.status(200).send({ ok: true, data: response });
+        return res.status(200).send({ ok: true, data: serializeStructures(response) });
       } else {
-        return res.status(200).send(response);
+        return res.status(200).send(serializeStructures(response));
       }
     } catch (error) {
       capture(error);

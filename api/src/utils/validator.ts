@@ -1,5 +1,16 @@
 import Joi from "joi";
-import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, YoungDto, ReferentStatus, SUB_ROLE_GOD } from "snu-lib";
+import {
+  ROLES_LIST,
+  SUB_ROLES_LIST,
+  VISITOR_SUB_ROLES_LIST,
+  PHONE_ZONES_NAMES_ARR,
+  YoungDto,
+  ReferentStatus,
+  SUB_ROLE_GOD,
+  APPLICATION_STATUS,
+  sanitizeStoredHtml,
+  departmentList,
+} from "snu-lib";
 import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -34,17 +45,17 @@ export function validateMission(mission) {
       endAt: Joi.string().allow(null, ""),
       duration: Joi.string().allow(null, ""),
       format: Joi.string().allow(null, ""),
-      frequence: Joi.string().allow(null, ""),
+      frequence: Joi.string().allow(null, "").custom((value) => sanitizeStoredHtml(value)),
       period: Joi.array().items(Joi.string().allow(null, "")),
       subPeriod: Joi.array().items(Joi.string().allow(null, "")),
       placesTotal: Joi.number().allow(null),
       placesLeft: Joi.number().allow(null),
-      actions: Joi.string().allow(null, ""),
-      description: Joi.string().allow(null, ""),
+      actions: Joi.string().allow(null, "").custom((value) => sanitizeStoredHtml(value)),
+      description: Joi.string().allow(null, "").custom((value) => sanitizeStoredHtml(value)),
       hebergement: Joi.string().allow(null, ""),
       hebergementPayant: Joi.string().allow(null, ""),
-      justifications: Joi.string().allow(null, ""),
-      contraintes: Joi.string().allow(null, ""),
+      justifications: Joi.string().allow(null, "").custom((value) => sanitizeStoredHtml(value)),
+      contraintes: Joi.string().allow(null, "").custom((value) => sanitizeStoredHtml(value)),
       structureId: Joi.string().regex(idRegex, "id"),
       structureName: Joi.string().allow(null, ""),
       status: Joi.string().allow(null, ""),
@@ -76,7 +87,10 @@ export function validateStructure(structure) {
     .keys({
       name: Joi.string().allow(null, ""),
       siret: Joi.string().allow(null, ""),
-      description: Joi.string().allow(null, ""),
+      // Texte libre rendu en HTML sur la fiche mission de moncompte (FH1).
+      description: Joi.string()
+        .allow(null, "")
+        .custom((value) => sanitizeStoredHtml(value)),
       website: Joi.string().allow(null, ""),
       facebook: Joi.string().allow(null, ""),
       twitter: Joi.string().allow(null, ""),
@@ -229,23 +243,57 @@ const applicationKeys = {
   statusComment: Joi.string().allow(null, ""),
 };
 
+/**
+ * Transitions de statut qu'un volontaire peut déclencher lui-même sur sa candidature :
+ * accepter une proposition (WAITING_VALIDATION / WAITING_VERIFICATION pour une PM),
+ * annuler, abandonner. Cf. `app/src/scenes/missions`.
+ *
+ * Sans cette restriction, `status` est une chaîne libre : un volontaire peut passer sa
+ * candidature en DONE et, avec `missionDuration`, déclencher la validation de sa phase 2
+ * (cf. `updateYoungPhase2StatusAndHours`).
+ */
+const YOUNG_ALLOWED_UPDATE_APPLICATION_STATUS = [
+  APPLICATION_STATUS.WAITING_VALIDATION,
+  APPLICATION_STATUS.WAITING_VERIFICATION,
+  APPLICATION_STATUS.CANCEL,
+  APPLICATION_STATUS.ABANDON,
+];
+
+/** À la création, un volontaire ne peut candidater qu'en attente de validation / de vérification (PM). */
+const YOUNG_ALLOWED_NEW_APPLICATION_STATUS = [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION];
+
 export function validateUpdateApplication(application, user) {
+  const young = isYoung(user);
   return Joi.object()
     .keys({
       ...applicationKeys,
       // A young can only update a mission for him/herself.
-      youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
+      youngId: young ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
+      status: young
+        ? Joi.string()
+            .valid(...YOUNG_ALLOWED_UPDATE_APPLICATION_STATUS)
+            .allow(null, "")
+        : Joi.string().allow(null, ""),
+      // Le front ne remonte `missionDuration` que pour remettre le compteur à zéro lors d'un abandon :
+      // toute autre valeur permettrait de gonfler les heures de phase 2.
+      missionDuration: young ? Joi.string().valid("0").allow(null, "") : Joi.string().allow(null, ""),
       _id: Joi.string().required(),
     })
     .validate(application, { stripUnknown: true });
 }
 
 export function validateNewApplication(application, user) {
+  const young = isYoung(user);
   return Joi.object()
     .keys({
       ...applicationKeys,
       // A young can only apply to a mission for him/herself.
-      youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).required() : Joi.string().required(),
+      youngId: young ? Joi.string().equal(user._id.toString()).required() : Joi.string().required(),
+      status: young
+        ? Joi.string()
+            .valid(...YOUNG_ALLOWED_NEW_APPLICATION_STATUS)
+            .allow(null, "")
+        : Joi.string().allow(null, ""),
       missionId: Joi.string().required(),
     })
     .validate(application, { stripUnknown: true });
@@ -284,24 +332,6 @@ export function validateNewCohesionCenter(application) {
 
 export function validateUpdateCohesionCenter(application) {
   return Joi.object().keys(cohesionCenterKeys()).validate(application, { stripUnknown: true });
-}
-
-const sessionPhase1Keys = {
-  cohesionCenterId: Joi.string().allow(null, ""),
-  headCenterId: Joi.string().allow(null, ""),
-  cohort: Joi.string().allow(null, ""),
-  userId: Joi.string().allow(null, ""),
-  team: Joi.array().items(Joi.any().allow(null, "")),
-  waitingList: Joi.array().items(Joi.string().allow(null, "")),
-  placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  dateStart: Joi.date().allow(null),
-  dateEnd: Joi.date().allow(null),
-  sanitaryContactEmail: Joi.string().allow(null, ""),
-};
-
-export function validateSessionPhase1(session) {
-  return Joi.object().keys(sessionPhase1Keys).validate(session, { stripUnknown: true });
 }
 
 export function validateYoung(young: YoungDto) {
@@ -345,7 +375,8 @@ export function validateYoung(young: YoungDto) {
     inscriptionRefusedMessage: Joi.string().allow(null, ""),
     inscriptionStep: Joi.string().allow(null, ""),
     cohesion2020Step: Joi.string().allow(null, ""),
-    historic: Joi.array().items(Joi.any().allow(null, "")),
+    // `historic` n'est jamais inscriptible depuis une requête : il est reconstruit côté serveur à
+    // chaque changement de statut (cf. FM13).
     lastLoginAt: Joi.string().allow(null, ""),
     // Les jetons d'authentification (reset de mot de passe, invitation, phase 3) ne sont jamais
     // inscriptibles depuis une requête : ils sont générés par les flux dédiés côté serveur.
@@ -581,7 +612,9 @@ export function validateDepartmentService(departmentService) {
   return Joi.object()
     .keys({
       contacts: Joi.array().items(Joi.any().allow(null, "")),
-      department: Joi.string().allow(null, ""),
+      // Le département identifie le service visé (`findOne({ department })`) et porte le contrôle de
+      // périmètre : absent, la requête écraserait le premier service venu.
+      department: Joi.string().required(),
       region: Joi.string().allow(null, ""),
       directionName: Joi.string().allow(null, ""),
       serviceName: Joi.string().allow(null, ""),
@@ -594,15 +627,16 @@ export function validateDepartmentService(departmentService) {
     })
     .validate(departmentService, { stripUnknown: true });
 }
-export function validateWaitingList(waitingList) {
-  return Joi.object()
-    .keys({
-      zip: Joi.string().allow(null, ""),
-      mail: Joi.string().allow(null, ""),
-      birthdateAt: Joi.string().allow(null, ""),
-    })
-    .validate(waitingList, { stripUnknown: true });
-}
+// Les départements d'un référent sont un tableau : sans liste fermée, un second élément libre
+// devenait une formule dans l'export Excel « Utilisateurs » (SheetJS lit `[valeur, formule]`).
+export const referentDepartmentSchema = () =>
+  Joi.array()
+    .items(
+      Joi.string()
+        .valid(...departmentList)
+        .allow(null, ""),
+    )
+    .allow(null, "");
 
 export function validateReferent(referent) {
   return Joi.object()
@@ -617,7 +651,7 @@ export function validateReferent(referent) {
         .allow(null)
         .valid(...ROLES_LIST),
       region: Joi.string().allow(null, ""),
-      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      department: referentDepartmentSchema(),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
@@ -663,34 +697,6 @@ export function validateSelf(referent) {
       mobile: Joi.string().allow(null, ""),
     })
     .validate(referent, { stripUnknown: true });
-}
-
-export function validatePhase1Document(phase1document, key) {
-  switch (key) {
-    case "imageRight":
-      return Joi.object({
-        imageRight: Joi.string().trim().required().valid("true", "false"),
-        imageRightFiles: Joi.array().items(Joi.string().required()).required().min(1),
-      }).validate(phase1document);
-    case "rules":
-      return Joi.object({
-        rulesYoung: Joi.string().trim().required().valid("true"),
-      }).validate(phase1document);
-    case "agreement":
-      return Joi.object({
-        youngPhase1Agreement: Joi.string().trim().required().valid("true"),
-      }).validate(phase1document);
-    case "cohesionStayMedical":
-      return Joi.object({
-        cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true"),
-      }).validate(phase1document);
-    case "convocation":
-      return Joi.object({
-        convocationFileDownload: Joi.string().trim().required().valid("true"),
-      }).validate(phase1document);
-    default:
-      return { value: null, error: { key: "unknow " + key } };
-  }
 }
 
 export function validatePhase2Preference(preferences) {

@@ -1,7 +1,6 @@
 import express from "express";
 import Joi from "joi";
 import passport from "passport";
-import crypto from "crypto";
 import { UserRequest } from "../request";
 import { ERRORS, notifDepartmentChange } from "../../utils";
 import { getQPV, getDensity } from "../../geo";
@@ -9,7 +8,7 @@ import { YoungModel, CohortModel } from "../../models";
 import { serializeYoung } from "../../utils/serializer";
 import { getFilteredSessions } from "../../utils/cohort";
 import { capture } from "../../sentry";
-import { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "snu-lib";
+import { formatPhoneNumberFromPhoneZone, isCle, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import { validateParents } from "../../utils/validator";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
@@ -72,8 +71,6 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       department: Joi.string().trim().required(),
       region: Joi.string().trim().required(),
       cityCode: Joi.string().trim().default("").allow("", null),
-      status: Joi.string().valid("VALIDATED", "WAITING_LIST", "NOT_ELIGIBLE", "WAITING_VALIDATION").allow(null),
-      cohort: Joi.string().allow(null),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -87,43 +84,43 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
     }
 
+    // Le statut et la cohorte ne sont jamais lus dans le body : un jeune en liste complémentaire
+    // s'auto-promouvait en VALIDATED en l'envoyant avec sa nouvelle adresse (audit 2026-09-21, M41).
+    // Ils sont recalculés ici à partir de l'éligibilité de la nouvelle adresse.
+    let status: string | undefined;
     if (
       // Cohort and status should be checked
       value.department !== young.department &&
-      value.cohort !== "à venir" &&
+      !isCle(young) &&
+      young.cohort !== "à venir" &&
       young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
       (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
     ) {
       // @todo eligibility is based on address, should be based on school address.
-      const availableSessions = await getFilteredSessions({ grade: young.grade, birthdateAt: young.birthdateAt, ...value }, Number(req.headers["x-user-timezone"]) || null);
+      const availableSessions = await getFilteredSessions(
+        { grade: young.grade, birthdateAt: young.birthdateAt, status: young.status, ...value },
+        Number(req.headers["x-user-timezone"]) || null,
+      );
 
-      const cohort = value.cohort ? value.cohort : young.cohort;
-      const status = value.status ? value.status : young.status;
-      let isGoalReached = false;
+      if (availableSessions.length === 0) {
+        // Aucun séjour ouvert à la nouvelle adresse : le jeune n'est plus éligible.
+        status = YOUNG_STATUS.NOT_ELIGIBLE;
+      } else {
+        // Le séjour actuel doit rester accessible depuis la nouvelle adresse ; en changer passe par
+        // PUT /young/change-cohort, qui contrôle lui-même l'éligibilité.
+        const cohortDocument = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
+        if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (!availableSessions.some((s) => s.name === cohortDocument.name)) {
+          return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+        }
 
-      const cohortDocument = await CohortModel.findOne({ name: cohort });
-      if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      // Check cohort availability
-      const isEligible = availableSessions.find((s) => s.name === cohortDocument.name);
-
-      if (!isEligible && status !== YOUNG_STATUS.NOT_ELIGIBLE) {
-        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+        // Objectif atteint dans le nouveau département : un jeune validé passe en liste complémentaire.
+        // L'inverse n'existe pas : sortir de la liste complémentaire relève de l'instruction.
+        if (young.status === YOUNG_STATUS.VALIDATED) {
+          const completionObjectif = await getCompletionObjectifs(value.department, cohortDocument);
+          if (completionObjectif.isAtteint) status = YOUNG_STATUS.WAITING_LIST;
+        }
       }
-
-      // Check if cohort goal is reached
-      if (isEligible) {
-        const completionObjectif = await getCompletionObjectifs(value.department, cohortDocument);
-        isGoalReached = completionObjectif.isAtteint;
-      }
-
-      if (isGoalReached && status === YOUNG_STATUS.VALIDATED) {
-        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
-      }
-
-      // Address should be updated without any other modification.
-    } else if ((value.cohort && value.cohort !== young.cohort && value.cohort !== "à venir") || (value.status && value.status !== young.status)) {
-      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
     }
 
     if (young.department && value.department !== young.department) {
@@ -132,6 +129,7 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
     }
 
     young.set(value);
+    if (status) young.set({ status });
     await young.save({ fromUser: req.user });
 
     // Check quartier prioritaires.
@@ -184,7 +182,6 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
       if (value.parent2Email && !validator.isEmail(value.parent2Email)) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      if (value.parent2Email) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     } else {
       young.parent2Status = "";
       young.parent2LastName = "";
@@ -193,7 +190,6 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
       // @ts-expect-error nullable field
       young.parent2PhoneZone = null;
       young.parent2Email = "";
-      young.parent2Inscription2023Token = "";
     }
 
     young.set(value);

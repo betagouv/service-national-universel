@@ -3,7 +3,7 @@ import React from "react";
 import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
-import EngagementPrograms from "../preinscription/components/EngagementPrograms";
+import EngagementPrograms from "@/components/engagement/EngagementPrograms";
 
 export default function WaitingAffectation() {
   const { young } = useAuth();

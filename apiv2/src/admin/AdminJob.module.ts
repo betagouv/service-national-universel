@@ -14,16 +14,12 @@ import { ligneDeBusMongoProviders } from "./infra/sejours/phase1/ligneDeBus/prov
 import { pointDeRassemblementMongoProviders } from "./infra/sejours/phase1/pointDeRassemblement/provider/PointDeRassemblementMongo.provider";
 import { sejourMongoProviders } from "./infra/sejours/phase1/sejour/provider/SejourMongo.provider";
 import { sessionMongoProviders } from "./infra/sejours/phase1/session/provider/SessionMongo.provider";
-import { SimulationAffectationHTS } from "./core/sejours/phase1/affectation/SimulationAffectationHTS";
-import { SimulationAffectationHTSService } from "./core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phase1/initProvider/gateway";
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { FileProvider } from "@shared/infra/File.provider";
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { referentielUseCaseProviders } from "./infra/referentiel/initProvider/useCase";
-import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
-import { ValiderAffectationHTS } from "./core/sejours/phase1/affectation/ValiderAffectationHTS";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
@@ -41,8 +37,6 @@ import { referentielServiceProvider } from "./infra/referentiel/initProvider/ser
 import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
-import { SimulationAffectationCLEService } from "./core/sejours/phase1/affectation/SimulationAffectationCLE.service";
-import { SimulationAffectationCLE } from "./core/sejours/phase1/affectation/SimulationAffectationCLE";
 import { EtablissementGateway } from "./core/sejours/cle/etablissement/Etablissement.gateway";
 import { EtablissementRepository } from "./infra/sejours/cle/etablissement/Etablissement.repository";
 import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
@@ -51,24 +45,7 @@ import { ReferentRepository } from "./infra/iam/repository/mongo/ReferentMongo.r
 import { referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provider";
 import { ContactGateway } from "./infra/iam/Contact.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
-import { ValiderAffectationCLE } from "./core/sejours/phase1/affectation/ValiderAffectationCLE";
-import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffectationSelector.service";
 import { AdminTaskInscriptionSelectorService } from "./infra/task/AdminTaskInscriptionSelector.service";
-import { SimulationBasculeJeunes } from "./core/sejours/phase1/inscription/SimulationBasculeJeunes";
-import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
-import { ValiderBasculeJeunesValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesValides";
-import { SimulationAffectationCLEDromCom } from "./core/sejours/phase1/affectation/SimulationAffectationCLEDromCom";
-import { ValiderAffectationCLEDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationCLEDromCom";
-import { ValiderAffectationCLEService } from "./core/sejours/phase1/affectation/ValiderAffectationCLE.service";
-import { ValiderBasculeJeunesService } from "./core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
-import { ValiderBasculeJeunesNonValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides";
-import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
-import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
-import { SimulationAffectationHTSDromCom } from "./core/sejours/phase1/affectation/SimulationAffectationHTSDromCom";
-import { ValiderAffectationHTSService } from "./core/sejours/phase1/affectation/ValiderAffectationHTS.service";
-import { ValiderAffectationHTSDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
-import { SimulationDesisterPostAffectation } from "./core/sejours/phase1/desistement/SimulationDesisterPostAffectation";
-import { ImporterClasseEnMasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ImporterClasseEnMasse";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { AuthModule } from "@auth/Auth.module";
@@ -182,30 +159,8 @@ import { SearchSejourElasticRepository } from "@analytics/infra/SearchSejourElas
         { provide: SearchSegmentDeLigneGateway, useClass: SearchSegmentDeLigneElasticRepository },
         { provide: SearchSejourGateway, useClass: SearchSejourElasticRepository },
         // add use case here
-        AffectationService,
-        InscriptionService,
-        SimulationAffectationHTSService,
-        SimulationAffectationHTS,
-        SimulationAffectationHTSDromCom,
-        SimulationAffectationCLEService,
-        SimulationAffectationCLE,
-        SimulationAffectationCLEDromCom,
-        ValiderAffectationHTSService,
-        ValiderAffectationCLEService,
-        ValiderAffectationHTS,
-        ValiderAffectationHTSDromCom,
-        ValiderAffectationCLE,
-        ValiderAffectationCLEDromCom,
-        SimulationDesisterPostAffectation,
-        ValiderDesisterPostAffectation,
-        DesistementService,
         ...referentielUseCaseProviders,
         ...referentielServiceProvider,
-        AdminTaskAffectationSelectorService,
-        SimulationBasculeJeunes,
-        ValiderBasculeJeunesService,
-        ValiderBasculeJeunesValides,
-        ValiderBasculeJeunesNonValides,
         ExporterJeunes,
         ExporterMissionCanditatures,
         ExporterMissions,
@@ -215,7 +170,6 @@ import { SearchSejourElasticRepository } from "@analytics/infra/SearchSejourElas
         AdminTaskInscriptionSelectorService,
         AdminTaskImportReferentielSelectorService,
         AdminTaskEngagementSelectorService,
-        ImporterClasseEnMasse,
         ClasseService,
         JeuneService,
         ExportMissionService,

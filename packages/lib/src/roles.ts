@@ -253,12 +253,21 @@ const canDeleteYoung = (actor) => {
   return isAdmin(actor);
 };
 
+/**
+ * Matrice de RÔLES uniquement : `isHeadCenter` et `referentCLEAuthorized` n'expriment aucun périmètre
+ * (le rattachement session / classe / établissement ne se vérifie qu'en base). Côté API, ne jamais
+ * l'appeler seule sur une route d'écriture : utiliser `canEditYoungInScope` (api/src/young/youngScope.ts),
+ * qui compose cette matrice avec le contrôle du rattachement réel (audit 2026-09-21, H88 et H89).
+ * Côté front, elle reste utilisable pour afficher / masquer une action.
+ */
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isHeadCenter = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 
-  const actorAndTargetInTheSameRegion = actor.region === young.region;
-  const actorAndTargetInTheSameDepartment = actor.department.includes(young.department);
+  // fail-closed : un acteur ou un volontaire sans territoire ne peut jamais matcher (et ne doit pas
+  // faire planter l'appelant, ce qui transformait une 403 en 500).
+  const actorAndTargetInTheSameRegion = !!young?.region && actor.region === young.region;
+  const actorAndTargetInTheSameDepartment = !!young?.department && (actor.department || []).includes(young.department);
   const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && actorAndTargetInTheSameRegion;
   const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actorAndTargetInTheSameDepartment;
   //TODO update this
@@ -278,8 +287,77 @@ function canDeletePatchesHistory(actor, target) {
 }
 
 function canViewNotes(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor?.role);
   return isAdminOrReferent;
+}
+
+/**
+ * Situations particulières du dossier jeune : santé, handicap et suivi médico-social.
+ * Une structure d'accueil de mission n'en a pas besoin pour instruire une candidature.
+ */
+export const YOUNG_HEALTH_FIELDS = [
+  "handicap",
+  "allergies",
+  "handicapInSameDepartment",
+  "reducedMobilityAccess",
+  "ppsBeneficiary",
+  "paiBeneficiary",
+  "medicosocialStructure",
+  "medicosocialStructureName",
+  "medicosocialStructureAddress",
+  "medicosocialStructureComplementAddress",
+  "medicosocialStructureZip",
+  "medicosocialStructureCity",
+  "medicosocialStructureDepartment",
+  "medicosocialStructureRegion",
+  "medicosocialStructureLocation",
+  "specificAmenagment",
+  "specificAmenagmentType",
+];
+
+/** Métadonnées des pièces d'identité (nom, date d'expiration, catégorie du fichier). */
+export const YOUNG_IDENTITY_FILE_FIELDS = ["cniFiles", "files.cniFiles", "latestCNIFileExpirationDate", "latestCNIFileCategory", "CNIFileNotValidOnStart"];
+
+const STRUCTURE_ROLES: string[] = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
+
+/** Données de santé : tout le monde sauf les structures d'accueil. Le jeune voit les siennes. */
+function canViewYoungHealthData(actor) {
+  return !!actor && !STRUCTURE_ROLES.includes(actor.role);
+}
+
+/** Pièces d'identité : tout le monde sauf les structures d'accueil. Le jeune voit les siennes. */
+function canViewYoungIdentityFiles(actor) {
+  return !!actor && !STRUCTURE_ROLES.includes(actor.role);
+}
+
+/**
+ * Champs du dossier jeune que l'API ne doit pas renvoyer à `actor`. Chemins pointés
+ * (`files.cniFiles`) pour les champs imbriqués. Sans acteur connu, on masque tout.
+ */
+export function getYoungFieldsHiddenFrom(actor): string[] {
+  const hidden: string[] = [];
+  if (!canViewNotes(actor)) hidden.push("notes");
+  if (!canViewYoungHealthData(actor)) hidden.push(...YOUNG_HEALTH_FIELDS);
+  if (!canViewYoungIdentityFiles(actor)) hidden.push(...YOUNG_IDENTITY_FILE_FIELDS);
+  return hidden;
+}
+
+/** Retire de `doc` (en place) les champs de `paths`, pointés ou non. */
+export function omitYoungFields<T extends Record<string, any>>(doc: T, paths: string[]): T {
+  if (!doc || typeof doc !== "object") return doc;
+  for (const path of paths) {
+    const [head, ...rest] = path.split(".");
+    if (!rest.length) {
+      delete doc[head];
+      continue;
+    }
+    const child = doc[head];
+    if (child && typeof child === "object") {
+      // Copie de l'objet imbriqué : ne pas muter un sous-document partagé.
+      (doc as any)[head] = omitYoungFields({ ...child }, [rest.join(".")]);
+    }
+  }
+  return doc;
 }
 
 function canViewReferent(actor, target) {
@@ -394,24 +472,40 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
 
 function canViewYoungMilitaryPreparationFile(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
-  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department);
-  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === young.region;
+  // fail-closed : un acteur ou un volontaire sans territoire ne peut jamais matcher.
+  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && !!young?.department && (actor.department || []).includes(young.department);
+  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && !!young?.region && actor.region === young.region;
   const authorized = isAdmin || isReferentDepartmentFromTargetDepartment || isReferentRegionFromTargetRegion;
   return authorized;
 }
 
+/**
+ * Refuser les pièces de préparation militaire les SUPPRIME du stockage : l'autorisation doit être
+ * exactement celle de leur consultation. La clause historique `[RESPONSIBLE, REFERENT_REGION]`
+ * autorisait tout responsable de structure et tout référent régional, hors de son territoire, à
+ * détruire les pièces de n'importe quel volontaire (constat H64).
+ */
 function canRefuseMilitaryPreparation(actor, young) {
-  return canViewYoungMilitaryPreparationFile(actor, young) || [ROLES.RESPONSIBLE, ROLES.REFERENT_REGION].includes(actor.role);
+  return canViewYoungMilitaryPreparationFile(actor, young);
 }
 
+/**
+ * Les branches `targetCenter` comparaient directement `actor.department` / `actor.region` aux champs
+ * du centre : deux `undefined` suffisaient à autoriser (tout compte dont `cleanReferentData` a retiré
+ * la géographie, appelé sans `targetCenter`). Elles exigent désormais une valeur des deux côtés.
+ *
+ * Ce prédicat reste une matrice géographique : il n'exprime aucun rattachement entre l'acteur et le
+ * volontaire. Pour un responsable / superviseur de structure, utiliser `isYoungInStructureScope`
+ * (api/src/young/youngScope.ts) — audit 2026-09-21, H65.
+ */
 function canViewYoungFile(actor, target, targetCenter?) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
   const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
   // @ts-ignore
-  const isReferentCenterFromSameDepartmentTargetCenter = actor.department === targetCenter?.department;
+  const isReferentCenterFromSameDepartmentTargetCenter = !!targetCenter?.department && actor.department === targetCenter.department;
   // @ts-ignore
-  const isReferentCenterFromSameRegionTargetCenter = actor.region === targetCenter?.region;
+  const isReferentCenterFromSameRegionTargetCenter = !!targetCenter?.region && actor.region === targetCenter.region;
   const authorized =
     isAdmin ||
     isReferentDepartmentFromTargetDepartment ||
@@ -419,10 +513,6 @@ function canViewYoungFile(actor, target, targetCenter?) {
     isReferentCenterFromSameDepartmentTargetCenter ||
     isReferentCenterFromSameRegionTargetCenter;
   return authorized;
-}
-
-function canCreateOrUpdateCohesionCenter(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
 }
 
 function canCreateEvent(actor) {
@@ -545,12 +635,24 @@ function canCreateOrModifyMission(user: UserDto, mission: MissionType, structure
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) || (user.role === ROLES.RESPONSIBLE && user.structureId === mission.structureId);
 }
 
+/**
+ * Visibilités qu'un rôle peut poser sur un programme, à l'image de ce que propose l'écran
+ * d'administration : une visibilité nationale engage tout le territoire, une visibilité régionale
+ * toute une région. Un rôle absent de cette table ne peut poser aucune visibilité.
+ */
+const PROGRAM_VISIBILITY_BY_ROLE: Record<string, string[]> = {
+  [ROLES.REFERENT_DEPARTMENT]: ["DEPARTMENT", "HEAD_CENTER"],
+  [ROLES.REFERENT_REGION]: ["DEPARTMENT", "REGION", "HEAD_CENTER"],
+};
+
 function canCreateOrUpdateProgram(user, program) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
-  return (
-    isAdminOrReferent &&
-    !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department?.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
-  );
+  if (user.role === ROLES.ADMIN) return true;
+  if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) return false;
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !user.department?.includes(program.department)) return false;
+  if (user.role === ROLES.REFERENT_REGION && user.region !== program.region) return false;
+  // Une visibilité vide (programme historique) reste dans le périmètre géographique déjà vérifié.
+  if (program.visibility && !PROGRAM_VISIBILITY_BY_ROLE[user.role].includes(program.visibility)) return false;
+  return true;
 }
 
 function canCreateStructure(user) {
@@ -692,8 +794,12 @@ function canViewCohesionCenter(actor: UserDto) {
   ].includes(actor.role);
 }
 
+// Annuaire par email : seuls les rôles qui composent l'équipe de direction d'un centre
+// (`admin/src/scenes/centersV2/view/Team.tsx`, réservé aux admins et référents dép./rég.) en ont
+// l'usage. La famille chef de centre y avait accès sans jamais en avoir besoin : c'était un oracle
+// national d'existence d'adresse, nom, rôle et territoire (M68).
 function canGetReferentByEmail(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canViewMeetingPoints(actor) {
@@ -832,6 +938,7 @@ function canInviteYoung(actor: UserDto, cohort?: CohortDto | null) {
   }
 }
 
+/** Même réserve que `canEditYoung` : matrice de rôles sans périmètre, à composer avec `canEditYoungInScope` côté API. */
 function canSendTemplateToYoung(actor, young) {
   return canEditYoung(actor, young);
 }
@@ -893,7 +1000,14 @@ function canSearchInElasticSearch(actor, index) {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
   } else if (index === "cohesionyoung") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (/* legacy and new name */ index === "sessionphase1young" || index === "sessionphase1") {
+  } else if (index === "sessionphase1young") {
+    // Les jeunes d'une session (PII, santé, parents). Seuls les rôles dont
+    // l'appartenance à la session est vérifiée côté route y ont accès :
+    // transporter, administrateur_cle et referent_classe ne l'étaient pas et
+    // lisaient donc n'importe quelle session (cf. H27). Ils restent autorisés
+    // sur l'index `sessionphase1`, qui ne porte que les métadonnées de session.
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
+  } else if (index === "sessionphase1") {
     return [
       ROLES.ADMIN,
       ROLES.REFERENT_REGION,
@@ -954,30 +1068,6 @@ function canShareSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
     actor.role,
   );
-}
-
-function canEditTableDeRepartitionDepartment(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
-function canEditTableDeRepartitionRegion(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
-function canViewSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
-}
-
-function canCreateSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
-function canEditSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
-function canDeleteSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canUpdateLigneBus(actor) {
@@ -1068,8 +1158,11 @@ export function isSuperAdmin(actor) {
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
 
+// Réponse discriminante sur l'existence d'un compte : réservée aux rôles qui administrent les
+// comptes d'un territoire. Un superviseur y trouvait un oracle d'énumération des emails (audit
+// 2026-09-21, M70) ; un doublon à l'invitation lui est signalé par le 409 de signup_invite.
 function canCheckIfRefExist(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor?.role);
 }
 
 function canSeeDashboardSejourInfo(actor) {
@@ -1109,27 +1202,8 @@ function canCreateClasse(actor) {
   return [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
-function canUpdateClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateReferentClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateClasseStay(actor) {
-  return [ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
 function canViewClasse(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateEtablissement(actor) {
-  return (
-    (actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement) ||
-    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role)
-  );
 }
 
 function canViewEtablissement(actor) {
@@ -1138,14 +1212,6 @@ function canViewEtablissement(actor) {
 
 function canSearchStudent(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canWithdrawClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
-}
-
-function canDeleteClasse(actor) {
-  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canAllowSNU(actor) {
@@ -1171,19 +1237,8 @@ function canEditTotalSeats(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats);
 }
 
-function canNotifyAdminCleForVerif(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
-}
-function canVerifyClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
 function canManageMig(user: ReferentDto) {
   return ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role);
-}
-
-function canCreateEtablissement(user: UserDto) {
-  return [ROLES.ADMIN].includes(user.role);
 }
 
 //CLE
@@ -1338,7 +1393,6 @@ export {
   canViewReferent,
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
-  canCreateOrUpdateCohesionCenter,
   canCreateOrUpdateSessionPhase1,
   canViewSessionPhase1,
   isSessionEditionOpen,
@@ -1388,13 +1442,9 @@ export {
   canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canEditTableDeRepartitionDepartment,
-  canEditTableDeRepartitionRegion,
-  canViewSchemaDeRepartition,
-  canCreateSchemaDeRepartition,
-  canEditSchemaDeRepartition,
-  canDeleteSchemaDeRepartition,
   canViewNotes,
+  canViewYoungHealthData,
+  canViewYoungIdentityFiles,
   canUpdateLigneBus,
   canCreateLigneBus,
   canDeleteLigneBus,
@@ -1426,23 +1476,14 @@ export {
   canSeeDashboardSejourHeadCenter,
   canUpdateMyself,
   canCreateClasse,
-  canUpdateClasse,
-  canUpdateClasseStay,
   canViewClasse,
-  canUpdateEtablissement,
   canViewEtablissement,
   canSearchStudent,
-  canDeleteClasse,
-  canWithdrawClasse,
   canAllowSNU,
   canEditSanitaryEmailContact,
   canEditEstimatedSeats,
   canEditTotalSeats,
-  canNotifyAdminCleForVerif,
-  canVerifyClasse,
   canManageMig,
-  canUpdateReferentClasse,
-  canCreateEtablissement,
   canValidateMultipleYoungsInClass,
   getPhaseStatusOptions,
   canModifyDirectionCenterTeam,

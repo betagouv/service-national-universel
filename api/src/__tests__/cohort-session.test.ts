@@ -6,7 +6,7 @@ const { ObjectId } = Types;
 
 import { COHORT_TYPE, ERRORS, GRADES, ROLES, YOUNG_STATUS } from "snu-lib";
 
-import { CohortModel } from "../models";
+import { ClasseModel, CohortModel, EtablissementModel } from "../models";
 import { dbConnect, dbClose } from "./helpers/db";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 
@@ -21,6 +21,12 @@ import getNewCohortFixture from "./fixtures/cohort";
 // cohortGroup
 import { createCohortGroupHelper } from "./helpers/cohortGroup";
 import getNewCohortGroupFixture from "./fixtures/cohortGroup";
+
+// périmètre du référent
+import { createFixtureClasse } from "./fixtures/classe";
+import { createFixtureEtablissement } from "./fixtures/etablissement";
+import { getNewReferentFixture } from "./fixtures/referent";
+import { createReferentHelper } from "./helpers/referent";
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
@@ -161,12 +167,17 @@ describe("Cohort Session Controller", () => {
     });
 
     it("admin cle, should return filtered sessions if young is valid", async () => {
+      // L'administrateur CLE doit être rattaché à la classe du volontaire (constat L8).
+      const adminCle = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
+      const etablissement = await EtablissementModel.create(createFixtureEtablissement({ coordinateurIds: [adminCle._id.toString()], referentEtablissementIds: [] }));
+      const classe = await ClasseModel.create(createFixtureClasse({ etablissementId: etablissement._id.toString(), referentClasseIds: [] }));
       const young = await createYoungHelper(
         getNewYoungFixture({
           schooled: "false", // not HTZ
           region: "Pays de la Loire",
           department: "Loire-Atlantique",
           schoolDepartment: "Loire-Atlantique",
+          classeId: classe._id.toString(),
         }),
       );
       await createCohortHelper(
@@ -195,7 +206,7 @@ describe("Cohort Session Controller", () => {
         }),
       );
 
-      const response = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE })).post(`/cohort-session/eligibility/2023/${young._id}`);
+      const response = await request(getAppHelper(adminCle, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -237,7 +248,9 @@ describe("Cohort Session Controller", () => {
         }),
       );
 
-      const response = await request(getAppHelper({ role: ROLES.REFERENT_DEPARTMENT })).post(`/cohort-session/eligibility/2023/${young._id}?getAllSessions=true`);
+      // Le référent départemental doit être celui du volontaire (constat L8).
+      const referentDep = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Loire-Atlantique"], region: "Pays de la Loire" }));
+      const response = await request(getAppHelper(referentDep, "referent")).post(`/cohort-session/eligibility/2023/${young._id}?getAllSessions=true`);
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
@@ -586,32 +599,6 @@ describe("Cohort Session Controller", () => {
       // response = await request(getAppHelper({ role: ROLES.ADMIN }, "referent")).post(`/cohort-session/eligibility/2023/${young._id}`);
       // expect(response.status).toBe(200);
       // expect(response.body.data.length).toBe(0);
-    });
-  });
-
-  describe("GET /api/cohort-session/isReInscriptionOpen", () => {
-    it("admin, should return 200 OK with data", async () => {
-      const currentCohortGroup = await createCohortGroupHelper(getNewCohortGroupFixture());
-      const currentCohort = await createCohortHelper(getNewCohortFixture({ cohortGroupId: currentCohortGroup._id }));
-      const young = await createYoungHelper(
-        getNewYoungFixture({
-          cohort: currentCohort.name,
-          cohortId: currentCohort._id,
-        }),
-      );
-      await createCohortHelper(
-        getNewCohortFixture({
-          type: COHORT_TYPE.VOLONTAIRE,
-          reInscriptionStartDate: faker.date.past(),
-          reInscriptionEndDate: faker.date.future(),
-        }),
-      );
-
-      const res = await request(getAppHelper(young)).get("/cohort-session/isReInscriptionOpen");
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty("ok", true);
-      expect(res.body).toHaveProperty("data", true);
     });
   });
 

@@ -1,24 +1,19 @@
 import { STATUS } from "../constants";
-import sanitizeHtml from "sanitize-html";
 import { useState, useEffect } from "react";
 import { ENVIRONMENT } from "../config";
+
+export { htmlCleaner, htmlToText, urlify, noteToSafeHtml } from "./html";
+export { sanitizeLinkUrl, sanitizeImageUrl, sanitizeVideoUrl, sanitizeHttpsUrl } from "./safeUrl";
 
 export function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
 }
 
-export function urlify(text) {
-  var urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.replace(urlRegex, function (url) {
-    return ' <a href="' + url + '" target="_blank"> ' + url + " </a> ";
-  });
-}
-
 export const TRANSLATE_ROLE = {
-  ADMIN: "Admin",
   AGENT: "Agent",
   REFERENT_REGION: "Référent régional",
   REFERENT_DEPARTMENT: "Référent départemental",
+  DG: "DG",
 };
 
 export const getDocumentTitle = () => {
@@ -42,43 +37,6 @@ export const getStatusColor = (status) => {
   if (status === STATUS.TOTREAT) return "text-[#32257F] bg-[#C7D2FE]";
   return ""; // default
 };
-
-export const htmlCleaner = (text) => {
-  const clean = sanitizeHtml(text, {
-    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "br", "div", "blockquote", "img"],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-      blockquote: ["style"],
-      img: ["src", "alt", "style", "width", "height", "iwc-no-src"],
-    },
-    allowedSchemes: ["data", "http", "https"],
-  });
-  return sanitizeUrl(clean).trim();
-};
-
-const SAFE_URL_PATTERN = /(?:(?:https?|mailto|ftp|tel|file|sms):|[^&:/?#]*(?:[/?#]|$))/gi;
-
-/** A pattern that matches safe data URLs. It only matches image, video, and audio types. */
-const DATA_URL_PATTERN = /data:(?:image\/(?:bmp|gif|jpeg|jpg|png|tiff|webp)|video\/(?:mpeg|mp4|ogg|webm)|audio\/(?:mp3|oga|ogg|opus));base64/i;
-
-function sanitizeUrl(url) {
-  url = String(url);
-  if (!url.includes("data:") && !(url.includes("http:") || url.includes("https:"))) {
-    return url;
-  }
-  if (url.includes("data:") && (url.includes("http:") || url.includes("https:"))) {
-    if (url.match(SAFE_URL_PATTERN) && url.match(DATA_URL_PATTERN)) return url;
-    else return "";
-  }
-  if (url.includes("data:")) {
-    if (url.match(DATA_URL_PATTERN)) return url;
-    else return "";
-  }
-  if (url.includes("http:") || url.includes("https:")) {
-    if (url.match(SAFE_URL_PATTERN)) return url;
-    else return "";
-  }
-}
 
 export function readFileAsync(file) {
   return new Promise((resolve, reject) => {

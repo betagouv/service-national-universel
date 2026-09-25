@@ -10,11 +10,14 @@ const AgentModel = require("../../models/agent");
 const { matchVentilationRule } = require("../../utils/ventilation");
 const { weekday, sendNotif, SENDINBLUE_TEMPLATES } = require("../../utils");
 const { weekendRanges, isDateInRange } = require("../../utils/email");
-const { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_SOURCE } = require("../../schemas");
+const { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_SOURCE, SCHEMA_ATTACHMENT_PATH } = require("../../schemas");
+const { plainTextToMessageHtml } = require("../../utils/messageHtml");
+const { serializeTicketForContact, serializeMessageForContact } = require("../../utils/contactTicketSerializer");
 
 const { sendTemplate } = require("../../brevo");
 
 const WRONG_REQUEST = "WRONG_REQUEST";
+const OPERATION_UNAUTHORIZED = "OPERATION_UNAUTHORIZED";
 
 router.use(apiKeyGuard);
 
@@ -22,7 +25,7 @@ router.post(
   "/",
   validateBody(
     Joi.object({
-      message: Joi.string(),
+      message: Joi.string().max(20000),
       email: SCHEMA_EMAIL,
       firstName: Joi.string(),
       lastName: Joi.string(),
@@ -37,7 +40,9 @@ router.post(
           Joi.object({
             name: Joi.string(),
             url: Joi.string(),
-            path: Joi.string(),
+            // Le chemin est contraint au préfixe des pièces jointes de message : l'api v1 vérifie déjà
+            // que l'objet vient d'un upload support, ce filtre est la seconde barrière côté support.
+            path: SCHEMA_ATTACHMENT_PATH,
           })
         )
         .optional(),
@@ -69,11 +74,23 @@ router.post(
       filterAttributes.find((att) => att.name === "departement").value = filterAttributes.find((att) => att.name === "departement").value[0];
     }
 
-    let user = await ContactModel.findOneAndUpdate({ email: email.toLowerCase() }, { email: email.toLowerCase(), firstName, lastName, attributes: filterAttributes });
+    // Le formulaire public (source FORM) n'authentifie pas l'email saisi : il ne doit jamais réécrire la
+    // fiche d'un contact existant, ni rejoindre un ticket existant (M91). Les autres appels viennent de
+    // routes authentifiées de l'api v1, qui transmettent l'identité de la session.
+    const isAnonymousForm = source === "FORM";
+    // Texte brut saisi dans un formulaire : échappé puis mis en forme, jamais concaténé tel quel (M92).
+    const formatedMessage = plainTextToMessageHtml(message);
+    if (isAnonymousForm && ticketId) return res.status(403).send({ ok: false, code: OPERATION_UNAUTHORIZED });
+
+    let user = isAnonymousForm
+      ? await ContactModel.findOne({ email: email.toLowerCase() })
+      : await ContactModel.findOneAndUpdate({ email: email.toLowerCase() }, { email: email.toLowerCase(), firstName, lastName, attributes: filterAttributes });
     if (!user) user = await AgentModel.findOne({ email: email.toLowerCase() });
     if (!user) user = await ContactModel.create({ email: email.toLowerCase(), firstName, lastName, attributes: filterAttributes });
 
-    let ticket = await TicketModel.findById(ticketId);
+    let ticket = ticketId ? await TicketModel.findById(ticketId) : null;
+    // Un message n'est ajouté qu'au ticket de son auteur : l'api v1 le vérifie déjà, c'est la seconde barrière.
+    if (ticket && String(ticket.contactId) !== String(user._id)) return res.status(403).send({ ok: false, code: OPERATION_UNAUTHORIZED });
     if (ticket) {
       ticket.status = "OPEN";
       ticket.messageCount = ticket.messageCount + 1 || 2;
@@ -108,7 +125,7 @@ router.post(
 
       ticket = await matchVentilationRule(ticket);
 
-      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message });
+      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: formatedMessage });
 
       if (isDateInRange(new Date(), weekendRanges)) {
         const templateId = SENDINBLUE_TEMPLATES.SNUPPORT_CLOSED;
@@ -123,21 +140,20 @@ router.post(
 
     await ticket.save();
 
-    let formatedMessage = "<p> " + message.replaceAll("\n", " <br> ") + " </p>";
-    formatedMessage = urlify(formatedMessage);
-
     const newMessage = await MessageModel.create({
       ticketId: ticket._id,
       authorId: user._id,
       authorLastName: user.lastName,
       authorFirstName: user.firstName,
       text: formatedMessage,
-      files,
+      // Seuls le nom et le chemin (préfixe `message/`, vérifié par Joi) sont conservés : l'URL fournie
+      // par l'appelant n'est lue par aucun front et pouvait pointer n'importe où.
+      files: files?.map(({ name, path }) => ({ name, path })),
     });
 
     if (!newMessage) return res.status(400).send({ ok: false, code: WRONG_REQUEST });
 
-    return res.status(200).send({ ok: true, data: { ticket, message: newMessage } });
+    return res.status(200).send({ ok: true, data: { ticket: serializeTicketForContact(ticket), message: serializeMessageForContact(newMessage) } });
   }
 );
 
@@ -147,10 +163,3 @@ GET /v0/message
 */
 
 module.exports = router;
-
-function urlify(text) {
-  var urlRegex = /(https?:\/\/[^\s]+)/g;
-  return text.replace(urlRegex, function (url) {
-    return ' <a href="' + url + '" target="_blank"> ' + url + " </a> ";
-  });
-}

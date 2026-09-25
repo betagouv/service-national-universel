@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import { Link } from "react-router-dom";
 import usePrograms from "../../usePrograms";
 import Loader from "@/components/Loader";
-import plausibleEvent from "@/services/plausible";
 
 export function Programs() {
   const [open, setOpen] = useState(false);
@@ -12,7 +11,6 @@ export function Programs() {
   if (error) return <div>Erreur lors du chargement des données.</div>;
 
   function handleClick() {
-    if (open) plausibleEvent("Phase2/CTA - Afficher tout");
     setOpen(!open);
   }
   const sortedData = [...data].sort((a, b) => a.order - b.order);

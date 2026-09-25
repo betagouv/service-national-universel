@@ -16,6 +16,9 @@ function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallbac
 
 const staticConfig = {
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
+  // Fonds des attestations et convocations (signatures des ministres), téléchargés depuis le bucket au démarrage.
+  // Hors de `public/`, que `express.static` sert sans authentification (M72 de l'audit du 21/09/2026).
+  PDF_TEMPLATES_ROOTDIR: `${__dirname}/../pdf-templates`,
   FONT_ROOTDIR: `${__dirname}/assets/fonts`,
 };
 
@@ -61,9 +64,6 @@ export const config = {
   SENDINBLUEKEY: _env(envStr, "SENDINBLUEKEY"),
   DIAGORIENTE_URL: _env(envStr, "DIAGORIENTE_URL", "https://api-ql-dev.projetttv.org/graphql"),
   DIAGORIENTE_TOKEN: _env(envStr, "DIAGORIENTE_TOKEN"),
-  FRANCE_CONNECT_URL: _env(envStr, "FRANCE_CONNECT_URL", "https://fcp.integ01.dev-franceconnect.fr/api/v1"),
-  FRANCE_CONNECT_CLIENT_ID: _env(envStr, "FRANCE_CONNECT_CLIENT_ID"),
-  FRANCE_CONNECT_CLIENT_SECRET: _env(envStr, "FRANCE_CONNECT_CLIENT_SECRET"),
   CELLAR_ENDPOINT: _env(envStr, "CELLAR_ENDPOINT"),
   CELLAR_KEYID: _env(envStr, "CELLAR_KEYID"),
   CELLAR_KEYSECRET: _env(envStr, "CELLAR_KEYSECRET"),
@@ -84,13 +84,22 @@ export const config = {
   API_ASSOCIATION_CELLAR_KEYSECRET: _env(envStr, "API_ASSOCIATION_CELLAR_KEYSECRET"),
   SLACK_BOT_TOKEN: _env(envStr, "SLACK_BOT_TOKEN"),
   SLACK_BOT_CHANNEL: _env(envStr, "SLACK_BOT_CHANNEL"),
+  // Canal dedie aux comptes responsables crees par la synchro JeVeuxAider et laisses inactifs.
+  // Non defini, les messages retombent sur SLACK_BOT_CHANNEL.
+  SLACK_JVA_CHANNEL: _env(envStr, "SLACK_JVA_CHANNEL"),
   JVA_TOKEN: _env(envStr, "JVA_TOKEN"),
   JVA_API_KEY: _env(envStr, "JVA_API_KEY"),
   REDIS_URL: _env(envStr, "REDIS_URL", "redis://127.0.0.1:6379"),
+  /**
+   * Nombre de reverse proxies devant l'API. Express ne retient alors que le
+   * dernier saut non fiable de X-Forwarded-For : sans ce réglage, le rate
+   * limiting se contourne en forgeant l'en-tête. À ajuster si la chaîne de
+   * proxies change.
+   */
+  TRUST_PROXY_HOPS: _env(envInt, "TRUST_PROXY_HOPS", ["production", "staging", "ci", "custom"].includes(environment) ? 1 : 0),
   API_DEMARCHE_SIMPLIFIEE_TOKEN: _env(envStr, "API_DEMARCHE_SIMPLIFIEE_TOKEN"),
   PM2_SLACK_URL: _env(envStr, "PM2_SLACK_URL"),
   TASK_QUEUE_PREFIX: _env(envStr, "TASK_QUEUE_PREFIX", environment),
-  TASK_MONITOR_ENABLE_AUTH: _env(envBool, "TASK_MONITOR_ENABLE_AUTH", false),
   TASK_MONITOR_USER: _env(envStr, "TASK_MONITOR_USER"),
   TASK_MONITOR_SECRET: _env(envStr, "TASK_MONITOR_SECRET"),
   ENABLE_2FA: _env(envBool, "ENABLE_2FA", false),

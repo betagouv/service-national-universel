@@ -28,12 +28,10 @@ import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phas
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
 import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
-import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 import { Phase1Controller } from "./infra/sejours/phase1/api/Phase1.controller";
 import { AffectationController } from "./infra/sejours/phase1/affectation/api/Affectation.controller";
-import { SimulationAffectationCLEService } from "./core/sejours/phase1/affectation/SimulationAffectationCLE.service";
 import { SimulationAffectationHTSService } from "./core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { jeuneMongoProviders } from "./infra/sejours/jeune/provider/JeuneMongo.provider";
 import { centreMongoProviders } from "./infra/sejours/phase1/centre/provider/CentreMongo.provider";
@@ -62,16 +60,12 @@ import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscriptio
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
 import { DesistementController } from "./infra/sejours/phase1/desistement/api/Desistement.controller";
-import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
-import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
-import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ValidationInscriptionEnMasseClasse";
 import { AuthModule } from "../auth/Auth.module";
 import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
 import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
-import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { InscrireEleveManuellement } from "./core/sejours/cle/classe/useCase/InscrireEleveManuellement";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { MissionController } from "./infra/engagement/mission/api/Mission.controller";
@@ -130,10 +124,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         AffectationService,
         InscriptionService,
         SimulationAffectationHTSService,
-        SimulationAffectationCLEService,
-        DesistementService,
-        ValiderDesisterPostAffectation,
-        ValidationInscriptionEnMasseClasse,
         ExporterJeuneService,
         AdminTaskRepository,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -160,7 +150,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
         ...cleUseCaseProviders,
-        ...phase1UseCaseProviders,
         ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
@@ -168,7 +157,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         ...serviceProvider,
         ...featureFlagMongoProviders,
         FeatureFlagService,
-        ClasseImportService,
         JeuneService,
         InscrireEleveManuellement,
         {
@@ -191,10 +179,8 @@ export class AdminModule {
         consumer.apply(ClsMiddleware).forRoutes("{*cls}");
         consumer
             .apply(AddUserToRequestMiddleware)
-            .exclude({ path: "/classe/public/:id", method: RequestMethod.GET })
             .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .exclude({ path: "/", method: RequestMethod.GET })
-            .exclude({ path: "/testsentry", method: RequestMethod.GET })
             .exclude({ path: "/health", method: RequestMethod.GET })
             .exclude({ path: "/queues/*queues", method: RequestMethod.GET })
             .exclude({ path: "/queues/*queues/retry/*retry", method: RequestMethod.PUT })

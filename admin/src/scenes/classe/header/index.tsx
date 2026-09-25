@@ -1,20 +1,12 @@
 import React from "react";
 import { HiOutlineClipboardList } from "react-icons/hi";
-import cx from "classnames";
 
-import { ROLES, STATUS_CLASSE, YOUNG_STATUS, ClasseFileKeys, ClasseCertificateKeys, ClassesRoutes, isAdmin, isReferentRegDep, FeatureFlagName } from "snu-lib";
+import { ROLES, STATUS_CLASSE, ClasseFileKeys, ClassesRoutes } from "snu-lib";
 import { User } from "@/types";
 import { DropdownButton } from "@snu/ds/admin";
 
-import ButtonRelanceVerif from "./ButtonRelanceVerif";
-import VerifClassButton from "./VerifClassButton";
-import ButtonLinkInvite from "./ButtonLinkInvite";
 import ButtonHandleInscription from "./ButtonHandleInscription";
-import ButtonInscriptionEnMasse from "./ButtonInscriptionEnMasse";
-import ButtonInscriptionManuelle from "./ButtonInscriptionManuelle";
 import ButtonDownloadEmptyFile from "./ButtonDownloadEmptyFile";
-import ButtonCertificateDownload from "./ButtonCertificateDownload";
-import DeleteButton from "./DeleteButton";
 
 interface Props {
   user: User;
@@ -22,21 +14,12 @@ interface Props {
   setClasse: (classe: NonNullable<ClassesRoutes["GetOne"]["response"]["data"]>) => void;
   isLoading: boolean;
   setIsLoading: (b: boolean) => void;
-  url: string;
   id: string;
   studentStatus: any;
   canPerformManualInscriptionActions: boolean;
 }
 
-export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus, canPerformManualInscriptionActions }: Props) => {
-  const isClasseDeletable = () => {
-    if (studentStatus?.[YOUNG_STATUS.VALIDATED] > 0) return false;
-    if (classe?.cohesionCenterId) return false;
-    if (classe?.sessionId) return false;
-    if (classe?.ligneId) return false;
-    return true;
-  };
-
+export const getHeaderActionList = ({ user, classe, setIsLoading, id, studentStatus }: Props) => {
   const getOptionsExport = () => {
     const optionsExport = [
       {
@@ -67,57 +50,10 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
         ],
       },
     ];
-    if (studentStatus?.parentAllowSNU > 0) {
-      optionsExport[0].items.push({
-        key: "consent",
-        render: (
-          <ButtonCertificateDownload key="consent" title={"Consentements à la participation (.pdf)"} type={ClasseCertificateKeys.CONSENT} id={id} setIsLoading={setIsLoading} />
-        ),
-      });
-    }
-    if (studentStatus?.imageRight > 0) {
-      optionsExport[0].items.push({
-        key: "image",
-        render: <ButtonCertificateDownload key="image" title={"Droits à l'image (.pdf)"} type={ClasseCertificateKeys.IMAGE} id={id} setIsLoading={setIsLoading} />,
-      });
-    }
-    if (studentStatus?.youngWithSession > 0) {
-      optionsExport[0].items.push({
-        key: "convocation",
-        render: (
-          <ButtonCertificateDownload key="convocation" title={"Convocations au séjour (.pdf)"} type={ClasseCertificateKeys.CONVOCATION} id={id} setIsLoading={setIsLoading} />
-        ),
-      });
-    }
 
     if (optionsExport[0].items.length === 0) optionsExport.shift();
     return optionsExport;
   };
-
-  const optionsInscription = [
-    {
-      key: "inscription",
-      title: "Inscrire les élèves",
-      items: [
-        {
-          key: "link",
-          render: <ButtonLinkInvite key="invite" url={url} />,
-        },
-        ...(isReferentRegDep(user) || (isAdmin(user) && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE])
-          ? [
-              {
-                key: "bulk",
-                render: <ButtonInscriptionEnMasse key="bulk" id={id} />,
-              },
-              {
-                key: "inscription-manuelle",
-                render: <ButtonInscriptionManuelle key="inscription-manuelle" id={id} />,
-              },
-            ]
-          : []),
-      ],
-    },
-  ];
 
   const optionsInscriptionHandler = [
     {
@@ -140,41 +76,7 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
     },
   ];
 
-  const optionsAdmin = [
-    {
-      key: "actions",
-      title: "Actions",
-      items: [
-        {
-          key: "edit1",
-          render: classe && <DeleteButton classe={classe} onLoading={setIsLoading} />,
-        },
-      ],
-    },
-  ];
-
   const actionsList: React.ReactNode[] = [];
-
-  if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-    actionsList.push(<ButtonRelanceVerif key="relance" classeId={id} onLoading={setIsLoading} />);
-  }
-  if (classe?.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
-    actionsList.push(<VerifClassButton key="verify" classe={classe} setClasse={setClasse} isLoading={isLoading} setLoading={setIsLoading} />);
-  }
-
-  const isManualInscriptionActionDisabled = !(classe?.status === STATUS_CLASSE.OPEN || canPerformManualInscriptionActions);
-  const optionsInscriptionFiltered =
-    classe?.status !== STATUS_CLASSE.OPEN && canPerformManualInscriptionActions
-      ? [
-          {
-            ...optionsInscription[0],
-            // override items to keep only manual inscription
-            items: optionsInscription[0].items.filter((i) => i.key === "manual"),
-          },
-        ]
-      : optionsInscription;
-
-
 
   if (classe?.status && (classe.status === STATUS_CLASSE.OPEN || classe.status === STATUS_CLASSE.CLOSED) && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)) {
     actionsList.push(
@@ -188,9 +90,6 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
       />,
     );
   }
-
-
-
 
   return actionsList;
 };

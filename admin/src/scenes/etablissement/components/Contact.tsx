@@ -4,20 +4,16 @@ import { MdOutlineContentCopy } from "react-icons/md";
 import { Link } from "react-router-dom";
 
 import { Button, Container } from "@snu/ds/admin";
-import { translate, isAdminCle, isReferentClasse, isChefEtablissement, isReferentOrAdmin, isCoordinateurEtablissement, ReferentDto } from "snu-lib";
+import { translate, isAdminCle, isReferentClasse, ReferentDto } from "snu-lib";
 import { copyToClipboard } from "@/utils";
 import { User } from "@/types";
-
-import ButtonDeleteCoordinator from "./ButtonDeleteCoordinator";
 
 interface Props {
   contacts: ReferentDto[];
   user: User;
-  etablissementId: string;
-  onChange: () => void;
 }
 
-export default function Contact({ contacts, user, etablissementId, onChange }: Props) {
+export default function Contact({ contacts, user }: Props) {
   const [copied, setCopied] = useState<boolean[]>([]);
 
   return (
@@ -31,11 +27,6 @@ export default function Contact({ contacts, user, etablissementId, onChange }: P
             </Link>
           )}
         </span>
-      }
-      actions={
-        (isChefEtablissement(user) || isReferentOrAdmin(user)) && contacts.filter(isCoordinateurEtablissement).length
-          ? [<ButtonDeleteCoordinator key="delete-coordinator" etablissementId={etablissementId} contacts={contacts} onChange={onChange} className="ml-auto" />]
-          : []
       }>
       <div className="flex items-stretch justify-between overflow-y-auto">
         {contacts.map((contact, index) => (

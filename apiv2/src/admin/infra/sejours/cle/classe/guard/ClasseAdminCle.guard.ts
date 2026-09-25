@@ -34,9 +34,15 @@ export class ClasseAdminCleGuard implements CanActivate {
                 etablissement.coordinateurIds.includes(request.user.id)
             );
         }
-        return (
-            (await this.classeDepartementGuard.canActivate(context)) ||
-            (await this.classeRegionGuard.canActivate(context))
-        );
+        // La voie géographique est réservée aux référents territoriaux : sans condition de rôle,
+        // tout compte de la région de la classe (référent d'une autre classe, visiteur, chef de
+        // centre…) pouvait remplacer le référent de la classe, la vérifier ou y inscrire des élèves.
+        if (request.user.role === ROLES.REFERENT_REGION) {
+            return this.classeRegionGuard.canActivate(context);
+        }
+        if (request.user.role === ROLES.REFERENT_DEPARTMENT) {
+            return this.classeDepartementGuard.canActivate(context);
+        }
+        return false;
     }
 }

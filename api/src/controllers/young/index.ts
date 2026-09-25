@@ -1,7 +1,5 @@
 import express, { Response } from "express";
 import passport from "passport";
-import fetch from "node-fetch";
-import queryString from "querystring";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
@@ -10,47 +8,56 @@ import fs from "fs";
 import fileUpload from "express-fileupload";
 
 import { decrypt, encrypt } from "../../cryptoUtils";
-import { getRedisClient } from "../../redis";
 import { config } from "../../config";
 import { logger } from "../../logger";
-import { capture, captureMessage } from "../../sentry";
-import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument, MissionEquivalenceModel } from "../../models";
-import AuthObject from "../../auth";
+import { capture } from "../../sentry";
 import {
-  uploadFile,
-  validatePassword,
-  ERRORS,
-  inSevenDays,
-  isYoung,
-  isReferent,
-  updatePlacesSessionPhase1,
-  getCcOfYoung,
-  getFile,
-  deleteFile,
-  updateSeatsTakenInBusLine,
-} from "../../utils";
+  ReferentModel,
+  YoungModel,
+  ApplicationModel,
+  SessionPhase1Model,
+  LigneBusModel,
+  ClasseModel,
+  EtablissementModel,
+  CohortModel,
+  ApplicationDocument,
+  MissionEquivalenceModel,
+  YoungDocument,
+} from "../../models";
+import AuthObject from "../../auth";
+import { signinRateLimiter, emailSendingRateLimiter } from "../../middlewares/rateLimit";
+import { requireJsonBody } from "../../middlewares/requireJsonBody";
+import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
-import { validateYoung, validateId, validatePhase1Document, idSchema } from "../../utils/validator";
+import { validateYoung, validateId, idSchema } from "../../utils/validator";
 import patches from "../patches";
-import { serializeYoung, serializeApplication } from "../../utils/serializer";
+import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
+import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
+import {
+  canAccessYoungDocumentsInScope,
+  canEditYoungInScope,
+  canViewYoungFileInScope,
+  getApplicationScopeFilter,
+  isYoungInReferentGeography,
+  isYoungInUserScope,
+} from "../../young/youngScope";
+import { purgeYoungFiles } from "../../young/youngFilesPurge";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
   canInviteYoung,
-  canEditYoung,
-  canEditPresenceYoung,
   canDeletePatchesHistory,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS,
   ROLES,
   YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE3,
   YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanWithdraw,
-  translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
   getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
@@ -59,12 +66,12 @@ import {
   ContractType,
   CohortType,
   ReferentType,
-  getCohortPeriod,
   WITHRAWN_REASONS,
   PERMISSION_RESOURCES,
   isReadAuthorized,
   PERMISSION_CODES,
-  PERMISSION_ACTIONS, ReferentStatus,
+  PERMISSION_ACTIONS,
+  ReferentStatus,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
@@ -79,25 +86,52 @@ import { FileTypeResult } from "file-type";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
-import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
-import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
+import { handleNotifForYoungWithdrawn } from "../../young/youngService";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
 
-router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
-router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
-router.post("/signin", (req, res) => YoungAuth.signin(req, res));
-router.post("/signin-2fa", (req, res) => YoungAuth.signin2FA(req, res));
-router.post("/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestEmailUpdate(req, res));
+// Lot C de l'audit du 21/09/2026 : quota par IP sur les routes publiques d'auth,
+// que les compteurs par compte ne couvrent pas (énumération, password spraying,
+// abus des routes qui envoient un email ou réécrivent un token).
+const youngSigninLimiter = signinRateLimiter();
+
+// M3 de l'audit du 21/09/2026 : l'inscription en ligne est fermée
+// (`/preinscription` redirige vers snu.gouv.fr/inscriptions-cloturees et plus
+// aucun appelant de cette route ne subsiste dans le dépôt). Tant qu'elle
+// répondait, elle restait un oracle d'énumération : le triplet prénom / nom /
+// date de naissance permettait de savoir anonymement si une personne est
+// inscrite. Un code d'erreur uniformisé n'y aurait rien changé — « compte
+// créé » contre « compte pas créé » reste discriminant sur une route
+// d'inscription publique. Même fermeture que POST /referent/signup.
+// À rouvrir explicitement — avec un rate limiter — quand les inscriptions
+// reprennent ; la porte de cohorte de signupVolontaire reste en place.
+router.post("/signup", (_req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+});
+router.post("/signup/email", emailSendingRateLimiter("young-signup-email"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
+  YoungAuth.changeEmailDuringSignUp(req, res),
+);
+router.post("/signin", youngSigninLimiter, requireJsonBody, (req, res) => YoungAuth.signin(req, res));
+router.post("/signin-2fa", youngSigninLimiter, requireJsonBody, (req, res) => YoungAuth.signin2FA(req, res));
+router.post("/email", emailSendingRateLimiter("young-email-update"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
+  YoungAuth.requestEmailUpdate(req, res),
+);
 router.post("/email-validation/new-email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmailUpdate(req, res));
 router.post("/email-validation", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmail(req, res));
-router.get("/email-validation/token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestNewEmailValidationToken(req, res));
+router.get(
+  "/email-validation/token",
+  emailSendingRateLimiter("young-email-validation-token"),
+  passport.authenticate("young", { session: false, failWithError: true }),
+  (req, res) => YoungAuth.requestNewEmailValidationToken(req, res),
+);
 router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
-router.post("/forgot_password", async (req: UserRequest, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
-router.post("/forgot_password_reset", async (req: UserRequest, res) => YoungAuth.forgotPasswordReset(req, res));
+router.post("/forgot_password", emailSendingRateLimiter("young-forgot-password"), async (req: UserRequest, res) =>
+  YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`),
+);
+router.post("/forgot_password_reset", youngSigninLimiter, async (req: UserRequest, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.resetPassword(req, res));
 router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.checkPassword(req, res));
 
@@ -111,8 +145,11 @@ router.post("/signup_verify", async (req: UserRequest, res) => {
 
     const young = await YoungModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    return res.status(200).send({ ok: true, token, data: serializeYoung(young, young) });
+    // Pré-remplissage du formulaire d'activation uniquement : aucune session n'est ouverte ici.
+    // Cette route délivrait un JWT de session complet contre le seul jeton d'invitation, sans mot de
+    // passe (audit 2026-09-21, M43) ; c'est `signup_invite` qui authentifie, à partir du couple
+    // (email, invitationToken) et sans lire de JWT.
+    return res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -153,7 +190,7 @@ router.post("/signup_invite", async (req: UserRequest, res) => {
 
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ data: serializeYoung(young, young), token, ok: true });
+    return res.status(200).send({ data: serializeYoung(young, young), ok: true });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -276,8 +313,6 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.parent2ContactPreference = "email";
     obj.status = YOUNG_STATUS.IN_PROGRESS;
 
-    obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
-    if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
     obj.inscriptionDoneDate = new Date();
     if (obj.classeId) {
       obj.source = YOUNG_SOURCE.CLE;
@@ -323,13 +358,39 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       params: { toName, cta, fromName },
     });
 
-    return res.status(200).send({ young: young, ok: true });
+    return res.status(200).send({ young: serializeYoung(young, req.user), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+// Le lien de validation phase 3 est envoyé au tuteur, à une adresse saisie par le jeune : son porteur
+// ne reçoit que ce dont la page de validation a besoin, pas le dossier du volontaire (santé, parents,
+// adresse, jetons) qu'exposait `serializeYoung(data, data)` (audit 2026-09-21, M44).
+const PHASE3_TUTOR_VIEW_FIELDS = [
+  "_id",
+  "firstName",
+  "lastName",
+  "cohort",
+  "statusPhase3",
+  "phase3StructureName",
+  "phase3MissionDomain",
+  "phase3MissionDescription",
+  "phase3MissionStartAt",
+  "phase3MissionEndAt",
+  "phase3TutorFirstName",
+  "phase3TutorLastName",
+  "phase3TutorEmail",
+  "phase3TutorPhone",
+  "phase3TutorNote",
+] as const;
+
+function serializeYoungForPhase3Tutor(young: YoungDocument) {
+  const data = young.toObject();
+  return Object.fromEntries(PHASE3_TUTOR_VIEW_FIELDS.map((field) => [field, data[field]]));
+}
 
 router.get("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
   try {
@@ -349,7 +410,7 @@ router.get("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       capture(`Young not found ${req.params.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
+    return res.status(200).send({ ok: true, data: serializeYoungForPhase3Tutor(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -362,9 +423,7 @@ router.put("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       young: Joi.string().required(),
       token: Joi.string().required(),
       phase3TutorNote: Joi.string().optional(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -377,7 +436,15 @@ router.put("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    data.set({ statusPhase3: "VALIDATED", statusPhase3UpdatedAt: Date.now(), statusPhase3ValidatedAt: Date.now(), phase3TutorNote: value.phase3TutorNote });
+    // Le lien du tuteur est à usage unique : le jeton est effacé à la validation, pour qu'un lien transféré
+    // ou retrouvé dans une boîte mail ne permette plus ni de relire la mission ni de la revalider.
+    data.set({
+      statusPhase3: "VALIDATED",
+      statusPhase3UpdatedAt: Date.now(),
+      statusPhase3ValidatedAt: Date.now(),
+      phase3TutorNote: value.phase3TutorNote,
+      phase3Token: "",
+    });
     await data.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3;
@@ -388,7 +455,7 @@ router.put("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       cc,
     });
 
-    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
+    return res.status(200).send({ ok: true, data: serializeYoungForPhase3Tutor(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -413,17 +480,20 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
 
     const data = await YoungModel.findOne({ _id: value.young });
 
-    if (!canEditYoung(req.user, data)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
     if (!data) {
       capture(`Young not found ${value.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+
+    // `canEditYoung` n'est qu'une matrice de rôles : elle autorise tout référent CLE sur tout
+    // volontaire `source: CLE`, sans vérifier sa classe (constat L23).
+    if (!(await canEditYoungInScope(req.user, data))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     delete value.young;
     data.set({ ...value, statusPhase3UpdatedAt: Date.now() });
     await data.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
+    return res.status(200).send({ ok: true, data: serializeYoung(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -446,7 +516,10 @@ router.get(
       const young = await YoungModel.findById(id);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const youngPatches = await patches.get(req, YoungModel);
+      // `patches.get` lit USER_HISTORY/PATCH avec `ignorePolicy` : le périmètre doit être vérifié ici.
+      if (!(await isYoungInUserScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const youngPatches = await patches.get(req, YoungModel, young);
       if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({ ok: true, data: youngPatches });
     } catch (error) {
@@ -467,12 +540,11 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
       phase3MissionEndAt: Joi.string().optional().allow(null, ""),
       phase3TutorFirstName: Joi.string().optional().allow(null, ""),
       phase3TutorLastName: Joi.string().optional().allow(null, ""),
-      phase3TutorEmail: Joi.string().optional().allow(null, ""),
+      phase3TutorEmail: Joi.string().lowercase().trim().email().optional().allow(null, ""),
       phase3TutorPhone: Joi.string().optional().allow(null, ""),
-      statusPhase3: Joi.string().optional().allow(null, ""),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+      // Pas de `statusPhase3` ni de `.unknown()` : avec `.unknown()`, `stripUnknown` ne retire rien et
+      // tout champ du body finissait dans `young.set` (audit 2026-09-21, M45).
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -485,11 +557,17 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    // Une mission validée par le tuteur ne se réécrit plus : le jeune ne peut pas substituer une autre
+    // mission à celle qui a été attestée.
+    if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
     // eslint-disable-next-line no-unused-vars
     const { id, ...values } = value;
     values.phase3Token = crypto.randomBytes(20).toString("hex");
 
-    young.set({ ...values, statusPhase3UpdatedAt: Date.now() });
+    // Le statut est fixé par le serveur : la soumission ouvre l'attente de validation par le tuteur.
+    young.set({ ...values, statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION, statusPhase3UpdatedAt: Date.now() });
     await young.save({ fromUser: req.user });
 
     const youngName = `${young.firstName} ${young.lastName}`;
@@ -520,30 +598,6 @@ router.put("/accept-cgu", passport.authenticate("young", { session: false, failW
 
     young.set({ acceptCGU: "true" });
     await young.save({ fromUser: req.user });
-
-    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/accept-ri", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const young = await YoungModel.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
-    await young.save({ fromUser: req.user });
-
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
@@ -692,7 +746,8 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       message: value.message,
     });
 
-    res.status(200).send({ ok: true, data: young });
+    // Jamais le document brut : il porte les jetons du compte (audit 2026-09-21, L24).
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -721,6 +776,12 @@ router.get(
       if (isReferent(req.user) && !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON() } })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
+      // `CANDIDATURE_READ` est seedée sans policy : `isReadAuthorized` répond vrai pour tout volontaire.
+      // Même périmètre que le dossier (`GET /referent/young/:id`), puis seules les candidatures de sa
+      // structure / son réseau pour un responsable ou un superviseur (GOO-41).
+      if (isReferent(req.user) && !(await canViewYoungFileInScope(req.user, young))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
 
       const { error: queryError, value: isMilitaryPreparation } = Joi.boolean().validate(req.query.isMilitaryPreparation);
       if (queryError) {
@@ -728,7 +789,7 @@ router.get(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const query: any = { youngId: id };
+      const query: any = { youngId: id, ...(isReferent(req.user) ? await getApplicationScopeFilter(req.user) : {}) };
 
       type PopulatedApplication = ApplicationDocument & { mission: MissionType; tutor: ReferentType; contract: ContractType };
       let data: PopulatedApplication[] = await ApplicationModel.find(query).populate("mission").populate("contract").populate("tutor");
@@ -737,113 +798,26 @@ router.get(
         data = data.filter((a) => a.mission?.isMilitaryPreparation);
       }
 
-      for (let application of data) {
+      // La sérialisation doit produire un nouveau tableau : réassigner la variable de boucle ne modifiait
+      // rien et laissait sortir le tuteur (référent) et le contrat en documents bruts, tokens compris.
+      const serialized = data.map((application) => {
         if (application.mission?.tutorId && !application.tutorId) application.tutorId = application.mission.tutorId;
         if (application.mission?.structureId && !application.structureId) application.structureId = application.mission.structureId;
-        application = { ...serializeApplication(application), mission: application.mission, tutor: application.tutor, contract: application.contract };
-      }
+        return {
+          ...serializeApplication(application),
+          mission: application.mission ? serializeMission(application.mission as any) : application.mission,
+          tutor: application.tutor ? serializeReferent(application.tutor as any) : application.tutor,
+          contract: application.contract ? serializeContract(application.contract as any) : application.contract,
+        };
+      });
 
-      return res.status(200).send({ ok: true, data });
+      return res.status(200).send({ ok: true, data: serialized });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
   },
 );
-
-// Get authorization from France Connect.
-router.post("/france-connect/authorization-url", async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const query = {
-      scope: `openid given_name family_name email`,
-      redirect_uri: `${config.APP_URL}/${value.callback}`,
-      response_type: "code",
-      client_id: config.FRANCE_CONNECT_CLIENT_ID,
-      state: crypto.randomBytes(20).toString("hex"),
-      nonce: crypto.randomBytes(20).toString("hex"),
-      acr_values: "eidas1",
-    };
-    const redisClient = getRedisClient();
-    await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
-    await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
-
-    const url = `${config.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
-    return res.status(200).send({ ok: true, data: { url } });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-// Get user information for authorized user on France Connect.
-router.post("/france-connect/user-info", async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required(), state: Joi.string().required() })
-      .unknown()
-      .validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    // Get token…
-    const body = {
-      grant_type: "authorization_code",
-      redirect_uri: `${config.APP_URL}/${value.callback}`,
-      client_id: config.FRANCE_CONNECT_CLIENT_ID,
-      client_secret: config.FRANCE_CONNECT_CLIENT_SECRET,
-      code: value.code,
-    };
-
-    const tokenResponse = await fetch(`${config.FRANCE_CONNECT_URL}/token`, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: queryString.stringify(body),
-    });
-
-    const token = await tokenResponse.json();
-
-    if (token["status"] === "fail") {
-      captureMessage(`France Connect User Information failed: ${JSON.stringify({ token })}`);
-      return res.sendStatus(403);
-    }
-
-    const franceConnectToken = token["id_token"];
-
-    const decodedToken = jwt.decode(franceConnectToken);
-
-    let storedState;
-    let storedNonce;
-
-    const redisClient = getRedisClient();
-    storedState = await redisClient.get(`franceConnectState:${value.state}`);
-    // @ts-ignore
-    storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
-
-    if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
-      capture(`France Connect User Information failed: ${JSON.stringify({ storedNonce, storedState, token })}`);
-      return res.sendStatus(403);
-    }
-
-    // … then get user info.
-    const userInfoResponse = await fetch(`${config.FRANCE_CONNECT_URL}/userinfo`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token["access_token"]}` },
-    });
-
-    const userInfo = await userInfoResponse.json();
-
-    res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
-  } catch (e) {
-    capture(e);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
 
 // Delete one user (only admin can delete user)
 router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
@@ -864,19 +838,16 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
     // Tout le reste est effacé par la boucle ci-dessous. Aligné sur anonymizeOldCohorts.effect.
     const fieldToKeep = ["_id", "__v", "createdAt"];
 
-    for (const key in young.files) {
-      if (key.length) {
-        for (const file in key as any) {
-          try {
-            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${(file as any)._id}`);
-            else await deleteFile(`app/young/${id}/${key}/${(file as any)._id}`);
-            young.set({ files: { [key]: undefined } });
-          } catch (e) {
-            capture(e);
-          }
-        }
-      }
+    // Fichiers S3 d'abord : si la purge échoue, rien n'est effacé en base et la suppression peut être
+    // relancée. Effacer le document avant laisserait des binaires sans plus aucune référence (M48).
+    let deletedFiles: number;
+    try {
+      deletedFiles = await purgeYoungFiles(id);
+    } catch (e) {
+      capture(e);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+    logger.info(`Soft-delete du volontaire ${id} : ${deletedFiles} fichier(s) S3 supprimé(s)`);
 
     // Brevo AVANT le wipe : la boucle ci-dessous efface les emails, donc unsync
     // doit lire les vrais emails maintenant (sinon il ne supprime aucun contact).
@@ -1047,172 +1018,14 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     if (!canGetYoungByEmail(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let data = await YoungModel.findOne({ email: value });
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const keys = ["cohesionStayMedical", "imageRight", "rules", "agreement", "convocation"];
-    const { error: documentError, value: document } = Joi.string<"cohesionStayMedical" | "imageRight" | "rules" | "agreement" | "convocation">()
-      .required()
-      .valid(...keys)
-      .validate(req.params.document, { stripUnknown: true });
-    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const young = await YoungModel.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const { error: bodyError, value } = validatePhase1Document(req.body, document);
-    if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-
-    if (["imageRight"].includes(document)) {
-      value[`${document}FilesStatus`] = "WAITING_VERIFICATION";
-      value[`${document}FilesComment`] = undefined;
-    }
-
-    young.set(value);
-    await young.save({ fromUser: req.user });
-
-    if (["imageRight", "rules"].includes(document)) {
-      let template = SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION;
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: { type_document: translateFileStatusPhase1(document) },
-        cc,
-      });
-    }
-
-    // uniquement post affectation
-    if (document === "agreement") {
-      // youngPhase1Agreement est forcément true ici
-      let template = SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT;
-      let cc = getCcOfYoung({ template, young });
-      const cohort = await CohortModel.findOne({ name: young.cohort });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          cta: `${config.APP_URL}`,
-          date_cohorte: cohort ? getCohortPeriod(cohort) : "",
-          youngFirstName: young.firstName,
-          youngLastName: young.lastName,
-        },
-        cc,
-      });
-    }
-
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/phase1/multiaction/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({
-      departSejourMotif: Joi.string().required(),
-      departSejourAt: Joi.string().required(),
-      departSejourMotifComment: Joi.string().optional().allow(null, ""),
-      ids: Joi.array().items(Joi.string().required()).required(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
-    }
-
-    const { departSejourMotif, departSejourAt, departSejourMotifComment, ids } = value;
-
-    const youngs = await YoungModel.find({ _id: { $in: ids } });
-    if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-
-    if (youngs.some((young) => !canEditPresenceYoung(req.user))) {
+    const data = await YoungModel.findOne({ email: value });
+    if (!data) return res.status(200).send({ ok: true, data: null });
+    // `canGetYoungByEmail` n'est qu'une matrice de rôles : sans périmètre, un référent départemental
+    // lisait le dossier (et les tokens) de n'importe quel volontaire du pays.
+    if (req.user.role !== ROLES.ADMIN && !isYoungInReferentGeography(req.user, data)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
-    if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    for (let young of youngs) {
-      young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
-      await young.save({ fromUser: req.user });
-      await autoValidationSessionPhase1Young({ young, user: req.user });
-    }
-
-    for (let young of youngs) {
-      await handleNotificationForDeparture(young, departSejourMotif, departSejourMotifComment);
-    }
-
-    res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/phase1/multiaction/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
-    const { error, value } = Joi.object({
-      value: Joi.string().trim().valid("true", "false").required(),
-      key: Joi.string()
-        .trim()
-        .required()
-        .valid(...allowedKeys),
-      ids: Joi.array().items(Joi.string().required()).required(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-
-    const { value: newValue, key, ids } = value;
-
-    const youngs = await YoungModel.find({ _id: { $in: ids } });
-    if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-
-    if (!canEditPresenceYoung(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    for (let young of youngs) {
-      if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
-        young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
-      } else {
-        young.set({ [key]: newValue });
-      }
-      await young.save({ fromUser: req.user });
-      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-      await autoValidationSessionPhase1Young({ young, user: req.user });
-      await updatePlacesSessionPhase1(sessionPhase1, req.user);
-      if (key === "cohesionStayPresence" && newValue === "true") {
-        let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];
-        if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! });
-        await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
-          emailTo,
-          params: {
-            youngFirstName: young.firstName,
-            youngLastName: young.lastName,
-          },
-        });
-      }
-    }
-
-    res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
+    return res.status(200).send({ ok: true, data: serializeYoung(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1274,15 +1087,17 @@ async function getStatusAfterChangementSejour(currentStatus: string, department:
   return currentStatus;
 }
 
-router.use("/:id/documents", require("./documents"));
-router.use("/:id/meeting-point", require("./meeting-point"));
-router.use("/:id/session", require("./session"));
-router.use("/:id/phase1", require("./phase1").default);
-router.use("/:id/phase2", require("./phase2"));
-router.use("/reinscription", require("./reinscription"));
-router.use("/inscription2023", require("./inscription2023"));
-router.use("/note", require("./note").default);
-router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
+// Tous les sous-routeurs /young/:id/* passent par le contrôle d'appartenance commun : un jeune n'accède
+// qu'à son propre dossier, un référent à ceux de son périmètre réel (audit 2026-09-21, lot 3).
+// Les préfixes statiques doivent être montés avant les routes paramétrées.
+// Le tunnel d'inscription (`/inscription2023`) et de réinscription (`/reinscription`) est supprimé :
+// les inscriptions sont fermées (lot H1 de l'audit du 21/09/2026, constats M51 à M58).
 router.use("/account", require("./account").default);
+router.use("/note/:youngId", youngPerimeterMiddleware({ paramName: "youngId" }), require("./note").default);
+router.use("/:id/documents", youngPerimeterMiddleware({ referentAccess: canAccessYoungDocumentsInScope }), require("./documents"));
+router.use("/:id/meeting-point", youngPerimeterMiddleware(), require("./meeting-point"));
+router.use("/:id/session", youngPerimeterMiddleware(), require("./session"));
+router.use("/:id/phase2", youngPerimeterMiddleware(), require("./phase2"));
+router.use("/:id/point-de-rassemblement", youngPerimeterMiddleware(), require("./point-de-rassemblement"));
 
 export default router;

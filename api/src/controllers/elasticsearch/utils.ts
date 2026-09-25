@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ROLES, canSearchInElasticSearch, getEsSensitiveFields } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, getEsSensitiveFields, region2department } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS, isYoung, isReferent } from "../../utils";
 import { StructureModel } from "../../models";
@@ -232,7 +232,8 @@ function joiElasticSearch({ filterFields, sortFields = [], body }: JoiElasticSea
       .allow(null)
       .default(null),
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
-    size: Joi.number().integer().min(10).max(100).default(10),
+    // `0` : comptage seul (hits.total), sans renvoyer de dossier (cf. YoungFooterNoRequest).
+    size: Joi.alternatives().try(Joi.number().valid(0), Joi.number().integer().min(10).max(100)).default(10),
   });
 
   const { error, value } = schema.validate({ ...body }, { stripUnknown: true });
@@ -248,12 +249,32 @@ interface MissionContextResult {
   };
 }
 
-async function buildMissionContext(user: UserDto): Promise<MissionContextResult> {
+type MissionContextOptions = {
+  /**
+   * Garde le périmètre national des référents. Réservé à la recherche de missions à proposer à un
+   * volontaire : elle ne porte que sur des missions validées et visibles, que le volontaire trouve
+   * lui-même au-delà des limites du département.
+   */
+  referentNationalScope?: boolean;
+};
+
+async function buildMissionContext(user: UserDto, { referentNationalScope = false }: MissionContextOptions = {}): Promise<MissionContextResult> {
   const contextFilters: ContextFilters = [];
 
   // A young can only see validated missions.
   if (isYoung(user)) contextFilters.push({ term: { "status.keyword": "VALIDATED" } });
   if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // Les référents ne listent que les missions de leur territoire, comme `isMissionInUserScope` (GOO-45).
+  if (!referentNationalScope && user.role === ROLES.REFERENT_DEPARTMENT) {
+    const departments = ([] as string[]).concat(user.department || []);
+    if (!departments.length) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "department.keyword": departments } });
+  }
+  if (!referentNationalScope && user.role === ROLES.REFERENT_REGION) {
+    if (!user.region) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ term: { "region.keyword": user.region } });
+  }
 
   // A responsible cans only see their structure's missions.
   if (user.role === ROLES.RESPONSIBLE) {
@@ -279,10 +300,36 @@ interface ApplicationContextResult {
   };
 }
 
+/**
+ * Rôles pour lesquels `buildApplicationContext` sait construire un périmètre.
+ * Un rôle absent de cette liste n'obtiendrait AUCUN filtre : il verrait l'index
+ * `application` national, et via `exportFields` les fiches jeunes peuplées.
+ * La fonction refuse donc par défaut (cf. H26).
+ * ADMIN est national par conception.
+ */
+const APPLICATION_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
+
 async function buildApplicationContext(user: UserDto): Promise<ApplicationContextResult> {
   const contextFilters: ContextFilters = [];
 
   if (!canSearchInElasticSearch(user, "application")) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+  if (!APPLICATION_CONTEXT_SCOPED_ROLES.includes(user.role)) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // Périmètre géographique des référents, aligné sur les policies
+  // CANDIDATURE_DEPARTMENT_* / CANDIDATURE_REGION_* (young.department / young.region).
+  // L'index `application` ne porte pas `youngRegion` : la région est traduite en
+  // liste de départements.
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    const departments = user.department || [];
+    if (!departments.length) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "youngDepartment.keyword": departments } });
+  }
+
+  if (user.role === ROLES.REFERENT_REGION) {
+    const departments = region2department[user.region as string] || [];
+    if (!departments.length) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "youngDepartment.keyword": departments } });
+  }
 
   // A responsible can only see their structure's applications.
   if (user.role === ROLES.RESPONSIBLE) {
@@ -317,6 +364,10 @@ function buildDashboardUserRoleContext(user: UserDto): DashboardUserRoleContextR
   return { dashboardUserRoleContextFilters: contextFilters };
 }
 
+/** Bornes des recherches de missions côté jeune : `from + size` ≤ 10 000 (fenêtre ES). */
+const YOUNG_MISSION_SEARCH_MAX_SIZE = 100;
+const YOUNG_MISSION_SEARCH_MAX_PAGE = 99;
+
 function getResponsibleCenterField(role: string | undefined): string | null {
   if (!role) return null;
   let field = "";
@@ -338,4 +389,6 @@ export {
   buildApplicationContext,
   buildDashboardUserRoleContext,
   getResponsibleCenterField,
+  YOUNG_MISSION_SEARCH_MAX_SIZE,
+  YOUNG_MISSION_SEARCH_MAX_PAGE,
 };

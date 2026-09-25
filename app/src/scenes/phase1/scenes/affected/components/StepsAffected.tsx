@@ -8,17 +8,12 @@ import StepMedicalFile from "./step/stepMedicalFile";
 import StepPDR from "./step/StepPDR";
 import { useSteps } from "../utils/steps.utils";
 import useAuth from "@/services/useAuth";
-import plausibleEvent from "@/services/plausible";
 import Loader from "@/components/Loader";
 
 export default function StepsAffected() {
   const { isCLE, young } = useAuth();
   const { areAllStepsDone, countOfStepsDone } = useSteps();
   if (!young) return <Loader />;
-
-  function handleClick() {
-    plausibleEvent("CLE affecte - desistement");
-  }
 
   return (
     <section id="etapes" className="flex flex-col">
@@ -35,8 +30,7 @@ export default function StepsAffected() {
                   pathname: "/changer-de-sejour/se-desister",
                   state: { backlink: "/phase1" },
                 }}
-                className="text-blue-600 underline underline-offset-2"
-                onClick={handleClick}>
+                className="text-blue-600 underline underline-offset-2">
                 {" "}
                 Se désister du SNU.
               </Link>

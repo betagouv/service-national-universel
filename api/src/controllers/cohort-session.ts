@@ -4,15 +4,16 @@ import { config } from "../config";
 import { CohortsRoutes, ROLES } from "snu-lib";
 
 import { capture } from "../sentry";
-import { ERRORS } from "../utils";
-import { YoungModel, CohortModel } from "../models";
+import { ERRORS, isYoung } from "../utils";
+import { YoungModel } from "../models";
 import { RouteRequest, RouteResponse } from "./request";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 import { CohortsRoutesSchema } from "../cohort/cohortValidator";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
-import { isReInscriptionOpen, isInscriptionOpen } from "../cohort/cohortService";
+import { isInscriptionOpen } from "../cohort/cohortService";
+import { canViewYoungFileInScope } from "../young/youngScope";
 
 const router = express.Router();
 
@@ -32,9 +33,19 @@ router.post(
       let isManualInscription = false;
       const { id } = req.validatedParams;
       if (id) {
+        // Un jeune ne calcule que sa propre éligibilité : le contrôle précède la lecture pour ne pas
+        // révéler l'existence d'un identifiant (constat L8, audit 2026-09-21).
+        if (isYoung(req.user) && req.user._id.toString() !== id) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
         const youngDocument = await YoungModel.findById(id).lean();
         if (!youngDocument) {
           return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        }
+        // Un référent n'interroge que les volontaires dont il peut ouvrir le dossier : même périmètre
+        // que `GET /referent/young/:id`, d'où provient l'appel (bouton de changement de cohorte).
+        if (!isYoung(req.user) && !(await canViewYoungFileInScope(req.user, youngDocument))) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
         // deparment and zip not required in the schema...
         young = youngDocument as typeof young;
@@ -63,32 +74,6 @@ router.post(
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  },
-);
-
-router.get(
-  "/isReInscriptionOpen",
-  authMiddleware(["young"]),
-  async (req: RouteRequest<CohortsRoutes["GetIsReincriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsReincriptionOpen"]>) => {
-    try {
-      const user = req.user;
-      const cohort = await CohortModel.findById(user.cohortId);
-      if (!cohort) {
-        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      }
-      const isOpen = await isReInscriptionOpen({
-        cohortGroupId: cohort.cohortGroupId,
-        timeZoneOffset: req.headers["x-user-timezone"] as string,
-      });
-
-      return res.json({
-        ok: true,
-        data: isOpen,
-      });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
   },
 );

@@ -4,19 +4,9 @@ import mongoose from "mongoose";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
-import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 
 import { setupAdminTest } from "../../setUpAdminTest";
-import { createSession } from "./helper/SessionHelper";
-import { createLigneDeBus } from "./helper/LigneDeBusHelper";
-import { createSejour } from "./helper/SejourHelper";
-import { createPointDeRassemblement } from "./helper/PointDeRassemblementHelper";
-import { createPlanDeTransport } from "./helper/PlanDeTransportHelper";
-import { ClsService } from "nestjs-cls";
-import { createJeune } from "./helper/JeuneHelper";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -24,11 +14,9 @@ jest.mock("@nestjs-cls/transactional", () => ({
 
 describe("Phase1Controller", () => {
     let app: INestApplication;
-    let cls: ClsService;
     let phase1Controller: Phase1Controller;
     let mockedAddUserToRequestMiddleware;
     let module: TestingModule;
-    let jeuneGateway: JeuneGateway;
     beforeAll(async () => {
         const appSetup = await setupAdminTest();
         app = appSetup.app;
@@ -45,8 +33,6 @@ describe("Phase1Controller", () => {
 
         app.use(mockedAddUserToRequestMiddleware);
 
-        jeuneGateway = module.get<JeuneGateway>(JeuneGateway);
-        cls = module.get<ClsService>(ClsService);
         await app.init();
     });
 
@@ -54,44 +40,14 @@ describe("Phase1Controller", () => {
         expect(phase1Controller).toBeDefined();
     });
 
-    describe("DELETE /phase1/:id/plan-de-transport", () => {
-        it("should return 200", async () => {
-            const session = await createSession();
-            const pdr = await createPointDeRassemblement();
-            const sejour = await createSejour({ sessionId: session.id });
-            const ligne = await createLigneDeBus({
-                sessionId: session.id,
-                sessionNom: session.nom,
-                pointDeRassemblementIds: [pdr.id],
-            });
-            await createPlanDeTransport({
-                sessionNom: session.nom,
-                sessionId: session.id,
-            });
+    describe("identifiants de route mal formés (L42)", () => {
+        it.each([
+            ["GET /phase1/simulations/abc", () => request(app.getHttpServer()).get("/phase1/simulations/abc")],
+            ["GET /phase1/abc/simulations", () => request(app.getHttpServer()).get("/phase1/abc/simulations")],
+        ])("%s répond 400 au lieu d'un CastError en 500", async (_, appel) => {
+            const response = await appel();
 
-            const jeuneBefore = await createJeune({
-                statut: YOUNG_STATUS.VALIDATED,
-                statutPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
-                sessionId: session.id,
-                sessionNom: session.nom,
-                sejourId: sejour.id,
-                ligneDeBusId: ligne.id,
-                pointDeRassemblementId: pdr.id,
-            });
-            const response = await cls.runWith(
-                // @ts-ignore
-                { user: null },
-                () => request(app.getHttpServer()).delete(`/phase1/${session.id}/plan-de-transport`),
-            );
-
-            expect(response.status).toBe(200);
-
-            const jeuneAfter = await jeuneGateway.findById(jeuneBefore.id);
-            expect(jeuneAfter.statutPhase1).toBe(YOUNG_STATUS_PHASE1.WAITING_AFFECTATION);
-            expect(jeuneAfter.youngPhase1Agreement).toBe("false");
-            expect(jeuneAfter.centreId).toBeUndefined();
-            expect(jeuneAfter.pointDeRassemblementId).toBeUndefined();
-            expect(jeuneAfter.ligneDeBusId).toBeUndefined();
+            expect(response.status).toBe(400);
         });
     });
 

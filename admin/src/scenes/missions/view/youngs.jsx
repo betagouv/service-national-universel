@@ -116,7 +116,7 @@ export default function Youngs({ mission, applications, updateMission }) {
 
   const handleClick = async (application) => {
     if (!application?.youngId) {
-      captureMessage("Error with application :", { extra: { application } });
+      captureMessage("Error with application :", { extra: { applicationId: application?._id } });
       return;
     }
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);

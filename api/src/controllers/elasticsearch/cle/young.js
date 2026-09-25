@@ -99,7 +99,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      let data = serializeYoungs(response);
+      let data = serializeYoungs(response, req.user);
       data = await populateYoungExport(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
@@ -118,7 +118,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         // Mettre à jour et envoyer la réponse
         response.body.responses[0].hits.hits = youngs;
       }
-      return res.status(200).send(serializeYoungs(response.body));
+      return res.status(200).send(serializeYoungs(response.body, req.user));
     }
   } catch (error) {
     capture(error);

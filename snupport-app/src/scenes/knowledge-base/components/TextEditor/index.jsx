@@ -11,6 +11,7 @@ import { TextEditorButton, Icon, Spacer, Toolbar } from "./components";
 import { wrapLink, AddLinkButton, RemoveLinkButton, isLink } from "./links";
 import EmojiPicker from "../EmojiPicker";
 import { deserialize } from "./importHtml";
+import { sanitizeImageUrl, sanitizeLinkUrl, sanitizeVideoUrl } from "../../utils/safeUrl";
 import API from "../../../../services/api";
 import { Button } from "../Buttons";
 
@@ -291,7 +292,9 @@ const withPlugins = (editor) => {
   return editor;
 };
 
-const insertImage = (editor, url, alt) => {
+const insertImage = (editor, rawUrl, alt) => {
+  const url = sanitizeImageUrl(rawUrl);
+  if (!url) return;
   const text = { text: "" };
   const image = { type: "image", url, alt, children: [text] };
   Transforms.insertNodes(editor, image);
@@ -309,7 +312,7 @@ const InlineChromiumBugfix = () => (
 const LinkComponent = ({ attributes, children, element }) => {
   const selected = useSelected();
   return (
-    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} inline text-blue-900 underline`}>
+    <a {...attributes} href={sanitizeLinkUrl(element.url) ?? undefined} className={`${selected ? "border-2" : ""} inline text-blue-900 underline`}>
       <InlineChromiumBugfix />
       {children}
       <InlineChromiumBugfix />
@@ -421,7 +424,7 @@ const Image = ({ attributes, children, element, readOnly }) => {
     <div {...attributes}>
       <div contentEditable={false} className="relative" style={{ userSelect: "none" }}>
         <img
-          src={element.url}
+          src={sanitizeImageUrl(element.url) ?? undefined}
           alt={element.alt}
           onMouseEnter={() => setShowDelete(true)}
           onMouseLeave={() => setShowDelete(false)}
@@ -482,9 +485,14 @@ const VideoElement = ({ attributes, children, element, readOnly }) => {
             Supprimer la video
           </TextEditorButton>
         )}
-        <div className="relative h-0 pb-[56.25%]">
-          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
-        </div>
+        {/* Une iframe s'exécute sans clic : seul le lecteur Vimeo est rendu (FH17). */}
+        {sanitizeVideoUrl(url) ? (
+          <div className="relative h-0 pb-[56.25%]">
+            <iframe src={`${sanitizeVideoUrl(url)}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
+          </div>
+        ) : (
+          <p className="text-sm text-gray-500">Vidéo non affichée : seules les vidéos player.vimeo.com sont autorisées.</p>
+        )}
         {!readOnly && (
           <MetaDataInput
             initValue={url}

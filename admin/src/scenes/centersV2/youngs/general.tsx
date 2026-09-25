@@ -42,7 +42,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
 
   const handleClick = async (young: YoungDto) => {
     if (!young?._id) {
-      captureMessage("Error with young :", { extra: { young } });
+      captureMessage("Error with young : missing _id");
       return;
     }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);

@@ -34,7 +34,6 @@ export type { CohortsRoutes } from "./cohort";
 export type { CohortGroupRoutes } from "./cohortGroup";
 export type { ClassesRoutes } from "./cle/classe";
 export type { InscriptionGoalsRoutes } from "./inscriptiongoal";
-export type { PreinscriptionRoutes } from "./preinscription";
 export type { AffectationRoutes } from "./phase1/affectation";
 export type { DesistementRoutes } from "./phase1/desistement";
 export type { ReferentielRoutes } from "./referentiel";

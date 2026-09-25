@@ -2,6 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logge
 import { HttpArgumentsHost } from "@nestjs/common/interfaces";
 import { HttpAdapterHost } from "@nestjs/core";
 import * as Sentry from "@sentry/nestjs";
+import { redactUrl, redactValue } from "@snu/log-redaction";
 import { Router } from "express";
 import { HttpError } from "snu-lib";
 import { FunctionalException } from "../core/FunctionalException";
@@ -36,24 +37,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
         const currentRoute = this.getCurrentRoute(request);
 
+        // Ni `request.headers` (Authorization porteur d'un JWT de session encore valide, cookies)
+        // ni `request.body` (mots de passe, PII de jeunes, contacts plan marketing) ne sont transmis :
+        // une simple 403 de garde suffisait à faire remonter un jeton réutilisable chez un tiers.
+        // Les paramètres de route et de requête, utiles au diagnostic, passent par la redaction.
         Sentry.captureMessage(`💥 HTTP ${httpStatus} ${request.method} ${currentRoute} ${exception.name}`, {
             level: "error",
             contexts: {
-                params: request.params,
-                query: request.query,
-                route: request.route,
-                payload: request.body,
+                params: redactValue({ ...request.params }),
+                query: redactValue({ ...request.query }),
+                route: { path: request.route?.path },
             },
             extra: {
                 request: {
                     auth: request.user?.id,
-                    headers: request.headers,
                     method: request.method,
-                    params: request.params,
-                    originalUrl: request.originalUrl,
+                    params: redactValue({ ...request.params }),
+                    originalUrl: redactUrl(request.originalUrl),
                     path: request.path,
-                    payload: request.body,
-                    route: request.route,
+                    route: request.route?.path,
                     correlationId: request.correlationId,
                 },
             },

@@ -35,12 +35,9 @@ const Contact = lazy(() => import("./scenes/contact"));
 const Contract = lazy(() => import("./scenes/contract"));
 const ContractDone = lazy(() => import("./scenes/contract/done"));
 const Espace = lazy(() => import("./Espace"));
-const Inscription2023 = lazy(() => import("./scenes/inscription2023"));
 const Maintenance = lazy(() => import("./scenes/maintenance"));
 const NonEligible = lazy(() => import("./scenes/noneligible"));
 const OnBoarding = lazy(() => import("./scenes/cle/OnBoarding"));
-const ReInscription = lazy(() => import("./scenes/reinscription"));
-const RepresentantsLegaux = lazy(() => import("./scenes/representants-legaux"));
 const Thanks = lazy(() => import("./scenes/contact/Thanks"));
 const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 const ExternalRedirect = lazy(() => import("./components/ExternalRedirect"));
@@ -83,7 +80,6 @@ function App() {
             ) : (
               <Switch>
                 <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
-                <Redirect from={"/inscription2023"} to={"/inscription"} />
                 <Redirect from={"/phase1/changer-de-sejour"} to={"/changer-de-sejour"} />
                 <Route path="/preinscription" component={() => <ExternalRedirect to="https://www.snu.gouv.fr/inscriptions-cloturees/" />} />
 
@@ -91,7 +87,6 @@ function App() {
                 <SentryRoute path="/validate-contract" component={Contract} />
                 <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
                 <SentryRoute path="/noneligible" component={NonEligible} />
-                <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
                 <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
                 <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
                 <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
@@ -100,8 +95,6 @@ function App() {
                 <SentryRoute path="/public-engagements" component={AllEngagements} />
                 <SentryRoute path="/merci" component={Thanks} />
 
-                <SecureRoute path="/inscription" component={Inscription2023} />
-                <SecureRoute path="/reinscription" component={ReInscription} />
                 <SecureRoute path="/" component={Espace} />
               </Switch>
             )}

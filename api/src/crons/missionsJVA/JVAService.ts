@@ -1,8 +1,20 @@
 import { config } from "../../config";
 import { addHours } from "date-fns";
-import { department2region, departmentLookUp, MISSION_STATUS, MissionType, ReferentType, ReferentStatus, ROLES, SENDINBLUE_TEMPLATES, StructureType } from "snu-lib";
+import {
+  APPLICATION_STATUS,
+  department2region,
+  departmentLookUp,
+  MISSION_STATUS,
+  MissionType,
+  ReferentType,
+  ReferentStatus,
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+  StructureType,
+  sanitizeStoredHtml,
+} from "snu-lib";
 import { getTutorName } from "../../services/mission";
-import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../../models";
+import { ApplicationModel, MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../../models";
 import { updateApplicationStatus, updateApplicationTutor } from "../../application/applicationService";
 import { sendTemplate } from "../../brevo";
 import { fetchMissions, fetchStructureById, JeVeuxAiderMission } from "./JVARepository";
@@ -20,7 +32,7 @@ const MISSION_END_DATE_LIMIT = new Date("2026-11-09T00:00:00.000Z");
 function formatStructure(jvaStructure): Partial<StructureType> {
   return {
     name: jvaStructure.name,
-    description: jvaStructure.description,
+    description: sanitizeStoredHtml(jvaStructure.description),
     website: jvaStructure.website,
     facebook: jvaStructure.facebook,
     twitter: jvaStructure.twitter,
@@ -50,6 +62,14 @@ function formatResponsable(resp, structureId: string): Partial<ReferentType> {
     phone: resp?.phone !== "null" ? resp?.phone : undefined,
     mobile: resp?.mobile !== "null" ? resp?.mobile : undefined,
     role: ROLES.RESPONSIBLE,
+    // Le compte est cree a partir de donnees externes (les `responsables` d'une organisation
+    // moderee cote jeveuxaider.gouv.fr) : il ne doit pas etre utilisable sans validation SNU.
+    // Le schema referent vaut `ACTIVE` par defaut, et un compte ACTIVE sans mot de passe
+    // s'active en self-service par le titulaire de l'adresse (POST /referent/forgot_password,
+    // /forgot_password_reset puis /signin), ce qui contournerait la fermeture de
+    // POST /referent/signup. `INACTIVE` bloque ces trois routes ; un agent SNU active le compte
+    // depuis la fiche utilisateur de l'espace admin une fois la structure verifiee.
+    status: ReferentStatus.INACTIVE,
     structureId,
   };
 }
@@ -65,13 +85,14 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
 
   return {
     name: mission.title,
-    description,
-    actions,
+    // HTML fourni par JeVeuxAider, rendu tel quel dans les fiches mission de app et admin (GOO-19).
+    description: sanitizeStoredHtml(description),
+    actions: sanitizeStoredHtml(actions),
     mainDomain: jva2SnuDomaines[mission.domain],
     startAt: addHours(startAt, 2),
     endAt: missionEndDate,
     placesTotal: mission.snuPlaces,
-    frequence: mission.schedule,
+    frequence: sanitizeStoredHtml(mission.schedule),
     structureId: structure.id,
     structureName: structure.name,
     tutorId: referentMission.id,
@@ -97,7 +118,13 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
 async function createReferentIfNotExists(resp, structureId: string): Promise<ReferentDocument | null> {
   if (await ReferentModel.exists({ email: resp.email })) return null;
   const ref = new ReferentModel(formatResponsable(resp, structureId));
-  return await ref.save({ fromUser });
+  const referent = await ref.save({ fromUser });
+  await slack.info({
+    channel: config.SLACK_JVA_CHANNEL,
+    title: "Compte responsable JVA a activer",
+    text: `Le compte ${referent.email} (structure ${structureId}) a ete cree depuis JeVeuxAider et laisse INACTIF. Il doit etre active manuellement apres verification de la structure.`,
+  });
+  return referent;
 }
 
 async function createStructure(mission: JeVeuxAiderMission): Promise<StructureDocument | undefined> {
@@ -147,11 +174,16 @@ async function getOrCreateStructure(mission: JeVeuxAiderMission): Promise<Struct
     // Erreur E11000 = duplicate key (race condition)
     if (error instanceof Error && "code" in error && (error as { code: number }).code === 11000) {
       logger.info(`Structure ${mission.organizationClientId} already created by concurrent process, fetching...`);
-      return await StructureModel.findOne({ jvaStructureId: mission.organizationClientId }) ?? undefined;
+      return (await StructureModel.findOne({ jvaStructureId: mission.organizationClientId })) ?? undefined;
     }
     throw error;
   }
 }
+
+// Statuts décidés côté SNU (refus, archivage) ou annulation : la synchro JVA ne les rouvre jamais.
+const CLOSED_MISSION_STATUSES: string[] = [MISSION_STATUS.CANCEL, MISSION_STATUS.REFUSED, MISSION_STATUS.ARCHIVED];
+// Candidatures qui occupent une place, comme dans applicationService.updateMission.
+const APPLICATION_STATUSES_TAKING_PLACE = [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE];
 
 async function updateMission(mission: MissionDocument, updatedMission: Partial<MissionType>): Promise<MissionDocument> {
   const oldMissionTutorId = mission.tutorId;
@@ -159,16 +191,31 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
   delete updatedMission.description;
   delete updatedMission.actions;
   delete updatedMission.frequence;
-  const placesLeft = mission.placesLeft + updatedMission.placesTotal! - mission.placesTotal;
+  // Une mission déjà rattachée garde son tuteur et sa structure : une réaffectation se fait côté SNU,
+  // pas depuis des données externes (L29 de l'audit du 21/09/2026).
+  if (mission.tutorId) {
+    delete updatedMission.tutorId;
+    delete updatedMission.tutorName;
+  }
+  if (mission.structureId) {
+    delete updatedMission.structureId;
+    delete updatedMission.structureName;
+  }
+  // Recalculées depuis les candidatures : l'ancien calcul incrémental dérivait et pouvait devenir négatif.
+  const placesTotal = updatedMission.placesTotal ?? mission.placesTotal;
+  const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: APPLICATION_STATUSES_TAKING_PLACE } });
+  const placesLeft = Math.max(0, placesTotal - placesTaken);
+  const placesStatus = placesLeft === 0 ? "FULL" : placesLeft === placesTotal ? "EMPTY" : "ONE_OR_MORE";
   mission.set({
     ...updatedMission,
     placesLeft,
+    placesStatus,
   });
-  if (mission.status === MISSION_STATUS.CANCEL) {
-    mission.set({ status: MISSION_STATUS.WAITING_VALIDATION });
+  if (CLOSED_MISSION_STATUSES.includes(mission.status)) {
+    logger.info(`Mission ${mission.jvaMissionId} is ${mission.status} on SNU side, status kept.`);
   }
   await mission.save({ fromUser });
-  if (oldMissionTutorId !== updatedMission.tutorId) {
+  if (updatedMission.tutorId && oldMissionTutorId !== updatedMission.tutorId) {
     await updateApplicationTutor(mission, fromUser);
   }
   return mission;
@@ -176,7 +223,7 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
 
 export async function syncMissions() {
   const limit = 50;
-  
+
   for (let skip = 0; ; skip += limit) {
     logger.info(`Fetching missions from ${skip} to ${skip + limit}`);
     const result = await fetchMissions(skip);

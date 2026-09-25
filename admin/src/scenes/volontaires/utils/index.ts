@@ -19,7 +19,6 @@ import {
   translatePhase2,
   translateYoungSource,
   translateStatusMilitaryPreparationFiles,
-  canAssignManually,
   UserDto,
   MeetingPointType,
   CohesionCenterType,
@@ -27,12 +26,9 @@ import {
   ClasseType,
   EtablissementType,
   LigneBusType,
-  YoungType,
-  CohortDto,
 } from "snu-lib";
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
-import { youngCheckinField } from "@/utils";
 import { Filter } from "@/components/filters-system-v2/components/Filters";
 
 interface AllFields {
@@ -691,21 +687,4 @@ export function transformInscription(data) {
       "Dernier statut le": formatLongDateFR(data.lastStatusAt),
     };
   });
-}
-
-export function isCohortOpenForAffectation(user: UserDto, young: YoungType, cohort: CohortDto): boolean {
-  if (!user || !young || !cohort) return false;
-  if (young.status !== "VALIDATED" && young.status !== "WAITING_LIST") {
-    return false;
-  } else if (cohort) {
-    return canAssignManually(user, young, cohort);
-  } else {
-    return false;
-  }
-}
-
-export function isYoungCheckIsOpen(user: UserDto, cohort: CohortDto): boolean {
-  if (!cohort || !user) return false;
-  const field = youngCheckinField[user.role];
-  return field ? !!cohort[field] : false;
 }

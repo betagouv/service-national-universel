@@ -1,6 +1,6 @@
 import React from "react";
 import { BsInfoSquareFill } from "react-icons/bs";
-import { emailValidationNoticeModal, updateEmailModal } from "@/scenes/preinscription/components/Modals";
+import { emailValidationNoticeModal, updateEmailModal } from "@/components/modals/dsfrModals";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 
 const DidNotReceiveActivationReasons = ({ className }) => {

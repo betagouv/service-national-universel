@@ -33,110 +33,6 @@ describe("Point de rassemblement", () => {
       expect(res.status).toBe(400);
     });
   });
-  describe.skip("PUT /point-de-rassemblement/:id", () => {
-    it("should return 404 when point-de-rassemblement does not exist", async () => {
-      const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
-      const res = await request(getAppHelper())
-        .get("/point-de-rassemblement/" + notExistingPdrId)
-        .send();
-      expect(res.status).toBe(404);
-    });
-
-    it("should return 400 when request body is invalid", async () => {
-      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
-      const res = await request(getAppHelper())
-        .put("/point-de-rassemblement/" + pointDeRassemblement._id)
-        .send({
-          name: "New Name",
-          address: "New Address",
-          city: "New City",
-          zip: "New Zip",
-          department: "New Department",
-          region: "New Region",
-          location: {
-            lat: "invalid_lat",
-            lon: "invalid_lon",
-          },
-        });
-      expect(res.status).toBe(400);
-    });
-
-    it("should update point-de-rassemblement and return 200", async () => {
-      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
-      const res = await request(getAppHelper())
-        .put("/point-de-rassemblement/" + pointDeRassemblement._id)
-        .send({
-          name: "New Name",
-          address: "New Address",
-          city: "New City",
-          zip: "New Zip",
-          department: "New Department",
-          region: "New Region",
-          location: {
-            lat: 1.234567,
-            lon: 2.345678,
-          },
-        });
-      expect(res.status).toBe(200);
-      expect(res.body.ok).toBe(true);
-      expect(res.body.data.name).toBe("New Name");
-      expect(res.body.data.address).toBe("New Address");
-      expect(res.body.data.city).toBe("New City");
-      expect(res.body.data.zip).toBe("New Zip");
-      expect(res.body.data.department).toBe("New Department");
-      expect(res.body.data.region).toBe("New Region");
-      expect(res.body.data.location.lat).toBe(1.234567);
-      expect(res.body.data.location.lon).toBe(2.345678);
-    });
-  });
-  describe("PUT /point-de-rassemblement/delete/cohort/:id", () => {
-    it("should return 404 when point-de-rassemblement does not exist", async () => {
-      const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
-      const res = await request(getAppHelper())
-        .get("/point-de-rassemblement/detete/cohort/" + notExistingPdrId)
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return 403 when youngs are still linked to point-de-rassemblement", async () => {
-      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
-      await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: pointDeRassemblement._id, cohort: "Février 2023 - C" });
-      const res = await request(getAppHelper())
-        .put("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id)
-        .send({ cohort: "Février 2023 - C" });
-      expect(res.status).toBe(403);
-    });
-    it("should return 200", async () => {
-      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
-      const res = await request(getAppHelper())
-        .put("/point-de-rassemblement/delete/cohort/" + pointDeRassemblement._id)
-        .send({ cohort: "Février 2023 - C" });
-      expect(res.status).toBe(200);
-    });
-  });
-  describe.skip("DELETE /point-de-rassemblement/:id", () => {
-    it("should return 404 when point-de-rassemblement does not exist", async () => {
-      const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
-      const res = await request(getAppHelper())
-        .delete("/point-de-rassemblement/" + notExistingPdrId)
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return 403 when youngs are still linked to point-de-rassemblement", async () => {
-      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
-      await createYoungHelper({ ...getNewYoungFixture(), meetingPointId: pointDeRassemblement._id });
-      const res = await request(getAppHelper())
-        .delete("/point-de-rassemblement/" + pointDeRassemblement._id)
-        .send();
-      expect(res.status).toBe(403);
-    });
-    it("should return 200", async () => {
-      const pointDeRassemblement = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
-      const res = await request(getAppHelper())
-        .delete("/point-de-rassemblement/" + pointDeRassemblement._id)
-        .send();
-      expect(res.status).toBe(200);
-    });
-  });
   describe("GET /point-de-rassemblement/fullInfo/:pdrId/:busId", () => {
     it("should return 403 when young try to fetch another pdr than his", async () => {
       const pointDeRassemblemenYoung = await createPointDeRassemblementHelper({ ...getNewPointDeRassemblementFixture() });
@@ -191,74 +87,6 @@ describe("Point de rassemblement", () => {
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
       expect(res.body.code).toBe("SERVER_ERROR");
-    });
-  });
-  describe.skip("POST /", () => {
-    it("should return 400 when request body is invalid", async () => {
-      const res = await request(getAppHelper())
-        .post("/point-de-rassemblement/")
-        .send({
-          cohort: "Février 2023 - C",
-          name: "Meeting Point",
-          address: "123 Main St",
-          complementAddress: "Apt 1",
-          city: "Paris",
-          zip: "75001",
-          department: "Paris",
-          region: "Île-de-France",
-          location: {
-            lat: 48.8566,
-            lon: 2.3522,
-          },
-          invalidProperty: "invalid",
-        });
-      expect(res.status).toBe(400);
-      expect(res.body.ok).toBe(false);
-    });
-
-    it("should return 403 when user is not authorized to create meeting point", async () => {
-      const user = { _id: "123", role: "user" };
-
-      const res = await request(getAppHelper(user))
-        .post("/point-de-rassemblement/")
-        .send({
-          cohort: "Février 2023 - C",
-          name: "Meeting Point",
-          matricule: faker.lorem.words(),
-          address: "123 Main St",
-          city: "Paris",
-          zip: "75001",
-          department: "Paris",
-          region: "Île-de-France",
-          location: {
-            lat: 48.8566,
-            lon: 2.3522,
-          },
-        });
-      expect(res.status).toBe(403);
-    });
-
-    it("should return 200 when meeting point is successfully created", async () => {
-      const user = { _id: "123", role: "admin" };
-      const res = await request(getAppHelper(user))
-        .post("/point-de-rassemblement/")
-        .send({
-          cohort: "Février 2023 - C",
-          name: "Meeting Point",
-          address: "123 Main St",
-          city: "Paris",
-          zip: "75001",
-          department: "Paris",
-          region: "Île-de-France",
-          location: {
-            lat: 48.8566,
-            lon: 2.3522,
-          },
-          matricule: faker.lorem.words(),
-        });
-      expect(res.status).toBe(200);
-      expect(res.body.ok).toBe(true);
-      expect(res.body.data).toBeDefined();
     });
   });
   describe("GET /point-de-rassemblement/:id/bus/:cohort", () => {
@@ -376,19 +204,6 @@ describe("Point de rassemblement", () => {
       expect(response.status).toBe(200);
       expect(response.body.ok).toBe(true);
       expect(response.body.data).toBe(false);
-    });
-  });
-  describe("PUT /cohort/:id", () => {
-    it("should return 404 when point-de-rassemblement does not exist", async () => {
-      const notExistingPdrId = "5f9f1b9b9b9b9b9b9b9b9b9b";
-      const res = await request(getAppHelper())
-        .put("/point-de-rassemblement/cohort/" + notExistingPdrId)
-        .send({
-          id: notExistingPdrId,
-          cohort: "Test Cohort",
-          complementAddress: "",
-        });
-      expect(res.status).toBe(404);
     });
   });
   describe("GET /:id", () => {

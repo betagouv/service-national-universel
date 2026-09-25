@@ -4,6 +4,8 @@ const Joi = require("joi");
 const  { agentGuard } = require("../middlewares/authenticationGuards");
 const { validateParams, validateBody, idSchema } = require("../middlewares/validation");
 const { SCHEMA_ID } = require("../schemas");
+const { ERRORS } = require("../errors");
+const { canManageOwnedResource } = require("../utils/ownedResourceScope");
 
 router.use(agentGuard);
 
@@ -64,7 +66,10 @@ router.patch("/:id",
     name: SCHEMA_NAME,
   }).min(1)),
   async (req, res) => {
-    await FolderModel.findOneAndUpdate({ _id: req.cleanParams.id }, req.cleanBody, { new: true });
+    const folder = await FolderModel.findById(req.cleanParams.id);
+    if (!folder) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canManageOwnedResource(req.user, folder)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    await FolderModel.findOneAndUpdate({ _id: folder._id }, req.cleanBody, { new: true });
     return res.status(200).send({ ok: true });
   }
 );
@@ -74,9 +79,18 @@ router.post("/reindex",
     ids: Joi.array().items(SCHEMA_ID),
   }).prefs({ presence: 'required' })),
   async (req, res) => {
-    req.cleanBody.ids.forEach(async (id, folderIndex) => {
-      await FolderModel.findOneAndUpdate({ _id: id }, { folderIndex });
-    })
+    // On ne réordonne que les dossiers du périmètre de l'appelant : les identifiants hors périmètre
+    // (ou inconnus) sont ignorés, jamais réindexés. Le `forEach(async …)` précédent ne renvoyait
+    // aucune promesse : la réponse partait avant la fin des écritures.
+    const folders = await FolderModel.find({ _id: { $in: req.cleanBody.ids } });
+    const foldersById = new Map(folders.map((folder) => [String(folder._id), folder]));
+    await Promise.all(
+      req.cleanBody.ids.map(async (id, folderIndex) => {
+        const folder = foldersById.get(String(id));
+        if (!folder || !canManageOwnedResource(req.user, folder)) return;
+        await FolderModel.findOneAndUpdate({ _id: id }, { folderIndex });
+      })
+    );
     return res.status(200).send({ ok: true });
   }
 );
@@ -84,8 +98,10 @@ router.post("/reindex",
 router.delete("/:id",
   validateParams(idSchema),
   async (req, res) => {
-    const query = { _id: req.cleanParams.id };
-    await FolderModel.findOneAndDelete(query);
+    const folder = await FolderModel.findById(req.cleanParams.id);
+    if (!folder) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canManageOwnedResource(req.user, folder)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    await FolderModel.findOneAndDelete({ _id: folder._id });
     return res.status(200).send({ ok: true });
   }
 );

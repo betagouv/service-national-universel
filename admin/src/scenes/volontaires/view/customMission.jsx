@@ -11,9 +11,9 @@ import Toggle from "../../../components/Toggle";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { adminURL } from "../../../config";
 import api from "../../../services/api";
-import plausibleEvent from "../../../services/plausible";
 import { ENABLE_PM, MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import Field from "@/components/ui/forms/Field";
+import { MISSION_HTML_FIELDS, warnIfHtmlSanitized } from "@/utils/sanitizedFields";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
@@ -152,14 +152,13 @@ export default function CustomMission({ young, onChange }) {
         return setLoading(false);
       }
 
-      plausibleEvent("Volontaires/profil/phase2 CTA - Créer mission personnalisée");
-
       values.addressVerified = values.addressVerified.toString();
       const responseMission = await api.post("/mission", values);
       if (!responseMission.ok) return toastr.error("Une erreur s'est produite lors de l'enregistrement de cette mission", translate(responseMission.code));
 
       const application = await handleProposal(responseMission.data, values.applicationStatus);
       toastr.success("Mission enregistrée");
+      warnIfHtmlSanitized(values, responseMission.data, MISSION_HTML_FIELDS);
       history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
     } catch (e) {
       setLoading(false);

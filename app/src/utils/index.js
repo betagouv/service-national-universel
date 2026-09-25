@@ -4,38 +4,22 @@ import {
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   YOUNG_STATUS_PHASE3,
-  REGLEMENT_INTERIEUR_VERSION,
   EQUIVALENCE_STATUS,
   canViewMissions,
   APPLICATION_STATUS,
   canCreateApplications,
   canCreateEquivalences,
   isCohortFullyArchived,
+  sanitizeLinkUrl,
 } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
-import { toastr } from "react-redux-toastr";
-import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
 import { isPast } from "date-fns";
 
 function addOneDay(date) {
   const newDate = new Date(date);
   newDate.setDate(newDate.getDate() + 1);
   return newDate;
-}
-
-/*  
-  Un jeune doit réaccepter le Reglement intérieur si le départ de sa cohorte est 
-  apres la date de mise en place du dernier reglement (et s'il ne l'a pas déja 
-  accepté).
-*/
-export function shouldReAcceptRI(young, cohort) {
-  const newRiDate = new Date(REGLEMENT_INTERIEUR_VERSION);
-  const cohortStartDate = new Date(cohort?.dateStart);
-  if (permissionPhase1(young) && cohortStartDate >= newRiDate && young?.acceptRI != REGLEMENT_INTERIEUR_VERSION) {
-    return true;
-  }
-  return false;
 }
 
 export function getPasswordErrorMessage(v) {
@@ -144,9 +128,10 @@ export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 
 export const ENABLE_PM = true;
 
+/** Lien externe saisi sans schéma (« www.site.fr ») : http ajouté, puis filtre d'URL partagé (GOO-19). */
 export function urlWithScheme(url) {
-  if (!/^https?:\/\//i.test(url)) return `http://${url}`;
-  return url;
+  const withScheme = /^https?:\/\//i.test(url) ? url : `http://${url}`;
+  return sanitizeLinkUrl(withScheme) ?? undefined;
 }
 
 export const copyToClipboard = (text) => {
@@ -210,14 +195,6 @@ export const validateId = (id) => {
 
 export const desktopBreakpoint = 768;
 
-export function displaySignupToast(user) {
-  const url = window.location.pathname;
-  const shouldDisplaySignupToast =
-    !url.includes("/representants-legaux") &&
-    ((user.status === YOUNG_STATUS.IN_PROGRESS && user.inscriptionStep2023 !== INSCRIPTION_STEPS.EMAIL_WAITING_VALIDATION) ||
-      (user.status === YOUNG_STATUS.REINSCRIPTION && user.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE));
-
-  if (shouldDisplaySignupToast) {
-    toastr.success("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.", { timeOut: 3 });
-  }
+export function capitalizeFirstLetter(string) {
+  if (string) return string.charAt(0).toUpperCase() + string.slice(1);
 }

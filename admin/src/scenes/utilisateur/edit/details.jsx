@@ -10,7 +10,6 @@ import ModalChangeTutor from "../../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "../composants/ModalUniqueResponsable";
 import api from "../../../services/api";
-import plausibleEvent from "../../../services/plausible";
 import {
   canUpdateReferent,
   canDeleteReferent,
@@ -133,7 +132,6 @@ export default function Details({ user, setUser, currentUser }) {
     try {
       setSaving(true);
       if (validate()) {
-        plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
         const updatedData = { ...data };
         if (trimmedPhone) updatedData.phone = trimmedPhone;
         if (trimmedMobile) updatedData.mobile = trimmedMobile;
@@ -342,7 +340,7 @@ export default function Details({ user, setUser, currentUser }) {
             <div className="w-[1px] bg-[#E5E7EB]" />
             <div className="flex-1 pl-16">
               <div className="mb-2">Contact</div>
-              <Field mode={mode} className="mb-4" label="E-mail" name="email" value={data.email} onChange={onChange("email")} error={errors.email} copy={true} />
+              <Field mode={currentUser.role === ROLES.ADMIN ? mode : MODE_DEFAULT} className="mb-4" label="E-mail" name="email" value={data.email} onChange={onChange("email")} error={errors.email} copy={true} />
               <Field mode={mode} className="mb-4" label="Téléphone fixe" name="phone" value={data.phone} onChange={onChange("phone")} error={errors.phone} />
               <Field mode={mode} label="Téléphone mobile" name="mobile" value={data.mobile} onChange={onChange("mobile")} error={errors.mobile} />
             </div>

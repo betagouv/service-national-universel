@@ -1,12 +1,11 @@
 const express = require("express");
 const router = express.Router();
-const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const Joi = require("joi");
 const OrganisationModel = require("../models/organisation");
 const { agentGuard } = require("../middlewares/authenticationGuards");
 const { ERRORS } = require("../errors");
-const { requireRole } = require("../middlewares/userRoleGuards");
+const { canAdministerAgents, canAssignRole, canManageAgent, ROLE_RANKS } = require("../utils/agentAdminScope");
 const { validateParams, validateBody, idSchema } = require("../middlewares/validation");
 const { SCHEMA_EMAIL, SCHEMA_ROLE } = require("../schemas");
 
@@ -15,7 +14,8 @@ const AgentModel = require("../models/agent");
 const { validatePassword } = require("../utils");
 const { hashResetToken } = require("../utils/resetToken");
 const { cookieOptions, logoutCookieOptions } = require("../cookie-options");
-const { JWT_MAX_AGE, JWT_VERSION } = require("../jwt-options");
+const { signAgentToken } = require("../utils/agentToken");
+const { serializeAgent, serializeAgentSelf, PUBLIC_FIELDS } = require("../utils/agentSerializer");
 
 const { sendEmail } = require("../brevo");
 const { serializeOrganisation } = require("../utils/organisation");
@@ -24,6 +24,9 @@ const SCHEMA_PASSWORD = Joi.string().pattern(/^\S+$/).message("{{#label}} must b
 const SCHEMA_TOKEN_LENGTH = 20;
 const SCHEMA_TOKEN = Joi.string().length(SCHEMA_TOKEN_LENGTH, "hex");
 const SCHEMA_FIRSTNAME = Joi.string().trim();
+// Durée de validité du lien de réinitialisation. Elle était calculée avec JWT_MAX_AGE, exprimé en secondes,
+// ajouté à un horodatage en millisecondes : le lien expirait au bout de 86 secondes.
+const RESET_TOKEN_MAX_AGE_MS = 1000 * 60 * 60; // 1 hour
 const SCHEMA_LASTNAME = Joi.string().trim();
 
 router.post(
@@ -32,7 +35,7 @@ router.post(
     Joi.object({
       email: SCHEMA_EMAIL,
       password: SCHEMA_PASSWORD,
-    }).prefs({ presence: "required" })
+    }).prefs({ presence: "required" }),
   ),
   async (req, res) => {
     const { password, email } = req.cleanBody;
@@ -50,45 +53,53 @@ router.post(
 
     user.set({ lastLoginAt: Date.now() });
     await user.save();
-    const token = jwt.sign({ __v: JWT_VERSION, _id: user._id }, config.JWT_SECRET, {
-      expiresIn: JWT_MAX_AGE,
-    });
+    const token = signAgentToken(user);
     res.cookie("jwtzamoud", token, cookieOptions());
     const organisation = await OrganisationModel.findById(user.organisationId);
 
-    return res.status(200).send({ ok: true, user, organisation: serializeOrganisation(organisation), token });
-  }
+    // Le jeton ne vit que dans le cookie httpOnly : le renvoyer dans le corps le rendait lisible par un script injecté (L48).
+    return res.status(200).send({ ok: true, user: serializeAgentSelf(user), organisation: serializeOrganisation(organisation) });
+  },
 );
 
 router.post("/logout", agentGuard, async (req, res) => {
+  // Effacer le cookie ne suffit pas : une copie du jeton (volée par XSS, restée sur un autre poste) restait
+  // valable 24 h. Avancer lastLogoutAt révoque tous les jetons émis jusqu'ici pour cet agent (M98).
+  req.user.set({ lastLogoutAt: Date.now() });
+  await req.user.save();
   res.clearCookie("jwtzamoud", logoutCookieOptions());
   return res.status(200).send({ ok: true });
 });
 
+const requireAgentAdmin = (req, res, next) => {
+  if (!canAdministerAgents(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  next();
+};
+
 router.post(
   "/",
   agentGuard,
-  requireRole("AGENT"),
+  requireAgentAdmin,
   validateBody(
     Joi.object({
       email: SCHEMA_EMAIL,
       firstName: SCHEMA_FIRSTNAME,
       lastName: SCHEMA_LASTNAME,
       role: SCHEMA_ROLE,
-    }).prefs({ presence: "required" })
+    }).prefs({ presence: "required" }),
   ),
   async (req, res) => {
+    if (!canAssignRole(req.user, req.cleanBody.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Mot de passe aléatoire que personne ne connaît : l'agent choisit le sien via « mot de passe oublié ».
+    // Il n'est pas soumis à validatePassword, qui exige des classes de caractères qu'un hexadécimal n'a pas.
     const password = crypto.randomBytes(16).toString("hex");
-
-    if (!validatePassword(password)) return res.status(200).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
-    const organisation = await OrganisationModel.findOne({ name: "SNU" });
 
     try {
       await AgentModel.create({
         ...req.cleanBody,
         password,
-        organisationId: organisation._id,
+        organisationId: req.user.organisationId,
       });
       return res.status(200).send({ ok: true });
     } catch (error) {
@@ -97,15 +108,16 @@ router.post(
       }
       throw error;
     }
-  }
+  },
 );
 
-router.delete("/:id", agentGuard, requireRole("AGENT"), validateParams(idSchema), async (req, res) => {
+router.delete("/:id", agentGuard, requireAgentAdmin, validateParams(idSchema), async (req, res) => {
   const { id } = req.cleanParams;
   const agent = await AgentModel.findById(id);
   if (!agent) {
     return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
   }
+  if (!canManageAgent(req.user, agent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   await AgentModel.findByIdAndDelete(id);
   return res.status(200).send({ ok: true });
 });
@@ -113,19 +125,23 @@ router.delete("/:id", agentGuard, requireRole("AGENT"), validateParams(idSchema)
 router.patch(
   "/:id",
   agentGuard,
-  requireRole("AGENT"),
+  requireAgentAdmin,
   validateParams(idSchema),
   validateBody(
     Joi.object({
       email: SCHEMA_EMAIL,
       firstName: SCHEMA_FIRSTNAME,
       lastName: SCHEMA_LASTNAME,
-    }).min(1)
+    }).min(1),
   ),
   async (req, res) => {
-    await AgentModel.findOneAndUpdate({ _id: req.cleanParams.id, organisationId: req.user.organisationId }, req.cleanBody);
+    const agent = await AgentModel.findById(req.cleanParams.id);
+    if (!agent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
+    if (!canManageAgent(req.user, agent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    await AgentModel.findOneAndUpdate({ _id: agent._id, organisationId: req.user.organisationId }, req.cleanBody);
     return res.status(200).send({ ok: true });
-  }
+  },
 );
 
 router.get("/me", agentGuard, async (req, res) => {
@@ -134,13 +150,14 @@ router.get("/me", agentGuard, async (req, res) => {
   const organisation = await OrganisationModel.findOne({ _id: user.organisationId });
   await user.save();
 
-  res.send({ user, organisation: serializeOrganisation(organisation), ok: true, token: req.cookies.jwtzamoud });
+  // Pas de jeton dans le corps : une XSS le lisait ici pour voler la session de l'agent (L48).
+  res.send({ user: serializeAgentSelf(user), organisation: serializeOrganisation(organisation), ok: true });
 });
 
 router.get("/", agentGuard, async (req, res) => {
-  const agents = await AgentModel.find({});
-  const obj = { AGENT: [], REFERENT_DEPARTMENT: [], REFERENT_REGION: [], DG: [] };
-  agents.map((a) => obj[a.role].push(a));
+  const agents = await AgentModel.find({}).select(PUBLIC_FIELDS.join(" "));
+  const obj = Object.keys(ROLE_RANKS).reduce((acc, role) => ({ ...acc, [role]: [] }), {});
+  agents.forEach((a) => obj[a.role] && obj[a.role].push(serializeAgent(a)));
   return res.status(200).send({ ok: true, data: obj });
 });
 
@@ -149,7 +166,7 @@ router.post(
   validateBody(
     Joi.object({
       email: SCHEMA_EMAIL,
-    }).prefs({ presence: "required" })
+    }).prefs({ presence: "required" }),
   ),
   async (req, res) => {
     const { email } = req.cleanBody;
@@ -157,13 +174,13 @@ router.post(
     if (!agent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
     const token = crypto.randomBytes(SCHEMA_TOKEN_LENGTH).toString("hex");
     const tokenHash = hashResetToken({ token, secret: config.PASSWORD_RESET_TOKEN_SECRET });
-    agent.set({ forgotPasswordResetToken: tokenHash, forgotPasswordResetExpires: Date.now() + JWT_MAX_AGE });
+    agent.set({ forgotPasswordResetToken: tokenHash, forgotPasswordResetExpires: Date.now() + RESET_TOKEN_MAX_AGE_MS });
     await agent.save();
     const subject = "Réinitialiser votre mot de passe";
     const body = `Une demande de réinitialisation de mot de passe a été faite, si elle vient bien de vous vous pouvez <a href="${config.SNUPPORT_URL_ADMIN}/auth/reset?token=${token}" style="color: #584FEC">cliquer ici pour réinitialiser votre mot de passe</a>`;
     await sendEmail([{ email: agent.email }], subject, body);
     res.status(200).send({ ok: true });
-  }
+  },
 );
 
 router.post(
@@ -173,7 +190,7 @@ router.post(
       token: SCHEMA_TOKEN,
       password: SCHEMA_PASSWORD,
       passwordConfirm: SCHEMA_PASSWORD,
-    }).prefs({ presence: "required" })
+    }).prefs({ presence: "required" }),
   ),
   async (req, res) => {
     const { token, password, passwordConfirm } = req.cleanBody;
@@ -184,11 +201,13 @@ router.post(
     if (!validatePassword(password)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
     agent.password = password;
+    // Révoque les sessions ouvertes avec l'ancien mot de passe, dont celle d'un éventuel attaquant (M98).
+    agent.passwordChangedAt = Date.now();
     agent.forgotPasswordResetToken = "";
     agent.forgotPasswordResetExpires = "";
     await agent.save();
     return res.status(200).send({ ok: true });
-  }
+  },
 );
 
 /*

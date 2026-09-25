@@ -18,7 +18,17 @@ export function getMatchingPermissions(user: Pick<UserDto, "acl">, resource: str
   return (user.acl || []).filter((acl) => acl.resource === resource && [action, PERMISSION_ACTIONS.FULL].includes(acl.action));
 }
 
-/** Au moins une permission sans policy : l'accès à la ressource est sans restriction. */
+/**
+ * Accès sans restriction : au moins une permission sans policy ET aucune permission scopée
+ * sur la même ressource/action.
+ *
+ * La policy la plus restrictive gagne : une permission large seedée sans policy ne doit jamais
+ * annuler silencieusement une policy écrite pour restreindre le même rôle (audit 2026-09-21, H87).
+ * Sans cette précédence, tout `isXxxAuthorized({ context })` est un no-op pour les rôles concernés
+ * et `getPolicyMongoFilter` renvoie « aucune restriction ».
+ */
 export function hasUnrestrictedPermission(permissions: Acl[]): boolean {
-  return permissions.some((acl) => !acl.policy?.length);
+  if (!permissions.length) return false;
+  if (permissions.some((acl) => acl.policy?.length)) return false;
+  return true;
 }

@@ -13,7 +13,7 @@ import Quote from "../../components/Icons/Quote";
 import Thumbs from "../../components/Icons/Thumbs";
 import View from "../../modificationPanel/View";
 
-export default function Modification({ demandeDeModification, getModification }) {
+export default function Modification({ demandeDeModification }) {
   const [panel, setPanel] = React.useState({ open: false });
   const [tagsOptions, setTagsOptions] = React.useState(null);
   const user = useSelector((state) => state.Auth.user);
@@ -116,14 +116,7 @@ export default function Modification({ demandeDeModification, getModification })
           </div>
         ))}
       </div>
-      <View
-        open={panel.open}
-        setOpen={() => setPanel({ open: false })}
-        modification={panel.modification}
-        getModification={getModification}
-        tagsOptions={tagsOptions}
-        getTags={getTags}
-      />
+      <View open={panel.open} setOpen={() => setPanel({ open: false })} modification={panel.modification} tagsOptions={tagsOptions} />
     </div>
   );
 }

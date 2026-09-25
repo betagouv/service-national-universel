@@ -1,7 +1,4 @@
-import fetch from "node-fetch";
-
 import request from "supertest";
-import jwt from "jsonwebtoken";
 import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS, COHORT_TYPE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import * as fileUtils from "../utils/file";
@@ -20,6 +17,8 @@ import { createReferentHelper } from "./helpers/referent";
 import { getNewReferentFixture } from "./fixtures/referent";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
+import { createEtablissement } from "./helpers/etablissement";
+import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { ClasseModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
@@ -53,6 +52,8 @@ jest.mock("../utils", () => ({
   getFile: () => Promise.resolve({ Body: "" }),
   uploadFile: (path, file) => Promise.resolve({ path, file }),
   deleteFile: (path, file) => Promise.resolve({ path, file }),
+  listFiles: () => Promise.resolve([]),
+  deleteFilesByList: () => Promise.resolve({}),
 }));
 
 jest.mock("../emails", () => ({
@@ -184,7 +185,8 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      // La fixture a une phase 3 validée, désormais figée.
+      const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: "WAITING_REALISATION" }));
 
       const res = await request(await getAppHelperWithAcl(young))
         .put(`/young/${young._id}/validate-mission-phase3`)
@@ -192,7 +194,7 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(200);
     });
     it("should be only accessible by young", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: "WAITING_REALISATION" }));
       const passport = require("passport");
       const res = await request(await getAppHelperWithAcl())
         .put(`/young/${young._id}/validate-mission-phase3`)
@@ -208,61 +210,6 @@ describe("Young", () => {
         .put(`/young/${they._id}/validate-mission-phase3`)
         .send();
       expect(res.statusCode).toEqual(403);
-    });
-  });
-
-  let storedState;
-  let storedNonce;
-
-  describe("POST /young/france-connect/authorization-url", () => {
-    it("should return 200", async () => {
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/france-connect/authorization-url")
-        .send({
-          callback: "foo",
-        });
-      const url = res.body.data.url;
-      storedState = url.split("state=")[1].split("&")[0];
-      storedNonce = url.split("nonce=")[1].split("&")[0];
-      expect(res.statusCode).toEqual(200);
-    });
-  });
-
-  describe("POST /young/france-connect/user-info", () => {
-    it("should return 200", async () => {
-      const secretKey = "mysecretkey";
-      const jwtPayload = {
-        nonce: storedNonce,
-      };
-      const jwtOptions = {
-        expiresIn: "1h",
-      };
-      const jwtToken = jwt.sign(jwtPayload, secretKey, jwtOptions);
-
-      const jsonResponse = jest
-        .fn()
-        .mockReturnValueOnce(
-          Promise.resolve({
-            access_token: "foo",
-            id_token: jwtToken,
-          }),
-        )
-        .mockReturnValue(Promise.resolve({}));
-      // @ts-ignore
-      fetch.mockReturnValue(
-        Promise.resolve({
-          status: 200,
-          json: jsonResponse,
-        }),
-      );
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/france-connect/user-info")
-        .send({
-          code: "foo",
-          callback: "bar",
-          state: storedState,
-        });
-      expect(res.statusCode).toEqual(200);
     });
   });
 
@@ -536,8 +483,10 @@ describe("Young", () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty("young");
-      expect(res.body.young).toHaveProperty("invitationToken");
-      expect(res.body.young).toHaveProperty("invitationExpires");
+      // Le token d'invitation ne doit jamais sortir de l'email d'invitation : il délivre un JWT jeune
+      // via POST /young/signup_verify (constat H43 de l'audit du 21/09/2026).
+      expect(res.body.young).not.toHaveProperty("invitationToken");
+      expect(res.body.young).not.toHaveProperty("invitationExpires");
       expect(res.body.young).toHaveProperty("status", "WAITING_VALIDATION");
       expect(res.body.young).toHaveProperty("cohort", cohort.name);
       expect(res.body.young).toHaveProperty("cohortId", cohort._id.toString());
@@ -728,7 +677,11 @@ describe("Young", () => {
       // @ts-ignore
       sendTemplate.mockClear();
       const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
-      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
+      // le jeune doit être rattaché à l'établissement de l'administrateur CLE : le périmètre est
+      // désormais vérifié en base (canEditYoungInScope), plus seulement par le rôle
+      const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [tutor._id.toString()] }));
+      const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id.toString() }));
+      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id.toString(), etablissementId: etablissement._id.toString() }));
       const res = await request(await getAppHelperWithAcl(tutor))
         .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`)
         .send({ status: "VALIDATED" });

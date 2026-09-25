@@ -28,13 +28,11 @@ fi
 
 front=0
 back=0
-use_packages=0
 use_patches=0
 copy_tsconfig=0
 
 if [[ $application == "api" || $application == "apiv2" ]]; then
     back=1;
-    use_packages=1;
     use_patches=1;
 fi
 if [[ $application == "app" || $application == "admin" ]]; then
@@ -47,6 +45,9 @@ fi
 if [[ $application == "snupport-app" ]]; then
     front=1;
 fi
+
+source "$(cd "$(dirname "$0")" && pwd)/copy-packages.sh"
+source "$(cd "$(dirname "$0")" && pwd)/csp-report.sh"
 
 cd "$(dirname $0)/../.."
 
@@ -74,15 +75,15 @@ mkdir -p $destination
 
 if (( $front )); then
     mv out/$application/build $destination
-    envsubst '$APP_HOME $PORT' < devops/build/front/nginx.conf > $destination/nginx.conf
+    # Affectation séparée de l'export : sous `set -e`, un échec de csp_report_uri arrête le build
+    CSP_REPORT_URI=$(csp_report_uri $application)
+    export CSP_REPORT_URI
+    envsubst '$APP_HOME $PORT $CSP_REPORT_URI' < devops/build/front/nginx.conf > $destination/nginx.conf
     cp devops/build/front/package.json $destination
 fi
 
 if (( $back )); then
-    if (( $use_packages )); then
-        mkdir -p $destination/packages/lib/
-        mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
-    fi
+    copy_workspace_packages $destination
     mv out/node_modules $destination/
 fi
 

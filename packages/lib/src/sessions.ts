@@ -1,12 +1,11 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS } from "./constants/constants";
+import { COHORT_STATUS } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { shouldDisplayDateByCohortName } from "./utils/cohortUtils";
 import { CohortType } from "./mongoSchema/cohort";
-import { YoungType } from "./mongoSchema/young";
 
 const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
 
@@ -134,17 +133,6 @@ const isCohortFullyArchived = (cohort?: CohortType) => {
   return cohort?.status === COHORT_STATUS.FULLY_ARCHIVED;
 };
 
-
-function hasAccessToReinscription(young: YoungType) {
-  if (young.departSejourMotif === "Exclusion") {
-    return false;
-  }
-  if ([YOUNG_STATUS.DELETED].includes(young.status as any)) {
-    return false;
-  }
-  return young.cohort === "à venir";
-}
-
 export {
   getSchoolYear,
   getCohortYear,
@@ -152,7 +140,6 @@ export {
   formatCohortPeriod,
   getCohortPeriodTemp,
   inscriptionCreationOpenForYoungs,
-  hasAccessToReinscription,
   isCohortArchived,
   isCohortFullyArchived,
   getCohortStartDate,

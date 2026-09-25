@@ -13,7 +13,6 @@ import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExterna
 import useAuth from "@/services/useAuth";
 import { RiInformationFill } from "react-icons/ri";
 import useCohort from "@/services/useCohort";
-import plausibleEvent from "@/services/plausible";
 import { HiArrowRight } from "react-icons/hi";
 import Notice from "@/components/ui/alerts/Notice";
 
@@ -24,10 +23,6 @@ export default function WaitingAffectation() {
   const text = isCLE
     ? "Votre affectation vous sera communiquée par votre établissement scolaire."
     : "Votre affectation vous sera communiquée dans les semaines qui précèdent le départ par mail. En attendant, commencez à préparer votre fiche sanitaire ci-dessous !";
-
-  function handleClick() {
-    plausibleEvent("CLE attente affectation - desistement");
-  }
 
   return (
     <HomeContainer>
@@ -54,8 +49,7 @@ export default function WaitingAffectation() {
                 pathname: "/changer-de-sejour/se-desister",
                 state: { backlink: "/phase1" },
               }}
-              className="text-blue-600 underline underline-offset-2"
-              onClick={handleClick}>
+              className="text-blue-600 underline underline-offset-2">
               Se désister du SNU.
             </Link>
           </div>

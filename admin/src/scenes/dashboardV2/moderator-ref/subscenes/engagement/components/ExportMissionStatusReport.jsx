@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
-import plausibleEvent from "../../../../../../services/plausible";
+import { safeJsonToSheet } from "@/utils/file";
 import ModalConfirm from "../../../../../../components/modals/ModalConfirm";
 import { MISSION_STATUS, REFERENT_ROLES, region2department, translate } from "snu-lib";
 import { useSelector } from "react-redux";
@@ -16,7 +16,6 @@ export default function ExportMissionStatusReport({ filter }) {
   const user = useSelector((state) => state.Auth.user);
 
   const onClick = () => {
-    plausibleEvent("Dashboard/CTA - Exporter Detail missions");
     setModal({
       isOpen: true,
       onConfirm: run,
@@ -79,8 +78,8 @@ export default function ExportMissionStatusReport({ filter }) {
       const lines = await aggregateMissionsStatusData(result.data);
 
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-      const sheetData = XLSX.utils.json_to_sheet(lines);
-      const sheetFilter = XLSX.utils.json_to_sheet(linesFilter);
+      const sheetData = safeJsonToSheet(lines);
+      const sheetFilter = safeJsonToSheet(linesFilter);
       const wb = { Sheets: { ["Données"]: sheetData, Filtres: sheetFilter }, SheetNames: ["Données", "Filtres"] };
       const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       const data = new Blob([excelBuffer], { type: fileType });

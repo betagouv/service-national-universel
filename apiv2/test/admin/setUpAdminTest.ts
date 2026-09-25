@@ -1,6 +1,6 @@
 import configuration from "@config/testConfiguration";
 import { getQueueToken } from "@nestjs/bullmq";
-import { Logger, ValidationPipe } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
@@ -10,10 +10,8 @@ import { QueueName } from "@shared/infra/Queue";
 
 import { ClasseService } from "@admin/core/sejours/cle/classe/Classe.service";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
-import { SimulationAffectationCLEService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE.service";
 import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
-import { ValiderBasculeJeunesService } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
 import { historyProvider } from "@admin/infra/history/historyProvider";
 import { AuthProvider } from "@admin/infra/iam/auth/Auth.provider";
 import { JwtTokenService } from "@admin/infra/iam/auth/JwtToken.service";
@@ -36,7 +34,6 @@ import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.control
 import { centreMongoProviders } from "@admin/infra/sejours/phase1/centre/provider/CentreMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "@admin/infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 import { gatewayProviders as sejourGatewayProviders } from "@admin/infra/sejours/phase1/initProvider/gateway";
-import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { BasculeJeuneNonValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
 import { BasculeJeuneValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { ligneDeBusMongoProviders } from "@admin/infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
@@ -61,10 +58,9 @@ import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway
 import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
 import { SharedModule } from "@shared/Shared.module";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
-import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
-import { DesistementService } from "../../src/admin/core/sejours/phase1/desistement/Desistement.service";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
 import { InscrireEleveManuellement } from "@admin/core/sejours/cle/classe/useCase/InscrireEleveManuellement";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -119,9 +115,6 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             AffectationService,
             InscriptionService,
             SimulationAffectationHTSService,
-            SimulationAffectationCLEService,
-            ValiderBasculeJeunesService,
-            DesistementService,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,
@@ -145,7 +138,6 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             { provide: FileGateway, useClass: FileProvider },
             { provide: AuthProvider, useClass: JwtTokenService },
             { provide: TaskGateway, useClass: AdminTaskRepository },
-            ...phase1UseCaseProviders,
             ...cleUseCaseProviders,
             ...referentielGatewayProviders,
             ...regionAcademiqueMongoProviders,
@@ -155,7 +147,6 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             FeatureFlagService,
             { provide: FeatureFlagGateway, useClass: FeatureFlagMongoRepository },
             ...featureFlagMongoProviders,
-            ClasseImportService,
             InscrireEleveManuellement,
             JeuneService,
         ],
@@ -173,7 +164,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         .compile();
 
     const app = adminTestModule.createNestApplication({ logger: false });
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(...pipesGlobaux());
 
     return { app, adminTestModule };
 };

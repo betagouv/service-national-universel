@@ -15,10 +15,6 @@ const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
 const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
-export const MAILING_LISTS = {
-  INSCRIPTION: 1712,
-};
-
 //https://my.sendinblue.com/lists/add-attributes
 
 type ContactAttribute = {
@@ -61,8 +57,7 @@ const api = async (path, options: any = {}, force?: boolean) => {
 
     if (!config.SENDINBLUEKEY) {
       captureMessage("NO SENDINBLUE KEY");
-      logger.debug(options);
-      logger.debug("Mail was not sent.");
+      logger.debug(`Mail was not sent (${options.method || "GET"} ${path}).`);
       return;
     }
 
@@ -83,6 +78,29 @@ const api = async (path, options: any = {}, force?: boolean) => {
   }
 };
 
+// Le corps transmis à Brevo porte le contenu des messages : identité du jeune et de ses représentants
+// légaux, liens à jeton, textes libres. `redactSentryEvent` (src/sentry.js) masque les secrets
+// reconnaissables à leur clé, mais pas une identité ni un code en clair au milieu d'un texte : on ne
+// remonte donc jamais le corps, seulement de quoi diagnostiquer l'échec d'envoi.
+type BrevoResponse = { code?: string; message?: string };
+type MailBody = { templateId?: number; to?: unknown[]; cc?: unknown[]; bcc?: unknown[]; attachment?: unknown[] };
+
+function mailDiagnostic(body: MailBody = {}, mail?: BrevoResponse) {
+  return {
+    templateId: body.templateId,
+    recipientCount: body.to?.length ?? 0,
+    ccCount: body.cc?.length ?? 0,
+    bccCount: body.bcc?.length ?? 0,
+    attachmentCount: body.attachment?.length ?? 0,
+    brevoCode: mail?.code,
+    brevoMessage: mail?.message,
+  };
+}
+
+function smsDiagnostic(body: { tag?: string } = {}, sms?: BrevoResponse) {
+  return { tag: body.tag, brevoCode: sms?.code, brevoMessage: sms?.message };
+}
+
 // https://developers.sendinblue.com/reference/sendtransacsms
 export async function sendSMS(phoneNumber, content, tag) {
   try {
@@ -101,9 +119,10 @@ export async function sendSMS(phoneNumber, content, tag) {
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
     if (!sms || sms?.code) {
-      captureMessage("Error sending an SMS", { extra: { sms, body } });
+      captureMessage("Error sending an SMS", { extra: smsDiagnostic(body, sms) });
     }
-    if (config.ENVIRONMENT !== "production") {
+    // le contenu complet reste visible en local uniquement, jamais sur un environnement déployé
+    if (config.ENVIRONMENT === "development") {
       logger.debug("", { body, sms });
     }
   } catch (e) {
@@ -135,9 +154,10 @@ export async function sendEmail(to: Email[], subject: string, htmlContent, { par
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
     if (!mail || mail?.code) {
-      captureMessage("Error sending an email", { extra: { mail, body } });
+      captureMessage("Error sending an email", { extra: mailDiagnostic(body, mail) });
     }
-    if (config.ENVIRONMENT !== "production") {
+    // le contenu complet reste visible en local uniquement, jamais sur un environnement déployé
+    if (config.ENVIRONMENT === "development") {
       logger.debug("", { body, mail });
     }
   } catch (e) {
@@ -275,15 +295,16 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
     // * To delete once we put the email of the parent in the template
     const isParentTemplate = Object.values(SENDINBLUE_TEMPLATES.parent).some((value) => value == body?.templateId);
     if (mail?.message == "email is missing in to" && isParentTemplate) {
-      captureMessage("Parent sans email", { extra: { mail, body } });
+      captureMessage("Parent sans email", { extra: mailDiagnostic(body, mail) });
       return;
     }
 
     if (!mail || mail?.code) {
-      captureMessage("Error sending a template", { extra: { mail, body } });
+      captureMessage("Error sending a template", { extra: mailDiagnostic(body, mail) });
       return;
     }
-    if (config.ENVIRONMENT !== "production" || options.force) {
+    // le contenu complet reste visible en local uniquement, jamais sur un environnement déployé
+    if (config.ENVIRONMENT === "development") {
       logger.debug("", { body, mail });
     }
     return mail;
@@ -362,6 +383,108 @@ export async function updateContact(id, { attributes, emailBlacklisted, smsBlack
   return await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
 }
 
+/**
+ * Attributs de contact synchronisés vers Brevo.
+ *
+ * Liste explicite (allowlist) et non liste d'exclusion : le document jeune porte plus de 300 champs, dont
+ * des données de santé (handicap, allergies, PAI/PPS, structure médico-sociale, aménagements spécifiques,
+ * PSC1, dossier médical), l'adresse précise, le téléphone, la date de naissance, les pièces d'identité et
+ * les coordonnées des deux représentants légaux. Brevo est un sous-traitant marketing : il ne doit recevoir
+ * que ce qui sert au ciblage et à la personnalisation des campagnes.
+ *
+ * Une liste d'exclusion laissait passer par défaut tout nouveau champ du schéma. Ici, un champ non listé
+ * n'est jamais transmis : l'ajout doit être délibéré et vérifié au regard de la finalité marketing.
+ */
+const YOUNG_SYNC_FIELDS = [
+  "cohort",
+  "cohortId",
+  "originalCohort",
+  "source",
+  "status",
+  "accountStatus",
+  "phase",
+  "statusPhase1",
+  "statusPhase2",
+  "statusPhase3",
+  "phase2ApplicationStatus",
+  "phase2NumberHoursDone",
+  "inscriptionStep",
+  "inscriptionStep2023",
+  "hasStartedReinscription",
+  "withdrawnReason",
+  "grade",
+  "situation",
+  "schooled",
+  "academy",
+  "department",
+  "region",
+  "country",
+  "qpv",
+  "isRegionRural",
+  "populationDensity",
+  "createdAt",
+  "updatedAt",
+  "lastStatusAt",
+  "inscriptionDoneDate",
+  "statusPhase2ValidatedAt",
+  "statusPhase3ValidatedAt",
+  "lastLoginAt",
+  "lastActivityAt",
+] as const;
+
+const REFERENT_SYNC_FIELDS = [
+  "role",
+  "subRole",
+  "invitationType",
+  "status",
+  "region",
+  "department",
+  "cohesionCenterName",
+  "acceptCGU",
+  "registredAt",
+  "createdAt",
+  "updatedAt",
+  "lastLoginAt",
+  "lastActivityAt",
+] as const;
+
+/**
+ * Attributs transmis au contact d'un représentant légal : uniquement le contexte de campagne du jeune.
+ * Le parent ne reçoit ni les données de santé du jeune, ni son adresse, son téléphone ou sa date de
+ * naissance, ni les coordonnées de l'autre représentant légal.
+ */
+const PARENT_SYNC_FIELDS = [
+  "cohort",
+  "cohortId",
+  "source",
+  "status",
+  "phase",
+  "statusPhase1",
+  "statusPhase2",
+  "statusPhase3",
+  "inscriptionStep2023",
+  "grade",
+  "academy",
+  "department",
+  "region",
+  "createdAt",
+  "updatedAt",
+  "lastStatusAt",
+] as const;
+
+function buildAttributes(user, fields: readonly string[]): Partial<ContactAttribute> {
+  const attributes: Partial<ContactAttribute> = {};
+  for (const field of fields) {
+    // filet de sécurité : une clé sensible ne peut pas entrer dans Brevo par une entrée erronée de la liste
+    if (isSensitiveKey(field)) continue;
+    const value = user[field];
+    if (value === undefined || value === null || value === "") continue;
+    // si c'est une date, on ne garde que le jour
+    attributes[field.toUpperCase()] = field.endsWith("At") && typeof value === "string" ? value.slice(0, 10) : value;
+  }
+  return attributes;
+}
+
 export async function sync(obj, type, { force } = { force: false }) {
   if (config.ENVIRONMENT !== "production" && !force) {
     logger.debug("no sync brevo");
@@ -373,54 +496,39 @@ export async function sync(obj, type, { force } = { force: false }) {
 
     const email = user.email;
     const id = user._id;
-    let parents: { slot: "parent1" | "parent2"; contact: Contact }[] = [];
-    const attributes: Partial<ContactAttribute> = {};
-    for (let i = 0; i < Object.keys(user).length; i++) {
-      const key = Object.keys(user)[i];
-      if (key.endsWith("At")) {
-        // if its a date
-        if (user[key]) attributes[key.toUpperCase()] = user[key].slice(0, 10);
-      } else {
-        attributes[key.toUpperCase()] = user[key];
-      }
-    }
+    const contactType = String(type).toUpperCase();
 
-    attributes.FIRSTNAME && (attributes.PRENOM = attributes.FIRSTNAME);
-    attributes.LASTNAME && (attributes.NOM = attributes.LASTNAME);
-    attributes.TYPE = type.toUpperCase();
+    const attributes = buildAttributes(user, contactType === "YOUNG" ? YOUNG_SYNC_FIELDS : REFERENT_SYNC_FIELDS);
+    user.firstName && (attributes.PRENOM = user.firstName);
+    user.lastName && (attributes.NOM = user.lastName);
+    attributes.TYPE = contactType;
     attributes.REGISTRED = !!attributes.REGISTRED_AT;
 
+    let parents: { slot: "parent1" | "parent2"; contact: Contact }[] = [];
     let listIds: number[] = [];
-    if (attributes.TYPE === "YOUNG") {
+    if (contactType === "YOUNG") {
       if (user.status === YOUNG_STATUS.DELETED) return;
+      // le contact parent est identifié par le jeune (prénom, nom, cohorte) : les campagnes parents s'y appuient
+      const parentAttributes = buildAttributes(user, PARENT_SYNC_FIELDS);
+      parentAttributes.PRENOM = attributes.PRENOM;
+      parentAttributes.NOM = attributes.NOM;
+      parentAttributes.TYPE = attributes.TYPE;
+      parentAttributes.REGISTRED = attributes.REGISTRED;
       if (user.parent1Email) {
-        parents.push({ slot: "parent1", contact: { email: user.parent1Email, attributes, listIds: [1447] } });
+        parents.push({ slot: "parent1", contact: { email: user.parent1Email, attributes: parentAttributes, listIds: [1447] } });
       }
       if (user.parent2Email) {
-        parents.push({ slot: "parent2", contact: { email: user.parent2Email, attributes, listIds: [1447] } });
+        parents.push({ slot: "parent2", contact: { email: user.parent2Email, attributes: parentAttributes, listIds: [1447] } });
       }
       listIds.push(1446);
     }
-    if (attributes.TYPE === "REFERENT") listIds.push(1448);
+    if (contactType === "REFERENT") listIds.push(1448);
     [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && listIds.push(1243, 2225);
     [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && listIds.push(1449);
 
-    delete attributes.EMAIL;
-    delete attributes.PASSWORD;
-    delete attributes.__V;
-    delete attributes._ID;
-    delete attributes.LASTNAME;
-    delete attributes.FIRSTNAME;
-
-    // Les attributs sont construits en recopiant tout le document : ne pas transmettre à Brevo (ni, en cas
-    // d'erreur, à nos journaux et à Sentry) les tokens d'invitation, de reset, de 2FA et de validation d'email.
-    for (const key of Object.keys(attributes)) {
-      if (isSensitiveKey(key)) delete attributes[key];
-    }
-
-    syncContact(email, attributes, listIds, { id, type: attributes.TYPE, contact: "self" });
+    syncContact(email, attributes, listIds, { id, type: contactType, contact: "self" });
     for (const parent of parents) {
-      syncContact(parent.contact.email, parent.contact.attributes, parent.contact.listIds!, { id, type: attributes.TYPE, contact: parent.slot });
+      syncContact(parent.contact.email, parent.contact.attributes, parent.contact.listIds!, { id, type: contactType, contact: parent.slot });
     }
   } catch (e) {
     capture(e);

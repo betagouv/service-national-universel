@@ -15,7 +15,10 @@ const { sendTemplate } = require("./brevo");
 const { capture } = require("./sentry");
 const { sendNotif, SENDINBLUE_TEMPLATES } = require("./utils/");
 const { encrypt } = require("./utils/crypto");
-const { getS3Path } = require("./utils/file");
+const { getS3Path, getAttachmentFileName } = require("./utils/file");
+const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
+const { inspectAttachment } = require("./utils/attachments");
+const { sanitizeMessageHtml } = require("./utils/messageHtml");
 
 const regex = /\[#(\w+)\]/i;
 
@@ -57,6 +60,14 @@ async function addMessage(mail) {
       ticket = await TicketModel.findOne({ number: mail.ticketNumber });
     }
 
+    // Le numéro de ticket et l'en-tête References sont fournis par l'expéditeur : on ne rejoint
+    // un fil existant que si l'expéditeur en fait déjà partie, sinon n'importe qui pourrait
+    // s'insérer dans le ticket d'un autre. À défaut, un nouveau ticket est créé plus bas.
+    if (ticket && !canSenderJoinTicket(ticket, mail.fromAddress)) {
+      console.log(`imap: mail ${mail.messageId} non rattaché au ticket ${ticket.number} (expéditeur hors du fil)`);
+      ticket = null;
+    }
+
     if (ticket) ticket.status = "OPEN";
     //Create ticket if it doesnt exist yet
     if (!ticket) {
@@ -90,13 +101,14 @@ async function addMessage(mail) {
     // create message
     const message = {};
     message.messageId = mail.messageId;
-    message.text = mail.html ?? "";
+    // Le HTML d'un mail entrant est choisi par l'expéditeur : il est assaini avant d'être stocké, rendu
+    // aux agents et renvoyé dans l'historique des réponses (M97).
+    message.text = sanitizeMessageHtml(mail.html ?? "");
     message.ticketId = ticket._id;
     message.authorFirstName = contact.firstName;
     message.authorLastName = contact.lastName;
     message.authorId = contact._id;
     message.rawText = mail.text;
-    message.rawHtml = mail.textHtml;
     message.fromEmail = contact.email;
     message.toEmail = mail.toAdress;
     message.subject = mail.subject;
@@ -106,24 +118,18 @@ async function addMessage(mail) {
     if (mail.attachments?.length) {
       createdMessage.files = [];
       for (let attachment of mail.attachments) {
-        if (
-          attachment.contentType.includes("image") ||
-          attachment.contentType.includes("pdf") ||
-          attachment.contentType.includes("xls") ||
-          attachment.contentType.includes("application/vnd.ms-excel") ||
-          attachment.contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") ||
-          attachment.contentType.includes("application/vnd.openxmlformats-officedocument.wordprocessingml.document") ||
-          attachment.contentType.includes("application/vnd.oasis.opendocument.spreadsheet") ||
-          attachment.contentType.includes("application/vnd.oasis.opendocument.text") ||
-          attachment.contentType.includes("application/vnd.oasis.opendocument.presentation") ||
-          attachment.filename?.includes("doc")
-        ) {
-          const encryptedBuffer = encrypt(attachment.content);
-          const path = getS3Path(attachment.filename);
-          const url = await uploadAttachment(path, { data: encryptedBuffer, mimetype: attachment.contentType, encoding: "7bit" });
-          if (url) {
-            createdMessage.files.push({ name: attachment.filename, path, url });
-          }
+        // Le type est déduit des magic numbers du contenu, jamais du Content-Type ni du nom
+        // de fichier fournis par l'expéditeur, et c'est le type détecté qui est stocké.
+        const { mime, accepted } = await inspectAttachment(attachment.content);
+        if (!accepted) {
+          console.log(`imap: pièce jointe « ${attachment.filename} » écartée (détecté: ${mime ?? "inconnu"}, annoncé: ${attachment.contentType})`);
+          continue;
+        }
+        const encryptedBuffer = encrypt(attachment.content);
+        const path = getS3Path(attachment.filename, mime);
+        const url = await uploadAttachment(path, { data: encryptedBuffer, mimetype: mime, encoding: "7bit" });
+        if (url) {
+          createdMessage.files.push({ name: getAttachmentFileName(attachment.filename, mime), path, url });
         }
       }
       await createdMessage.save();
@@ -295,3 +301,5 @@ function readMails(imapConfig, box, searchs = []) {
   }
 }
 module.exports = Module;
+// Exporté pour les tests : addMessage porte la logique de rattachement d'un mail entrant à un ticket.
+module.exports.addMessage = addMessage;

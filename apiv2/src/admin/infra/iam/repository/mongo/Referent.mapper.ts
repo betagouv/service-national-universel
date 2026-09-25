@@ -4,7 +4,7 @@ import {
     ReferentModel,
     ReferentModelLight,
 } from "@admin/core/iam/Referent.model";
-import { ReferentType } from "snu-lib";
+import { ReferentStatus, ReferentType } from "snu-lib";
 import { ReferentDocument } from "../../provider/ReferentMongo.provider";
 
 export class ReferentMapper {
@@ -37,6 +37,7 @@ export class ReferentMapper {
             acceptCGU: referentDocument.acceptCGU === "true" ? true : false,
             lastLogoutAt: referentDocument.lastLogoutAt,
             passwordChangedAt: referentDocument.passwordChangedAt, // required by jwt_token v1
+            status: referentDocument.status as ReferentStatus | undefined,
 
             // used by usecase or frontend ?
             // lastLoginAt: referentDocument.lastLoginAt,

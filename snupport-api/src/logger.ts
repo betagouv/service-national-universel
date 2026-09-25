@@ -1,5 +1,6 @@
 import { config } from "./config";
 import { createLogger, transports, format } from "winston";
+import { redactLogInfo } from "@snu/log-redaction";
 
 const LEVELS = {
   error: 0,
@@ -9,11 +10,15 @@ const LEVELS = {
   debug: 4,
 };
 
+// Filet de sécurité : aucun secret (tokens, mots de passe, clés) ni email en clair ne doit atteindre les transports,
+// quel que soit le code appelant (message texte, dump JSON, meta).
+const redact = format(redactLogInfo);
+
 function _format() {
   if (config.ENVIRONMENT === "development") {
-    return format.combine(format.simple(), format.colorize({ all: true }));
+    return format.combine(redact(), format.simple(), format.colorize({ all: true }));
   }
-  return format.simple();
+  return format.combine(redact(), format.simple());
 }
 
 export const logger = createLogger({

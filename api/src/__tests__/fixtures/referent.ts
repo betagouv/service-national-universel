@@ -7,7 +7,6 @@ export function getNewReferentFixture(object: Partial<ReferentType> = {}): Parti
     firstName: faker.person.firstName(),
     lastName: faker.person.lastName(),
     email: faker.internet.email().toLowerCase(),
-    password: faker.internet.password(),
     region: faker.helpers.arrayElement(regionList),
     department: [faker.location.state()],
     phone: faker.phone.number(),

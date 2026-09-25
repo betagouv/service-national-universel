@@ -29,7 +29,7 @@ describe("Young Auth", () => {
   let res;
   describe("POST /young/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      res = await request(getAppHelper()).post("/young/signin");
+      res = await request(getAppHelper()).post("/young/signin").send({});
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/signin").send({ email: "foo@bar.fr" });
@@ -63,7 +63,28 @@ describe("Young Auth", () => {
     });
   });
   describe("POST /young/signup", () => {
-    it("should return 400 when all the fields are note defined or not well informed", async () => {
+    // L'inscription en ligne est fermée (M3, audit du 2026-09-21) : la route
+    // renvoie 403, comme POST /referent/signup. Les cas ci-dessous décrivent le
+    // comportement d'origine et sont à réactiver avec la route, à la réouverture
+    // des inscriptions.
+    it("should return 403 because online signup is closed", async () => {
+      const fixture = getNewYoungFixture();
+      res = await request(getAppHelper()).post("/young/signup").send({
+        email: fixture.email?.toLowerCase(),
+        firstName: "foo",
+        lastName: "bar",
+        password: VALID_PASSWORD,
+        birthdateAt: fixture.birthdateAt,
+        grade: fixture.grade,
+        frenchNationality: fixture.frenchNationality,
+        schooled: fixture.schooled,
+        cohort: fixture.cohort,
+      });
+      expect(res.status).toBe(403);
+      expect(res.body.code).toBe("OPERATION_NOT_ALLOWED");
+    });
+
+    it.skip("should return 400 when all the fields are note defined or not well informed", async () => {
       const fixture = getNewYoungFixture();
       res = await request(getAppHelper()).post("/young/signup");
       expect(res.status).toBe(400);
@@ -98,7 +119,7 @@ describe("Young Auth", () => {
       expect(res.status).toBe(400);
     });
 
-    it("should return 400 when password does not match requirments", async () => {
+    it.skip("should return 400 when password does not match requirments", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email?.toLowerCase();
       res = await request(getAppHelper()).post("/young/signup").send({ email, password: "bar", firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
@@ -123,7 +144,7 @@ describe("Young Auth", () => {
         cohort: fixture.cohort,
       });
       expect(res.status).toBe(200);
-      expect(res.body.token).toBeTruthy();
+      expect(String(res.headers["set-cookie"])).toContain("jwt_young=");
     });
 
     it.skip("should transform firstName and lastName", async () => {
@@ -145,7 +166,7 @@ describe("Young Auth", () => {
       expect(res.body.user.email).toBe(fixture.email?.toLowerCase());
     });
 
-    it("should return 409 when user already exists", async () => {
+    it.skip("should return 409 when user already exists", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email?.toLowerCase();
       const young = await createYoungHelper({ ...fixture, email });
@@ -167,7 +188,7 @@ describe("Young Auth", () => {
       expect(res.status).toBe(409);
     });
 
-    it("should return 409 when the number of users in the class exceeds the total seats", async () => {
+    it.skip("should return 409 when the number of users in the class exceeds the total seats", async () => {
       const fixture = getNewYoungFixture();
       const email = fixture.email?.toLowerCase();
       const classe = await ClasseModel.create({ ...createFixtureClasse(), totalSeats: 1 });

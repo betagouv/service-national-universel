@@ -32,6 +32,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isContractInUserScope } from "../services/contractAccess";
+import { toErrorCode } from "../utils/errorCode";
 
 async function createContract(data: any, fromUser: UserDto): Promise<ContractType> {
   const { sendMessage } = data;
@@ -286,7 +287,7 @@ router.post(
       await updateYoungStatusPhase2Contract(young, req.user);
       await updateYoungPhase2StatusAndHours(young, req.user);
 
-      return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
+      return res.status(200).send({ ok: true, data: serializeContract(contract) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -362,7 +363,7 @@ router.get(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
-      return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
+      return res.status(200).send({ ok: true, data: serializeContract(data) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -396,7 +397,7 @@ router.get(
       return res.status(200).send({ ok: true, data: contractPatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );
@@ -420,7 +421,7 @@ router.get("/token/:token", async (req: UserRequest, res: Response) => {
     const data = await ContractModel.findOne(contractTokenFilter(token));
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data: serializeContract(data, null, false) });
+    return res.status(200).send({ ok: true, data: serializeContract(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

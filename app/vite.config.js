@@ -21,11 +21,14 @@ export const VitePluginWatchPackages = async (config) => {
   };
 };
 
-// eslint-disable-next-line no-unused-vars
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
+  // Sans VITE_ENVIRONMENT, le bundle retombait sur « development » : Sentry coupé et contrôles réservés à la production désactivés.
+  if (command === "build" && !env.VITE_ENVIRONMENT) {
+    throw new Error("VITE_ENVIRONMENT est obligatoire pour construire l'application (production, staging, ci, custom…)");
+  }
   const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
   if (mode !== "development") {
     plugins.push(
@@ -41,6 +44,10 @@ export default defineConfig(({ mode }) => {
           deploy: {
             env: mode,
           },
+        },
+        // Sourcemaps envoyées à Sentry, jamais publiées avec le build
+        sourcemaps: {
+          filesToDeleteAfterUpload: ["./build/**/*.map"],
         },
         validate: true,
         reactComponentAnnotation: { enabled: true },
@@ -59,7 +66,8 @@ export default defineConfig(({ mode }) => {
     },
     plugins: plugins,
     build: {
-      sourcemap: mode !== "development",
+      // "hidden" : pas de commentaire sourceMappingURL dans les bundles publiés
+      sourcemap: mode !== "development" ? "hidden" : false,
       outDir: "build",
       rollupOptions: {
         output: {

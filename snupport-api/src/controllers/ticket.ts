@@ -6,12 +6,16 @@ import AgentModel from "../models/agent";
 import MessageModel from "../models/message";
 import TagModel from "../models/tag";
 import { agentGuard } from "../middlewares/authenticationGuards";
+import { requireRole, forbidReadOnlyRoles } from "../middlewares/userRoleGuards";
 import { validateParams, validateBody, validateQuery, idSchema } from "../middlewares/validation";
 import { ERRORS } from "../errors";
 import { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_TICKET_STATUS } from "../schemas";
 import { sendEmailWithConditions, weekday, getHoursDifference, sendNotif, SENDINBLUE_TEMPLATES, diacriticSensitiveRegex } from "../utils";
 import { matchVentilationRule } from "../utils/ventilation";
 import { canAccessTicket, scopeTicketQuery } from "../utils/ticketScope";
+import { getForbiddenTicketUpdateFields, reconcileTicketNotes } from "../utils/ticketUpdate";
+import { sanitizeUserHtml } from "../utils/userContent";
+const { sanitizeMessageHtml } = require("../utils/messageHtml");
 import { UserRequest } from "./request";
 const escapeStringRegexp = require("escape-string-regexp");
 
@@ -51,6 +55,7 @@ const SCHEMA_DATERANGE = Joi.object({
 
 router.post(
   "/",
+  forbidReadOnlyRoles,
   validateBody(
     Joi.object({
       subject: Joi.string().trim(),
@@ -94,6 +99,9 @@ router.post(
       createdHourAt: new Date().getHours(),
       createdDayAt: weekday[new Date().getDay()],
       createdBy: req.user.role,
+      // Les destinataires en copie choisis à la création font partie du fil : les réponses suivantes
+      // (dont l'envoi avec pièces jointes) ne peuvent mettre en copie que ceux-là ou des comptes du support.
+      copyRecipient: copyRecipients,
     };
 
     if (user.role === "AGENT") {
@@ -131,7 +139,7 @@ router.post(
     if (files.length === 0) {
       let newMessage = await MessageModel.create({
         ticketId: newTicket._id,
-        text: message,
+        text: sanitizeMessageHtml(message),
         authorId: user._id,
         authorFirstName: user.firstName,
         authorLastName: user.lastName,
@@ -719,6 +727,7 @@ router.get("/linkTicket/:id", validateParams(idSchema), async (req: UserRequest,
 
 router.patch(
   "/:id",
+  forbidReadOnlyRoles,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -729,7 +738,11 @@ router.patch(
       copyRecipients: Joi.array().items(SCHEMA_EMAIL),
       files: Joi.array().items(Joi.object()),
       status: SCHEMA_TICKET_STATUS,
-      messageDraft: Joi.string().allow(""),
+      // Brouillon et notes sont rendus chez les autres comptes du ticket (référents → agents) : le HTML
+      // est assaini à l'écriture, en plus du filtre au rendu de snupport-app (GOO-6).
+      messageDraft: Joi.string()
+        .allow("")
+        .custom((value) => sanitizeUserHtml(value)),
       feedback: Joi.string().trim(),
       contactGroup: SCHEMA_CONTACT_GROUP,
       contactDepartment: Joi.string().trim(),
@@ -744,7 +757,7 @@ router.patch(
         Joi.object({
           authorName: Joi.string().trim(),
           createdAt: Joi.date(),
-          content: Joi.string(),
+          content: Joi.string().custom((value) => sanitizeUserHtml(value)),
         })
       ),
       agentId: SCHEMA_ID.allow(""),
@@ -768,8 +781,12 @@ router.patch(
     let ticket = await TicketModel.findOne({ _id: id });
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (getForbiddenTicketUpdateFields(req.user, req.cleanBody).length) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    ticket.set(req.cleanBody);
+    const update = { ...req.cleanBody };
+    if (update.notes) update.notes = reconcileTicketNotes({ user: req.user, storedNotes: ticket.notes, submittedNotes: update.notes });
+
+    ticket.set(update);
 
     if (req.cleanBody.status === "CLOSED") {
       ticket.closedAt = new Date();
@@ -800,7 +817,8 @@ router.patch(
   }
 );
 
-router.delete("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
+// Suppression et transfert ne sont proposés qu'au support central dans snupport-app (FH11, GOO-13).
+router.delete("/:id", requireRole("AGENT"), validateParams(idSchema), async (req: UserRequest, res: Response) => {
   const id = req.cleanParams.id;
   const ticket = await TicketModel.findById(id);
   if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -811,6 +829,7 @@ router.delete("/:id", validateParams(idSchema), async (req: UserRequest, res: Re
 
 router.put(
   "/transfer/:id",
+  requireRole("AGENT"),
   validateParams(idSchema),
   validateBody(
     Joi.object({

@@ -1,10 +1,11 @@
 import { ROLES, UserDto, YoungType, canEditYoung } from "snu-lib";
 
-import { ClasseModel, SessionPhase1Model } from "../models";
+import { ApplicationModel, ClasseModel, SessionPhase1Model, StructureModel } from "../models";
 import { getResponsibleCenterField } from "../controllers/elasticsearch/utils";
 
 const HEAD_CENTER_ROLES: string[] = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
 const CLE_ROLES: string[] = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE];
+const GEO_ROLES: string[] = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
 
 /**
  * Périmètre d'un chef de centre (ou de ses adjoints) : le volontaire doit être affecté à une session
@@ -57,5 +58,143 @@ export async function canEditYoungInScope(user: UserDto, young: Pick<YoungType, 
 export function isYoungInReferentGeography(user: UserDto, young: Pick<YoungType, "region" | "department">): boolean {
   if (user.role === ROLES.REFERENT_REGION) return !!young.region && young.region === user.region;
   if (user.role === ROLES.REFERENT_DEPARTMENT) return !!young.department && ((user.department as string[]) || []).includes(young.department);
+  return false;
+}
+
+/**
+ * Périmètre d'un référent départemental / régional : le volontaire est de son territoire, ou affecté à
+ * une session phase 1 de son territoire — mêmes deux cas que la recherche ES (buildYoungContext), pour
+ * ne pas refuser en lecture un volontaire que le référent voit déjà dans ses listes.
+ */
+async function isYoungInReferentTerritory(user: UserDto, young: Pick<YoungType, "region" | "department" | "sessionPhase1Id">): Promise<boolean> {
+  if (isYoungInReferentGeography(user, young)) return true;
+  return isSessionInReferentTerritory(user, young.sessionPhase1Id);
+}
+
+async function isSessionInReferentTerritory(user: UserDto, sessionPhase1Id: string | undefined): Promise<boolean> {
+  if (!sessionPhase1Id) return false;
+  if (user.role === ROLES.REFERENT_REGION && !user.region) return false;
+  const territoire = user.role === ROLES.REFERENT_REGION ? { region: user.region } : { department: { $in: (user.department as string[]) || [] } };
+  return !!(await SessionPhase1Model.exists({ _id: sessionPhase1Id, ...territoire }));
+}
+
+/**
+ * Rattachement d'une session phase 1 à l'acteur, pour les actions de masse sur les volontaires qui y
+ * sont affectés (pointage, JDM, fiche sanitaire, départ) : chef de centre ou adjoint de la session,
+ * référent départemental / régional du territoire de la session, admin. Tout autre rôle est refusé,
+ * de même qu'un lot sans session pour qui n'est pas admin.
+ */
+export async function isSessionPhase1InUserScope(user: UserDto, sessionPhase1Id: string | undefined): Promise<boolean> {
+  if (user.role === ROLES.ADMIN) return true;
+  if (HEAD_CENTER_ROLES.includes(user.role)) return isYoungInHeadCenterScope(user, { sessionPhase1Id });
+  if (GEO_ROLES.includes(user.role)) return isSessionInReferentTerritory(user, sessionPhase1Id);
+  return false;
+}
+
+/**
+ * Périmètre de LECTURE d'un volontaire (dossier, historique).
+ *
+ * Miroir en lecture de `canEditYoungInScope` : les rôles dont la matrice de permissions est nationale
+ * (chef de centre, référent CLE) doivent être rattachés au volontaire en base, les référents
+ * géographiques à son territoire. Tout rôle non listé est refusé : un rôle sans périmètre défini
+ * (transporter, responsable de structure, comptes résiduels) n'a rien à faire dans le dossier d'un
+ * volontaire, et l'ajouter doit être un choix explicite.
+ */
+export async function isYoungInUserScope(user: UserDto, young: Pick<YoungType, "region" | "department" | "classeId" | "sessionPhase1Id">): Promise<boolean> {
+  if (user.role === ROLES.ADMIN) return true;
+  if (HEAD_CENTER_ROLES.includes(user.role)) return isYoungInHeadCenterScope(user, young);
+  if (CLE_ROLES.includes(user.role)) return isYoungInCleScope(user, young);
+  if (GEO_ROLES.includes(user.role)) return isYoungInReferentTerritory(user, young);
+  return false;
+}
+
+/**
+ * Périmètre de LECTURE du dossier d'un volontaire côté référent (`GET /referent/young/:id`).
+ *
+ * `isYoungInUserScope` refuse par construction les responsables et superviseurs de structure, qui
+ * n'ont pas de rattachement territorial ; ils consultent pourtant légitimement le dossier des
+ * volontaires ayant candidaté à une de leurs missions. C'est le seul élargissement autorisé ici :
+ * `canViewYoung` (snu-lib) ne contrôlait que le rôle, ouvrant le dossier de n'importe quel
+ * volontaire à tout responsable, superviseur ou référent hors de son territoire (constat H67).
+ */
+export async function canViewYoungFileInScope(user: UserDto, young: Pick<YoungType, "_id" | "region" | "department" | "classeId" | "sessionPhase1Id">): Promise<boolean> {
+  if (await isYoungInUserScope(user, young)) return true;
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return isYoungInStructureScope(user, young);
+  return false;
+}
+
+/**
+ * Structures sur lesquelles un responsable / superviseur a autorité : la sienne, plus celles de son
+ * réseau pour un superviseur (même découpage que les policies `structureId` / `networkId`).
+ */
+async function getActorStructureIds(user: UserDto): Promise<string[]> {
+  if (!user.structureId) return [];
+  const structureIds = [user.structureId];
+  if (user.role === ROLES.SUPERVISOR) {
+    const networkStructures = await StructureModel.find({ networkId: user.structureId }, { _id: 1 });
+    structureIds.push(...networkStructures.map((structure) => structure._id.toString()));
+  }
+  return structureIds;
+}
+
+/**
+ * Périmètre d'un responsable / superviseur de structure : le volontaire doit avoir candidaté à une
+ * mission portée par la structure de l'utilisateur (ou, pour un superviseur, par une structure de
+ * son réseau). C'est le contrôle que `canDownloadYoungDocuments` laissait en commentaire.
+ */
+export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
+  const structureIds = await getActorStructureIds(user);
+  if (!structureIds.length) return false;
+  return !!(await ApplicationModel.exists({ youngId: young._id!.toString(), structureId: { $in: structureIds } }));
+}
+
+/**
+ * Filtre Mongo à ajouter à `{ youngId }` pour ne joindre au dossier d'un volontaire que les
+ * candidatures que l'utilisateur a le droit de voir.
+ *
+ * Un responsable / superviseur n'ouvre le dossier que parce que le volontaire a candidaté dans son
+ * périmètre (`isYoungInStructureScope`) : les candidatures dans d'autres structures ne le regardent
+ * pas, et `CANDIDATURE_READ` est seedée sans policy pour ces rôles (GOO-41). Les autres rôles
+ * voient le dossier au titre de leur territoire ou de leur rattachement : toutes les candidatures
+ * du volontaire relèvent alors de leur périmètre.
+ */
+export async function getApplicationScopeFilter(user: UserDto): Promise<{ structureId?: { $in: string[] } }> {
+  if (![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return {};
+  return { structureId: { $in: await getActorStructureIds(user) } };
+}
+
+/**
+ * Périmètre d'un responsable / superviseur sur les pièces de préparation militaire : le volontaire
+ * doit avoir candidaté à une mission portée par une structure de préparation militaire de son
+ * périmètre.
+ *
+ * Le repli historique ne testait que `isMilitaryPreparation` sur la structure de l'acteur, sans
+ * aucun lien avec le volontaire : tout responsable d'une structure PM pouvait télécharger les pièces
+ * PM de n'importe quel volontaire (constat H66, audit 2026-09-21).
+ */
+export async function isYoungInMilitaryPreparationStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
+  const structureIds = await getActorStructureIds(user);
+  if (!structureIds.length) return false;
+  const militaryStructures = await StructureModel.find({ _id: { $in: structureIds }, isMilitaryPreparation: "true" }, { _id: 1 });
+  if (!militaryStructures.length) return false;
+  return !!(await ApplicationModel.exists({
+    youngId: young._id!.toString(),
+    structureId: { $in: militaryStructures.map((structure) => structure._id.toString()) },
+  }));
+}
+
+/**
+ * Autorisation d'accès aux pièces d'un volontaire (liste, téléchargement, génération d'attestation),
+ * périmètre compris.
+ *
+ * Remplace `canDownloadYoungDocuments` (snu-lib), qui autorisait tout RESPONSIBLE / SUPERVISOR sur
+ * n'importe quel volontaire — le rapprochement avec les candidatures y était commenté (constat C15).
+ */
+export async function canAccessYoungDocumentsInScope(
+  user: UserDto,
+  young: Pick<YoungType, "_id" | "sessionPhase1Id" | "classeId" | "region" | "department" | "source">,
+): Promise<boolean> {
+  if (await canEditYoungInScope(user, young)) return true;
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return isYoungInStructureScope(user, young);
   return false;
 }

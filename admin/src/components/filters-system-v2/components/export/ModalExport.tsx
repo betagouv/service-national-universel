@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { translate, translateField } from "snu-lib";
 import ExportFieldCard from "../../../ExportFieldCard";
 import ModalTailwind from "../../../modals/ModalTailwind";
-import plausibleEvent from "../../../../services/plausible";
 import ExportComponent from "./ExportComponent";
 import { Filter } from "../Filters";
 
@@ -80,7 +79,6 @@ export default function ModalExport({ isOpen, setIsOpen, route, transform, expor
         </button>
         <div className="flex w-full">
           <ExportComponent
-            handleClick={() => plausibleEvent(`${exportTitle}/CTA - Exporter ${exportTitle}`)}
             title={`Exporter les ${exportTitle}`}
             exportTitle={exportTitle}
             route={route}

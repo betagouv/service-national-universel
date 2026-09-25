@@ -13,6 +13,13 @@ const { getAllPdfTemplates } = require("./utils/pdf-renderer");
 const basicAuth = require("express-basic-auth");
 const { initMonitor, initQueues, closeQueues, initWorkers, closeWorkers, scheduleRepeatableTasks } = require("./queues/redisQueue");
 
+function getTaskMonitorAuth() {
+  const user = config.TASK_MONITOR_USER;
+  const secret = config.TASK_MONITOR_SECRET;
+  if (!user || !secret) return null;
+  return { user, secret };
+}
+
 async function runTasks() {
   await Promise.all([initDB(), getAllPdfTemplates()]);
 
@@ -22,17 +29,16 @@ async function runTasks() {
 
   const app = express();
 
-  if (config.TASK_MONITOR_ENABLE_AUTH) {
-    app.use(
-      basicAuth({
-        challenge: true,
-        users: {
-          [config.TASK_MONITOR_USER]: config.TASK_MONITOR_SECRET,
-        },
-      }),
-    );
+  // Bull Board affiche le contenu des jobs (emails, liens d'invitation, PII) et permet de les rejouer ou de
+  // les supprimer. Il n'est monté que derrière une authentification ; sans identifiants configurés, il
+  // n'est pas servi du tout (M12, audit du 21/09/2026 : il était public par défaut).
+  const monitorAuth = getTaskMonitorAuth();
+  if (monitorAuth) {
+    app.use(basicAuth({ challenge: true, users: { [monitorAuth.user]: monitorAuth.secret } }), initMonitor());
+  } else {
+    logger.warn("Task monitor disabled: TASK_MONITOR_USER and TASK_MONITOR_SECRET are not set");
+    app.get("/", (req, res) => res.status(200).send("SNU tasks"));
   }
-  app.use("/", initMonitor());
   setupExpressErrorHandler(app);
 
   // * Use Terminus for graceful shutdown
@@ -66,4 +72,5 @@ async function runTasks() {
 
 module.exports = {
   runTasks,
+  getTaskMonitorAuth,
 };

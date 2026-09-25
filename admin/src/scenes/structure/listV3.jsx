@@ -3,8 +3,7 @@ import { Link, useHistory } from "react-router-dom";
 import React, { useState } from "react";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { Title } from "../pointDeRassemblement/components/common";
-import plausibleEvent from "../../services/plausible";
-import { colors, ROLES, translate, structureExportFields, getDepartmentNumber, formatLongDateFR, formatStringLongDate } from "snu-lib";
+import { colors, ROLES, translate, structureExportFields, getDepartmentNumber, formatLongDateFR, formatStringLongDate, htmlToPlainText } from "snu-lib";
 import { Filters, ModalExport, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { BsDownload } from "react-icons/bs";
 import { corpsEnUniforme } from "../../utils";
@@ -21,10 +20,7 @@ export default function ListV3() {
         <div className="flex w-full flex-1 flex-col px-8">
           <div className="flex items-center justify-between py-8">
             <Title>{user.role === ROLES.SUPERVISOR ? "Mes structures affiliées" : "Toutes les structures"}</Title>
-            <Link
-              className="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:brightness-110 active:brightness-125"
-              to="/structure/create"
-              onClick={() => plausibleEvent("Structure/CTA - Inviter nouvelle structure")}>
+            <Link className="rounded-lg bg-blue-600 px-3 py-2 text-sm text-white hover:brightness-110 active:brightness-125" to="/structure/create">
               Inviter une nouvelle structure
             </Link>
           </div>
@@ -223,7 +219,7 @@ async function exportTransform(all, values) {
         ["Statut juridique"]: translate(data.legalStatus) || "",
         ["Type(s) de structure"]: data.types?.toString() || "",
         ["Sous-type de structure"]: data.sousTypes || "",
-        ["Présentation de la structure"]: data.description || "",
+        ["Présentation de la structure"]: htmlToPlainText(data.description) || "",
       },
       location: {
         ["Adresse de la structure"]: data.address || "",

@@ -20,13 +20,15 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import ViewStructureLink from "../../components/buttons/ViewStructureLink";
 import api from "../../services/api";
-import plausibleEvent from "@/services/plausible";
+import { MISSION_HTML_FIELDS, warnIfHtmlSanitized } from "@/utils/sanitizedFields";
 
 export default function Create(props) {
   const urlParams = new URLSearchParams(window.location.search);
-  const duplicate = urlParams.get("duplicate");
-  const structureRattacheeId = urlParams.get("structureRattacheeId");
-  const structureIdFromParams = structureRattacheeId ? structureRattacheeId : props?.match?.params?.id;
+  // Identifiants tirés de l'URL puis insérés dans des chemins d'API : ObjectId uniquement (FL5).
+  const asObjectId = (value) => (value && /^[0-9a-fA-F]{24}$/.test(value) ? value : null);
+  const duplicate = asObjectId(urlParams.get("duplicate"));
+  const structureRattacheeId = asObjectId(urlParams.get("structureRattacheeId"));
+  const structureIdFromParams = structureRattacheeId ? structureRattacheeId : asObjectId(props?.match?.params?.id);
   const [values, setValues] = useState({
     structureId: structureIdFromParams,
   });
@@ -58,13 +60,13 @@ export default function Create(props) {
     if (!values.structureId) return history.push("/mission");
 
     //init structure
-    const { ok, data, code } = await api.get(`/structure/${values.structureId}`);
+    const { ok, data, code } = await api.get(`/structure/${encodeURIComponent(values.structureId)}`);
     if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la structure", translate(code));
     setValues({ ...values, structureName: data.name, structureId: data._id.toString(), isMilitaryPreparation: data.isMilitaryPreparation ? "true" : "false" });
     setStructure(data);
 
     //init list tutor
-    const { responses } = await api.post("/elasticsearch/referent/structure/" + values.structureId);
+    const { responses } = await api.post(`/elasticsearch/referent/structure/${encodeURIComponent(values.structureId)}`);
     if (responses?.length) {
       const responseReferents = responses[0].hits.hits.map((hit) => ({ label: hit._source.firstName + " " + hit._source.lastName, value: hit._id, tutor: hit._source }));
       setReferents(responseReferents);
@@ -73,7 +75,7 @@ export default function Create(props) {
 
   const fetchMission = async () => {
     try {
-      const { ok, data } = await api.get(`/mission/${duplicate}`);
+      const { ok, data } = await api.get(`/mission/${encodeURIComponent(duplicate)}`);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération de la mission");
       delete data._id;
       delete data.createdAt;
@@ -151,8 +153,8 @@ export default function Create(props) {
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
         return setLoading(false);
       }
-      plausibleEvent(`Admin/${duplicate ? "Dupliquer" : "Créer"} une mission`);
       toastr.success("Mission enregistrée");
+      warnIfHtmlSanitized(values, data, MISSION_HTML_FIELDS);
       return history.push(`/mission/${data._id}`);
     } catch (e) {
       setLoading(false);

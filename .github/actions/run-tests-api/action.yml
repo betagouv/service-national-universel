@@ -22,14 +22,49 @@ runs:
       with:
         node-version: "20.17"
 
+    # Les runners sont auto-hébergés et réutilisés d'un job à l'autre. Un job tué en cours
+    # de route — runner qui perd la communication, annulation — laisse derrière lui un
+    # conteneur nommé "mongodb", et tous les jobs suivants sur cette machine échouent alors
+    # au démarrage de MongoDB ("Conflict. The container name /mongodb is already in use"),
+    # sans jamais exécuter un test. On retire donc le résidu avant de démarrer.
+    - name: Remove stale MongoDB container
+      shell: bash
+      run: |
+        # Chaque runner a son propre demon Docker (dind) et n'execute qu'un job a la
+        # fois : un conteneur "mongodb" present ici est forcement un residu du job
+        # precedent, jamais la base d'un job concurrent. On le supprime donc sans
+        # condition, qu'il tourne ou non -- l'action --rm ne le retire qu'a sa sortie,
+        # et il reste vivant apres la fin du job.
+        docker rm -f mongodb 2>/dev/null || true
+
     - name: Start MongoDB 7.0
       uses: supercharge/mongodb-github-action@1.12.1
       with:
         mongodb-version: "7.0"
         mongodb-replica-set: "rs0"
 
+    # Les runners self-hosted sont persistants : node_modules survit d'un job a l'autre.
+    # Quand il correspond deja au package-lock courant, restaurer l'archive depuis le cache
+    # GitHub (~305 Mo, plusieurs minutes) ne fait que reecrire a l'identique ce qui est
+    # deja sur le disque. Sur ubuntu-latest le temoin n'existe jamais, donc rien ne change.
+    - name: Detect usable node_modules
+      id: nm
+      shell: bash
+      run: |
+        H="${{ hashFiles('**/package-lock.json') }}"
+        if [ -f node_modules/.snu-lock ] && [ "$(cat node_modules/.snu-lock)" = "$H" ]; then
+          echo "fresh=true" >> "$GITHUB_OUTPUT"
+          echo "node_modules deja aligne sur package-lock : cache et npm ci ignores."
+        else
+          echo "fresh=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - uses: actions/cache@v4
       id: cache-npm
+      # Sur runner self-hosted on n'utilise jamais le cache : ni restauration ni
+      # sauvegarde. node_modules persiste sur le disque entre les jobs, et le
+      # televersement de l'archive (~305 Mo) depasse la duree des tests eux-memes.
+      if: runner.environment == 'github-hosted' && steps.nm.outputs.fresh != 'true'
       with:
         path: |
           apiv2/node_modules
@@ -39,17 +74,30 @@ runs:
           admin/node_modules
           packages/ds/node_modules
           packages/lib/node_modules
+          packages/log-redaction/node_modules
         key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-nodemodules-
 
     - name: Install packages
-      if: steps.cache-npm.outputs.cache-hit != 'true'
+      if: steps.nm.outputs.fresh != 'true' && steps.cache-npm.outputs.cache-hit != 'true'
       shell: bash
       run: npm ci
 
+    # Le temoin permet au prochain job de ce runner de sauter cache et installation.
+    - name: Mark node_modules as matching package-lock
+      shell: bash
+      run: |
+        mkdir -p node_modules
+        echo "${{ hashFiles('**/package-lock.json') }}" > node_modules/.snu-lock
+
     - name: Build lib
       working-directory: packages/lib
+      shell: bash
+      run: npm run build
+
+    - name: Build log-redaction
+      working-directory: packages/log-redaction
       shell: bash
       run: npm run build
 

@@ -1,6 +1,6 @@
-import { ROLES, UserDto, ReferentType, PERMISSION_RESOURCES, isAdmin, isResponsibleOrSupervisor, isWriteAuthorized, region2department } from "snu-lib";
+import { ROLES, UserDto, ReferentType, PERMISSION_RESOURCES, isAdmin, isResponsibleOrSupervisor, isWriteAuthorized, region2department, department2region } from "snu-lib";
 
-import { CohesionCenterModel, SessionPhase1Model, StructureModel } from "../models";
+import { ApplicationModel, ClasseModel, CohesionCenterModel, EtablissementModel, MissionModel, SessionPhase1Model, StructureModel } from "../models";
 
 type Geography = { region?: string | null; departments: string[] };
 
@@ -110,6 +110,150 @@ export async function isReferentInUserScope(user: UserDto, target: ReferentType)
       return departments.some((department) => (region2department[user.region!] || []).includes(department));
     }
     return departments.some((department) => ((user.department as string[]) || []).includes(department));
+  }
+
+  return false;
+}
+
+type ReferentUpdate = Partial<Pick<ReferentType, "email" | "region" | "department" | "subRole" | "status">>;
+
+const normalizeDepartments = (department: unknown): string[] => {
+  const list = Array.isArray(department) ? department : [department];
+  return [...new Set(list.filter((value): value is string => typeof value === "string" && value !== ""))].sort();
+};
+
+const hasChanged = (update: ReferentUpdate, target: ReferentType, key: "email" | "region" | "subRole" | "status") => key in update && (update[key] || "") !== (target[key] || "");
+
+/**
+ * Champs d'un compte référent que seul un admin modifie librement (GOO-5, FH5/FH9).
+ *
+ * `isReferentInUserScope` borne la *cible* (état serveur avant modification), `canUpdateReferent` la
+ * matrice des rôles : aucun des deux ne regarde les *valeurs demandées*. Un référent départemental
+ * pouvait donc s'attribuer tous les départements de France via PUT /referent/<soi>, et tout acteur
+ * du périmètre réactiver un compte désactivé ou changer l'email d'un collègue (donc récupérer son
+ * compte par « mot de passe oublié »).
+ *
+ * Les formulaires postent l'objet complet : renvoyer la valeur courante reste sans effet, seul un
+ * changement est contrôlé.
+ * - `status` et `email` : admin uniquement ;
+ * - `subRole` : jamais sur son propre compte (le sous-rôle porte des permissions) ;
+ * - `region` / `department` : bornés au territoire de l'acteur, comme pour une invitation
+ *   (`isInvitationInUserScope`) ; un responsable/superviseur n'a pas de territoire, il ne les change pas.
+ */
+export function isReferentUpdateInUserScope(user: UserDto, target: ReferentType, update: ReferentUpdate): boolean {
+  if (isAdmin(user)) return true;
+
+  if (hasChanged(update, target, "status")) return false;
+  if ("email" in update && (update.email || "").toLowerCase().trim() !== (target.email || "").toLowerCase().trim()) return false;
+
+  const isSelf = user._id?.toString() === target._id?.toString();
+  if (isSelf && hasChanged(update, target, "subRole")) return false;
+
+  const regionChanged = hasChanged(update, target, "region");
+  const requestedDepartments = normalizeDepartments(update.department);
+  const departmentsChanged = "department" in update && requestedDepartments.join() !== normalizeDepartments(target.department).join();
+  if (!regionChanged && !departmentsChanged) return true;
+
+  if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) return false;
+
+  const allowedDepartments: string[] = user.role === ROLES.REFERENT_REGION ? region2department[user.region!] || [] : normalizeDepartments(user.department);
+  if (regionChanged && update.region && update.region !== user.region) return false;
+  if (departmentsChanged && requestedDepartments.some((department) => !allowedDepartments.includes(department))) return false;
+  return true;
+}
+
+/** Deux périmètres géographiques se recouvrent s'ils partagent une région ou un département. */
+function geographiesOverlap(actor: Geography, target: Geography): boolean {
+  if (actor.region && target.region && actor.region === target.region) return true;
+  const actorDepartments = new Set([...actor.departments, ...(actor.region ? region2department[actor.region] || [] : [])]);
+  if (target.departments.some((department) => actorDepartments.has(department))) return true;
+  // La cible ne porte qu'une région, l'acteur qu'un département (ou l'inverse).
+  if (target.region && actor.departments.some((department) => department2region[department] === target.region)) return true;
+  return false;
+}
+
+/** Établissement de rattachement d'un acteur CLE : coordinateur/référent d'établissement, ou référent d'une de ses classes. */
+async function getActorEtablissement(user: UserDto) {
+  const direct = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
+  if (direct) return direct;
+
+  const classe = await ClasseModel.findOne({ referentClasseIds: user._id });
+  if (!classe?.etablissementId) return null;
+  return EtablissementModel.findById(classe.etablissementId);
+}
+
+/**
+ * Périmètre de lecture d'un compte référent.
+ *
+ * `canViewReferent` (snu-lib) ne porte que la matrice des rôles : il autorise par exemple tout
+ * responsable à lire tout responsable de France. Ce contrôle-ci ajoute l'appartenance, en reprenant
+ * la règle métier de référence — celle de l'annuaire Elasticsearch (`buildReferentContext`) — pour
+ * que la fiche d'un référent ne soit jamais lisible en dehors de la liste où il apparaît.
+ *
+ * Il est volontairement distinct de `isReferentInUserScope` (écriture) : la matrice d'écriture
+ * n'ouvre qu'aux admins, responsables/superviseurs, référents dép./rég. et à soi-même, alors que la
+ * lecture couvre aussi la famille chef de centre et les rôles CLE.
+ */
+export async function isReferentReadableByUser(user: UserDto, target: ReferentType): Promise<boolean> {
+  if (isAdmin(user)) return true;
+  if (user._id?.toString() === target._id?.toString()) return true;
+
+  // Même périmètre qu'en écriture : structure (et réseau) pour les responsables, géographie pour les référents.
+  if (isResponsibleOrSupervisor(user) || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+    return isReferentInUserScope(user, target);
+  }
+
+  // Chef de centre, adjoint, référent sanitaire : le périmètre de leur centre.
+  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+    const [actorGeography, targetGeography] = await Promise.all([getReferentGeography(user as any), getReferentGeography(target)]);
+    return geographiesOverlap(actorGeography, targetGeography);
+  }
+
+  // Administrateur CLE, référent de classe : leur établissement, plus les référents départementaux de son département.
+  if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) {
+    const etablissement = await getActorEtablissement(user);
+    if (!etablissement) return false;
+
+    const targetId = target._id?.toString();
+    const membresEtablissement = [...(etablissement.referentEtablissementIds || []), ...(etablissement.coordinateurIds || [])].map(String);
+    if (targetId && membresEtablissement.includes(targetId)) return true;
+
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id }).select({ referentClasseIds: 1 });
+    if (targetId && classes.some((classe) => (classe.referentClasseIds || []).map(String).includes(targetId))) return true;
+
+    return target.role === ROLES.REFERENT_DEPARTMENT && !!etablissement.department && (target.department || []).includes(etablissement.department);
+  }
+
+  return false;
+}
+
+/**
+ * Périmètre d'envoi d'un email à un tuteur de mission (`POST /referent/:tutorId/email/:template`).
+ *
+ * `canSendTutorTemplate` (snu-lib) ne teste que le rôle de l'appelant : un responsable de structure
+ * ou un référent départemental pouvait écrire, depuis l'expéditeur officiel du SNU et avec un texte
+ * libre, à n'importe quel référent du pays (constat M67).
+ *
+ * Trois liens légitimes existent : le tuteur appartient au périmètre de l'appelant (sa structure pour
+ * un responsable, sa géographie pour un référent) ; il encadre une mission du territoire que
+ * l'appelant instruit — cas des modèles MISSION_REFUSED / MISSION_WAITING_CORRECTION, envoyés
+ * précisément depuis l'écran d'instruction de la mission ; ou il encadre une mission à laquelle a
+ * candidaté un volontaire du territoire.
+ */
+export async function canContactTutorInScope(user: UserDto, tutor: ReferentType): Promise<boolean> {
+  if (await isReferentInUserScope(user, tutor)) return true;
+
+  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+    const tutorId = tutor._id?.toString();
+    const territoire = user.role === ROLES.REFERENT_REGION ? { region: user.region } : { department: { $in: (user.department as string[]) || [] } };
+    if (await MissionModel.exists({ tutorId, ...territoire })) return true;
+
+    // Le tuteur encadre une mission à laquelle a candidaté un volontaire du territoire : c'est le
+    // cas de MILITARY_PREPARATION_DOCS_VALIDATED, envoyé depuis le dossier du volontaire, dont la
+    // mission peut relever d'un autre département.
+    const departements = user.role === ROLES.REFERENT_REGION ? region2department[user.region!] || [] : (user.department as string[]) ?? [];
+    if (!departements.length) return false;
+    return !!(await ApplicationModel.exists({ tutorId, youngDepartment: { $in: departements } }));
   }
 
   return false;

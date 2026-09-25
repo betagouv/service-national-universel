@@ -17,7 +17,7 @@ function render(doc, young) {
   doc.font(FONT).fontSize(FONT_SIZE).lineGap(LINE_GAP).fillColor(FILL_COLOR);
 
   if (config.ENVIRONMENT !== "test") {
-    doc.image(path.join(config.IMAGES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
+    doc.image(path.join(config.PDF_TEMPLATES_ROOTDIR, template), 0, 0, { fit: [page.width, page.height], align: "center", valign: "center" });
   }
 
   doc

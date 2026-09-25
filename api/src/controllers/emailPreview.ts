@@ -16,7 +16,8 @@ const router = express.Router();
 router.get("/template/:id?", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
-      id: Joi.string().required(),
+      // Les identifiants de template Brevo sont numériques (FL4).
+      id: Joi.number().integer().positive().required(),
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -26,7 +27,7 @@ router.get("/template/:id?", passport.authenticate("referent", { session: false,
 
     const { id: templateId } = value;
 
-    const templateContent = await getPreviewTemplate(templateId);
+    const templateContent = await getPreviewTemplate(String(templateId));
 
     if ((templateContent as BrevoApiError).code !== undefined) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });

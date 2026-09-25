@@ -1,5 +1,6 @@
 import dayjs from "@/utils/dayjs.utils";
 import * as XLSX from "xlsx";
+import { safeJsonToSheet } from "@/utils/file";
 
 import { EtablissementType } from "snu-lib";
 
@@ -71,7 +72,7 @@ export function exportExcelSheet(etablissements: EtablissementExport[]) {
     "Date de création",
   ];
 
-  const sheet = XLSX.utils.json_to_sheet(sheetData);
+  const sheet = safeJsonToSheet(sheetData);
   XLSX.utils.sheet_add_aoa(sheet, [headers], { origin: "A1" });
 
   // --- create workbook

@@ -1,5 +1,6 @@
 const passport = require("passport");
 const express = require("express");
+const Joi = require("joi");
 const router = express.Router();
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
@@ -87,17 +88,43 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
   }
 });
 
+const youngsReportSchema = Joi.object({
+  // Le front transmet tous ses filtres ; seul `cohort` est utilisé ici.
+  filters: Joi.object({ cohort: Joi.array().items(Joi.string()).max(200).default([]) }).default({ cohort: [] }),
+  department: Joi.string().required(),
+});
+
+/**
+ * Un rapport départemental reste dans le périmètre du compte : le visiteur, borné à
+ * sa région comme le référent régional, n'était pas contrôlé du tout (L11).
+ */
+function isDepartmentInDashboardScope(user, department) {
+  switch (user.role) {
+    case ROLES.ADMIN:
+      return true;
+    case ROLES.REFERENT_REGION:
+    case ROLES.VISITOR:
+      return Boolean(user.region) && (region2department[user.region] || []).includes(department);
+    case ROLES.REFERENT_DEPARTMENT:
+      return (user.department || []).includes(department);
+    default:
+      return false;
+  }
+}
+
 router.post("/youngsReport", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user } = req;
-    const { filters, department } = req.body;
 
     if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (user.role === ROLES.REFERENT_REGION && !region2department[user.region].includes(department))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Corps non validé jusqu'ici : `department` et `filters.cohort` partaient tels
+    // quels dans la requête Elasticsearch (L11).
+    const { error, value } = youngsReportSchema.validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { filters, department } = value;
 
-    if (user.role === ROLES.REFERENT_DEPARTMENT && !user.department.includes(department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isDepartmentInDashboardScope(user, department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const body = {
       query: {
@@ -137,6 +164,11 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     }
     if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) {
       session = await SessionPhase1Model.findOne({ adjointsIds: { $in: [req.user._id] }, cohort: queryFilters.cohort });
+    }
+    // Un rôle de centre sans session sur la cohorte repartait sans aucun filtre de
+    // contexte, donc avec les agrégations nationales (L11).
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role) && !session) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const body = {
@@ -327,7 +359,8 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
         bool: {
           must: [{ match_all: {} }],
           filter: [
-            user.role === ROLES.REFERENT_REGION
+            // Le visiteur est borné à sa région, comme sur les autres agrégations (L11).
+            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
               ? {
                   bool: {
                     should: [

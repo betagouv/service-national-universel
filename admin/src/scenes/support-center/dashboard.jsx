@@ -12,7 +12,6 @@ import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
 import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles, administrator_cleArticles, referent_classeArticles } from "./articles";
-import plausibleEvent from "../../services/plausible";
 import { ROLES } from "snu-lib";
 import { isResponsableDeCentre } from "snu-lib";
 
@@ -106,7 +105,6 @@ const Dashboard = (props) => {
             className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
             type="text"
             placeholder={placeholder}
-            onClick={() => plausibleEvent("Besoin d'aide - Barre de recherche")}
             onChange={(e) => setSearch(e.target.value)}
             value={search}
           />
@@ -224,9 +222,7 @@ const Dashboard = (props) => {
               une réponse par mail.
             </div>
             <div className="buttons mt-4">
-              <InternalLink onClick={() => plausibleEvent("Besoin d'aide - Contacter quelqu'un")} to={`/besoin-d-aide/ticket?from=${from}`}>
-                Contacter&nbsp;quelqu&apos;un
-              </InternalLink>
+              <InternalLink to={`/besoin-d-aide/ticket?from=${from}`}>Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
         </div>

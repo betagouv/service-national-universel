@@ -1,4 +1,5 @@
 import express, { Response, Router } from "express";
+import { canSearchMeetingPoints } from "snu-lib";
 import { capture } from "../../sentry";
 import esClient from "../../es";
 import { ERRORS } from "../../utils";
@@ -6,6 +7,7 @@ import { allRecords } from "../../es/utils";
 import { joiElasticSearch, buildNdJson, buildRequestBody } from "./utils";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { UserRequest } from "../request";
+import { getGeoScopeEsFilter } from "../../services/sejourAccess";
 
 const router: Router = express.Router();
 
@@ -19,12 +21,18 @@ router.post("/:action(search|export)", authMiddleware(["referent"]), async (req:
       sortFields: [],
     };
 
+    // Authorization
+    // Aucun rôle n'était vérifié : tout compte référent (responsable, superviseur…)
+    // listait et exportait les points de rassemblement de France (L14).
+    if (!canSearchMeetingPoints(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     // Body params validation
     const { queryFilters, page, sort, error, size } = joiElasticSearch({ filterFields: searchFields.filterFields, sortFields: searchFields.sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
-    const contextFilters: any[] = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }, { exists: { field: "matricule" } }];
+    // Référents : points de leur région / département ; admin et transporteur : national.
+    const contextFilters: any[] = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }, { exists: { field: "matricule" } }, getGeoScopeEsFilter(user)].filter(Boolean);
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({

@@ -30,9 +30,30 @@ RUN --mount=type=secret,id=BUILD_SECRETS \
     npx turbo run build
 EOF
 
-COPY patches/ patches/ 
+COPY patches/ patches/
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --omit dev --workspace api --workspace apiv2 --include-workspace-root
+
+# Prépare l'arborescence des paquets du workspace, dans la même disposition que
+# devops/build/copy-packages.sh : dist/ aplati à la racine du paquet, node_modules à côté
+# quand il existe. COPY ne sait pas itérer, on prépare donc le tout ici pour n'avoir qu'un
+# seul COPY ensuite — et pour qu'un nouveau paquet soit embarqué sans toucher ce Dockerfile.
+RUN <<EOF
+set -e
+mkdir -p /build/staging/packages
+for package in /build/packages/*/; do
+    name=$(basename "$package")
+    if [ ! -d "${package}dist" ]; then
+        echo "ERROR: le paquet $name n'a pas de répertoire dist/ — son build a-t-il tourné ?" >&2
+        exit 1
+    fi
+    mkdir -p "/build/staging/packages/$name"
+    cp -R "${package}dist/." "/build/staging/packages/$name/"
+    if [ -d "${package}node_modules" ]; then
+        cp -R "${package}node_modules" "/build/staging/packages/$name/"
+    fi
+done
+EOF
 
 
 
@@ -44,8 +65,9 @@ COPY /devops/build/docker/back/nginx.conf /etc/nginx/http.d/default.conf
 
 WORKDIR /run
 
-COPY --from=builder /build/packages/lib/node_modules/ packages/lib/node_modules/
-COPY --from=builder /build/packages/lib/dist/ packages/lib/
+# Les paquets du workspace doivent être recopiés : node_modules ne contient que des liens
+# symboliques vers packages/<nom>, qui pendent si la cible n'est pas là (MODULE_NOT_FOUND au boot).
+COPY --from=builder /build/staging/packages/ packages/
 
 COPY --from=builder /build/api/public/ api/public/
 COPY --from=builder /build/api/node_modules/ api/node_modules/

@@ -10,6 +10,7 @@ import {
   canViewStructureChildren,
   isSupervisor,
   isAdmin,
+  isResponsibleOrSupervisor,
   SENDINBLUE_TEMPLATES,
   StructureType,
   UserDto,
@@ -29,6 +30,7 @@ import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddl
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { toErrorCode } from "../utils/errorCode";
 
 const setAndSave = async (data: any, keys: Record<string, any>, fromUser?: UserDto): Promise<void> => {
   data.set({ ...keys });
@@ -160,6 +162,15 @@ router.put(
         delete checkedStructure.networkId;
       }
 
+      // La géographie de la structure fixe le périmètre des référents qui l'instruisent (GOO-5) : un
+      // responsable ne la déplace pas hors de leur territoire, un référent la garde dans le sien.
+      const geographyChanged = (["department", "region"] as const).some((key) => key in checkedStructure && (checkedStructure[key] || "") !== (structure[key] || ""));
+      if (!isAdmin(req.user) && geographyChanged) {
+        if (isResponsibleOrSupervisor(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        const moved = new StructureModel({ ...structure.toJSON(), ...checkedStructure });
+        if (!isStructureAuthorized(req.user, moved, PERMISSION_ACTIONS.WRITE)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       structure.set(checkedStructure);
       await structure.save({ fromUser: req.user });
       await updateNetworkName(structure, req.user);
@@ -286,7 +297,7 @@ router.get(
       return res.status(200).send({ ok: true, data: structurePatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );

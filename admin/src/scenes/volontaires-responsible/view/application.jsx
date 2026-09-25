@@ -3,9 +3,8 @@ import { toastr } from "react-redux-toastr";
 import { Link, useHistory, useParams } from "react-router-dom";
 
 import api from "../../../services/api";
-import { appURL } from "../../../config";
 import { capture } from "../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition, copyToClipboard, ENABLE_PM } from "../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition, ENABLE_PM } from "../../../utils";
 import downloadPDF from "../../../utils/download-pdf";
 import ReactLoading from "react-loading";
 
@@ -298,7 +297,6 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                           target="projectManager"
                           contract={contract}
                           status={contract?.projectManagerStatus}
-                          token={contract?.projectManagerToken}
                           validationDate={contract?.projectManagerValidationDate}
                         />
                         <StatusContractPeople
@@ -309,7 +307,6 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                           target="structureManager"
                           contract={contract}
                           status={contract?.structureManagerStatus}
-                          token={contract?.structureManagerToken}
                           validationDate={contract?.structureManagerValidationDate}
                         />
                         {contract?.isYoungAdult === "true" ? (
@@ -329,7 +326,6 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                               target="parent1"
                               contract={contract}
                               status={contract?.parent1Status}
-                              token={contract?.parent1Token}
                               validationDate={contract?.parent1ValidationDate}
                             />
                             {contract?.parent2Email && (
@@ -341,7 +337,6 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
                                 target="parent2"
                                 contract={contract}
                                 status={contract?.parent2Status}
-                                token={contract?.parent2Token}
                                 validationDate={contract?.parent2ValidationDate}
                               />
                             )}
@@ -493,7 +488,7 @@ export default function Phase2Application({ young, onChange, currentTab = "candi
   );
 }
 
-const StatusContractPeople = ({ value, description, firstName, lastName, token, contract, target }) => (
+const StatusContractPeople = ({ value, description, firstName, lastName, contract, target }) => (
   <div className="flex flex-col items-start justify-center ">
     <div className="flex flex-col items-start justify-center " data-tip data-for={`${firstName}${lastName}-validation`}>
       <div className="mr-2">
@@ -514,14 +509,6 @@ const StatusContractPeople = ({ value, description, firstName, lastName, token, 
     </div>
     {value !== "VALIDATED" ? (
       <div className="mt-4">
-        <div
-          className="cursor-pointer text-xs text-blue-500 hover:underline"
-          onClick={() => {
-            copyToClipboard(`${appURL}/validate-contract?token=${token}`);
-            toastr.success("Le lien a été copié dans le presse papier.");
-          }}>
-          Copier le lien de validation
-        </div>
         <SendContractLink contract={contract} target={target} />
       </div>
     ) : null}

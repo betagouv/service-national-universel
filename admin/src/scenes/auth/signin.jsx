@@ -4,17 +4,15 @@ import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
-import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
-import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
-import api, { setJwtToken } from "../../services/api";
+import api from "../../services/api";
 import Header from "./components/header";
 import UnavailabilityBanner from "./components/unavailabilityBanner";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
-import { FEATURES_NAME, isFeatureEnabled, formatToActualTime, isValidRedirectUrl, ERRORS } from "snu-lib";
-import { captureMessage } from "../../sentry";
+import { formatToActualTime, ERRORS, isInternalRedirectUrl } from "snu-lib";
+import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import useDocumentCss from "../../hooks/useDocumentCss";
 
@@ -33,7 +31,7 @@ export default function Signin() {
 
   const { redirect, unauthorized } = queryString.parse(location.search);
 
-  if (user) return <Redirect to={redirect || "/"} />;
+  if (user) return <Redirect to={isInternalRedirectUrl(redirect) ? redirect : "/"} />;
   if (unauthorized === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
@@ -68,25 +66,15 @@ export default function Signin() {
                 onSubmit={async ({ email, password }, actions) => {
                   try {
                     setIsReferentInactive(false);
-                    const { user, token, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
+                    const { user, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
                     if (code === "2FA_REQUIRED") {
-                      plausibleEvent("2FA demandée");
                       return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
                     } else if (code === "VERIFICATION_REQUIRED") {
                       return history.push(signinRedirect);
                     }
-                    if (token) setJwtToken(token);
                     if (user) {
-                      plausibleEvent("Connexion réussie");
                       dispatch(setUser(user));
-                      if ((isFeatureEnabled(FEATURES_NAME.FORCE_REDIRECT, undefined, environment) && redirect) || isValidRedirectUrl(redirect)) {
-                        return (window.location.href = redirect || "/");
-                      }
-                      if (redirect) {
-                        captureMessage("Invalid redirect url", { extra: { redirect } });
-                        toastr.error("Url de redirection invalide : " + redirect);
-                        return history.push("/");
-                      }
+                      return redirectAfterSignin(history, redirect);
                     }
                   } catch (e) {
                     actions.setFieldValue("password", "");

@@ -4,7 +4,6 @@ import { HiExternalLink, HiOutlineChatAlt2, HiOutlineClipboardList, HiOutlineDes
 import { LiaHistorySolid } from "react-icons/lia";
 import { HiGlobeEuropeAfrica } from "react-icons/hi2";
 import ReactTooltip from "react-tooltip";
-import plausibleEvent from "@/services/plausible";
 import { SNUPPORT_URL_ADMIN } from "@/config";
 import TicketAgentDropdownButton from "../../components/TicketAgentDropdownButton";
 import { getStatusColor, translateRole, translateParcours, getDotColorClass, formatTicketDate, getDepartmentNumber } from "@/utils";
@@ -77,7 +76,6 @@ export default function TableItem({ ticket, update, filter, selectedTicket, setS
               setSelectedTicket={setSelectedTicket}
               setTicket={() => {
                 update(filter);
-                plausibleEvent("List Tickets/CTA - Change agent");
               }}
               agents={agents}
               role={"AGENT"}
@@ -90,7 +88,6 @@ export default function TableItem({ ticket, update, filter, selectedTicket, setS
               setSelectedTicket={setSelectedTicket}
               setTicket={() => {
                 update(filter);
-                plausibleEvent("List Tickets/CTA - Change Referent region");
               }}
               agents={referentsRegion}
               role={"REFERENT_REGION"}
@@ -102,7 +99,6 @@ export default function TableItem({ ticket, update, filter, selectedTicket, setS
             setSelectedTicket={setSelectedTicket}
             setTicket={() => {
               update(filter);
-              plausibleEvent("List Tickets/CTA - Change Referent department");
             }}
             agents={referentsDepartment}
             role={"REFERENT_DEPARTMENT"}
@@ -146,7 +142,6 @@ export default function TableItem({ ticket, update, filter, selectedTicket, setS
         {user.role === "AGENT" && (
           <button
             onClick={() => {
-              plausibleEvent("List Tickets/CTA - Open preview");
               openTicketPreview(ticket);
             }}
             className="bg-gray-100 rounded-full p-2 inline-flex items-center justify-center  mr-3"
@@ -161,7 +156,6 @@ export default function TableItem({ ticket, update, filter, selectedTicket, setS
         <button
           onClick={(e) => {
             e.stopPropagation();
-            plausibleEvent("List Tickets/CTA - Open in window");
             window.open(`${SNUPPORT_URL_ADMIN}/ticket/${ticket._id}`, "_blank");
           }}
           className="bg-gray-100 rounded-full p-2 inline-flex items-center justify-center"

@@ -34,7 +34,6 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import plausibleEvent from "../../services/plausible";
 import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
@@ -332,7 +331,6 @@ const Action = ({ hit, structure }: ActionProps) => {
     try {
       if (handleImpersonateLoading) return;
       setHandleImpersonateLoading(true);
-      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", hit._id);
       dispatch(setUser(data));
       history.push("/dashboard");

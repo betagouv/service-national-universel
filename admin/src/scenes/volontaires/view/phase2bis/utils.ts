@@ -1,4 +1,4 @@
-import { ROLES, applicationExportFields, formatDateFRTimezoneUTC, formatLongDateUTC, translate } from "snu-lib";
+import { ROLES, applicationExportFields, formatDateFRTimezoneUTC, formatLongDateUTC, htmlToPlainText, translate } from "snu-lib";
 import { User } from "@/types";
 
 export async function transform(data: any[], selectedFields: any) {
@@ -53,7 +53,7 @@ export async function transform(data: any[], selectedFields: any) {
         "Statut juridique de la structure": data.structure.legalStatus,
         "Type(s) de structure": data.structure.types.toString(),
         "Sous-type de structure": data.structure.sousType,
-        "Présentation de la structure": data.structure.description,
+        "Présentation de la structure": htmlToPlainText(data.structure.description),
       },
       structureLocation: {
         "Adresse de la structure": data.structure.address,

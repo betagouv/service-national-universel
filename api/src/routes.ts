@@ -16,7 +16,6 @@ export function injectRoutes(app) {
   app.use("/email", require("./controllers/email").default);
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters").default);
-  app.use("/gouv.fr", require("./controllers/gouv.fr"));
   app.use("/inscription-goal", require("./controllers/inscription-goal").default);
   app.use("/ligne-de-bus", require("./planDeTransport/ligneDeBus/ligneDeBusController"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point").default);
@@ -25,20 +24,15 @@ export function injectRoutes(app) {
   app.use("/point-de-rassemblement", require("./planDeTransport/pointDeRassemblement").default);
   app.use("/program", require("./controllers/program").default);
   app.use("/referent", require("./referent/referentController").default);
-  app.use("/representants-legaux", require("./controllers/representants-legaux"));
-  app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
   app.use("/session-phase1", require("./controllers/session-phase1"));
   app.use("/signin", require("./controllers/signin"));
   app.use("/structure", require("./controllers/structure").default);
-  app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition").default);
   app.use("/tags", require("./controllers/tags"));
-  app.use("/waiting-list", require("./controllers/waiting-list"));
   app.use("/young", require("./controllers/young/index").default);
   app.use("/young", require("./young/youngController").default);
   app.use("/young-edition", require("./young/edition/youngEditionController").default);
   app.use("/SNUpport", require("./controllers/SNUpport").default);
   app.use("/cle", require("./cle").default);
-  app.use("/preinscription", require("./preinscription/preinscriptionController"));
   app.use("/filter-label", require("./filterLabel/filterLabelController"));
   app.use("/email-preview", require("./controllers/emailPreview").default);
 

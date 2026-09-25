@@ -1,32 +1,21 @@
 import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
-import { useHistory, useLocation } from "react-router-dom";
-import { PointDeRassemblementType, ROLES, getDepartmentNumber, isSuperAdmin } from "snu-lib";
+import { useHistory } from "react-router-dom";
+import { PointDeRassemblementType, ROLES, getDepartmentNumber } from "snu-lib";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { Title } from "./components/common";
-import ModalCreation from "./components/ModalCreation";
 import { getCohortGroups } from "@/services/cohort.service";
 import { getDefaultCohort } from "@/utils/session";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { Filter } from "@/components/filters-system-v2/components/Filters";
-import ImportPDRButton from "./components/ImportPDRButton";
 
 export default function List() {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
-  const [modal, setModal] = React.useState({ isOpen: false });
   const defaultCohortName = getDefaultCohort(cohorts)?.name;
-  const history = useHistory();
-  const { search } = useLocation();
-  const query = new URLSearchParams(search);
-
-  React.useEffect(() => {
-    const modalCreationOpen = query.get("modal_creation_open");
-    setModal({ isOpen: !!modalCreationOpen });
-  }, []);
 
   if (!defaultCohortName || !user) return <div></div>;
   return (
@@ -35,7 +24,6 @@ export default function List() {
       <div className="flex w-full flex-col px-8">
         <div className="flex items-center justify-between pt-8">
           <Title>Points de rassemblement</Title>
-          <div className="flex gap-4">{isSuperAdmin(user) && <ImportPDRButton className="mb-8" />}</div>
         </div>
         <div>
           <div className={`relative mb-8 items-start rounded-b-lg rounded-tr-lg bg-white`}>
@@ -45,14 +33,6 @@ export default function List() {
           </div>
         </div>
       </div>
-      <ModalCreation
-        isOpen={modal.isOpen}
-        onCancel={() => {
-          setModal({ isOpen: false });
-          query.delete("modal_creation_open");
-          history.replace({ search: query.toString() });
-        }}
-      />
     </>
   );
 }

@@ -12,7 +12,7 @@ export default function YoungMenu() {
   const { cache } = useSWRConfig();
   const onLogout = async (event) => {
     event.preventDefault();
-    await API.post({ origin: snuApiUrl, path: "/young/logout" });
+    await API.post({ origin: snuApiUrl, path: "/signin/logout" });
     mutate(null);
     cache.clear();
   };
@@ -23,8 +23,7 @@ export default function YoungMenu() {
         {({ open }) => (
           <>
             <Popover.Button className="flex h-10 w-10 items-center justify-center gap-3 rounded-full border-none bg-blue-50 p-0 text-sm font-bold uppercase tracking-tight text-[#32257F]">
-              {user.firstName?.[0]}
-              {user.lastName?.[0]}
+              {user.initials}
             </Popover.Button>
 
             <Transition

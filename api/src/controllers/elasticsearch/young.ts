@@ -80,8 +80,13 @@ function getYoungsFilters(user: UserDto): string[] {
  * `head_center`, `head_center_adjoint` et `referent_sanitaire`, qui n'existent
  * plus sur la plateforme. Des comptes résiduels peuvent encore porter ces rôles
  * en base : ils doivent être refusés, pas tolérés.
+ *
+ * `visitor` est aussi absent : l'admin ne lui ouvre que le tableau de bord et
+ * l'annuaire des établissements, et le modèle de permissions (`canSearchInElasticSearch`)
+ * lui refuse l'index `young`. Il exportait pourtant les dossiers complets des
+ * volontaires de sa région par `/elasticsearch/young/export` (cf. FH8).
  */
-const YOUNG_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.VISITOR];
+const YOUNG_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
 
 interface YoungContextOptions {
   showAffectedToRegionOrDep?: boolean;
@@ -171,12 +176,14 @@ async function buildYoungContext(user: UserDto, options: YoungContextOptions = {
     }
   }
 
-  // Visitors are limited to their region.
-  if (user.role === ROLES.VISITOR) {
-    contextFilters.push({ term: { "region.keyword": user.region } });
-  }
   return { youngContextFilters: contextFilters };
 }
+
+/**
+ * Rôles dont l'appartenance à la session est vérifiée dans la route
+ * `/by-session/:sessionId/:action`. ADMIN est national par conception.
+ */
+const BY_SESSION_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
 
 const router: Router = express.Router();
 
@@ -232,10 +239,10 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
     });
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeYoungs(response.body));
+      return res.status(200).send(serializeYoungs(response.body, req.user));
     }
   } catch (error) {
     capture(error);
@@ -278,7 +285,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
     };
 
     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, bodyQuery) });
-    return res.status(200).send(serializeYoungs(response.body));
+    return res.status(200).send(serializeYoungs(response.body, req.user));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -341,10 +348,10 @@ router.post(
       });
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+        return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(serializeYoungs(response.body));
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -392,6 +399,10 @@ router.post(
       const sortFields: string[] = [];
 
       if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      // L'appartenance à la session n'est vérifiée que pour les rôles ci-dessous
+      // (blocs dédiés plus bas). Tout autre rôle lirait n'importe quelle session,
+      // les identifiants étant énumérables via /elasticsearch/sessionphase1 (cf. H27).
+      if (!BY_SESSION_SCOPED_ROLES.includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       // Context filters
       const contextFilters = [
@@ -462,10 +473,10 @@ router.post(
             all = data.map((item: any) => ({ ...item, esSchool: schools.find((e: any) => e._id === item.schoolId) }));
           }
 
-          response = { ok: true, data: serializeYoungs(all) };
+          response = { ok: true, data: serializeYoungs(all, req.user) };
         } else {
           const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-          return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+          return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
         }
       }
 
@@ -473,7 +484,7 @@ router.post(
         return res.status(200).send(response);
       } else {
         const esResponse = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        response = serializeYoungs(esResponse.body);
+        response = serializeYoungs(esResponse.body, req.user);
         return res.status(200).send(response);
       }
     } catch (error) {
@@ -525,12 +536,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         exportFields.push("email");
       }
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      let data = serializeYoungs(response);
+      let data = serializeYoungs(response, req.user);
       data = await populateYoungExport(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeYoungs(response.body));
+      return res.status(200).send(serializeYoungs(response.body, req.user));
     }
   } catch (error) {
     capture(error);
@@ -584,7 +595,7 @@ router.post(
 
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        let data = serializeYoungs(response);
+        let data = serializeYoungs(response, req.user);
         //School
         if (exportFields?.includes("schoolId")) {
           const schoolIds = [...new Set(data.map((item: any) => item.schoolId).filter(Boolean))];
@@ -595,7 +606,7 @@ router.post(
         return res.status(200).send({ ok: true, data });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(serializeYoungs(response.body));
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -683,10 +694,10 @@ router.post(
       }
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+        return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(serializeYoungs(response.body));
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -762,7 +773,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     });
 
     const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-    const data = aggregateStatus(serializeYoungs(response));
+    const data = aggregateStatus(serializeYoungs(response, req.user));
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

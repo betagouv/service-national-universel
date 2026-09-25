@@ -50,8 +50,7 @@ export default function Index() {
     if (!allSessions.ok) {
       throw new Error(translate(allSessions.code));
     }
-    const populatedSessions = await populateSessions(allSessions.data);
-    const sessionFiltered = filterSessions(populatedSessions, user);
+    const sessionFiltered = filterSessions(allSessions.data, user);
     sessionFiltered.sort((a, b) => a.startDate - b.startDate);
     setSessions(sessionFiltered);
   };
@@ -62,7 +61,7 @@ export default function Index() {
     <>
       {!isResponsableDeCentre(user) && <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
       <CenterInformations center={center} />
-      <SessionList center={center} onCenterChange={setCenter} sessions={sessions} onSessionsChange={setSessions} onRefetchSessions={() => loadSessions(center._id)} />
+      <SessionList center={center} sessions={sessions} />
     </>
   );
 }
@@ -76,17 +75,4 @@ function filterSessions(sessions, user) {
     return sessions.filter((session) => session?.adjointsIds.includes(user._id));
   }
   return [];
-}
-
-async function populateSessions(sessions) {
-  for (let i = 0; i < sessions.length; i++) {
-    const { data: ligneDeBus } = await api.get(`/session-phase1/${sessions[i]._id}/plan-de-transport`);
-    // aucune ligne de bus ne dessert ce centre dans le PDT
-    if (ligneDeBus?.length === 0 && sessions[i].placesTotal - sessions[i].placesLeft === 0) {
-      sessions[i].canBeDeleted = true;
-    } else {
-      sessions[i].canBeDeleted = false;
-    }
-  }
-  return sessions;
 }

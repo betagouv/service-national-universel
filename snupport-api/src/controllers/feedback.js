@@ -4,26 +4,33 @@ const Joi = require("joi");
 const FeedbackModel = require("../models/feedback");
 const ContactModel = require("../models/contact");
 const KnowledgeBaseModel = require("../models/knowledgeBase");
-const  { agentGuard } = require("../middlewares/authenticationGuards");
+const { agentGuard, apiKeyGuard } = require("../middlewares/authenticationGuards");
 const { validateBody, validateQuery } = require("../middlewares/validation");
 const { SCHEMA_ID, SCHEMA_EMAIL } = require("../schemas");
+const { ERRORS } = require("../errors");
 
+const FEEDBACK_COMMENT_MAX_LENGTH = 2000;
 
+// Feedback sur un article de la base de connaissance (M83). La route était publique : n'importe qui
+// créait en boucle des contacts (email arbitraire) et des commentaires rattachés à n'importe quel
+// identifiant. Elle ne sert que l'API v1 (`POST /SNUpport/knowledgeBase/feedback`), qui applique la
+// limitation de débit par IP et ne transmet que l'email de la session : clé d'API exigée, article
+// publié exigé, commentaire borné, et un contact n'est plus jamais créé ici.
 router.post("/",
+  apiKeyGuard,
   validateBody(Joi.object({
     isPositive: Joi.boolean(),
     knowledgeBaseArticle: SCHEMA_ID,
     contactEmail: SCHEMA_EMAIL.optional(),
-    comment: Joi.string().trim().optional(),
+    comment: Joi.string().trim().max(FEEDBACK_COMMENT_MAX_LENGTH).optional(),
   }).prefs({ presence: 'required' })),
   async function (req, res) {
     const { contactEmail, ...rest } = req.cleanBody;
-    let contact;
-    if (contactEmail) {
-      contact = await ContactModel.findOne({ email: contactEmail });
-      if (!contact) contact = await ContactModel.create({ email: contactEmail });
-    }
+    const article = await KnowledgeBaseModel.exists({ _id: rest.knowledgeBaseArticle, type: "article", status: "PUBLISHED" });
+    if (!article) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const feedback = { ...rest };
+    const contact = contactEmail ? await ContactModel.findOne({ email: contactEmail }, { _id: 1 }) : null;
     if (contact) feedback.createdBy = contact._id;
     await FeedbackModel.create(feedback);
     return res.status(200).send({ ok: true });

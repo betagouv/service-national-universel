@@ -1,13 +1,15 @@
-// AGENT/ADMIN/DG are central support staff without geographic scoping, matching the
+// AGENT/DG are central support staff without geographic scoping, matching the
 // existing filter logic in ticket.ts's buildContextFilter. REFERENT_DEPARTMENT and
 // REFERENT_REGION are restricted to their own department(s)/region, and fail closed
 // (deny) when the ticket carries no contact department/region to compare against.
+// Referents only ever see "QUESTION" tickets in lists (scopeTicketQuery): the unit routes
+// apply the same restriction, otherwise a known id opened any other ticket of the area (M99).
 function canAccessTicket(user, ticket) {
   if (user.role === "REFERENT_DEPARTMENT") {
-    return Boolean(ticket.contactDepartment) && Boolean(user.departments) && user.departments.includes(ticket.contactDepartment);
+    return ticket.formSubjectStep1 === "QUESTION" && Boolean(ticket.contactDepartment) && Boolean(user.departments) && user.departments.includes(ticket.contactDepartment);
   }
   if (user.role === "REFERENT_REGION") {
-    return Boolean(ticket.contactRegion) && ticket.contactRegion === user.region;
+    return ticket.formSubjectStep1 === "QUESTION" && Boolean(ticket.contactRegion) && ticket.contactRegion === user.region;
   }
   return true;
 }

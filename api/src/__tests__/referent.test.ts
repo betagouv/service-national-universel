@@ -81,8 +81,10 @@ afterEach(resetAppAuth);
 
 describe("Referent", () => {
   describe("POST /referent/signup_invite/:template", () => {
+    // La fixture tire un département fictif (faker) : la route n'accepte que ceux de `departmentList`.
+    const getInvitationFixture = () => ({ ...getNewReferentFixture(), department: ["Ain"] });
     it("should invite and add referent (admin)", async () => {
-      const referentFixture = getNewReferentFixture();
+      const referentFixture = getInvitationFixture();
       const referentsBefore = await getReferentsHelper();
       const res = await request(await getAppHelperWithAcl())
         .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
@@ -94,21 +96,21 @@ describe("Referent", () => {
     });
     it("should invite and add referent (responsible)", async () => {
       const structure = await createStructureHelper(getNewStructureFixture());
-      const referentFixture = { ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
+      const referentFixture = { ...getInvitationFixture(), role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
       const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
         .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send(referentFixture);
       expect(res.statusCode).toEqual(200);
     });
     it("should return 400 if no templates given", async () => {
-      const referentFixture = getNewReferentFixture();
+      const referentFixture = getInvitationFixture();
       const res = await request(await getAppHelperWithAcl())
         .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send({ ...referentFixture, structureId: 1 });
       expect(res.statusCode).toEqual(400);
     });
     it("should return 403 when responsible can not invite (all role except responsible)", async () => {
-      const referentFixture = { ...getNewReferentFixture(), role: ROLES.ADMIN };
+      const referentFixture = { ...getInvitationFixture(), role: ROLES.ADMIN };
       for (const role of ROLES_LIST) {
         if (role !== ROLES.RESPONSIBLE) {
           const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
@@ -119,13 +121,54 @@ describe("Referent", () => {
       }
     });
     it("should return 409 when user already exists", async () => {
-      const fixture = getNewReferentFixture();
+      const fixture = getInvitationFixture();
       const email = fixture.email?.toLowerCase();
       await createReferentHelper({ ...fixture, email });
       let res = await request(await getAppHelperWithAcl())
         .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send(fixture);
       expect(res.status).toBe(409);
+    });
+    // CLE décommissionné (H17) : ce parcours générique ne doit plus permettre de créer un compte
+    // ADMINISTRATEUR_CLE ou REFERENT_CLASSE actif, y compris pour un admin qui peut inviter tout rôle.
+    it("should return 403 when inviting an ADMINISTRATEUR_CLE or REFERENT_CLASSE", async () => {
+      for (const role of [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]) {
+        const referentFixture = { ...getInvitationFixture(), role };
+        const res = await request(await getAppHelperWithAcl())
+          .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
+          .send(referentFixture);
+        expect(res.statusCode).toEqual(403);
+        expect(res.body).toEqual({ ok: false, code: "OPERATION_NOT_ALLOWED" });
+      }
+    });
+  });
+
+  describe("POST /referent/signup_invite", () => {
+    // CLE décommissionné (H17) : cette route non authentifiée ne doit plus pouvoir activer un compte
+    // ADMINISTRATEUR_CLE ou REFERENT_CLASSE, même avec un jeton d'invitation valide.
+    it("should return 403 when activating an ADMINISTRATEUR_CLE or REFERENT_CLASSE", async () => {
+      for (const role of [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]) {
+        const invitationToken = `${Date.now()}-${role}`;
+        const referentFixture = getNewReferentFixture({
+          role,
+          invitationToken,
+          invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        });
+        const referent = await createReferentHelper(referentFixture);
+        const res = await request(await getAppHelperWithAcl())
+          .post("/referent/signup_invite")
+          .send({
+            email: referent.email,
+            invitationToken,
+            password: "Test1234567!",
+            acceptCGU: "true",
+          });
+        expect(res.statusCode).toEqual(403);
+        expect(res.body).toEqual({ ok: false, code: "OPERATION_NOT_ALLOWED" });
+        const referentAfter = await getReferentByIdHelper(referent._id);
+        expect(referentAfter?.registredAt).toBeFalsy();
+        await deleteReferentByIdHelper(referent._id);
+      }
     });
   });
 
@@ -186,7 +229,14 @@ describe("Referent", () => {
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
+        {
+          status: YOUNG_STATUS.WAITING_VALIDATION,
+          region: inscriptionGoal.region,
+          department: inscriptionGoal.department,
+          schoolDepartment: inscriptionGoal.department,
+          cohort: cohort.name,
+          cohortId: cohort._id,
+        },
         { keepYoung: true },
         { role: ROLES.REFERENT_DEPARTMENT, department: [inscriptionGoal.department!], region: inscriptionGoal.region },
       );
@@ -406,7 +456,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
@@ -434,7 +484,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
@@ -462,7 +512,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(200);
@@ -494,7 +544,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.REFUSED });
       expect(res.statusCode).toEqual(200);

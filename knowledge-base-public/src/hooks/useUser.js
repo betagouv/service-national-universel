@@ -11,6 +11,8 @@ const useUser = ({ redirectOnLoggedOut = "/base-de-connaissance" } = {}) => {
   const { seeAs } = useContext(SeeAsContext);
 
   const isLoading = !error && !data;
+  // Posé avant le rendu des pages : leurs requêtes vers l'API du support partent avec la preuve du rôle.
+  if (data !== undefined) API.setKnowledgeBaseToken(data?.ok ? data.knowledgeBaseToken : null);
   const user = data && data?.ok ? { ...data.user, isLoggedIn: true } : { restriction: "public", isLoggedIn: false };
 
   if (user.role === "administrateur_cle") user.role = `${user.role}_${user.subRole}`;

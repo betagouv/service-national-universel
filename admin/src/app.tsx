@@ -31,7 +31,7 @@ import { RestrictedRoute } from "./components/layout/RestrictedRoute";
 import Loader from "./components/Loader";
 import Footer from "./components/footer";
 
-import api, { initApi, setJwtToken } from "./services/api";
+import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
 
@@ -106,9 +106,6 @@ const VolontaireCle = lazy(() => import("./scenes/volontaire-cle"));
 // @ts-ignore
 const Contact = lazy(() => import("./scenes/contact"));
 // @ts-ignore
-const Signup = lazy(() => import("./scenes/signup"));
-// @ts-ignore
-// @ts-ignore
 const PlanMarketing = lazy(() => import("./scenes/planMarketing"));
 
 //DashboardV2
@@ -145,8 +142,6 @@ class App extends React.Component {
                   <SentryRoute path="/validate" component={Validate} />
                   <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
                   <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-                  <SentryRoute path="/creer-mon-compte" component={Signup} />
-                  <SentryRoute path="/verifier-mon-compte" component={Signup} />
                   {/* Authentification accessoire */}
                   <SentryRoute path="/auth" component={Auth} />
                   {/* Page par default (404 et Home) */}
@@ -200,11 +195,9 @@ const Home = () => {
       try {
         const res = await api.checkToken();
         if (!res.ok || !res.user) {
-          setJwtToken(null);
           dispatch(setUser(null));
           setLoading(false);
         }
-        if (res.token) setJwtToken(res.token);
         if (res.user) dispatch(setUser(res.user));
         const cohorts = await getCohorts(); // TODO: mise en place d'un cache (redux-persist?)
         if (cohorts) dispatch({ type: COHORTS_ACTIONS.SET_COHORTS, payload: cohorts });

@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import Modal from "../../../components/ui/modals/Modal";
 import { SENDINBLUE_TEMPLATES } from "../../../utils";
 import API from "../../../services/api";
-import { CDN_BASE_URL } from "../../representants-legaux/commons";
+import { CDN_BASE_URL } from "@/config";
 import { HiOutlineDownload, HiMail } from "react-icons/hi";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../components/ui/buttons/ButtonLight";

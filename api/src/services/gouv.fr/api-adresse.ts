@@ -40,33 +40,6 @@ export const apiAdress = async (
   }
 };
 
-export const getSpecificAdressLocation = async ({ label, address, city, zip }: { label?: string; address?: string; city?: string; zip?: string }) => {
-  if (!address || !city || !zip) {
-    throw new Error("Missing address, city or zip");
-  }
-  // si l'adresse ne commence par un numéro (ex: gare de nantes) on ajoute son label, sinon le numéro de rue suffit
-  const fullAddress = !label || address.match(/^[0-9].*/) ? `${address}, ${zip} ${city}` : `${label}, ${address}, ${city} ${zip}`;
-
-  let { features } = await apiAdress(fullAddress, { autocomplete: 0 });
-  if (!features?.length) {
-    throw new Error(`No location found for this address ${fullAddress}`);
-  }
-  if (features.length !== 1) {
-    const filteredFeatures = features?.filter(
-      (feature) => normlizeName(address) === normlizeName(feature.properties.name) && normlizeName(city) === normlizeName(feature.properties.city),
-    );
-    if (filteredFeatures.length !== 1) {
-      throw new Error(`Many locations (${features?.length}) found for this address ${fullAddress}`);
-    }
-    features = filteredFeatures;
-  }
-
-  return {
-    lon: features[0].geometry.coordinates[0],
-    lat: features[0].geometry.coordinates[1],
-  };
-};
-
 export const getNearestLocation = async (city: string, zip: string) => {
   try {
     if (!city && !zip) return null;
@@ -103,5 +76,3 @@ export const getNearestLocation = async (city: string, zip: string) => {
     return null;
   }
 };
-
-const normlizeName = (value: string) => value.trim().toLowerCase().replaceAll(" ", "-");

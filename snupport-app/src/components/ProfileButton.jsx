@@ -6,6 +6,7 @@ import Avatar from "./Avatar";
 
 import { setOrganisation, setUser } from "../redux/auth/actions";
 import API from "../services/api";
+import { clearLocalSession } from "../services/localSession";
 
 export default function ProfileButton() {
   const [open, setOpen] = useState(false);
@@ -36,6 +37,7 @@ export default function ProfileButton() {
           onClick={async () => {
             await API.post({ path: "/agent/logout" });
             API.setToken("");
+            await clearLocalSession();
             dispatch(setUser(null));
             dispatch(setOrganisation(null));
           }}
