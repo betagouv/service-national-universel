@@ -34,6 +34,21 @@ class InMemoryWritable extends Writable {
   }
 }
 
+// Documents que `generatePdfIntoStream` sait produire, par type puis gabarit. La convocation au séjour
+// de cohésion n'en fait plus partie depuis la fermeture de la phase 1 (#5214) : les routes la refusent
+// en 400 au lieu d'échouer en 500 (GOO-51).
+const PDF_DOCUMENTS: Record<string, string[]> = {
+  certificate: ["1", "2", "3", "snu"],
+  droitImage: ["droitImage"],
+  contract: ["2"],
+  image_right_batch: ["droitImage"],
+  consent_batch: ["consentement"],
+};
+
+export function isPdfDocumentAvailable(type: string, template: string): boolean {
+  return Object.hasOwn(PDF_DOCUMENTS, type) && PDF_DOCUMENTS[type].includes(template);
+}
+
 export async function generatePdfIntoStream(outStream, { type, template, young, contract }: { type: string; template: string; young?: YoungType; contract?: ContractType }) {
   // Un jeune anonymisé (RGPD) ne doit plus pouvoir générer/télécharger ses documents
   // (attestations phase 1/2/3, droit à l'image…). Garde central : couvre toutes les

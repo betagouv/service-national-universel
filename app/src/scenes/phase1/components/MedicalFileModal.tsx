@@ -10,13 +10,22 @@ import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../components/ui/buttons/ButtonLight";
 import ConfirmationModal from "../../../components/ui/modals/ConfirmationModal";
 import { capture } from "@/sentry";
-import useAffectationInfo from "../scenes/affected/utils/useAffectationInfo";
+import { useQuery } from "@tanstack/react-query";
+import { SessionPhase1Type } from "snu-lib";
 
 const MedicalFileModal = ({ isOpen, onClose, onClick = () => {}, title = "Transmettez votre fiche sanitaire" }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { young } = useAuth();
-  const { session } = useAffectationInfo();
+  const { data: session } = useQuery({
+    queryKey: ["session", young._id],
+    queryFn: async (): Promise<SessionPhase1Type> => {
+      const { ok, data, code } = await API.get(`/young/${young._id}/session/`);
+      if (!ok) throw new Error(code);
+      return data;
+    },
+    enabled: !!young._id,
+  });
   const email = session?.sanitaryContactEmail;
 
   const handleClick = async () => {
