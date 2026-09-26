@@ -66,7 +66,10 @@ async function validateUser(userModel: Model<any>, jwtPayload: JwtPayload, done:
       if (passwordMatch && logoutMatch && (!role || user.role === role)) {
         if (value._impersonateId) {
           user.impersonateId = value._impersonateId;
-          const impersonateUser = await userModel.findById(value._impersonateId);
+          // PL7 (lot P27) : l'usurpateur est toujours un référent (admin), même quand la cible
+          // impersonée est un jeune — chercher dans `userModel` (YoungModel dans ce cas) ne le
+          // trouvait jamais, et `impersonatedBy` restait vide : aucune trace de l'auteur réel.
+          const impersonateUser = await ReferentModel.findById(value._impersonateId);
           if (impersonateUser) {
             user.impersonatedBy = impersonateUser;
           }

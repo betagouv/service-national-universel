@@ -77,6 +77,9 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
         req.user = {
             ...user,
             acl,
+            // PL7 (lot P27) : sans ceci, une action faite sous impersonation référent sur /v2 restait
+            // attribuée au compte emprunté, sans trace de l'admin usurpateur.
+            impersonateId: payload.impersonateId,
         };
 
         this.cls.set("user", {
@@ -86,6 +89,7 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             role: user?.role,
             subRole: user?.sousRole,
             acl,
+            impersonateId: payload.impersonateId,
         });
         next();
     }

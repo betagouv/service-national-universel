@@ -96,3 +96,52 @@ describe("passport.validateUser — rôles décommissionnés (GOO-56, lot P24)",
     expect(done).toHaveBeenCalledWith(null, young);
   });
 });
+
+describe("passport.validateUser — PL7 (lot P27, audit du 25/09/2026) : l'usurpateur est toujours cherché dans ReferentModel", () => {
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("attribue impersonatedBy même quand la cible impersonée est un jeune (YoungModel)", async () => {
+    const admin: any = { _id: "507f1f77bcf86cd799439021", role: ROLES.ADMIN };
+    const young: any = {
+      _id: "507f1f77bcf86cd799439022",
+      status: "VALIDATED",
+      passwordChangedAt: null,
+      lastLogoutAt: null,
+    };
+    jest.spyOn(YoungModel, "findById").mockResolvedValue(young as any);
+    const referentFindById = jest.spyOn(ReferentModel, "findById").mockResolvedValue(admin as any);
+
+    const payload = { ...fakeJwtPayload(young), _impersonateId: admin._id };
+    const done = jest.fn();
+    await validateUser(YoungModel, payload, done);
+
+    // Avant correctif : le code interrogeait `userModel` (YoungModel ici), qui ne contient jamais
+    // d'admin — impersonatedBy restait indéfiniment vide, sans trace de l'auteur réel.
+    expect(referentFindById).toHaveBeenCalledWith(admin._id);
+    expect(done).toHaveBeenCalledWith(null, young);
+    expect(young.impersonatedBy).toBe(admin);
+  });
+
+  it("continue de fonctionner quand la cible impersonée est elle-même un référent (ReferentModel)", async () => {
+    const admin: any = { _id: "507f1f77bcf86cd799439023", role: ROLES.ADMIN };
+    const referent: any = {
+      _id: "507f1f77bcf86cd799439024",
+      status: "ACTIVE",
+      role: ROLES.REFERENT_DEPARTMENT,
+      passwordChangedAt: null,
+      lastLogoutAt: null,
+    };
+    const referentFindById = jest.spyOn(ReferentModel, "findById").mockImplementation(((id: string) =>
+      Promise.resolve(id === admin._id ? admin : referent)) as any);
+
+    const payload = { ...fakeJwtPayload(referent), _impersonateId: admin._id };
+    const done = jest.fn();
+    await validateUser(ReferentModel, payload, done);
+
+    expect(referentFindById).toHaveBeenCalledWith(admin._id);
+    expect(done).toHaveBeenCalledWith(null, referent);
+    expect(referent.impersonatedBy).toBe(admin);
+  });
+});
