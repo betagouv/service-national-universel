@@ -141,7 +141,8 @@ export default function TicketModal({ open, setOpen, message, subject, agents })
       </div>
       <hr />
       <label className="my-2 inline-block text-sm font-medium text-gray-700">Premier message du ticket</label>
-      <TextEditor htmlText={ticketMessage} setHtmlText={setTicketMessage} setSlateContent={setSlateContent} draftMessageHtml={ticketMessage} />
+      {/* PM54 : une image collée ici serait publiée en accès public sans jamais être envoyée au contact. */}
+      <TextEditor htmlText={ticketMessage} setHtmlText={setTicketMessage} setSlateContent={setSlateContent} draftMessageHtml={ticketMessage} allowImages={false} />
       <div className="mt-3 flex gap-3">
         <button
           type="button"

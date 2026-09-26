@@ -46,3 +46,27 @@ export const sanitizeVideoUrl = (value) => {
 
 /** Lien affiché à partir d'une valeur reçue d'un formulaire (attributs de contact) : https uniquement. */
 export const sanitizeHttpsUrl = (value) => parseAbsoluteUrl(value, ["https:"])?.href ?? null;
+
+// Origines des fronts SNU (production et staging) : un lien affiché à partir d'une valeur fournie par
+// un tiers (attribut de contact du formulaire public anonyme) ne doit désigner que l'un de ces fronts,
+// jamais un hôte quelconque présenté comme une métadonnée interne (PM32, hameçonnage). Copie conforme de
+// `ALLOWED_REDIRECT_ORIGINS` (packages/lib/src/utils/request.ts, GOO-9), dont snupport-app ne dépend pas.
+const SNU_FRONT_ORIGINS = [
+  "https://snu.gouv.fr",
+  "https://www.snu.gouv.fr",
+  "https://admin.snu.gouv.fr",
+  "https://moncompte.snu.gouv.fr",
+  "https://support.snu.gouv.fr",
+  "https://admin-support.snu.gouv.fr",
+  "https://admin.beta-snu.dev",
+  "https://moncompte.beta-snu.dev",
+  "https://support.beta-snu.dev",
+  "https://admin-support.beta-snu.dev",
+];
+
+/** Lien affiché à partir d'une valeur fournie par un tiers : https uniquement, vers un front SNU connu. */
+export const sanitizeKnownHttpsUrl = (value) => {
+  const parsed = parseAbsoluteUrl(value, ["https:"]);
+  if (!parsed || !SNU_FRONT_ORIGINS.includes(parsed.origin)) return null;
+  return parsed.href;
+};

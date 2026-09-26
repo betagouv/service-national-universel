@@ -62,6 +62,7 @@ const TextEditor = ({
   resetCount,
   className = "",
   macroSlateContent,
+  allowImages = true,
 }) => {
   const draftMessageSlate = new DOMParser().parseFromString(draftMessageHtml, "text/html");
   const deserialized = deserialize(draftMessageSlate.body).filter((a) => a.type);
@@ -76,7 +77,7 @@ const TextEditor = ({
   const arrowUpPressed = useKeyPress("ArrowUp");
   const arrowDownPressed = useKeyPress("ArrowDown");
   const [selected, setSelected] = useState(0);
-  if (!editorRef.current) editorRef.current = withPlugins(withHistory(withReact(createEditor())));
+  if (!editorRef.current) editorRef.current = withPlugins(withHistory(withReact(createEditor())), allowImages);
   const editor = editorRef.current;
 
   useEffect(() => {
@@ -294,7 +295,12 @@ const TextEditor = ({
   );
 };
 
-const withPlugins = (editor) => {
+// `allowImages` : coller ou déposer une image publie systématiquement le fichier en accès public
+// (`/knowledge-base/picture`, ACL public-read) avant même l'envoi du message, réservé à l'éditeur de
+// la base de connaissance. Dans l'éditeur de réponse d'un ticket, l'image collée n'est jamais
+// transmise au contact (importHtml.js retire le nœud image de serialize()), et le fichier reste
+// public en permanence à l'insu de l'agent qui la croit envoyée (PM54) : l'insertion y est refusée.
+const withPlugins = (editor, allowImages = true) => {
   const { insertData, isVoid, insertText, isInline } = editor;
 
   editor.isVoid = (element) => {
@@ -325,12 +331,20 @@ const withPlugins = (editor) => {
       const [mime] = file.type.split("/");
 
       if (mime === "image") {
+        if (!allowImages) {
+          toast.error("L'insertion d'image n'est pas autorisée ici : joignez plutôt le fichier au message.");
+          return;
+        }
         const [imageUrl, imageAlt] = await uploadImage(files);
         if (!!imageUrl && !!imageAlt) insertImage(editor, imageUrl, imageAlt);
       }
       return;
     }
     if (text && isImageUrl(text)) {
+      if (!allowImages) {
+        toast.error("L'insertion d'image n'est pas autorisée ici : joignez plutôt le fichier au message.");
+        return;
+      }
       const imageAlt = await new Promise((resolve) => {
         const alt = window.prompt("Veuillez saisir la description de l'image (accessibilité personne mal-voyante) :");
         resolve(alt);
