@@ -8,6 +8,8 @@ const { ERRORS } = require("../errors");
 const { canAdministerAgents, canAssignRole, canManageAgent, ROLE_RANKS } = require("../utils/agentAdminScope");
 const { validateParams, validateBody, idSchema } = require("../middlewares/validation");
 const { SCHEMA_EMAIL, SCHEMA_ROLE } = require("../schemas");
+const { requireRole } = require("../middlewares/userRoleGuards");
+const { ipEmailRateLimiter } = require("../middlewares/rateLimit");
 
 const { config } = require("../config");
 const AgentModel = require("../models/agent");
@@ -28,9 +30,15 @@ const SCHEMA_FIRSTNAME = Joi.string().trim();
 // ajouté à un horodatage en millisecondes : le lien expirait au bout de 86 secondes.
 const RESET_TOKEN_MAX_AGE_MS = 1000 * 60 * 60; // 1 hour
 const SCHEMA_LASTNAME = Joi.string().trim();
+const MINUTE = 60 * 1000;
+// Comptes agents des référents SNU : ils ne se connectent que via GET /v0/sso/signin, jamais par
+// mot de passe direct (PM43). Dupliqué volontairement plutôt que partagé : même liste que
+// ticketUpdate.js et controllers/v0/referent.js, aucun des trois n'exporte la sienne.
+const REFERENT_ROLES = ["REFERENT_DEPARTMENT", "REFERENT_REGION"];
 
 router.post(
   "/signin",
+  ipEmailRateLimiter({ prefix: "agent-signin", windowMs: 15 * MINUTE, limit: 20 }),
   validateBody(
     Joi.object({
       email: SCHEMA_EMAIL,
@@ -39,17 +47,18 @@ router.post(
   ),
   async (req, res) => {
     const { password, email } = req.cleanBody;
+    const invalid = () => res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
     const user = await AgentModel.findOne({ email });
-    if (!user) return res.status(401).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
+    // Un compte référent n'a pas d'accès par mot de passe (PM43) : refusé avant toute comparaison,
+    // avec la même réponse qu'un email inconnu ou un mauvais mot de passe (PM42).
+    if (!user || REFERENT_ROLES.includes(user.role)) return invalid();
 
     const userWithPassword = await AgentModel.findById(user._id).select("password");
-    if (!userWithPassword.password) {
-      return res.status(403).send({ ok: false, code: ERRORS.PASSWORD_NOT_SET });
-    }
+    if (!userWithPassword.password) return invalid();
 
     const match = await userWithPassword.comparePassword(password);
-    if (!match) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+    if (!match) return invalid();
 
     user.set({ lastLoginAt: Date.now() });
     await user.save();
@@ -154,7 +163,7 @@ router.get("/me", agentGuard, async (req, res) => {
   res.send({ user: serializeAgentSelf(user), organisation: serializeOrganisation(organisation), ok: true });
 });
 
-router.get("/", agentGuard, async (req, res) => {
+router.get("/", agentGuard, requireRole("AGENT"), async (req, res) => {
   const agents = await AgentModel.find({}).select(PUBLIC_FIELDS.join(" "));
   const obj = Object.keys(ROLE_RANKS).reduce((acc, role) => ({ ...acc, [role]: [] }), {});
   agents.forEach((a) => obj[a.role] && obj[a.role].push(serializeAgent(a)));
@@ -163,6 +172,7 @@ router.get("/", agentGuard, async (req, res) => {
 
 router.post(
   "/forgot_password",
+  ipEmailRateLimiter({ prefix: "agent-forgot-password", windowMs: 60 * MINUTE, limit: 10 }),
   validateBody(
     Joi.object({
       email: SCHEMA_EMAIL,
@@ -171,20 +181,25 @@ router.post(
   async (req, res) => {
     const { email } = req.cleanBody;
     const agent = await AgentModel.findOne({ email });
-    if (!agent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
-    const token = crypto.randomBytes(SCHEMA_TOKEN_LENGTH).toString("hex");
-    const tokenHash = hashResetToken({ token, secret: config.PASSWORD_RESET_TOKEN_SECRET });
-    agent.set({ forgotPasswordResetToken: tokenHash, forgotPasswordResetExpires: Date.now() + RESET_TOKEN_MAX_AGE_MS });
-    await agent.save();
-    const subject = "Réinitialiser votre mot de passe";
-    const body = `Une demande de réinitialisation de mot de passe a été faite, si elle vient bien de vous vous pouvez <a href="${config.SNUPPORT_URL_ADMIN}/auth/reset?token=${token}" style="color: #584FEC">cliquer ici pour réinitialiser votre mot de passe</a>`;
-    await sendEmail([{ email: agent.email }], subject, body);
+    // Toujours 200, que le compte existe ou non : un 404 renseignait un attaquant sur les emails
+    // enregistrés (PM42). Le jeton n'est émis que si le compte existe et n'est pas référent (SSO
+    // obligatoire, PM43) : sinon un référent pourrait s'auto-attribuer un mot de passe.
+    if (agent && !REFERENT_ROLES.includes(agent.role)) {
+      const token = crypto.randomBytes(SCHEMA_TOKEN_LENGTH).toString("hex");
+      const tokenHash = hashResetToken({ token, secret: config.PASSWORD_RESET_TOKEN_SECRET });
+      agent.set({ forgotPasswordResetToken: tokenHash, forgotPasswordResetExpires: Date.now() + RESET_TOKEN_MAX_AGE_MS });
+      await agent.save();
+      const subject = "Réinitialiser votre mot de passe";
+      const body = `Une demande de réinitialisation de mot de passe a été faite, si elle vient bien de vous vous pouvez <a href="${config.SNUPPORT_URL_ADMIN}/auth/reset?token=${token}" style="color: #584FEC">cliquer ici pour réinitialiser votre mot de passe</a>`;
+      await sendEmail([{ email: agent.email }], subject, body);
+    }
     res.status(200).send({ ok: true });
   },
 );
 
 router.post(
   "/forgot_password_reset",
+  ipEmailRateLimiter({ prefix: "agent-forgot-password-reset", windowMs: 60 * MINUTE, limit: 10 }),
   validateBody(
     Joi.object({
       token: SCHEMA_TOKEN,
@@ -196,7 +211,10 @@ router.post(
     const { token, password, passwordConfirm } = req.cleanBody;
     const tokenHash = hashResetToken({ token, secret: config.PASSWORD_RESET_TOKEN_SECRET });
     const agent = await AgentModel.findOne({ forgotPasswordResetToken: tokenHash, forgotPasswordResetExpires: { $gt: Date.now() } });
-    if (!agent) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+    // Défense en profondeur (PM43) : un jeton émis juste avant le déploiement (fenêtre résiduelle
+    // <= RESET_TOKEN_MAX_AGE_MS) ne doit pas non plus rouvrir un accès par mot de passe à un compte
+    // référent. Même réponse qu'un jeton invalide ou expiré, pour ne rien laisser filtrer (PM42).
+    if (!agent || REFERENT_ROLES.includes(agent.role)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
     if (password !== passwordConfirm) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
     if (!validatePassword(password)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
 

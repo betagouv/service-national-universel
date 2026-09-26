@@ -71,6 +71,14 @@ runs:
         mkdir -p node_modules
         echo "${{ hashFiles('**/package-lock.json') }}" > node_modules/.snu-lock
 
+    # snupport-api importe snu-lib (ex. hasAsfSignature dans src/utils/attachments.js, GOO-64) :
+    # sans son dist construit, toute suite qui charge attachments.js/message.js echoue au chargement
+    # du module avec "Cannot find module 'snu-lib'", avant meme d'atteindre un test.
+    - name: Build lib
+      working-directory: packages/lib
+      shell: bash
+      run: npm run build
+
     # snupport-api importe @snu/log-redaction (redaction avant envoi a Sentry, cf. src/sentry.js) :
     # sans son dist a jour, les tests de redaction (PH18/PM36) passent a tort sur l'ancien
     # comportement fige dans un dist perime.
