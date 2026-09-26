@@ -17,7 +17,6 @@ import { AuthProvider } from "./infra/iam/auth/Auth.provider";
 import { JwtTokenService } from "./infra/iam/auth/JwtToken.service";
 import { ContactGateway } from "./infra/iam/Contact.gateway";
 import { REFERENT_MONGOOSE_ENTITY, referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provider";
-import { ClasseController } from "./infra/sejours/cle/classe/api/Classe.controller";
 import { CLASSE_MONGOOSE_ENTITY, classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import {
     ETABLISSEMENT_MONGOOSE_ENTITY,
@@ -27,7 +26,6 @@ import { gatewayProviders as cleGatewayProviders } from "./infra/sejours/cle/ini
 import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phase1/initProvider/gateway";
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
-import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 import { Phase1Controller } from "./infra/sejours/phase1/api/Phase1.controller";
@@ -45,7 +43,6 @@ import { referentielUseCaseProviders } from "./infra/referentiel/initProvider/us
 import { HistoryController } from "./infra/history/api/History.controller";
 import { historyProvider } from "./infra/history/historyProvider";
 import { serviceProvider } from "./infra/iam/service/serviceProvider";
-import { ReferentController } from "./infra/iam/api/Referent.controller";
 import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 
@@ -66,7 +63,6 @@ import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway
 import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
-import { InscrireEleveManuellement } from "./core/sejours/cle/classe/useCase/InscrireEleveManuellement";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { MissionController } from "./infra/engagement/mission/api/Mission.controller";
 import { StructureController } from "./infra/engagement/structure/api/Structure.controller";
@@ -104,14 +100,12 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         SharedModule,
     ],
     controllers: [
-        ClasseController,
         AffectationController,
         BasculeJeuneValidesController,
         BasculeJeuneNonValidesController,
         Phase1Controller,
         AdminTaskController,
         HistoryController,
-        ReferentController,
         DesistementController,
         InscriptionController,
         MissionController,
@@ -149,7 +143,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
-        ...cleUseCaseProviders,
         ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
@@ -158,7 +151,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         ...featureFlagMongoProviders,
         FeatureFlagService,
         JeuneService,
-        InscrireEleveManuellement,
         {
             provide: APP_FILTER,
             useClass: AllExceptionsFilter,
