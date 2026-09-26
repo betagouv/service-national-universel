@@ -50,7 +50,7 @@
     "is-url": "^1.2.4",
     "isomorphic-fetch": "^2.2.1",
     "lodash.debounce": "^4.0.8",
-    "nanoid": "^4.0.2",
+    "nanoid": "^5.1.16",
     "path": "^0.12.7",
     "query-string": "^7.1.1",
     "react": "18.2.0",
