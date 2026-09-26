@@ -39,7 +39,7 @@ import {
 } from "snu-lib";
 
 import { serializeYoung, serializeReferent } from "./utils/serializer";
-import { consumeLoginAttempt, resetLoginAttempts, consume2FAAttempt, consumeEmailValidationAttempt, isLoginLocked } from "./services/auth/attemptCounters";
+import { consumeLoginAttempt, resetLoginAttempts, consume2FAAttempt, consumeEmailValidationAttempt, isLoginLocked, compareAgainstDummyHash } from "./services/auth/attemptCounters";
 import { validateFirstName } from "./utils/validator";
 import { getFilteredSessions } from "./utils/cohort";
 
@@ -437,24 +437,37 @@ class Auth {
     try {
       const now = new Date();
       const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
-      if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
-      // Pré-filtrage : un compte déjà verrouillé est refusé sans consommer de
-      // tentative, pour qu'un attaquant qui persiste ne repousse pas lui-même
-      // indéfiniment la date de déblocage du compte visé.
-      if (isLoginLocked(user, now)) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+      const exists = Boolean(user) && user.status !== "DELETED";
 
+      // PM5 (25/09/2026, résiduel de M4) : un email inconnu doit être indiscernable, en code comme
+      // en temps de réponse, d'un mot de passe faux sur un compte verrouillé. Un hash bcrypt factice
+      // de même coût (10) est comparé pour occuper un temps équivalent à `user.comparePassword`.
+      if (!exists) {
+        await compareAgainstDummyHash(password);
+        return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
+
+      // Pré-filtrage : un compte déjà verrouillé ne fait pas consommer de nouvelle tentative, pour
+      // qu'un attaquant qui persiste ne repousse pas lui-même indéfiniment la date de déblocage du
+      // compte visé (inchangé). Mais le mot de passe soumis est quand même comparé avant de répondre :
+      // seul son titulaire, qui le connaît, apprend qu'il est temporairement bloqué (TOO_MANY_REQUESTS) ;
+      // un mot de passe faux reste EMAIL_OR_PASSWORD_INVALID, qu'il y ait verrou ou non (PM5).
+      const preLocked = isLoginLocked(user, now);
+      const attempt = preLocked ? null : await consumeLoginAttempt(this.model, user._id, now);
       // La tentative est consommée AVANT bcrypt : sinon N requêtes concurrentes
       // franchissent toutes le contrôle de plafond pendant le hachage (M4).
-      const attempt = await consumeLoginAttempt(this.model, user._id, now);
-      if (attempt.blocked) {
-        return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
-      }
+      const rateLimited = preLocked || Boolean(attempt?.blocked) || Boolean(attempt?.delayed);
+      const nextLoginAttemptIn = preLocked ? user.nextLoginAttemptIn : attempt?.nextLoginAttemptIn;
 
       const match = await user.comparePassword(password);
 
       if (!match) {
-        if (attempt.delayed) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+        // Mot de passe faux : jamais de TOO_MANY_REQUESTS (PM5), même verrouillé ou différé — cette
+        // réponse ne dépend plus que de l'exactitude du mot de passe, jamais de l'état du compteur.
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
+      if (rateLimited) {
+        return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn } });
       }
 
       // Mot de passe bon : le compteur est purgé tout de suite, y compris quand
@@ -930,12 +943,28 @@ class Auth {
     }
 
     try {
+      const now = new Date();
+      const user = await this.model.findById(req.user._id);
+
+      // PM6 (25/09/2026, résiduel de M4) : même verrou que `checkPassword` — sans lui, une session
+      // volée ou une XSS peut soumettre le mot de passe courant sans aucune limite de tentatives.
+      if (isLoginLocked(user, now)) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+
+      const attempt = await consumeLoginAttempt(this.model, user._id, now);
+      if (attempt.blocked) {
+        return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+      }
+
       const match = await req.user.comparePassword(password);
-      if (!match) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      if (!match) {
+        if (attempt.delayed) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+        return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      }
+      await resetLoginAttempts(this.model, user._id);
+
       if (newPassword !== verifyPassword) return res.status(422).send({ ok: false, code: ERRORS.PASSWORDS_NOT_MATCH });
       if (newPassword === password) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
-      const user = await this.model.findById(req.user._id);
       const passwordChangedAt = Date.now();
       user.set({ password: newPassword, passwordChangedAt, loginAttempts: 0 });
       await user.save();
@@ -974,10 +1003,12 @@ class Auth {
       user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });
       await user.save();
 
-      await sendTemplate(SENDINBLUE_TEMPLATES.FORGOT_PASSWORD, {
+      // PM5 (25/09/2026) : l'appel Brevo n'est plus attendu avant de répondre — sinon la présence ou
+      // l'absence d'un compte se lit dans le temps de réponse (branche `!user` ci-dessus, immédiate).
+      sendTemplate(SENDINBLUE_TEMPLATES.FORGOT_PASSWORD, {
         emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
         params: { cta: `${cta}?token=${token}` },
-      });
+      }).catch(capture);
 
       return res.status(200).send({ ok: true });
     } catch (error) {
