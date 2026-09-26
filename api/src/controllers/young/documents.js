@@ -13,11 +13,12 @@ const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const mime = require("mime-types");
 const { scanFile } = require("../../utils/virusScanner");
-const { generatePdfIntoStream } = require("../../utils/pdf-renderer");
+const { generatePdfIntoStream, isPdfDocumentAvailable } = require("../../utils/pdf-renderer");
 const { getMimeFromFile, getMimeFromBuffer } = require("../../utils/file");
 
 const ALLOWED_DOCUMENT_MIME_TYPES = ["image/jpeg", "image/png", "application/pdf"];
 const { sendDocumentEmailTask } = require("../../queues/sendMailQueue");
+const { isDocumentEmailAvailable } = require("../../young/youngSendDocumentEmailService");
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -29,6 +30,7 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { id, type, template } = value;
+    if (!isPdfDocumentAvailable(type, template)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/documents).
     const young = req.targetYoung;
@@ -57,6 +59,8 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const { id, type, template, fileName, contract_id, switchToCle } = value;
+    // Seuls les attestations et le contrat de mission s'envoient par mail (cf. youngSendDocumentEmailService).
+    if (!isDocumentEmailAvailable(type, template)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungModel.findById(id).select({ region: 1, department: 1 }); // used by canSendFileByMailToYoung
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
