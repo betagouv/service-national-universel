@@ -681,13 +681,15 @@ export function validateEvent(event) {
 }
 
 export function validateSelf(referent) {
-  // Referents can not update their role.
+  // Referents can not update their role. Ni son email ni son mot de passe (PH12/PH17, audit du
+  // 25/09/2026) : `stripUnknown` les retire silencieusement du body, impersonation ou non. Le mot de
+  // passe se change via POST /referent/reset_password (exige l'ancien) ; l'email référent n'a pas
+  // d'équivalent vérifié et devient non modifiable en self-service (un ADMIN le fait via
+  // PUT /referent/:id).
   return Joi.object()
     .keys({
       firstName: validateFirstName().allow(null, ""),
       lastName: Joi.string().uppercase().allow(null, ""),
-      email: Joi.string().lowercase().trim().email().allow(null, ""),
-      password: Joi.string().allow(null, ""),
       // `god` reste accepté ici car un superadmin renvoie son propre sous-rôle en sauvegardant son
       // profil ; c'est le handler (PUT /referent) qui interdit de *changer* de sous-rôle.
       subRole: Joi.string()

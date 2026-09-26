@@ -1830,19 +1830,11 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    // Sous impersonation (`signin_as`), l'acteur n'est pas le titulaire du compte : lui laisser poser
-    // un email ou un mot de passe lui donnait une prise de contrôle définitive, sans autre trace que
-    // `fromUser` (audit 2026-09-21, H61). `reset_password` exige déjà le mot de passe courant ; cette
-    // route s'aligne. Renvoyer l'email courant reste sans effet (le formulaire de profil poste
-    // l'objet complet), mais l'effacer (`null`/`""`) est bien un changement et reste refusé.
-    if (req.user.impersonateId) {
-      const emailChanged = "email" in value && value.email !== user.email;
-      const passwordSubmitted = "password" in value && !!value.password;
-      if (emailChanged || passwordSubmitted) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-    }
-
+    // `validateSelf` retire déjà `email` et `password` du body (PH12/PH17, audit du 25/09/2026) :
+    // `value` ne les contient jamais, impersonation ou non. Un référent - impersoné ou non - ne
+    // s'attribue donc plus l'un ou l'autre par cette route (H61 étendu : le garde-fou ne dépendait
+    // jusque-là que de `req.user.impersonateId`). Le mot de passe se change via
+    // POST /referent/reset_password ; l'email référent se change via PUT /referent/:id (ADMIN).
     user.set(value);
     user.set(cleanReferentData(user));
     await user.save({ fromUser: req.user });

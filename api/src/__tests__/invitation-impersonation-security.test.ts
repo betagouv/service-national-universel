@@ -7,6 +7,13 @@
  *             régénérait l'invitation de n'importe quel compte, y compris déjà activé.
  * H61       : sous impersonation, `PUT /referent/` acceptait email et mot de passe.
  * L35       : `signin_as` ne vérifiait pas le statut du référent cible.
+ * PH12/PH17 (25/09/2026, résiduel de H72) : `PUT /referent/` appliquait email et mot de passe pour
+ *             toute session normale (non impersonée) sans mot de passe courant ni validation par
+ *             email — H61 ne bloquait que sous impersonation. `validateSelf` retire désormais ces
+ *             deux clés du schéma (stripUnknown) : elles sont ignorées silencieusement, impersonation
+ *             ou non. Le mot de passe se change via `POST /referent/reset_password` (exige l'ancien) ;
+ *             l'email référent devient non modifiable en self-service (un ADMIN le fait via
+ *             `PUT /referent/:id`).
  */
 import request from "supertest";
 import crypto from "crypto";
@@ -155,14 +162,14 @@ describe("M66 — POST /referent/signup_retry", () => {
   });
 });
 
-describe("H61 — PUT /referent/ sous impersonation", () => {
+describe("H61/PH12/PH17 — PUT /referent/ : email et mot de passe non modifiables en libre-service", () => {
   async function appImpersonant(victime: any) {
     const admin = await ReferentModel.create(getNewReferentFixture({ role: ROLES.ADMIN } as any));
     victime.impersonateId = admin._id;
     return getAppHelperWithAcl(victime);
   }
 
-  it("refuse de changer l'adresse email du compte impersoné", async () => {
+  it("ignore silencieusement le changement d'email d'un compte impersoné (H61)", async () => {
     const victime: any = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT } as any));
     const emailOrigine = victime.email;
 
@@ -170,12 +177,12 @@ describe("H61 — PUT /referent/ sous impersonation", () => {
       .put("/referent/")
       .send({ email: `attaquant-${faker.string.uuid()}@example.org` });
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
     const apres = await ReferentModel.findById(victime._id);
     expect(apres!.email).toBe(emailOrigine);
   });
 
-  it("refuse de changer le mot de passe du compte impersoné", async () => {
+  it("ignore silencieusement le changement de mot de passe d'un compte impersoné (H61)", async () => {
     const victime: any = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, password: MOT_DE_PASSE_VALIDE } as any));
     const hashOrigine = (await ReferentModel.findById(victime._id).select("password"))!.password;
 
@@ -183,7 +190,7 @@ describe("H61 — PUT /referent/ sous impersonation", () => {
       .put("/referent/")
       .send({ email: victime.email, password: "Attaquant1234!@#$" });
 
-    expect(res.status).toBe(403);
+    expect(res.status).toBe(200);
     const apres = await ReferentModel.findById(victime._id).select("password");
     expect(apres!.password).toBe(hashOrigine);
   });
@@ -200,8 +207,9 @@ describe("H61 — PUT /referent/ sous impersonation", () => {
     expect(apres!.firstName).toBe("Prenom");
   });
 
-  it("laisse un référent non impersoné changer son propre email", async () => {
+  it("ignore silencieusement le changement d'email d'un référent non impersoné (PH17)", async () => {
     const referent: any = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT } as any));
+    const emailOrigine = referent.email;
     const nouvelEmail = `nouveau-${faker.string.uuid()}@example.org`;
 
     const res = await request(await getAppHelperWithAcl(referent))
@@ -210,7 +218,33 @@ describe("H61 — PUT /referent/ sous impersonation", () => {
 
     expect(res.status).toBe(200);
     const apres = await ReferentModel.findById(referent._id);
-    expect(apres!.email).toBe(nouvelEmail);
+    expect(apres!.email).toBe(emailOrigine);
+  });
+
+  it("ignore silencieusement le changement de mot de passe d'un référent non impersoné (PH12/PH17)", async () => {
+    const referent: any = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, password: MOT_DE_PASSE_VALIDE } as any));
+    const hashOrigine = (await ReferentModel.findById(referent._id).select("password"))!.password;
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .put("/referent/")
+      .send({ password: "Attaquant1234!@#$" });
+
+    expect(res.status).toBe(200);
+    const apres = await ReferentModel.findById(referent._id).select("password");
+    expect(apres!.password).toBe(hashOrigine);
+  });
+
+  it("laisse toujours modifier les autres champs du profil (prénom, nom, téléphone)", async () => {
+    const referent: any = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT } as any));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .put("/referent/")
+      .send({ firstName: "Nouveau", lastName: "NOM", phone: "0600000000" });
+
+    expect(res.status).toBe(200);
+    const apres = await ReferentModel.findById(referent._id);
+    expect(apres!.firstName).toBe("Nouveau");
+    expect(apres!.phone).toBe("0600000000");
   });
 });
 

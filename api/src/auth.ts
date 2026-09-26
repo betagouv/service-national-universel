@@ -607,49 +607,6 @@ class Auth {
     }
   }
 
-  async changeEmailDuringSignUp(req, res) {
-    try {
-      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).validate(req.body, { stripUnknown: true });
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const user = await this.model.findOne({
-        email: req.user.email,
-        emailVerified: "false",
-      });
-
-      if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-
-      const existingUser = await this.model.findOne({
-        email: value.email,
-      });
-
-      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-
-      const tokenEmailValidation = await crypto.randomInt(1000000);
-      user.set({ email: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60 });
-      await user.save();
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: value.email }],
-        params: {
-          registration_code: tokenEmailValidation,
-          cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
-        },
-      });
-
-      return res.status(200).send({
-        ok: true,
-        user: serializeYoung(user, user),
-      });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  }
-
   async requestEmailUpdate(req, res) {
     try {
       const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required(), password: Joi.string().required() }).unknown().validate(req.body);
