@@ -1,8 +1,9 @@
 import crypto from "crypto";
+import { addYears } from "date-fns";
 import { Types } from "mongoose";
 import request from "supertest";
 
-import { YoungType, ROLES, PERMISSION_RESOURCES, PERMISSION_ACTIONS, ROLE_JEUNE } from "snu-lib";
+import { YoungType, ROLES, PERMISSION_RESOURCES, PERMISSION_ACTIONS, ROLE_JEUNE, getAge } from "snu-lib";
 
 import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -14,7 +15,8 @@ import { getYoungByIdHelper, createYoungHelper } from "./helpers/young";
 import { expectContractToEqual, getContractByIdHelper, createContractHelper } from "./helpers/contract";
 import { createStructureHelper } from "./helpers/structure";
 import getNewStructureFixture from "./fixtures/structure";
-import { ApplicationModel } from "../models";
+import { ApplicationModel, ContractModel } from "../models";
+import * as brevo from "../brevo";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 
@@ -35,10 +37,14 @@ jest.mock("node-fetch", () =>
   ),
 );
 
-jest.mock("../brevo", () => ({
-  ...jest.requireActual("../brevo"),
-  sendEmail: () => Promise.resolve(),
-}));
+jest.mock("../brevo", () => {
+  const actual = jest.requireActual("../brevo");
+  return {
+    ...actual,
+    sendEmail: () => Promise.resolve(),
+    sendTemplate: jest.fn((...args) => actual.sendTemplate(...args)),
+  };
+});
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
@@ -60,6 +66,16 @@ beforeAll(async () => {
 });
 afterAll(dbClose);
 afterEach(resetAppAuth);
+
+function expectedSignatories(young) {
+  return {
+    isYoungAdult: Number(getAge(young.birthdateAt)) >= 18 ? "true" : "false",
+    youngBirthdate: new Date(young.birthdateAt).toISOString().split("T")[0],
+    youngEmail: young.email,
+    parent1Email: young.parent1Email,
+    parent2Email: young.parent2Email,
+  };
+}
 
 describe("Contract", () => {
   describe("POST /contract", () => {
@@ -90,10 +106,13 @@ describe("Contract", () => {
         const contractFixture = getNewContractFixture();
         contractFixture.youngId = young._id;
         contractFixture.applicationId = application._id;
+        contractFixture.structureId = application.structureId;
         const res = await request(await getAppHelperWithAcl())
           .post("/contract")
           .send({ ...contractFixture, ...options });
-        return { res, young, application, contractFixture };
+        // Signataires et majorité viennent du dossier du jeune, pas du corps (PH4).
+        const expectedContract = { ...contractFixture, ...expectedSignatories(young) };
+        return { res, young, application, contractFixture: expectedContract };
       }
       it("should create contract and send it when setting sendMessage to true", async () => {
         const { res, young, contractFixture } = await createContract({ sendMessage: true });
@@ -139,7 +158,8 @@ describe("Contract", () => {
       });
 
       it("should create tokens for young (adult) without returning them", async () => {
-        const { res } = await createContract({ sendMessage: true, isYoungAdult: "true" });
+        const adult = await createYoungHelper({ ...getNewYoungFixture(), birthdateAt: addYears(new Date(), -20) });
+        const { res } = await createContract({ sendMessage: true }, adult);
         expect(res.status).toBe(200);
         const stored = await getContractByIdHelper(res.body.data._id);
         for (const field of TOKEN_FIELDS) {
@@ -170,6 +190,7 @@ describe("Contract", () => {
         const contractFixture = getNewContractFixture();
         contractFixture.youngId = young._id;
         contractFixture.applicationId = application._id;
+        contractFixture.structureId = application.structureId;
         contractFixture.missionDuration = "65";
         const res = await request(await getAppHelperWithAcl())
           .post("/contract")
@@ -601,13 +622,302 @@ describe("Contrat - cloisonnement des lectures (C2)", () => {
   });
 });
 
+describe("POST /contract - cloisonnement de l'écriture et signataires (PH4)", () => {
+  const mineur = () => addYears(new Date(), -16);
+  const majeur = () => addYears(new Date(), -20);
+
+  async function setupDossier({ birthdateAt = mineur(), networkId = "" }: { birthdateAt?: Date; networkId?: string } = {}) {
+    const structure = await createStructureHelper({ ...getNewStructureFixture(), networkId });
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      department: "Ain",
+      region: "Auvergne-Rhône-Alpes",
+      birthdateAt,
+      email: `jeune-${new ObjectId()}@dossier.fr`,
+      parent1Email: `parent1-${new ObjectId()}@dossier.fr`,
+      parent2Email: `parent2-${new ObjectId()}@dossier.fr`,
+    });
+    const application = await createApplication({ ...getNewApplicationFixture(), status: "VALIDATED", youngId: young._id, structureId: structure._id });
+    const body = {
+      ...getNewContractFixture(),
+      youngId: young._id.toString(),
+      applicationId: application._id.toString(),
+      structureId: structure._id.toString(),
+      youngDepartment: "Ain",
+    };
+    return { structure, young, application, body };
+  }
+
+  async function createExistingContract() {
+    const dossier = await setupDossier();
+    const creation = await request(await getAppHelperWithAcl())
+      .post("/contract")
+      .send({ ...dossier.body, sendMessage: false });
+    expect(creation.status).toBe(200);
+    return { ...dossier, contract: creation.body.data };
+  }
+
+  describe("création", () => {
+    it("devrait refuser un responsable d'une autre structure", async () => {
+      const { body } = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() }))
+        .post("/contract")
+        .send(body);
+      expect(res.status).toBe(403);
+      expect(await ContractModel.countDocuments({ applicationId: body.applicationId })).toBe(0);
+    });
+
+    it("devrait accepter le responsable de la structure", async () => {
+      const { structure, body } = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .post("/contract")
+        .send(body);
+      expect(res.status).toBe(200);
+    });
+
+    it("devrait refuser un superviseur hors réseau", async () => {
+      const { body } = await setupDossier();
+      const autreTete = await createStructureHelper({ ...getNewStructureFixture(), networkId: "" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: autreTete._id.toString() }))
+        .post("/contract")
+        .send(body);
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait accepter un superviseur de la tête de réseau", async () => {
+      const tete = await createStructureHelper({ ...getNewStructureFixture(), networkId: "" });
+      const { body } = await setupDossier({ networkId: tete._id.toString() });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: tete._id.toString() }))
+        .post("/contract")
+        .send(body);
+      expect(res.status).toBe(200);
+    });
+
+    it("devrait refuser un référent départemental hors département du jeune", async () => {
+      const { body } = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Nord"], region: "Hauts-de-France" }))
+        .post("/contract")
+        .send(body);
+      expect(res.status).toBe(403);
+      expect(await ContractModel.countDocuments({ applicationId: body.applicationId })).toBe(0);
+    });
+
+    it("devrait accepter le référent départemental du jeune", async () => {
+      const { body } = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"], region: "Auvergne-Rhône-Alpes" }))
+        .post("/contract")
+        .send(body);
+      expect(res.status).toBe(200);
+    });
+
+    it("devrait refuser un référent régional hors région du jeune", async () => {
+      const { body } = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, department: [], region: "Hauts-de-France" }))
+        .post("/contract")
+        .send(body);
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait accepter le référent régional du jeune", async () => {
+      const { body } = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, department: [], region: "Auvergne-Rhône-Alpes" }))
+        .post("/contract")
+        .send(body);
+      expect(res.status).toBe(200);
+    });
+
+    it("devrait refuser, sans rien écrire, une candidature d'une autre structure rattachée à sa propre structure", async () => {
+      const { structure } = await setupDossier();
+      const autre = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .post("/contract")
+        .send({ ...autre.body, structureId: structure._id.toString() });
+      expect(res.status).toBe(403);
+      expect(await ContractModel.countDocuments({ applicationId: autre.body.applicationId })).toBe(0);
+      const application = await getApplicationByIdHelper(autre.application._id);
+      expect(application?.contractId).toBe(autre.application.contractId);
+    });
+
+    it("devrait refuser, sans rien écrire, un jeune qui n'est pas celui de la candidature", async () => {
+      const { structure, body } = await setupDossier();
+      const autre = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .post("/contract")
+        .send({ ...body, youngId: autre.young._id.toString() });
+      expect(res.status).toBe(403);
+      expect(await ContractModel.countDocuments({ applicationId: body.applicationId })).toBe(0);
+    });
+
+    it("ne devrait pas persister de contrat quand la candidature est introuvable", async () => {
+      const { body } = await setupDossier();
+      const applicationId = new ObjectId().toString();
+      const res = await request(await getAppHelperWithAcl())
+        .post("/contract")
+        .send({ ...body, applicationId });
+      expect(res.status).toBe(404);
+      expect(await ContractModel.countDocuments({ applicationId })).toBe(0);
+    });
+  });
+
+  describe("mise à jour", () => {
+    it("devrait refuser un responsable d'une autre structure", async () => {
+      const { contract } = await createExistingContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() }))
+        .post("/contract")
+        .send({ ...contract, missionName: "modifiée" });
+      expect(res.status).toBe(403);
+      expect((await getContractByIdHelper(contract._id))?.missionName).not.toBe("modifiée");
+    });
+
+    it("devrait refuser un référent départemental hors département du jeune", async () => {
+      const { contract } = await createExistingContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Nord"], region: "Hauts-de-France" }))
+        .post("/contract")
+        .send({ ...contract, missionName: "modifiée" });
+      expect(res.status).toBe(403);
+      expect((await getContractByIdHelper(contract._id))?.missionName).not.toBe("modifiée");
+    });
+
+    it("devrait refuser un référent régional hors région du jeune", async () => {
+      const { contract } = await createExistingContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, department: [], region: "Hauts-de-France" }))
+        .post("/contract")
+        .send({ ...contract, missionName: "modifiée" });
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait accepter le référent départemental du jeune", async () => {
+      const { contract } = await createExistingContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"], region: "Auvergne-Rhône-Alpes" }))
+        .post("/contract")
+        .send({ ...contract, missionName: "modifiée" });
+      expect(res.status).toBe(200);
+      expect((await getContractByIdHelper(contract._id))?.missionName).toBe("modifiée");
+    });
+
+    it("devrait refuser de rattacher le contrat à la candidature d'un autre dossier", async () => {
+      const { structure, contract } = await createExistingContract();
+      const autre = await setupDossier();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .post("/contract")
+        .send({ ...contract, applicationId: autre.application._id.toString(), youngId: autre.young._id.toString() });
+      expect(res.status).toBe(403);
+      const stored = await getContractByIdHelper(contract._id);
+      expect(stored?.applicationId).toBe(contract.applicationId);
+      expect(stored?.youngId).toBe(contract.youngId);
+    });
+  });
+
+  describe("signataires pilotés par le dossier du jeune", () => {
+    it("devrait solliciter les représentants légaux d'un mineur même si le corps le déclare majeur", async () => {
+      const { young, body } = await setupDossier({ birthdateAt: mineur() });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/contract")
+        .send({ ...body, isYoungAdult: "true", youngBirthdate: addYears(new Date(), -30).toISOString(), sendMessage: true });
+      expect(res.status).toBe(200);
+      const stored = await getContractByIdHelper(res.body.data._id);
+      expect(stored?.isYoungAdult).toBe("false");
+      expect(stored?.parent1Status).toBe("WAITING_VALIDATION");
+      // sans la signature des représentants légaux, le contrat ne peut pas être validé
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung?.statusPhase2Contract[0]).toBe("SENT");
+    });
+
+    it("devrait traiter un jeune majeur comme majeur même si le corps le déclare mineur", async () => {
+      const { body } = await setupDossier({ birthdateAt: majeur() });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/contract")
+        .send({ ...body, isYoungAdult: "false", sendMessage: true });
+      expect(res.status).toBe(200);
+      const stored = await getContractByIdHelper(res.body.data._id);
+      expect(stored?.isYoungAdult).toBe("true");
+    });
+
+    it("devrait envoyer les liens de signature aux adresses du dossier, pas à celles du corps", async () => {
+      const spy = brevo.sendTemplate as jest.Mock;
+      spy.mockClear();
+      {
+        const { young, body } = await setupDossier({ birthdateAt: mineur() });
+        const res = await request(await getAppHelperWithAcl())
+          .post("/contract")
+          .send({ ...body, youngEmail: "pirate@forge.fr", parent1Email: "pirate@forge.fr", parent2Email: "pirate2@forge.fr", sendMessage: true });
+        expect(res.status).toBe(200);
+
+        const destinataires = spy.mock.calls.flatMap(([, { emailTo }]) => (emailTo || []).map((e) => e.email));
+        expect(destinataires).not.toContain("pirate@forge.fr");
+        expect(destinataires).not.toContain("pirate2@forge.fr");
+        expect(destinataires).toEqual(expect.arrayContaining([young.parent1Email, young.parent2Email]));
+
+        const stored = await getContractByIdHelper(res.body.data._id);
+        expect(stored?.youngEmail).toBe(young.email);
+        expect(stored?.parent1Email).toBe(young.parent1Email);
+        expect(stored?.parent2Email).toBe(young.parent2Email);
+      }
+    });
+
+    it("devrait envoyer le lien de signature d'un majeur à l'adresse du dossier", async () => {
+      const spy = brevo.sendTemplate as jest.Mock;
+      spy.mockClear();
+      {
+        const { young, body } = await setupDossier({ birthdateAt: majeur() });
+        const res = await request(await getAppHelperWithAcl())
+          .post("/contract")
+          .send({ ...body, youngEmail: "pirate@forge.fr", sendMessage: true });
+        expect(res.status).toBe(200);
+        const destinataires = spy.mock.calls.flatMap(([, { emailTo }]) => (emailTo || []).map((e) => e.email));
+        expect(destinataires).not.toContain("pirate@forge.fr");
+        expect(destinataires).toContain(young.email);
+      }
+    });
+
+    it("ne devrait pas redemander une signature parentale quand le corps change l'adresse d'un parent", async () => {
+      const { young, contract } = await createExistingContract();
+      const envoi = await request(await getAppHelperWithAcl())
+        .post("/contract")
+        .send({ ...contract, sendMessage: true });
+      expect(envoi.status).toBe(200);
+      const avant = await getContractByIdHelper(contract._id);
+
+      const res = await request(await getAppHelperWithAcl())
+        .post("/contract")
+        .send({ ...envoi.body.data, parent1Email: "pirate@forge.fr", sendMessage: true });
+      expect(res.status).toBe(200);
+      const apres = await getContractByIdHelper(contract._id);
+      expect(apres?.parent1Email).toBe(young.parent1Email);
+      expect(apres?.parent1Token).toBe(avant?.parent1Token);
+    });
+
+    it("devrait renvoyer le lien de signature à l'adresse du dossier (send-email)", async () => {
+      const { young, structure, application } = await setupDossier();
+      const contract = await createContractHelper({
+        ...getNewContractFixture(),
+        youngId: young._id,
+        applicationId: application._id,
+        structureId: structure._id,
+        parent1Email: "pirate@forge.fr",
+        parent1Token: "tok-parent1",
+      });
+      const spy = brevo.sendTemplate as jest.Mock;
+      spy.mockClear();
+      {
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+          .post(`/contract/${contract._id}/send-email/parent1`)
+          .send();
+        expect(res.status).toBe(200);
+        const destinataires = spy.mock.calls.flatMap(([, { emailTo }]) => (emailTo || []).map((e) => e.email));
+        expect(destinataires).toEqual([young.parent1Email]);
+      }
+    });
+  });
+});
+
 describe("POST /contract - champs pilotés par le serveur (H21)", () => {
   it("ne devrait pas accepter les statuts et jetons de signature envoyés par le client", async () => {
     const young = await createYoungHelper(getNewYoungFixture());
     const application = await createApplication({ ...getNewApplicationFixture(), status: "VALIDATED", youngId: young._id });
     const creation = await request(await getAppHelperWithAcl())
       .post("/contract")
-      .send({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id, sendMessage: true });
+      .send({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id, structureId: application.structureId, sendMessage: true });
     expect(creation.status).toBe(200);
 
     const contratInitial = await getContractByIdHelper(creation.body.data._id);
