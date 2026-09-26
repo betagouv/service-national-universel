@@ -9,6 +9,7 @@ const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch, getResponsibleCenterField } = require("./utils");
 const { ROLES } = require("snu-lib");
 const { LigneBusModel, SessionPhase1Model } = require("../../models");
+const { getLigneBusScope } = require("../../services/sejourAccess");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -57,6 +58,21 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort });
       if (!lignebus.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
+    }
+
+    // PM9 (25/09/2026) : le plan de transport national et les demandes de modification étaient
+    // lisibles par tout référent départemental ou régional, sans aucun filtre géographique (à la
+    // différence de lignebus.js, déjà borné). Même périmètre que lignebus (getLigneBusScope), avec
+    // les noms de champs réels du document plandetransport.
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+      const scope = await getLigneBusScope(user);
+      if (!scope || scope.national) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      contextFilters.push({
+        bool: {
+          should: [{ terms: { "centerId.keyword": scope.centerIds } }, { terms: { "pointDeRassemblements.meetingPointId.keyword": scope.meetingPointIds } }],
+          minimum_should_match: 1,
+        },
+      });
     }
 
     // Build request body

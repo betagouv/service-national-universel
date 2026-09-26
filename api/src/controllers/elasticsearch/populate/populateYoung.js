@@ -1,6 +1,7 @@
 const { allRecords } = require("../../../es/utils");
+const { serializeLigneBus } = require("../../../services/sejourAccess");
 
-async function populateYoungExport(data, exportFields) {
+async function populateYoungExport(data, exportFields, user) {
   //School
   if (exportFields.includes("schoolId")) {
     const schoolIds = [...new Set(data.map((item) => item.schoolId).filter(Boolean))];
@@ -27,7 +28,9 @@ async function populateYoungExport(data, exportFields) {
     //get bus
     const busIds = [...new Set(data.map((item) => item.ligneId).filter(Boolean))];
     const bus = await allRecords("lignebus", { bool: { must: { ids: { values: busIds } } } });
-    data = data.map((item) => ({ ...item, bus: bus?.find((e) => e._id.toString() === item.ligneId) }));
+    // PH7 (25/09/2026) : `team` (état civil, email, téléphone des accompagnateurs) n'est dû qu'à un
+    // ADMIN (canViewConvoyeurTeam) ; ce point d'export l'attachait tel quel à tout appelant.
+    data = data.map((item) => ({ ...item, bus: serializeLigneBus(bus?.find((e) => e._id.toString() === item.ligneId), user) }));
     //get ligneToPoint
     const meetingPointsIds = [...new Set(bus.reduce((prev, item) => [...prev, ...item.meetingPointsIds], []))];
     const lignesToPoint = await allRecords("lignetopoint", { bool: { must: { terms: { "meetingPointId.keyword": meetingPointsIds } } } });

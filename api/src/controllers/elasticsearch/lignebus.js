@@ -9,7 +9,7 @@ const { ES_NO_LIMIT, ROLES, canSearchLigneBus, canExportLigneBus } = require("sn
 const { allRecords } = require("../../es/utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const logger = require("../../logger");
-const { getLigneBusScope, getLigneBusScopeEsFilter } = require("../../services/sejourAccess");
+const { getLigneBusScope, getLigneBusScopeEsFilter, serializeLigneBus } = require("../../services/sejourAccess");
 
 /**
  * Filtres de contexte communs aux recherches sur l'index `lignebus` : lignes non
@@ -170,6 +170,13 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
       }
     }
 
+    // PH7 (25/09/2026) : `team` (état civil, email, téléphone des accompagnateurs, des tiers) était
+    // servi tel quel à tout rôle admis par canSearchLigneBus, alors que seul un ADMIN y a droit
+    // (canViewConvoyeurTeam).
+    for (const ligneBus of lignesBus) {
+      ligneBus._source = serializeLigneBus(ligneBus._source, user);
+    }
+
     return res.status(200).send(response.body);
   } catch (error) {
     capture(error);
@@ -216,6 +223,9 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
       center: responseWithCenterInfo[index].center,
       meetingPoints: responseWithMeetingPoints[index].meetingPoints,
     }));
+
+    // PH7 (25/09/2026) : mêmes accompagnateurs (team) que /search, filtrés hors ADMIN.
+    response = response.map((item) => serializeLigneBus(item, req.user));
 
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
