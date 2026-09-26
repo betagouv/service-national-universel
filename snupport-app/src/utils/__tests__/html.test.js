@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import sanitizeHtml from "sanitize-html";
-import { htmlCleaner, noteToSafeHtml, urlify } from "../html.js";
+import { hasHiddenRemoteImages, htmlCleaner, noteToSafeHtml, revealRemoteImages, urlify } from "../html.js";
 
 // Relit le HTML produit comme le ferait le navigateur et renvoie les balises et attributs réels.
 const parseTags = (html) => {
@@ -38,7 +38,34 @@ test("htmlCleaner garde les images collées dans un e-mail (data:image en base64
 
 test("htmlCleaner retire l'attribut style (FM23)", () => {
   assert.equal(htmlCleaner('<blockquote style="position:fixed;top:0">x</blockquote>'), "<blockquote>x</blockquote>");
-  assert.equal(htmlCleaner('<img src="https://a.fr/i.png" style="width:100%" />'), '<img src="https://a.fr/i.png" />');
+  assert.equal(htmlCleaner('<img src="https://a.fr/i.png" style="width:100%" />'), '<img iwc-no-src="https://a.fr/i.png" />');
+});
+
+// PL25 : une image distante d'un e-mail entrant (pixel de suivi) ne doit pas se charger automatiquement
+// chez l'agent qui ouvre le ticket ; elle est neutralisée par htmlCleaner et restaurée uniquement à la
+// demande explicite de l'agent (bouton « afficher les images »).
+test("htmlCleaner neutralise les images distantes (http et https) au lieu de les charger (PL25)", () => {
+  assert.equal(htmlCleaner('<img src="https://tiers.example/pixel.gif" width="1" height="1" />'), '<img width="1" height="1" iwc-no-src="https://tiers.example/pixel.gif" />');
+  assert.equal(htmlCleaner('<img src="http://tiers.example/pixel.gif" />'), '<img iwc-no-src="http://tiers.example/pixel.gif" />');
+});
+
+test("htmlCleaner garde les images collées (data:) chargées directement, sans neutralisation", () => {
+  assert.equal(htmlCleaner('<img src="data:image/png;base64,iVBORw0KGgo=" />'), '<img src="data:image/png;base64,iVBORw0KGgo=" />');
+});
+
+test("hasHiddenRemoteImages détecte une image distante neutralisée", () => {
+  assert.equal(hasHiddenRemoteImages(htmlCleaner('<img src="https://tiers.example/pixel.gif" />')), true);
+  assert.equal(hasHiddenRemoteImages(htmlCleaner('<img src="data:image/png;base64,iVBORw0KGgo=" />')), false);
+  assert.equal(hasHiddenRemoteImages(htmlCleaner("<p>rien</p>")), false);
+});
+
+test("revealRemoteImages restaure l'image distante à la demande de l'agent", () => {
+  const hidden = htmlCleaner('<img src="https://tiers.example/pixel.gif" alt="x" />');
+  assert.equal(revealRemoteImages(hidden), '<img alt="x" src="https://tiers.example/pixel.gif" />');
+});
+
+test("revealRemoteImages refuse un schéma dangereux même glissé directement dans iwc-no-src", () => {
+  assert.equal(revealRemoteImages('<img iwc-no-src="javascript:alert(1)" />'), "<img />");
 });
 
 test("htmlCleaner garde les listes à puces et force rel sur tout lien, comme snu-lib", () => {

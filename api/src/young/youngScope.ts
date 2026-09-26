@@ -1,4 +1,4 @@
-import { ROLES, UserDto, YoungType, canEditYoung, MILITARY_FILE_KEYS } from "snu-lib";
+import { APPLICATION_STATUS, ROLES, UserDto, YoungType, canEditYoung, MILITARY_FILE_KEYS } from "snu-lib";
 
 import { ApplicationModel, ClasseModel, SessionPhase1Model, StructureModel } from "../models";
 import { getResponsibleCenterField } from "../controllers/elasticsearch/utils";
@@ -138,6 +138,12 @@ async function getActorStructureIds(user: UserDto): Promise<string[]> {
 }
 
 /**
+ * Une proposition de mission (WAITING_ACCEPTATION) n'ouvre rien à la structure tant que le volontaire
+ * ne l'a pas acceptée : ni son dossier, ni ses pièces, ni la candidature elle-même (PH11, PH1).
+ */
+const NOT_A_PROPOSAL = { status: { $ne: APPLICATION_STATUS.WAITING_ACCEPTATION } };
+
+/**
  * Périmètre d'un responsable / superviseur de structure : le volontaire doit avoir candidaté à une
  * mission portée par la structure de l'utilisateur (ou, pour un superviseur, par une structure de
  * son réseau). C'est le contrôle que `canDownloadYoungDocuments` laissait en commentaire.
@@ -145,7 +151,7 @@ async function getActorStructureIds(user: UserDto): Promise<string[]> {
 export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
   const structureIds = await getActorStructureIds(user);
   if (!structureIds.length) return false;
-  return !!(await ApplicationModel.exists({ youngId: young._id!.toString(), structureId: { $in: structureIds } }));
+  return !!(await ApplicationModel.exists({ youngId: young._id!.toString(), structureId: { $in: structureIds }, ...NOT_A_PROPOSAL }));
 }
 
 /**
@@ -158,9 +164,9 @@ export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungTy
  * voient le dossier au titre de leur territoire ou de leur rattachement : toutes les candidatures
  * du volontaire relèvent alors de leur périmètre.
  */
-export async function getApplicationScopeFilter(user: UserDto): Promise<{ structureId?: { $in: string[] } }> {
+export async function getApplicationScopeFilter(user: UserDto): Promise<{ structureId?: { $in: string[] }; status?: { $ne: string } }> {
   if (![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return {};
-  return { structureId: { $in: await getActorStructureIds(user) } };
+  return { structureId: { $in: await getActorStructureIds(user) }, ...NOT_A_PROPOSAL };
 }
 
 /**
@@ -180,6 +186,7 @@ export async function isYoungInMilitaryPreparationStructureScope(user: UserDto, 
   return !!(await ApplicationModel.exists({
     youngId: young._id!.toString(),
     structureId: { $in: militaryStructures.map((structure) => structure._id.toString()) },
+    ...NOT_A_PROPOSAL,
   }));
 }
 

@@ -9,8 +9,8 @@ import { APPLICATION_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS_PHASE2 } from "snu
 
 export function EngagementList() {
   const { young } = useSelector((state) => state.Auth);
-  const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
-  const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });
+  const applications = useQuery({ queryKey: ["application", { youngId: young._id }], queryFn: () => fetchApplications(young._id) });
+  const equivalences = useQuery({ queryKey: ["equivalence", { youngId: young._id }], queryFn: () => fetchEquivalences(young._id) });
 
   if (equivalences.isPending || applications.isPending) {
     return <Loader />;

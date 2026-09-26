@@ -219,30 +219,6 @@ export function validateFirstName() {
   );
 }
 
-const applicationKeys = {
-  youngId: Joi.string().allow(null, ""),
-  youngFirstName: Joi.string().allow(null, ""),
-  youngLastName: Joi.string().allow(null, ""),
-  youngEmail: Joi.string().allow(null, ""),
-  youngBirthdateAt: Joi.string().allow(null, ""),
-  youngCity: Joi.string().allow(null, ""),
-  youngDepartment: Joi.string().allow(null, ""),
-  youngCohort: Joi.string().allow(null, ""),
-  missionId: Joi.string().allow(null, ""),
-  missionName: Joi.string().allow(null, ""),
-  missionDepartment: Joi.string().allow(null, ""),
-  missionRegion: Joi.string().allow(null, ""),
-  missionDuration: Joi.string().allow(null, ""),
-  structureId: Joi.string().allow(null, ""),
-  tutorId: Joi.string().allow(null, ""),
-  tutorName: Joi.string().allow(null, ""),
-  contractId: Joi.string().allow(null, ""),
-  priority: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  hidden: Joi.string().allow(null, ""),
-  status: Joi.string().allow(null, ""),
-  statusComment: Joi.string().allow(null, ""),
-};
-
 /**
  * Transitions de statut qu'un volontaire peut déclencher lui-même sur sa candidature :
  * accepter une proposition (WAITING_VALIDATION / WAITING_VERIFICATION pour une PM),
@@ -262,13 +238,24 @@ const YOUNG_ALLOWED_UPDATE_APPLICATION_STATUS = [
 /** À la création, un volontaire ne peut candidater qu'en attente de validation / de vérification (PM). */
 const YOUNG_ALLOWED_NEW_APPLICATION_STATUS = [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION];
 
+/**
+ * Une candidature ne se modifie que par son statut, sa durée, son masquage et son rang.
+ *
+ * Volontaire, mission, structure, tuteur et contrat sont dénormalisés et dérivés côté serveur. Écrits
+ * par le client, ils rattachaient une candidature à un autre volontaire ou à une autre mission, et
+ * faisaient joindre un contrat ou un référent tiers à la liste des candidatures du volontaire
+ * (constats PH1 et PH19, audit du 25/09/2026). Les autres clés sont ignorées ; `youngId` reste
+ * contrôlé pour refuser explicitement une réaffectation.
+ */
 export function validateUpdateApplication(application, user) {
   const young = isYoung(user);
   return Joi.object()
     .keys({
-      ...applicationKeys,
       // A young can only update a mission for him/herself.
-      youngId: young ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
+      youngId: young ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.forbidden(),
+      priority: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+      hidden: Joi.string().allow(null, ""),
+      statusComment: young ? Joi.any().strip() : Joi.string().allow(null, ""),
       status: young
         ? Joi.string()
             .valid(...YOUNG_ALLOWED_UPDATE_APPLICATION_STATUS)
@@ -282,11 +269,15 @@ export function validateUpdateApplication(application, user) {
     .validate(application, { stripUnknown: true });
 }
 
+/**
+ * À la création, seuls le volontaire, la mission et le statut viennent du client ; la durée aussi pour
+ * un référent (mission personnalisée). Tout le reste est dérivé du volontaire et de la mission par
+ * `POST /application` (constats PH1 et PH19).
+ */
 export function validateNewApplication(application, user) {
   const young = isYoung(user);
   return Joi.object()
     .keys({
-      ...applicationKeys,
       // A young can only apply to a mission for him/herself.
       youngId: young ? Joi.string().equal(user._id.toString()).required() : Joi.string().required(),
       status: young
@@ -294,6 +285,7 @@ export function validateNewApplication(application, user) {
             .valid(...YOUNG_ALLOWED_NEW_APPLICATION_STATUS)
             .allow(null, "")
         : Joi.string().allow(null, ""),
+      missionDuration: young ? Joi.any().strip() : Joi.string().allow(null, ""),
       missionId: Joi.string().required(),
     })
     .validate(application, { stripUnknown: true });

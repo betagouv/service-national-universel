@@ -21,6 +21,7 @@ jest.mock("../middlewares/authenticationGuards", () => ({
 }));
 jest.mock("../sentry", () => ({ capture: jest.fn() }));
 jest.mock("../brevo", () => ({ sendEmail: jest.fn() }));
+const { sendEmail } = require("../brevo");
 jest.mock("../models/organisation", () => ({ findById: jest.fn().mockResolvedValue(null), findOne: jest.fn().mockResolvedValue(null) }));
 jest.mock("../models/agent", () => ({ findById: jest.fn(), findOne: jest.fn(), find: jest.fn() }));
 jest.mock("../models/contact", () => ({ findById: jest.fn(), findOne: jest.fn() }));
@@ -35,6 +36,7 @@ const { signAgentToken, validateAgentTokenPayload, isAgentTokenCurrent } = requi
 const { serializeAgent, serializeAgentSelf } = require("../utils/agentSerializer");
 const { JWT_MAX_AGE, JWT_VERSION, checkJwtVersion } = require("../jwt-options");
 const { validationErrorHandler } = require("../middlewares/validation");
+const { resetRateLimiters } = require("../middlewares/rateLimit");
 
 // Reproduit la vérification de la stratégie "agent" de passport.js.
 const authenticate = (token, agent) => {
@@ -57,10 +59,12 @@ const buildAgentDoc = (fields = {}) => {
     forgotPasswordResetExpires: new Date(),
     lastLogoutAt: null,
     passwordChangedAt: null,
+    password: "hash",
     ...fields,
   };
   doc.set = jest.fn((values) => Object.assign(doc, values));
   doc.save = jest.fn().mockResolvedValue(doc);
+  doc.comparePassword = doc.comparePassword || jest.fn().mockResolvedValue(true);
   doc.toObject = () => {
     // eslint-disable-next-line no-unused-vars
     const { set, save, toObject, ...rest } = doc;
@@ -84,6 +88,7 @@ const buildApp = () => {
 };
 
 beforeEach(() => jest.clearAllMocks());
+afterEach(() => resetRateLimiters());
 
 describe("M98 : jetons de session agent", () => {
   it("dure 2 h et porte les dates d'invalidation", () => {
@@ -147,6 +152,98 @@ describe("M98 : jetons de session agent", () => {
     await request(buildApp()).post("/agent/forgot_password").send({ email: "ada@example.com" });
     expect(agent.forgotPasswordResetExpires - before).toBeGreaterThanOrEqual(60 * 60 * 1000 - 1000);
   });
+});
+
+describe("PM42 / PM43 : connexion agent, oracle d'existence et contournement du SSO référent", () => {
+  it("POST /agent/signin : email inconnu -> 401 EMAIL_OR_PASSWORD_INVALID (plus de USER_NOT_EXISTS)", async () => {
+    AgentModel.findOne.mockResolvedValue(null);
+    const res = await request(buildApp()).post("/agent/signin").send({ email: "inconnu@example.com", password: "whatever" });
+    expect(res.status).toBe(401);
+    expect(res.body.code).toBe("EMAIL_OR_PASSWORD_INVALID");
+  });
+
+  it("POST /agent/signin : compte sans mot de passe défini -> même 401 EMAIL_OR_PASSWORD_INVALID (plus de PASSWORD_NOT_SET)", async () => {
+    const agent = buildAgentDoc();
+    AgentModel.findOne.mockResolvedValue(agent);
+    AgentModel.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(buildAgentDoc({ password: undefined })) });
+    const res = await request(buildApp()).post("/agent/signin").send({ email: agent.email, password: "whatever" });
+    expect(res.status).toBe(401);
+    expect(res.body.code).toBe("EMAIL_OR_PASSWORD_INVALID");
+  });
+
+  it("POST /agent/signin : mauvais mot de passe -> 401 EMAIL_OR_PASSWORD_INVALID", async () => {
+    const agent = buildAgentDoc();
+    AgentModel.findOne.mockResolvedValue(agent);
+    AgentModel.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(buildAgentDoc({ comparePassword: jest.fn().mockResolvedValue(false) })) });
+    const res = await request(buildApp()).post("/agent/signin").send({ email: agent.email, password: "whatever" });
+    expect(res.status).toBe(401);
+    expect(res.body.code).toBe("EMAIL_OR_PASSWORD_INVALID");
+  });
+
+  it.each(["REFERENT_DEPARTMENT", "REFERENT_REGION"])(
+    "POST /agent/signin : refuse un compte %s même avec le bon mot de passe (SSO obligatoire)",
+    async (role) => {
+      const agent = buildAgentDoc({ role });
+      AgentModel.findOne.mockResolvedValue(agent);
+      AgentModel.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(buildAgentDoc({ role })) });
+      const res = await request(buildApp()).post("/agent/signin").send({ email: agent.email, password: "whatever" });
+      expect(res.status).toBe(401);
+      expect(res.body.code).toBe("EMAIL_OR_PASSWORD_INVALID");
+      expect(agent.save).not.toHaveBeenCalled();
+    },
+  );
+
+  it("POST /agent/signin : connexion valide d'un compte AGENT (non-régression)", async () => {
+    const agent = buildAgentDoc({ role: "AGENT" });
+    AgentModel.findOne.mockResolvedValue(agent);
+    AgentModel.findById.mockReturnValue({ select: jest.fn().mockResolvedValue(buildAgentDoc({ role: "AGENT" })) });
+    const res = await request(buildApp()).post("/agent/signin").send({ email: agent.email, password: "correct" });
+    expect(res.status).toBe(200);
+    expect(res.body.ok).toBe(true);
+  });
+
+  it("POST /agent/forgot_password répond toujours 200, même pour un email inconnu (plus d'oracle 404/200)", async () => {
+    AgentModel.findOne.mockResolvedValue(null);
+    const res = await request(buildApp()).post("/agent/forgot_password").send({ email: "inconnu@example.com" });
+    expect(res.status).toBe(200);
+    expect(res.body).toEqual({ ok: true });
+  });
+
+  it.each(["REFERENT_DEPARTMENT", "REFERENT_REGION"])(
+    "POST /agent/forgot_password : ne crée pas de jeton ni n'envoie d'email pour un compte %s",
+    async (role) => {
+      const agent = buildAgentDoc({ role });
+      AgentModel.findOne.mockResolvedValue(agent);
+      const res = await request(buildApp()).post("/agent/forgot_password").send({ email: agent.email });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ ok: true });
+      expect(agent.save).not.toHaveBeenCalled();
+      expect(sendEmail).not.toHaveBeenCalled();
+    },
+  );
+
+  it("POST /agent/forgot_password : crée le jeton et envoie l'email pour un compte AGENT (non-régression)", async () => {
+    const agent = buildAgentDoc({ role: "AGENT" });
+    AgentModel.findOne.mockResolvedValue(agent);
+    const res = await request(buildApp()).post("/agent/forgot_password").send({ email: agent.email });
+    expect(res.status).toBe(200);
+    expect(agent.save).toHaveBeenCalled();
+    expect(sendEmail).toHaveBeenCalled();
+  });
+
+  it.each(["REFERENT_DEPARTMENT", "REFERENT_REGION"])(
+    "POST /agent/forgot_password_reset : refuse un jeton par ailleurs valide pour un compte %s (défense en profondeur)",
+    async (role) => {
+      const agent = buildAgentDoc({ role });
+      AgentModel.findOne.mockResolvedValue(agent);
+      const res = await request(buildApp())
+        .post("/agent/forgot_password_reset")
+        .send({ token: "a".repeat(40), password: COMPLIANT_PASSWORD, passwordConfirm: COMPLIANT_PASSWORD });
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("PASSWORD_TOKEN_EXPIRED_OR_INVALID");
+      expect(agent.save).not.toHaveBeenCalled();
+    },
+  );
 });
 
 describe("M98 : stratégie passport « agent » réelle", () => {
@@ -234,6 +331,13 @@ describe("L49 : exposition des agents", () => {
     const res = await request(buildApp()).get("/agent");
     expect(select).toHaveBeenCalledWith("_id firstName lastName email role departments region");
     expect(res.body.data.AGENT).toEqual([{ _id: AGENT_ID, firstName: "Ada", lastName: "Lovelace", email: "ada@example.com", role: "AGENT" }]);
+  });
+
+  it.each(["REFERENT_DEPARTMENT", "REFERENT_REGION", "DG"])("PL17 : GET /agent refuse un rôle non-AGENT (%s)", async (role) => {
+    mockCurrentUser = buildAgentDoc({ role });
+    const res = await request(buildApp()).get("/agent");
+    expect(res.status).toBe(403);
+    expect(AgentModel.find).not.toHaveBeenCalled();
   });
 
   it("GET /agent/me ne renvoie pas les champs de sécurité", async () => {

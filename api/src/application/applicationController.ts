@@ -83,6 +83,27 @@ const { ObjectId } = require("mongoose").Types;
 
 const router = express.Router();
 
+const APPLICATION_FILE_KEYS = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+
+/**
+ * Les pièces sont rangées par candidature. Jusqu'ici elles l'étaient par volontaire
+ * (`app/young/<youngId>/application/<key>/<name>`) : deux candidatures du même volontaire partageaient
+ * un espace, et déposer un nom identique remplaçait la pièce de l'autre candidature (PM3).
+ */
+function getApplicationFilePath(youngId: string, applicationId: string, key: string, name: string) {
+  return `app/young/${youngId}/application/${applicationId}/${key}/${name}`;
+}
+
+/** Les pièces déposées avant le rangement par candidature restent lues à leur ancien emplacement. */
+async function getApplicationFile(youngId: string, applicationId: string, key: string, name: string) {
+  try {
+    return await getFile(getApplicationFilePath(youngId, applicationId, key, name));
+  } catch (error) {
+    if (error?.code !== "NoSuchKey") throw error;
+    return getFile(`app/young/${youngId}/application/${key}/${name}`);
+  }
+}
+
 router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const JoiId = validateId(req.params.id);
@@ -160,6 +181,23 @@ router.post(
       const cohort = await CohortModel.findById(young.cohortId);
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+      // Les champs dénormalisés viennent du volontaire et de la mission, jamais du body : le client y
+      // désignait le tuteur, le contrat ou les destinataires des notifications (PH19).
+      Object.assign(value, {
+        youngFirstName: young.firstName,
+        youngLastName: young.lastName,
+        youngEmail: young.email,
+        youngBirthdateAt: young.birthdateAt ? new Date(young.birthdateAt).toISOString() : undefined,
+        youngCity: young.city,
+        youngDepartment: young.department,
+        youngCohort: young.cohort,
+        missionName: mission.name,
+        missionDepartment: mission.department,
+        missionRegion: mission.region,
+        tutorId: mission.tutorId,
+        tutorName: mission.tutorName,
+      });
+
       if (isYoung(req.user)) {
         const { canApply, message } = await getAuthorizationToApply(mission, young, cohort);
         if (!canApply) {
@@ -194,6 +232,15 @@ router.post(
         const cohort = await CohortModel.findById(young.cohortId);
         if (!cohort) {
           return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        }
+
+        // Seuls l'admin et les référents territoriaux saisissent une mission déjà réalisée (mission
+        // personnalisée). Pour tout autre rôle, la candidature n'est qu'une proposition que le volontaire
+        // doit accepter, sur la durée de la mission : sinon une structure validait la phase 2 de
+        // n'importe quel volontaire en créant une candidature DONE de 84 h (PH1).
+        if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(req.user.role)) {
+          value.status = APPLICATION_STATUS.WAITING_ACCEPTATION;
+          value.missionDuration = mission.duration;
         }
 
         let canCreate: boolean;
@@ -943,10 +990,9 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
-      const rootKeys = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
       const { error: keyError, value: key } = Joi.string()
         .required()
-        .valid(...rootKeys)
+        .valid(...APPLICATION_FILE_KEYS)
         .validate(req.params.key, { stripUnknown: true });
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -985,6 +1031,7 @@ router.post(
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+      const uploadedNames: string[] = [];
       for (let i = 0; i < files.length; i++) {
         let currentFile = files[i];
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
@@ -1012,11 +1059,14 @@ router.post(
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-        await uploadFile(`app/young/${user._id}/application/${key}/${name}`, resultingFile);
-        //get application et get j eunes
+        await uploadFile(getApplicationFilePath(user._id.toString(), application._id.toString(), key, name), resultingFile);
+        uploadedNames.push(name);
         fs.unlinkSync(tempFilePath);
       }
-      application.set({ [key]: names });
+      // La liste ne retient que des pièces réelles de CETTE candidature : déjà présentes, ou déposées à
+      // l'instant. Sinon un nom quelconque y entrait, puis ouvrait la lecture de la pièce homonyme (PM3).
+      const existingNames = (application[key] || []).map(String);
+      application.set({ [key]: names.filter((fileName) => existingNames.includes(fileName) || uploadedNames.includes(fileName)) });
       await application.save({ fromUser: req.user });
 
       await updateYoungApplicationFilesType(application, req.user);
@@ -1025,7 +1075,7 @@ router.post(
       // argument de serializeYoung doit être l'acteur authentifié, pas le jeune candidat, sinon le
       // masquage GOO-11 (santé, CNI) ne s'applique jamais pour un responsable/superviseur qui dépose
       // une pièce (constat PH3, audit production 2026-09-25).
-      return res.status(200).send({ young: serializeYoung(user, req.user), data: names, ok: true });
+      return res.status(200).send({ young: serializeYoung(user, req.user), data: application[key], ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
@@ -1063,7 +1113,12 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
+    // Seules les quatre listes de pièces, et seulement les pièces de CETTE candidature : le chemin ne
+    // dépendait que du volontaire, une structure lisait donc les pièces d'une autre candidature (PM3).
+    if (!APPLICATION_FILE_KEYS.includes(key)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!(application[key] || []).map(String).includes(name)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    const downloaded = await getApplicationFile(young._id.toString(), application._id.toString(), key, name);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile: any = null;

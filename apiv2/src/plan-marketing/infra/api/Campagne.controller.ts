@@ -45,11 +45,10 @@ export class CampagneController {
 
     @Get(":id")
     async getById(@Param("id") id: string): Promise<CampagneModel> {
-        const campagne = await this.campagneGateway.findById(id);
-        if (!campagne) {
-            throw new Error("Campagne not found");
-        }
-        return campagne;
+        // PL15 (25/09/2026) : un ObjectId valide mais inexistant levait un Error générique, non
+        // catégorisé par AllExceptionsFilter → 500 + événement Sentry à chaque appel. Le service
+        // lève déjà FunctionalException(CAMPAIGN_NOT_FOUND), qui répond en 422 sans bruit Sentry.
+        return await this.campagneService.findById(id);
     }
 
     @Get(":id/campagnes-specifiques")

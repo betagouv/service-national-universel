@@ -418,7 +418,17 @@ describe("POST /SNUpport/ticket/form (M36, M37)", () => {
     }
   });
 
-  it("should keep a previous page given as a path or an https URL", async () => {
+  // PM32 : un anonyme ne doit pas pouvoir déposer un lien de phishing https vers un hôte hors des
+  // fronts SNU, présenté aux agents du support comme la page d'origine du visiteur.
+  it("should drop a previous page given as an https URL whose host is not an SNU front", async () => {
+    for (const fromPage of ["https://phishing-support-snu.example/login", "https://snu.gouv.fr.evil.example/phase1", "https://evil.example/snu.gouv.fr"]) {
+      SNUpport.api.mockClear();
+      expect((await form({ fromPage })).status).toBe(200);
+      expect(relayedAttribute("page précédente")).toBeNull();
+    }
+  });
+
+  it("should keep a previous page given as a path or an https URL to a known SNU front", async () => {
     expect((await form({ fromPage: "/phase1" })).status).toBe(200);
     expect(relayedAttribute("page précédente")).toBe("/phase1");
     SNUpport.api.mockClear();

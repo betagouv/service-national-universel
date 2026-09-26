@@ -28,16 +28,51 @@ const CLEANER_OPTIONS = {
   allowProtocolRelative: false,
   transformTags: {
     img: (tagName, attribs) => {
-      if (!/^\s*data:/i.test(attribs.src || "") || DATA_IMAGE_URL.test(attribs.src.trim())) return { tagName, attribs };
-      // eslint-disable-next-line no-unused-vars
-      const { src, ...rest } = attribs;
-      return { tagName, attribs: rest };
+      const src = (attribs.src || "").trim();
+      if (/^data:/i.test(src)) {
+        if (DATA_IMAGE_URL.test(src)) return { tagName, attribs };
+        // eslint-disable-next-line no-unused-vars
+        const { src: _drop, ...rest } = attribs;
+        return { tagName, attribs: rest };
+      }
+      if (/^https?:\/\//i.test(src)) {
+        // Image distante : chargée automatiquement chez l'agent dès l'ouverture du ticket, elle
+        // informerait l'expéditeur d'un e-mail entrant que le message a été lu (pixel de suivi,
+        // PL25). Neutralisée par défaut ; `revealRemoteImages` la restaure à la demande de l'agent.
+        // eslint-disable-next-line no-unused-vars
+        const { src: _drop, ...rest } = attribs;
+        return { tagName, attribs: { ...rest, "iwc-no-src": src } };
+      }
+      return { tagName, attribs };
     },
     a: (tagName, attribs) => ({ tagName, attribs: { ...attribs, rel: "noopener noreferrer" } }),
   },
 };
 
 export const htmlCleaner = (text) => sanitizeHtml(String(text ?? ""), CLEANER_OPTIONS).trim();
+
+/** Vrai si l'HTML assaini contient au moins une image distante neutralisée par htmlCleaner (PL25). */
+export const hasHiddenRemoteImages = (html) => /\biwc-no-src=/.test(String(html ?? ""));
+
+/**
+ * Restaure les images distantes neutralisées par htmlCleaner, à la demande explicite de l'agent
+ * (bouton « afficher les images »). Repasse par le même filtre de schéma que htmlCleaner : une
+ * valeur dangereuse glissée directement dans `iwc-no-src` (contournement de htmlCleaner) est
+ * refusée comme n'importe quel `src` d'image.
+ */
+export const revealRemoteImages = (html) =>
+  sanitizeHtml(String(html ?? ""), {
+    ...CLEANER_OPTIONS,
+    transformTags: {
+      ...CLEANER_OPTIONS.transformTags,
+      img: (tagName, attribs) => {
+        if (!attribs["iwc-no-src"]) return CLEANER_OPTIONS.transformTags.img(tagName, attribs);
+        // eslint-disable-next-line no-unused-vars
+        const { "iwc-no-src": src, ...rest } = attribs;
+        return { tagName, attribs: { ...rest, src } };
+      },
+    },
+  }).trim();
 
 const URL_IN_TEXT = /https?:\/\/[^\s<>"']+/g;
 const OPENING_LINK = /^<a[\s>]/i;

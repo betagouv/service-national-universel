@@ -8,6 +8,7 @@ import { toastr } from "react-redux-toastr";
 import useAuth from "@/services/useAuth";
 import useTickets from "../useTickets";
 import usePermissions from "@/hooks/usePermissions";
+import { queryClient } from "@/services/react-query";
 
 export default function User() {
   const { young, isCLE } = useAuth();
@@ -81,6 +82,7 @@ function Menu({ open, menuRef, onClose }) {
       setIsLoggingOut(true);
       await API.post(`/young/logout`);
       dispatch(setYoung(null));
+      queryClient.clear();
       toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
       return history.push("/auth");
     } catch (e) {

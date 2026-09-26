@@ -309,6 +309,9 @@ const Thread = ({
           reloadKey={reloadKey}
           signature={signature}
           macroSlateContent={macroSlateContent}
+          // PM54 : une image collée ici serait publiée en accès public sans jamais être envoyée au
+          // contact (importHtml.js ne sait pas la sérialiser dans le message).
+          allowImages={false}
         />
         <div>
           {files.length > 0 && (

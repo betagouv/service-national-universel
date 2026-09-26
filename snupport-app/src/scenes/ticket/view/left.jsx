@@ -17,7 +17,7 @@ import { BsPeople } from "react-icons/bs";
 import { HiOutlineIdentification } from "react-icons/hi2";
 import { useSelector } from "react-redux";
 import API from "../../../services/api";
-import { translateAttributesSNU, translateRole, noteToSafeHtml, htmlToText, sanitizeHttpsUrl, TRANSLATE_ROLE, translateParcours } from "../../../utils";
+import { translateAttributesSNU, translateRole, noteToSafeHtml, htmlToText, sanitizeHttpsUrl, sanitizeKnownHttpsUrl, TRANSLATE_ROLE, translateParcours } from "../../../utils";
 import Button from "../components/Button";
 import Textarea from "../components/Textarea";
 import TransferTicketModal from "../components/TransferTicketModal";
@@ -590,9 +590,10 @@ const Attribute = ({ attribute }) => {
         <br></br>
       </div>
     );
-  // Les attributs viennent en partie du formulaire public (page précédente, département, région) :
-  // un lien n'est émis que pour une URL https analysée, jamais sur la seule présence de « https:// » (FH15).
-  const linkUrl = attribute?.format === "link" || attribute?.value?.includes("https://") ? sanitizeHttpsUrl(attribute?.value) : null;
+  // Les attributs viennent en partie du formulaire public anonyme (page précédente, département, région) :
+  // un lien n'est émis que pour une URL https analysée, vers un front SNU connu, jamais sur la seule
+  // présence de « https:// » (FH15) ni vers un hôte quelconque choisi par l'expéditeur (PM32).
+  const linkUrl = attribute?.format === "link" || attribute?.value?.includes("https://") ? sanitizeKnownHttpsUrl(attribute?.value) : null;
   if (linkUrl)
     return (
       <div className="flex mb-2">

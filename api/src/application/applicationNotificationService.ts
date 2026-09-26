@@ -15,6 +15,8 @@ export async function notifyReferentMilitaryPreparationFilesSubmitted(user: Youn
 }
 
 export async function notifyReferentNewApplication(application: ApplicationType, young: YoungType) {
+  // Mission sans tuteur : `tutorId` vide ferait échouer la conversion en ObjectId.
+  if (!application.tutorId) return;
   const referent = await ReferentModel.findById(application.tutorId);
   if (!referent || referent.status === ReferentStatus.INACTIVE) return;
   const emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
@@ -29,6 +31,8 @@ export async function notifyReferentNewApplication(application: ApplicationType,
 }
 
 export async function notifySupervisorMilitaryPreparationFilesValidated(application: ApplicationType) {
+  // Mission sans tuteur : `tutorId` vide ferait échouer la conversion en ObjectId.
+  if (!application.tutorId) return;
   const superviseur = await ReferentModel.findById(application.tutorId);
   if (!superviseur || superviseur.status === ReferentStatus.INACTIVE) return;
   const emailTo = [{ name: `${superviseur.firstName} ${superviseur.lastName}`, email: superviseur.email }];
