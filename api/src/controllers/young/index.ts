@@ -25,7 +25,7 @@ import {
   YoungDocument,
 } from "../../models";
 import AuthObject from "../../auth";
-import { signinRateLimiter, emailSendingRateLimiter } from "../../middlewares/rateLimit";
+import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../../middlewares/rateLimit";
 import { requireJsonBody } from "../../middlewares/requireJsonBody";
 import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
@@ -96,6 +96,10 @@ const YoungAuth = new AuthObject(YoungModel);
 // que les compteurs par compte ne couvrent pas (énumération, password spraying,
 // abus des routes qui envoient un email ou réécrivent un token).
 const youngSigninLimiter = signinRateLimiter();
+
+// PM19 (audit du 25/09/2026) : la soumission de mission phase 3 envoie un email officiel au tuteur
+// renseigné par le volontaire, sans aucune limite de débit.
+const validateMissionPhase3Limiter = userRateLimiter({ prefix: "young-validate-mission-phase3", windowMs: 60 * 60 * 1000, limit: 10 });
 
 // M3 de l'audit du 21/09/2026 : l'inscription en ligne est fermée
 // (`/preinscription` redirige vers snu.gouv.fr/inscriptions-cloturees et plus
@@ -529,7 +533,7 @@ router.get(
   },
 );
 
-router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), validateMissionPhase3Limiter, async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -561,6 +565,14 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     // mission à celle qui a été attestée.
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    // PM19 : le volontaire choisit librement l'adresse du « tuteur » qui valide sa mission ; sans ce
+    // garde, il se valide lui-même (ou fait valider par un parent) en renseignant sa propre adresse.
+    if (value.phase3TutorEmail) {
+      const selfEmails = [young.email, young.parent1Email, young.parent2Email].filter(Boolean).map((email) => email!.toLowerCase());
+      if (selfEmails.includes(value.phase3TutorEmail.toLowerCase())) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
     }
     // eslint-disable-next-line no-unused-vars
     const { id, ...values } = value;
