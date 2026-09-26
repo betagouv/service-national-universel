@@ -2,6 +2,7 @@ import "reflect-metadata";
 import { IsNotEmpty, IsString } from "class-validator";
 import { BadRequestException, ValidationPipe } from "@nestjs/common";
 import { ObjectIdParamsPipe, pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
+import { SearchYoungDto } from "@analytics/infra/api/dto/SearchYoung.validation";
 
 class DtoDeTest {
     @IsString()
@@ -28,5 +29,14 @@ describe("pipesGlobaux (GOO-90)", () => {
         const [, validationPipe] = pipesGlobaux();
         const resultat = await validationPipe.transform({ nom: "x" }, { type: "body", metatype: DtoDeTest });
         expect(resultat).toEqual({ nom: "x" });
+    });
+
+    it("SearchYoungDto.filters (@IsObject() sans @ValidateNested()) reste accepté avec la liste blanche", async () => {
+        const [, validationPipe] = pipesGlobaux();
+        const resultat = await validationPipe.transform(
+            { filters: { status: ["VALIDATED"] } },
+            { type: "body", metatype: SearchYoungDto },
+        );
+        expect((resultat as SearchYoungDto).filters).toEqual({ status: ["VALIDATED"] });
     });
 });
