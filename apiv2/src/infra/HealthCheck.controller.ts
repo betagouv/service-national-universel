@@ -1,13 +1,12 @@
 import { Controller, Get } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 
 @Controller("")
 export class HealthCheckController {
-    constructor(private readonly configService: ConfigService) {}
-
+    // PL12 (25/09/2026) : GET /v2/ exposait la version déployée (`release`) sans authentification,
+    // utile à un attaquant pour cibler des CVE connues d'une version précise.
     @Get()
     check() {
-        return this.configService.getOrThrow("release");
+        return { status: "ok" };
     }
 
     @Get("health")

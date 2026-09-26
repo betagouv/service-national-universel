@@ -44,4 +44,14 @@ describe("HealthCheckController", () => {
             await request(app.getHttpServer()).get("/testsentry").expect(404);
         });
     });
+
+    describe("GET / (PL12)", () => {
+        it("ne renvoie plus la version déployée (release) sans authentification", async () => {
+            const response = await request(app.getHttpServer()).get("/").expect(200);
+
+            expect(response.body).toEqual({ status: "ok" });
+            expect(response.body.release).toBeUndefined();
+            expect(JSON.stringify(response.body)).not.toContain("test-version");
+        });
+    });
 });

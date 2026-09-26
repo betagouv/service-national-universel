@@ -22,10 +22,32 @@ const staticConfig = {
   FONT_ROOTDIR: `${__dirname}/assets/fonts`,
 };
 
+const KNOWN_ENVIRONMENTS = ["production", "staging", "ci", "custom", "test", "development"];
+// Recettes éphémères : devops/scripts/cc-environment-name.sh fabrique "env-" + nom de branche.
+const RECETTE_ENVIRONMENT_PATTERN = /^env-[a-z0-9-]+$/;
+
+function isKnownEnvironment(value: unknown): value is string {
+  return typeof value === "string" && (KNOWN_ENVIRONMENTS.includes(value) || RECETTE_ENVIRONMENT_PATTERN.test(value));
+}
+
 // NODE_ENV environment variable is used by :
 // - jest : unit test (NODE_ENV == "test")
-const defaultEnv = process.env.NODE_ENV === "test" ? "test" : "development";
+// PM7 (25/09/2026) : un repli silencieux sur "development" exposait le secret JWT public
+// "dev-secret" (et désactivait les garde-fous de production) sur tout déploiement qui aurait
+// oublié de positionner ENVIRONMENT. Seul jest a droit à un défaut implicite (via NODE_ENV) ;
+// partout ailleurs, y compris le poste des développeurs, ENVIRONMENT doit être déclaré (.env).
+const defaultEnv = process.env.NODE_ENV === "test" ? "test" : undefined;
 const environment = _env(envStr, "ENVIRONMENT", defaultEnv);
+
+if (!isKnownEnvironment(environment)) {
+  throw new Error(`Missing or invalid required environment variable ENVIRONMENT (received: ${JSON.stringify(environment)})`);
+}
+
+// Les recettes (devops/scripts/cc-create-environment.sh) ne positionnent pas NODE_ENV de façon
+// fiable : n'exiger qu'une absence, ou une égalité stricte avec ENVIRONMENT.
+if (process.env.NODE_ENV && process.env.NODE_ENV !== environment) {
+  throw new Error(`NODE_ENV (${process.env.NODE_ENV}) is inconsistent with ENVIRONMENT (${environment})`);
+}
 
 const jwtSecret =
   environment === "development" || environment === "test" ? _env(envStr, "JWT_SECRET", "dev-secret") : _env(envStr, "JWT_SECRET");
@@ -110,6 +132,8 @@ export const config = {
   DO_MIGRATION: _env(envBool, "DO_MIGRATION", false),
 };
 
-if (["production", "staging", "ci", "custom"].includes(config.ENVIRONMENT) && !config.JWT_SECRET) {
+// PM7 : couvre aussi les recettes (env-*) — l'ancienne liste fermée les laissait démarrer sans
+// JWT_SECRET, dev-secret n'étant lui-même réservé qu'à development/test.
+if (config.ENVIRONMENT !== "development" && config.ENVIRONMENT !== "test" && !config.JWT_SECRET) {
   throw new Error("Missing required environment variable JWT_SECRET");
 }

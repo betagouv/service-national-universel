@@ -6,6 +6,9 @@ import { StructureModel } from "../../models";
 import { UserDto } from "snu-lib";
 
 const ES_NO_LIMIT = 10000;
+// PM12 : chaque mot génère 3 clauses multi_match ; sans plafond, une searchbar à plusieurs
+// centaines de mots ferait grossir la requête ES d'autant.
+const MAX_SEARCHBAR_WORDS = 20;
 
 type SearchFields = string[];
 type FilterFields = string[];
@@ -23,7 +26,7 @@ type Sort = {
 } | null;
 
 function searchSubQuery([value]: string[], fields: SearchFields) {
-  const words = value?.trim().split(" ");
+  const words = value?.trim().split(" ").slice(0, MAX_SEARCHBAR_WORDS);
 
   const shouldClauses = words.map((word) => {
     return [
@@ -212,6 +215,14 @@ function joiElasticSearch({ filterFields, sortFields = [], body }: JoiElasticSea
           return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.number().allow(null)).max(200) };
         }
 
+        // PM12 : searchbar alimente searchSubQuery, qui génère 3 clauses ES par mot — sans borne
+        // de longueur, une chaîne de plusieurs centaines de Ko fait grossir la requête générée
+        // d'autant (blocage de l'API). Les autres filtres (facettes) ne sont pas concernés : ce
+        // sont des valeurs choisies dans une liste fermée côté front, pas du texte libre.
+        if (fieldWithoutKeyword === "searchbar") {
+          return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.string().allow("").max(200)).max(200) };
+        }
+
         // Default case: filter is a string
         return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.string().allow("")).max(200) };
       }, {}),
@@ -385,6 +396,7 @@ export {
   buildArbitratyNdJson,
   buildRequestBody,
   joiElasticSearch,
+  searchSubQuery,
   buildMissionContext,
   buildApplicationContext,
   buildDashboardUserRoleContext,
