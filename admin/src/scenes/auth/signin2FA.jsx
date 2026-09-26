@@ -9,7 +9,7 @@ import api from "../../services/api";
 import Header from "./components/header";
 import { GoTools } from "react-icons/go";
 import { BsShieldCheck } from "react-icons/bs";
-import { DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS, isInternalRedirectUrl } from "snu-lib";
+import { DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS, ERRORS, isInternalRedirectUrl } from "snu-lib";
 import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MIN = DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS / 60 / 1000;
@@ -40,6 +40,9 @@ export default function Signin() {
     } catch (e) {
       setLoading(false);
       console.log("ERROR", e);
+      if (e?.code === ERRORS.ADMIN_ACCESS_RESTRICTED) {
+        return toastr.error("L'accès à la plateforme est temporairement restreint.", "", { timeOut: 10000 });
+      }
       toastr.error(
         "(Double authentification) Code non reconnu.",
         `Merci d'inscrire le dernier code reçu par email. Après 3 tentatives ou plus de ${DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MIN} minutes, veuillez retenter de vous connecter.`,

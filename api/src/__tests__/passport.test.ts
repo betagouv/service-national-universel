@@ -1,6 +1,6 @@
-import { ROLES } from "snu-lib";
+import { FeatureFlagName, ROLES } from "snu-lib";
 import { validateUser } from "../passport";
-import { ReferentModel, YoungModel } from "../models";
+import { FeatureFlagModel, ReferentModel, YoungModel } from "../models";
 import { JWT_SIGNIN_VERSION } from "../jwt-options";
 
 jest.mock("../brevo", () => ({
@@ -25,7 +25,16 @@ function fakeJwtPayload(user: any) {
   } as any;
 }
 
+// Aucun verrouillage d'accès par défaut (pas de base dans ce test unitaire).
+function mockAccessRestriction(flag: any) {
+  return jest.spyOn(FeatureFlagModel, "findOne").mockReturnValue({ lean: () => Promise.resolve(flag) } as any);
+}
+
 describe("passport.validateUser — rôles décommissionnés (GOO-56, lot P24)", () => {
+  beforeEach(() => {
+    mockAccessRestriction(null);
+  });
+
   afterEach(() => {
     jest.restoreAllMocks();
   });
@@ -93,6 +102,98 @@ describe("passport.validateUser — rôles décommissionnés (GOO-56, lot P24)",
     const done = jest.fn();
     await validateUser(YoungModel, fakeJwtPayload(young), done);
 
+    expect(done).toHaveBeenCalledWith(null, young);
+  });
+});
+
+describe("passport.validateUser — verrouillage temporaire de l'accès référent (ADMIN_ACCESS_RESTRICTED)", () => {
+  const AUTORISE = "507f1f77bcf86cd7994390a1";
+  const HORS_LISTE = "507f1f77bcf86cd7994390b2";
+  const verrouillage = { name: FeatureFlagName.ADMIN_ACCESS_RESTRICTED, enabled: true, allowedReferentIds: [AUTORISE] };
+
+  const referent = (id: string): any => ({ _id: id, status: "ACTIVE", role: ROLES.ADMIN, roles: [ROLES.ADMIN], passwordChangedAt: null, lastLogoutAt: null });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  it("lit le flag ADMIN_ACCESS_RESTRICTED", async () => {
+    const findOne = mockAccessRestriction(null);
+    const user = referent(HORS_LISTE);
+    jest.spyOn(ReferentModel, "findById").mockResolvedValue(user);
+
+    const done = jest.fn();
+    await validateUser(ReferentModel, fakeJwtPayload(user), done);
+
+    expect(findOne).toHaveBeenCalledWith({ name: FeatureFlagName.ADMIN_ACCESS_RESTRICTED });
+    expect(done).toHaveBeenCalledWith(null, user);
+  });
+
+  it("garde la session d'un référent de la liste", async () => {
+    mockAccessRestriction(verrouillage);
+    const user = referent(AUTORISE);
+    jest.spyOn(ReferentModel, "findById").mockResolvedValue(user);
+
+    const done = jest.fn();
+    await validateUser(ReferentModel, fakeJwtPayload(user), done);
+
+    expect(done).toHaveBeenCalledWith(null, user);
+  });
+
+  it("coupe la session d'un référent hors liste, même ouverte avant le verrouillage", async () => {
+    mockAccessRestriction(verrouillage);
+    const user = referent(HORS_LISTE);
+    jest.spyOn(ReferentModel, "findById").mockResolvedValue(user);
+
+    const done = jest.fn();
+    await validateUser(ReferentModel, fakeJwtPayload(user), done);
+
+    expect(done).toHaveBeenCalledWith(null, false);
+  });
+
+  it("laisse passer tout le monde quand le flag est désactivé", async () => {
+    mockAccessRestriction({ ...verrouillage, enabled: false });
+    const user = referent(HORS_LISTE);
+    jest.spyOn(ReferentModel, "findById").mockResolvedValue(user);
+
+    const done = jest.fn();
+    await validateUser(ReferentModel, fakeJwtPayload(user), done);
+
+    expect(done).toHaveBeenCalledWith(null, user);
+  });
+
+  it("autorise un administrateur de la liste à impersonner un compte hors liste", async () => {
+    mockAccessRestriction(verrouillage);
+    const cible = referent(HORS_LISTE);
+    const admin = referent(AUTORISE);
+    jest.spyOn(ReferentModel, "findById").mockImplementation(((id: string) => Promise.resolve(id === HORS_LISTE ? cible : admin)) as any);
+
+    const done = jest.fn();
+    await validateUser(ReferentModel, { ...fakeJwtPayload(cible), _impersonateId: AUTORISE }, done);
+
+    expect(done).toHaveBeenCalledWith(null, cible);
+  });
+
+  it("refuse l'impersonation par un administrateur hors liste", async () => {
+    mockAccessRestriction(verrouillage);
+    const cible = referent(AUTORISE);
+    jest.spyOn(ReferentModel, "findById").mockResolvedValue(cible);
+
+    const done = jest.fn();
+    await validateUser(ReferentModel, { ...fakeJwtPayload(cible), _impersonateId: HORS_LISTE }, done);
+
+    expect(done).toHaveBeenCalledWith(null, false);
+  });
+
+  it("ne s'applique pas aux jeunes", async () => {
+    const findOne = mockAccessRestriction(verrouillage);
+    const young: any = { _id: HORS_LISTE, status: "VALIDATED", passwordChangedAt: null, lastLogoutAt: null };
+    jest.spyOn(YoungModel, "findById").mockResolvedValue(young);
+
+    const done = jest.fn();
+    await validateUser(YoungModel, fakeJwtPayload(young), done);
+
+    expect(findOne).not.toHaveBeenCalled();
     expect(done).toHaveBeenCalledWith(null, young);
   });
 });
