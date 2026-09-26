@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { ClsService } from "nestjs-cls";
 import { Inject, Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { ReferentStatus } from "snu-lib";
+import { ReferentStatus, isDecommissionedRole } from "snu-lib";
 import { CustomRequest } from "../../../../shared/infra/CustomRequest";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { AuthProvider, AuthTokenPayload } from "./Auth.provider";
@@ -132,6 +132,10 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             return false;
         }
         if (user.deletedAt || user.status === ReferentStatus.INACTIVE) {
+            return false;
+        }
+        // Rôle décommissionné (GOO-56, P24) : chaque API refuse la session de son côté.
+        if (isDecommissionedRole(user)) {
             return false;
         }
         return (
