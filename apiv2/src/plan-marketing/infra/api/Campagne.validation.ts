@@ -3,6 +3,7 @@ import {
     CampagneGeneriqueModel,
     CreateCampagneSpecifiqueModelWithRef,
     CreateCampagneSpecifiqueModelWithoutRef,
+    CampagneEnvoi,
 } from "@plan-marketing/core/Campagne.model";
 import { CampagneJeuneType, DestinataireListeDiffusion, PlanMarketingRoutes } from "snu-lib";
 import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber } from "class-validator";
@@ -90,9 +91,14 @@ export class CreateCampagneSpecifiqueWithRefDto implements CreateCampagneSpecifi
     @IsBoolean()
     @IsNotEmpty()
     isProgrammationActive: boolean = false;
+
+    // Non-optionnel en TS (le modèle `CreateCampagneSpecifiqueModelWithRef` exige
+    // `programmations: CreateCampagneProgrammation[]`, sans `undefined`) : la valeur par défaut
+    // couvre l'import d'une campagne générique dans une session, qui n'envoie jamais ce champ
+    // (`toEntityCreate` de la branche "with-ref" l'ignore de toute façon, cf. Campagne.mapper.ts).
+    @IsOptional()
     @IsArray()
-    @IsNotEmpty()
-    programmations: CampagneProgrammation[];
+    programmations: CampagneProgrammation[] = [];
 }
 
 export class UpdateCampagneGeneriqueDto
@@ -102,18 +108,61 @@ export class UpdateCampagneGeneriqueDto
     @IsString()
     @IsNotEmpty()
     id: string;
+
+    // Typés `Date` pour rester assignables à `CampagneGeneriqueModel` (implémenté ci-dessus), mais
+    // ce que le front envoie réellement sur le fil est une chaîne ISO (JSON n'a pas de type Date) :
+    // on valide donc avec `@IsString()`. Ni l'un ni l'autre champ n'est relu en aval
+    // (`Campagne.mapper.ts#toEntity` a pour type de retour `Omit<CampagneType, "createdAt" | "updatedAt">`).
+    @IsOptional()
+    @IsString()
+    createdAt?: Date;
+
+    @IsOptional()
+    @IsString()
+    updatedAt?: Date;
+
+    @IsOptional()
+    @IsArray()
+    envois?: CampagneEnvoi[];
 }
 
 export class UpdateCampagneSpecifiqueWithoutRefDto extends CreateCampagneSpecifiqueWithoutRefDto {
     @IsString()
     @IsNotEmpty()
     id: string;
+
+    // Cf. UpdateCampagneGeneriqueDto ci-dessus : typés `Date` pour rester assignables à
+    // `CampagneModel` (le contrôleur passe ce DTO à `mettreAJourCampagne.execute`), mais validés
+    // comme chaîne (JSON n'a pas de type Date). Non relus en aval.
+    @IsOptional()
+    @IsString()
+    createdAt?: Date;
+
+    @IsOptional()
+    @IsString()
+    updatedAt?: Date;
+
+    @IsOptional()
+    @IsArray()
+    envois?: CampagneEnvoi[];
 }
 
 export class UpdateCampagneSpecifiqueWithRefDto extends CreateCampagneSpecifiqueWithRefDto {
     @IsString()
     @IsNotEmpty()
     id: string;
+
+    @IsOptional()
+    @IsString()
+    createdAt?: Date;
+
+    @IsOptional()
+    @IsString()
+    updatedAt?: Date;
+
+    @IsOptional()
+    @IsArray()
+    envois?: CampagneEnvoi[];
 }
 
 export class EnvoyerCampagneDto {

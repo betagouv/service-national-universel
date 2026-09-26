@@ -89,4 +89,46 @@ describe("CampagneController - validation du corps (GOO-90)", () => {
             .expect(200);
         expect(mettreAJourCampagne.execute).toHaveBeenCalled();
     });
+
+    /**
+     * Revue finale (GOO-90) — régression 1 : `CampagneSpecifiqueMapper.toUpdatePayload` (admin)
+     * renvoie toujours `createdAt`/`updatedAt`/`envois`, absents des DTO de mise à jour. Avec
+     * `forbidNonWhitelisted`, toute mise à jour de campagne spécifique 400ait en production.
+     */
+    it("accepte une mise à jour de campagne spécifique avec les champs réellement envoyés par l'admin (createdAt/updatedAt/envois)", async () => {
+        await request(app.getHttpServer())
+            .put("/campagne/aaaaaaaaaaaaaaaaaaaaaaaa")
+            .send({
+                id: "aaaaaaaaaaaaaaaaaaaaaaaa",
+                nom: "Rappel J-7",
+                type: CampagneJeuneType.VOLONTAIRE,
+                listeDiffusionId: "liste-1",
+                templateId: 1,
+                objet: "Objet",
+                destinataires: [],
+                contexte: "",
+                cohortId: "cohorte-1",
+                generic: false,
+                envois: [{ date: new Date().toISOString(), statut: "EN_ATTENTE" }],
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString(),
+                isProgrammationActive: false,
+                programmations: [],
+            })
+            .expect(200);
+        expect(mettreAJourCampagne.execute).toHaveBeenCalled();
+    });
+
+    /**
+     * Revue finale (GOO-90) — régression 2 : l'import d'une campagne générique dans une session
+     * (`toCreatePayload`, branche avec référence) n'envoie jamais `programmations`. Le champ était
+     * `@IsNotEmpty()` sans valeur par défaut : cette création 400ait en production.
+     */
+    it("accepte la création d'une campagne spécifique avec référence sans programmations (import depuis une campagne générique)", async () => {
+        await request(app.getHttpServer())
+            .post("/campagne")
+            .send({ generic: false, cohortId: "cohorte-1", campagneGeneriqueId: "generique-1" })
+            .expect(201);
+        expect(campagneService.creerCampagne).toHaveBeenCalled();
+    });
 });

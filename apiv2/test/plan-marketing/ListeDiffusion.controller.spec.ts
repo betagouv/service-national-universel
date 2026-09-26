@@ -165,5 +165,27 @@ describe("ListeDiffusionController - habilitation", () => {
                 .expect(400);
             expect(listeDiffusionService.updateListeDiffusion).not.toHaveBeenCalled();
         });
+
+        /**
+         * Revue finale (GOO-90) — régression 3 : `ListeDiffusionForm` (admin) soumet tout
+         * `defaultValues` via react-hook-form (`shouldUnregister: false`), donc `type`,
+         * `createdAt`, `updatedAt` et `isArchived` en plus de `nom`/`filters`. Avec
+         * `forbidNonWhitelisted`, toute modification de liste 400ait en production.
+         */
+        it("accepte une modification avec les champs réellement soumis par le formulaire admin (type/createdAt/updatedAt/isArchived)", async () => {
+            await request(app.getHttpServer())
+                .put("/liste-diffusion/bbbbbbbbbbbbbbbbbbbbbbbb")
+                .send({
+                    id: "bbbbbbbbbbbbbbbbbbbbbbbb",
+                    nom: "Liste",
+                    type: "Volontaires",
+                    filters: { region: ["Bretagne"] },
+                    createdAt: "2024-01-01T00:00:00.000Z",
+                    updatedAt: "2024-01-01T00:00:00.000Z",
+                    isArchived: false,
+                })
+                .expect(200);
+            expect(listeDiffusionService.updateListeDiffusion).toHaveBeenCalled();
+        });
     });
 });
