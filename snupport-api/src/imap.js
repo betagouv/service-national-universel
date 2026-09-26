@@ -20,6 +20,7 @@ const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
 const { inspectAttachment } = require("./utils/attachments");
 const { sanitizeMessageHtml } = require("./utils/messageHtml");
 const { resolveUnverifiedContact } = require("./utils/contactVerification");
+const { logger } = require("./logger");
 
 const regex = /\[#(\w+)\]/i;
 
@@ -62,7 +63,8 @@ async function addMessage(mail) {
       const firstMessage = await MessageModel.findOne({ messageId: firstMessageId });
       if (firstMessage) {
         ticket = await TicketModel.findOne({ _id: firstMessage.ticketId });
-        if (!ticket) console.log("no ticket found, message" + firstMessage);
+        // PL20 : plus de dump du document message (sujet, expéditeur) — l'identifiant suffit au diagnostic.
+        if (!ticket) logger.error(`no ticket found for message ${firstMessage.messageId}`);
       }
     }
 
@@ -163,7 +165,9 @@ async function addMessage(mail) {
       });
     }
   } catch (e) {
-    console.log("error fetching mail : ", mail);
+    // PL20 : plus de dump du mail entrant complet (corps, expéditeur, pièces jointes) — l'identifiant
+    // suffit au diagnostic, le reste part vers Sentry via capture(e).
+    logger.error(`error fetching mail : ${mail?.messageId}`);
     capture(e);
   }
 }

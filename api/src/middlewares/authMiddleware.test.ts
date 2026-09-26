@@ -16,7 +16,7 @@ describe("authMiddleware", () => {
   let req, res, next;
 
   beforeEach(() => {
-    req = { path: "", originalUrl: "", ipInfo: "an-ip" } as any;
+    req = { path: "", originalUrl: "", ip: "an-ip" } as any;
     res = {} as Response;
     next = jest.fn();
   });

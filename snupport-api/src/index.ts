@@ -5,11 +5,11 @@ const cors = require("cors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const helmet = require("helmet");
-const logger = require("morgan");
 const passport = require("passport");
 const { errorHandler } = require("./middlewares/errorHandler");
 const { validationErrorHandler } = require("./middlewares/validation");
 const { applyJsonBodyParser } = require("./middlewares/httpHardening");
+const { httpLogger } = require("./middlewares/httpLogger");
 require("./mongo");
 require("./imap");
 require("./utils/ventilation");
@@ -22,7 +22,7 @@ const registerSentryErrorHandler = initSentry(app);
 app.use(helmet());
 
 console.log("ENVIRONMENT:", config.ENVIRONMENT);
-app.use(logger("dev"));
+app.use(httpLogger);
 
 // L'admin SNU et moncompte n'appellent jamais snupport-api directement (tout passe par l'api v1,
 // authentifiée par clé d'API) : leur ouvrir le CORS avec credentials faisait d'une XSS dans l'un de

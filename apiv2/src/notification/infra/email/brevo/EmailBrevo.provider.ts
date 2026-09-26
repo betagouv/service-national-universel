@@ -1,6 +1,6 @@
 import * as brevo from "@getbrevo/brevo";
 import { CreateUpdateContactModel, SendSmtpEmail, SendSmtpEmailAttachmentInner } from "@getbrevo/brevo";
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
@@ -21,6 +21,7 @@ function setApiKey(apiInstance: brevo.TransactionalEmailsApi | brevo.ContactsApi
 export class EmailBrevoProvider implements EmailProvider, ContactProvider {
     emailsApi: brevo.TransactionalEmailsApi;
     contactsApi: brevo.ContactsApi;
+    private readonly logger = new Logger(EmailBrevoProvider.name);
 
     constructor(
         private readonly config: ConfigService,
@@ -36,7 +37,9 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
     }
 
     async send(template: EmailTemplate, emailParams: EmailParams): Promise<{ response: object; body: object }> {
-        console.log(EmailBrevoProvider.name, template, emailParams);
+        // PL14 : emailParams porte les destinataires (e-mail, nom) et, pour certains templates, une
+        // URL avec jeton — jamais dumpé en entier, ni par un canal hors Logger Nest.
+        this.logger.log(`send() - template: ${template}, destinataires: ${emailParams.to?.length ?? 0}`);
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
         const sendSmtpEmail = new brevo.SendSmtpEmail();
 

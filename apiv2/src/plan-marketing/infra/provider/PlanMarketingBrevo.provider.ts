@@ -2,6 +2,7 @@ import * as brevo from "@getbrevo/brevo";
 import { Injectable, Logger } from "@nestjs/common";
 import { PlanMarketingCampagne, PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
 import { ConfigService } from "@nestjs/config";
+import { redactUrl } from "@snu/log-redaction";
 import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
 
 @Injectable()
@@ -46,7 +47,9 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
     }
 
     async importerContacts(nomListe: string, contacts: string, folderId: number, notifyUrl: string): Promise<number> {
-        this.logger.log(`importerContacts() - nomListe: ${nomListe}, notifyUrl: ${notifyUrl}`);
+        // PL16 : notifyUrl porte le jeton statique du webhook Brevo (HMAC du JWT_SECRET) en query
+        // string — jamais journalisé en clair.
+        this.logger.log(`importerContacts() - nomListe: ${nomListe}, notifyUrl: ${redactUrl(notifyUrl)}`);
         const requestContactImport = new brevo.RequestContactImport();
         requestContactImport.fileBody = contacts;
         requestContactImport.newList = { listName: nomListe, folderId: folderId };
