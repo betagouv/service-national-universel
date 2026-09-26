@@ -297,6 +297,77 @@ describe("AddUserToRequestMiddleware - cookie de session admin", () => {
     });
 });
 
+/**
+ * PL7 (lot P27, audit du 25/09/2026) : l'apiv2 ne remontait jamais `_impersonateId` — une action
+ * faite sous impersonation référent sur /v2 restait attribuée au compte emprunté, sans trace de
+ * l'admin usurpateur.
+ */
+describe("AddUserToRequestMiddleware - traçabilité de l'impersonation (PL7, lot P27)", () => {
+    let middleware: AddUserToRequestMiddleware;
+    const authProvider = { parseToken: jest.fn() };
+    const referentGateway = { findById: jest.fn() };
+    const cls = { set: jest.fn() };
+
+    beforeEach(async () => {
+        jest.clearAllMocks();
+        featureFlagGateway.findByName.mockResolvedValue(null);
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                AddUserToRequestMiddleware,
+                { provide: AuthProvider, useValue: authProvider },
+                { provide: ReferentGateway, useValue: referentGateway },
+                { provide: PermissionService, useValue: { getAcl: jest.fn().mockResolvedValue([]) } },
+                { provide: ClsService, useValue: cls },
+                { provide: ConfigService, useValue: configService },
+                { provide: FeatureFlagGateway, useValue: featureFlagGateway },
+                { provide: ClockGateway, useValue: clockGateway },
+            ],
+        }).compile();
+
+        middleware = module.get(AddUserToRequestMiddleware);
+        referentGateway.findById.mockResolvedValue({
+            id: "6600000000000000000000aa",
+            role: ROLES.REFERENT_DEPARTMENT,
+            status: ReferentStatus.ACTIVE,
+            metadata: {},
+        } as unknown as ReferentModel);
+    });
+
+    const req = () => ({ headers: { authorization: "JWT un.jeton.signe" } }) as unknown as CustomRequest;
+
+    it("propage impersonateId sur req.user et dans le contexte CLS", async () => {
+        authProvider.parseToken.mockResolvedValue({
+            id: "6600000000000000000000aa",
+            __v: "0",
+            lastLogoutAt: null,
+            passwordChangedAt: null,
+            impersonateId: "6600000000000000000000bb",
+        });
+        const requete = req();
+        const next = jest.fn();
+
+        await middleware.use(requete, {} as any, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(requete.user.impersonateId).toBe("6600000000000000000000bb");
+        expect(cls.set).toHaveBeenCalledWith("user", expect.objectContaining({ impersonateId: "6600000000000000000000bb" }));
+    });
+
+    it("laisse impersonateId absent hors impersonation", async () => {
+        authProvider.parseToken.mockResolvedValue({
+            id: "6600000000000000000000aa",
+            __v: "0",
+            lastLogoutAt: null,
+            passwordChangedAt: null,
+        });
+        const requete = req();
+
+        await middleware.use(requete, {} as any, jest.fn());
+
+        expect(requete.user.impersonateId).toBeUndefined();
+    });
+});
+
 describe("lireCookie", () => {
     it("extrait la valeur exacte du cookie demandé", () => {
         expect(lireCookie("jwt_ref_old=a; jwt_ref=b%2Ec; x=y", "jwt_ref")).toBe("b.c");
