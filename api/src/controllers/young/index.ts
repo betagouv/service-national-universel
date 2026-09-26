@@ -30,7 +30,7 @@ import { requireJsonBody } from "../../middlewares/requireJsonBody";
 import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
-import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
+import { setSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
 import { validateYoung, validateId, idSchema } from "../../utils/validator";
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
@@ -186,7 +186,7 @@ router.post("/signup_invite", async (req: UserRequest, res) => {
     young.set({ invitationExpires: null });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+    setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
 
     await young.save({ fromUser: req.user });
 

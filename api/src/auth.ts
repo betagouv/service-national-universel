@@ -17,7 +17,7 @@ import {
   JWT_TRUST_TOKEN_TYPE,
   checkJwtTrustTokenVersion,
 } from "./jwt-options";
-import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } from "./cookie-options";
+import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, setSessionCookie, clearSessionCookie } from "./cookie-options";
 import { getToken } from "./passport";
 import { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } from "./utils";
 import {
@@ -265,7 +265,7 @@ class Auth {
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
 
       return res.status(200).send({
         ok: true,
@@ -418,7 +418,7 @@ class Auth {
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
       return res.status(200).send({
         ok: true,
         user: serializeYoung(user, user),
@@ -521,8 +521,8 @@ class Auth {
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
-      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
-      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      if (isYoung(user)) setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
+      else if (isReferent(user)) setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
@@ -581,15 +581,15 @@ class Auth {
       if (isYoung(user)) {
         if (rememberMe) {
           const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC);
-          res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
+          setSessionCookie(res, `trust_token-${user._id}`, trustToken, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS);
         }
-        res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
       } else if (isReferent(user)) {
         if (rememberMe) {
           const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC);
-          res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS));
+          setSessionCookie(res, `trust_token-${user._id}`, trustToken, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS);
         }
-        res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
       }
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -756,12 +756,12 @@ class Auth {
       });
       if (isYoung(user)) {
         const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC);
-        res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
-        res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, `trust_token-${user._id}`, trustToken, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS);
+        setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
       } else if (isReferent(user)) {
         const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC);
-        res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS));
-        res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, `trust_token-${user._id}`, trustToken, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS);
+        setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
       }
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -818,8 +818,8 @@ class Auth {
       const { user } = req;
       user.set({ lastLogoutAt: Date.now() });
       await user.save();
-      if (isYoung(user)) res.clearCookie("jwt_young", cookieOptions());
-      else if (isReferent(user)) res.clearCookie("jwt_ref", cookieOptions());
+      if (isYoung(user)) clearSessionCookie(res, "jwt_young");
+      else if (isReferent(user)) clearSessionCookie(res, "jwt_ref");
 
       return res.status(200).send({ ok: true });
     } catch (error) {
@@ -876,7 +876,7 @@ class Auth {
       const currentPayload = jwt.decode(getToken(req) || "") as jwt.JwtPayload | null;
       const sessionStartedAt = typeof currentPayload?.sessionStartedAt === "number" ? currentPayload.sessionStartedAt : (currentPayload?.iat || 0) * 1000;
       if (!sessionStartedAt || Date.now() - sessionStartedAt > JWT_SESSION_ABSOLUTE_MAX_AGE_MS) {
-        res.clearCookie("jwt_ref", cookieOptions());
+        clearSessionCookie(res, "jwt_ref");
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
 
@@ -907,7 +907,7 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
 
-      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
       res.send({ ok: true, user: data, data });
     } catch (error) {
       capture(error);
@@ -985,10 +985,10 @@ class Auth {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       if (isYoung(user)) {
-        res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
         user.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
       } else if (isReferent(user)) {
-        res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
         user.acl = await getAcl(user);
       }
 

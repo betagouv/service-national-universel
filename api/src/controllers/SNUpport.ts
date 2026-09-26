@@ -8,7 +8,7 @@ import { v4 as uuid } from "uuid";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES, ReferentStatus, getSafeDownloadFileName } from "snu-lib";
 
 import slack from "../slack";
-import { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } from "../cookie-options";
+import { sharedCookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } from "../cookie-options";
 import { capture } from "../sentry";
 import SNUpport from "../SNUpport";
 import { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } from "../utils";
@@ -184,7 +184,7 @@ router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) 
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const options: CookieOptions = {
-      ...cookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS),
+      ...sharedCookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS),
       sameSite: "lax" as const,
     };
     res.cookie("jwtzamoud", token, options);

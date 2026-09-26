@@ -15,7 +15,7 @@ const { ContractModel } = require("../models");
 const { config } = require("../config");
 const { ROLES, APPLICATION_STATUS, MISSION_STATUS, CONTRACT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE2, ReferentStatus } = require("snu-lib");
 const { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION, JWT_JVA_TOKEN_VERSION, JWT_JVA_TOKEN_TYPE, JWT_JVA_TOKEN_MAX_AGE_SEC } = require("../jwt-options");
-const { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } = require("../cookie-options");
+const { setSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } = require("../cookie-options");
 const { ERRORS, checkStatusContract } = require("../utils");
 const { authRateLimiter } = require("../middlewares/rateLimit");
 
@@ -118,7 +118,7 @@ router.get("/signin", jvaSigninLimiter, async (req, res) => {
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+    setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
 
     return res.redirect(config.ADMIN_URL);
   } catch (error) {
