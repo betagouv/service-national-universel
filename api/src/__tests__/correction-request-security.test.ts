@@ -68,12 +68,12 @@ async function jeuneEtReferentHorsPerimetre(role = ROLES.REFERENT_DEPARTMENT) {
 }
 
 /** Le référent départemental dont dépend réellement le volontaire. */
-async function jeuneEtReferentDuDepartement() {
+async function jeuneEtReferentDuDepartement(status: string = YOUNG_STATUS.WAITING_VALIDATION) {
   const young = await createYoungHelper(
     getNewYoungFixture({
       department: "Paris",
       region: "Île-de-France",
-      status: YOUNG_STATUS.WAITING_VALIDATION,
+      status,
       correctionRequests: DEMANDE_EN_COURS,
     } as any),
   );
@@ -122,6 +122,46 @@ describe("H22/H23 — périmètre des demandes de correction", () => {
       const { young, referent } = await jeuneEtReferentDuDepartement();
 
       const res = await request(await getAppHelperWithAcl(referent))
+        .post(`/correction-request/${young._id}`)
+        .send([{ cohort: "Juillet 2023", field: "lastName", reason: "MISSING", message: "", status: "PENDING" }]);
+
+      expect(res.statusCode).toEqual(200);
+      expect((await getYoungByIdHelper(young._id))?.status).toEqual(YOUNG_STATUS.WAITING_CORRECTION);
+    });
+
+    it("autorise une nouvelle demande alors que le dossier est déjà en attente de correction", async () => {
+      const { young, referent } = await jeuneEtReferentDuDepartement(YOUNG_STATUS.WAITING_CORRECTION);
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post(`/correction-request/${young._id}`)
+        .send([{ cohort: "Juillet 2023", field: "lastName", reason: "MISSING", message: "", status: "PENDING" }]);
+
+      expect(res.statusCode).toEqual(200);
+      expect((await getYoungByIdHelper(young._id))?.status).toEqual(YOUNG_STATUS.WAITING_CORRECTION);
+    });
+
+    it.each([YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED])(
+      "refuse un dossier %s : PH5, canUpdateYoungStatus n'autorisait que les transitions VERS validé/terminé, jamais celle-ci",
+      async (status) => {
+        const { young, referent } = await jeuneEtReferentDuDepartement(status);
+
+        const res = await request(await getAppHelperWithAcl(referent))
+          .post(`/correction-request/${young._id}`)
+          .send([{ cohort: "Juillet 2023", field: "lastName", reason: "MISSING", message: "", status: "PENDING" }]);
+
+        expect(res.statusCode).toEqual(403);
+        const apres = await getYoungByIdHelper(young._id);
+        expect(apres?.status).toEqual(status);
+        expect(apres?.correctionRequests).toEqual(DEMANDE_EN_COURS.map((r) => expect.objectContaining({ field: r.field, status: r.status })));
+        expect(mockSendTemplate).not.toHaveBeenCalled();
+      },
+    );
+
+    it("autorise toujours l'ADMIN, quel que soit le statut du dossier", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED } as any));
+      const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+      const res = await request(await getAppHelperWithAcl(admin))
         .post(`/correction-request/${young._id}`)
         .send([{ cohort: "Juillet 2023", field: "lastName", reason: "MISSING", message: "", status: "PENDING" }]);
 

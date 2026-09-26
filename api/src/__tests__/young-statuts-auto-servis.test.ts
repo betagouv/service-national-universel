@@ -227,4 +227,43 @@ describe("PUT /young/:id/validate-mission-phase3 (M45)", () => {
     const updated = await getYoungByIdHelper(young._id);
     expect(updated?.phase3StructureName).toBe("Attestée");
   });
+
+  it("refuse un phase3TutorEmail identique à l'email du volontaire (PM19)", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put(`/young/${young._id}/validate-mission-phase3`)
+      .send({ phase3TutorEmail: young.email.toUpperCase() });
+
+    expect(res.status).toBe(403);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.statusPhase3).toBe(YOUNG_STATUS_PHASE3.WAITING_REALISATION);
+    expect(updated?.phase3TutorEmail).toBeFalsy();
+  });
+
+  it.each(["parent1Email", "parent2Email"] as const)("refuse un phase3TutorEmail identique au %s (PM19)", async (parentField) => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION, [parentField]: "parent@example.org" } as any));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put(`/young/${young._id}/validate-mission-phase3`)
+      .send({ phase3TutorEmail: "parent@example.org" });
+
+    expect(res.status).toBe(403);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.statusPhase3).toBe(YOUNG_STATUS_PHASE3.WAITING_REALISATION);
+  });
+
+  it("limite le nombre de soumissions de mission phase 3 par le volontaire (429 au-delà de 10 par heure, PM19)", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION }));
+    const app = await getAppHelperWithAcl(young);
+    const url = `/young/${young._id}/validate-mission-phase3`;
+
+    for (let i = 0; i < 10; i++) {
+      const res = await request(app).put(url).send({ phase3TutorEmail: "tuteur@example.org" });
+      expect(res.status).toBe(200);
+    }
+
+    const res = await request(app).put(url).send({ phase3TutorEmail: "tuteur@example.org" });
+    expect(res.status).toBe(429);
+  });
 });
