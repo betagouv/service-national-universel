@@ -61,7 +61,8 @@ import {
 } from "../utils";
 import { validateId, idSchema, validateSelf, validateYoung, validateReferent, referentDepartmentSchema } from "../utils/validator";
 import { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } from "../utils/serializer";
-import { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION } from "../jwt-options";
+import { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION, JWT_SESSION_ABSOLUTE_MAX_AGE_MS } from "../jwt-options";
+import { getToken } from "../passport";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../cookie-options";
 import {
   ROLES_LIST,
@@ -251,6 +252,16 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     }
     const { id, type } = params;
 
+    // PH14 (lot P27) : ce refus vit ici et non dans `canSigninAs` (packages/lib/src/roles.ts),
+    // dont la branche CLE disparaît en P25 — l'auto-impersonation et le cumul de sessions déjà
+    // empruntées doivent rester bloqués indépendamment du rôle.
+    if (req.user.impersonateId) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (String(req.user._id) === String(id)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let user: ReferentDocument | YoungDocument | null = null;
     let acl: PermissionDto[] | null = null;
     if (type === "referent") {
@@ -281,8 +292,24 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    // PH14 (lot P27) : l'état de session de l'usurpateur (pas seulement celui de la cible) est
+    // figé dans le jeton, pour que `restore_signin` puisse le revérifier avant de recréer une
+    // session ADMIN complète — un jeton capturé ne doit pas survivre au logout ou au changement
+    // de mot de passe de l'admin qui l'a émis, ni prolonger indéfiniment le plafond de 12h.
+    const currentPayload = jwt.decode(getToken(req) || "") as jwt.JwtPayload | null;
+    const sessionStartedAt = typeof currentPayload?.sessionStartedAt === "number" ? currentPayload.sessionStartedAt : (currentPayload?.iat || 0) * 1000;
+
     const token = jwt.sign(
-      { __v: JWT_SIGNIN_VERSION, _id: user.id, _impersonateId: req.user._id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt },
+      {
+        __v: JWT_SIGNIN_VERSION,
+        _id: user.id,
+        _impersonateId: req.user._id,
+        lastLogoutAt: user.lastLogoutAt,
+        passwordChangedAt: user.passwordChangedAt,
+        _impersonatorLastLogoutAt: (req.user as any).lastLogoutAt,
+        _impersonatorPasswordChangedAt: (req.user as any).passwordChangedAt,
+        sessionStartedAt,
+      },
       config.JWT_SECRET,
       {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
@@ -298,6 +325,10 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     userToReturn.impersonateId = req.user._id;
     userToReturn.acl = acl;
 
+    // PL7 (lot P27) : signin_as n'était pas journalisé — aucune recherche d'abus fiable n'était
+    // possible. Identifiants seuls, sans email ni autre PII.
+    logger.info(`referent.signin_as: ${req.user._id} -> ${type}:${user.id}`);
+
     return res.status(200).json({ ok: true, data: userToReturn });
   } catch (error) {
     capture(error);
@@ -310,19 +341,47 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
     const jwtValue = req.cookies.jwt_ref;
     if (!jwtValue) return res.status(401).send({ ok: false, user: { restriction: "public" } });
 
-    let jwtPayload;
+    let jwtPayload: jwt.JwtPayload;
     try {
-      jwtPayload = await jwt.verify(jwtValue, config.JWT_SECRET);
+      jwtPayload = (await jwt.verify(jwtValue, config.JWT_SECRET)) as jwt.JwtPayload;
     } catch (error) {
+      return res.status(401).send({ ok: false, user: { restriction: "public" } });
+    }
+    if (!jwtPayload._impersonateId) return res.status(401).send({ ok: false, user: { restriction: "public" } });
+
+    // PH14 (lot P27) : même plafond absolu que refreshToken (GOO-16) — un jeton d'impersonation
+    // capturé ne doit pas permettre de recréer une session ADMIN au-delà des 12h de la session
+    // d'origine.
+    const sessionStartedAt = typeof jwtPayload.sessionStartedAt === "number" ? jwtPayload.sessionStartedAt : ((jwtPayload.iat as number) || 0) * 1000;
+    if (!sessionStartedAt || Date.now() - sessionStartedAt > JWT_SESSION_ABSOLUTE_MAX_AGE_MS) {
+      res.clearCookie("jwt_ref", cookieOptions() as any);
       return res.status(401).send({ ok: false, user: { restriction: "public" } });
     }
 
     const user = await ReferentModel.findOne({ _id: jwtPayload._impersonateId, role: ROLES.ADMIN });
     if (!user) return res.status(401).send({ ok: false, user: { restriction: "public" } });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
-      expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
-    });
+    // PH14 (lot P27) : l'état de session de l'usurpateur, figé à l'émission du jeton
+    // d'impersonation, doit encore correspondre à l'état actuel de son compte — sinon un jeton
+    // capturé (XSS, log, poste partagé) recréerait indéfiniment une session ADMIN complète malgré
+    // un logout ou un changement de mot de passe survenu entre-temps.
+    const memeInstant = (a?: Date | string | null, b?: unknown): boolean => {
+      const ta = a ? new Date(a).getTime() : null;
+      const tb = b ? new Date(b as any).getTime() : null;
+      return ta === tb;
+    };
+    if (!memeInstant(user.lastLogoutAt, jwtPayload._impersonatorLastLogoutAt) || !memeInstant(user.passwordChangedAt, jwtPayload._impersonatorPasswordChangedAt)) {
+      res.clearCookie("jwt_ref", cookieOptions() as any);
+      return res.status(401).send({ ok: false, user: { restriction: "public" } });
+    }
+
+    const token = jwt.sign(
+      { __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt, sessionStartedAt },
+      config.JWT_SECRET,
+      {
+        expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
+      },
+    );
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     const userSerialized = serializeReferent(user);
     userSerialized.acl = await getAcl(user);
