@@ -175,6 +175,8 @@ describe("H1 - POST /application : la structure vient de la mission, pas du body
 
     expect(res.status).toBe(200);
     expect(res.body.data.structureId).toBe(maStructure._id.toString());
+    // Une structure ne crée qu'une proposition, que le volontaire doit accepter (PH1).
+    expect(res.body.data.status).toBe(APPLICATION_STATUS.WAITING_ACCEPTATION);
   });
 });
 
