@@ -140,7 +140,9 @@ router.post("/forgot_password_reset", youngSigninLimiter, async (req: UserReques
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.resetPassword(req, res));
 router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.checkPassword(req, res));
 
-router.post("/signup_verify", async (req: UserRequest, res) => {
+// PL3 (25/09/2026) : par parité avec referentSigninLimiter, déjà posé côté référent sur la route
+// équivalente.
+router.post("/signup_verify", youngSigninLimiter, async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) {
@@ -161,7 +163,9 @@ router.post("/signup_verify", async (req: UserRequest, res) => {
   }
 });
 
-router.post("/signup_invite", async (req: UserRequest, res) => {
+// PL3 (rate limiter) + PM31 (requireJsonBody, déjà posé sur /signin) : cette route ouvre une session
+// complète contre email + mot de passe + jeton d'invitation, comme /signin.
+router.post("/signup_invite", youngSigninLimiter, requireJsonBody, async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),

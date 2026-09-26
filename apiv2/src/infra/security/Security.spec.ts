@@ -4,7 +4,7 @@ import * as basicAuth from "express-basic-auth";
 import { MemoryStore } from "express-rate-limit";
 
 import { hostGuard, hotesAutorises } from "./HostGuard";
-import { RATE_LIMITS, estRouteCouteuse, rateLimiter } from "./RateLimit";
+import { RATE_LIMITS, estRouteCouteuse, jetonCookieAdmin, normaliserIp, rateLimiter } from "./RateLimit";
 import { bullBoardIpAllowlist, masquerSecrets } from "./BullBoardSecurity";
 
 describe("HostGuard (L46)", () => {
@@ -44,6 +44,36 @@ describe("RateLimit (M80)", () => {
         expect(estRouteCouteuse(req("GET", "/v2/phase1/abc/simulations"))).toBe(false);
         expect(estRouteCouteuse(req("POST", "/v2/plan-marketing/import/webhook"))).toBe(false);
         expect(estRouteCouteuse(req("POST", "/v2/mission/exporter-quelque-chose"))).toBe(false);
+    });
+
+    it("PM40 : identifie une route coûteuse quelle que soit la casse du chemin", () => {
+        const req = (method: string, path: string) => ({ method, path }) as express.Request;
+        expect(estRouteCouteuse(req("POST", "/v2/jeune/Export"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/jeune/EXPORT"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/affectation/abc/Simulation/hts"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/referentiel/Import/ROUTES"))).toBe(true);
+    });
+
+    it("PM26 : normaliserIp regroupe une IPv6 par /64, laisse une IPv4 inchangée", () => {
+        // Deux adresses du même bloc /64 doivent produire la même clé.
+        expect(normaliserIp("2001:db8:1234:5678:aaaa:bbbb:cccc:0001")).toBe(normaliserIp("2001:db8:1234:5678:1:2:3:4"));
+        // Un bloc /64 différent produit une clé différente.
+        expect(normaliserIp("2001:db8:1234:5679::1")).not.toBe(normaliserIp("2001:db8:1234:5678::1"));
+        // Formes compressées équivalentes.
+        expect(normaliserIp("::1")).toBe(normaliserIp("0:0:0:0:0:0:0:1"));
+        // IPv4 et IPv4-mappée : inchangées / réduites à l'IPv4.
+        expect(normaliserIp("203.0.113.5")).toBe("203.0.113.5");
+        expect(normaliserIp("::ffff:203.0.113.5")).toBe("203.0.113.5");
+    });
+
+    it("PM41 : jetonCookieAdmin lit jwt_ref seulement depuis l'origine admin", () => {
+        const URL_ADMIN = "https://admin.snu.gouv.fr";
+        const avecCookie = (origin?: string) => ({ headers: { origin, cookie: "jwt_ref=le-jeton; autre=x" } });
+
+        expect(jetonCookieAdmin(avecCookie(URL_ADMIN), URL_ADMIN)).toBe("le-jeton");
+        expect(jetonCookieAdmin(avecCookie("https://attaquant.example.org"), URL_ADMIN)).toBeUndefined();
+        expect(jetonCookieAdmin(avecCookie(undefined), URL_ADMIN)).toBeUndefined();
+        expect(jetonCookieAdmin({ headers: { origin: URL_ADMIN, cookie: undefined } }, URL_ADMIN)).toBeUndefined();
     });
 
     it("renvoie 429 au-delà du quota des routes coûteuses, sans brider les autres", async () => {

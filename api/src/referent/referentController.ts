@@ -491,10 +491,13 @@ async function sendNewInvitation(referent: ReferentDocument, { fromName, fromUse
   const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
 
   await referent.save({ fromUser });
-  await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
+  // PM5 (25/09/2026) : l'appel Brevo n'est plus attendu avant de répondre — sinon la présence ou
+  // l'absence d'un compte référent se lit dans le temps de réponse de POST /referent/signup_retry
+  // (route anonyme, réponse 200 immédiate quand `shouldResendInvitation` est faux).
+  sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
     params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
-  });
+  }).catch(capture);
 }
 
 /**
@@ -547,7 +550,10 @@ router.post("/signup_verify", referentSigninLimiter, async (req: UserRequest, re
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-router.post("/signup_invite", async (req: UserRequest, res: Response) => {
+// PM31 (25/09/2026) : requireJsonBody, déjà posé sur /signin — cette route ouvre elle aussi une
+// session complète (login CSRF résiduel sans lui : un formulaire tiers en x-www-form-urlencoded
+// pouvait déclencher l'activation).
+router.post("/signup_invite", requireJsonBody, async (req: UserRequest, res: Response) => {
   // Elle sert encore cette route ?
   try {
     const { error, value } = Joi.object({

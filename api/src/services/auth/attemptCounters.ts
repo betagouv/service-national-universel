@@ -20,6 +20,7 @@
  * `findOneAndUpdate` ne perd donc aucune traçabilité.
  */
 import { Model } from "mongoose";
+import bcrypt from "bcryptjs";
 
 /** Au-delà de ce nombre d'échecs, chaque tentative est différée. */
 export const MAX_LOGIN_ATTEMPTS_BEFORE_DELAY = 5;
@@ -146,4 +147,17 @@ export async function consumeEmailValidationAttempt(model: Model<any>, filter: R
     { $inc: { attemptsEmailValidation: 1 } },
     { new: true },
   );
+}
+
+/**
+ * Hash bcrypt (coût 10, identique à celui des mots de passe réels) d'une valeur constante qui n'est
+ * le mot de passe d'aucun compte. Comparer un mot de passe soumis contre ce hash, pour un email
+ * inconnu, coûte le même temps qu'une vraie comparaison — sans ce leurre, l'absence de compte se lit
+ * dans le temps de réponse de `POST /young|referent/signin` (PM5, audit du 25/09/2026).
+ */
+export const DUMMY_PASSWORD_HASH = "$2a$10$sTqDdPot0MHAYbrd3HYf4eGxYW4bE2V30W8ZWibJbykl7Ma6uzuY6";
+
+/** Compare un mot de passe soumis au hash factice ci-dessus. Le résultat est toujours faux. */
+export async function compareAgainstDummyHash(password: string): Promise<boolean> {
+  return bcrypt.compare(password, DUMMY_PASSWORD_HASH);
 }
