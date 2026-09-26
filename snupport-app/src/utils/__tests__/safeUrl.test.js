@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
-import { sanitizeHttpsUrl, sanitizeImageUrl, sanitizeLinkUrl, sanitizeVideoUrl } from "../safeUrl.js";
+import { sanitizeHttpsUrl, sanitizeImageUrl, sanitizeKnownHttpsUrl, sanitizeLinkUrl, sanitizeVideoUrl } from "../safeUrl.js";
 import { sanitizeLinkUrl as sanitizeArticleLinkUrl } from "../../scenes/knowledge-base/utils/safeUrl.js";
 
 // Vecteurs partagés avec snu-lib (GOO-19) : cette copie du filtre doit se comporter comme la référence.
@@ -17,7 +17,7 @@ const FILTERS = {
 test("respecte les vecteurs partagés de snu-lib", () => {
   assert.deepEqual(
     Object.keys(VECTORS).filter((key) => !key.startsWith("_")),
-    Object.keys(FILTERS),
+    Object.keys(FILTERS)
   );
   for (const [name, filter] of Object.entries(FILTERS)) {
     for (const value of VECTORS[name].accept) assert.notEqual(filter(value), null, `${name} accepte ${JSON.stringify(value)}`);
@@ -71,4 +71,16 @@ test("sanitizeHttpsUrl n'accepte que https (attributs de contact)", () => {
   // l'ancien test `value.includes("https://")` laissait passer ceci
   assert.equal(sanitizeHttpsUrl("javascript:alert(document.cookie)//https://snu.gouv.fr"), null);
   for (const url of DANGEROUS) assert.equal(sanitizeHttpsUrl(url), null, url);
+});
+
+// PM32 : un attribut de contact (formulaire public anonyme) ne doit produire un lien que vers un
+// front SNU connu, jamais vers un hôte quelconque présenté comme une métadonnée interne (hameçonnage).
+test("sanitizeKnownHttpsUrl n'accepte qu'un front SNU connu", () => {
+  assert.equal(sanitizeKnownHttpsUrl("https://moncompte.snu.gouv.fr/phase1"), "https://moncompte.snu.gouv.fr/phase1");
+  assert.equal(sanitizeKnownHttpsUrl("https://admin.snu.gouv.fr/volontaire/1"), "https://admin.snu.gouv.fr/volontaire/1");
+  assert.equal(sanitizeKnownHttpsUrl("https://admin.beta-snu.dev/volontaire/1"), "https://admin.beta-snu.dev/volontaire/1");
+  assert.equal(sanitizeKnownHttpsUrl("https://phishing-support-snu.example/login"), null);
+  assert.equal(sanitizeKnownHttpsUrl("https://snu.gouv.fr.evil.example/phase1"), null);
+  assert.equal(sanitizeKnownHttpsUrl("http://moncompte.snu.gouv.fr"), null);
+  for (const url of DANGEROUS) assert.equal(sanitizeKnownHttpsUrl(url), null, url);
 });

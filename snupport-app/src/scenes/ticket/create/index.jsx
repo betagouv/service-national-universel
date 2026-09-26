@@ -493,7 +493,8 @@ const Middle = ({
           </div>
         </div>
       )}
-      <TextEditor forcedHtml={template?.message} setHtmlText={setMessage} setSlateContent={setSlateContent} />
+      {/* PM54 : une image collée ici serait publiée en accès public sans jamais être envoyée au contact. */}
+      <TextEditor forcedHtml={template?.message} setHtmlText={setMessage} setSlateContent={setSlateContent} allowImages={false} />
       <div>
         {files.length > 0 && (
           <div className="mb-3 flex justify-between">
