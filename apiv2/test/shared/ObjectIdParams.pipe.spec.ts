@@ -34,9 +34,9 @@ describe("pipesGlobaux (GOO-90)", () => {
     it("SearchYoungDto.filters (@IsObject() sans @ValidateNested()) reste accepté avec la liste blanche", async () => {
         const [, validationPipe] = pipesGlobaux();
         const resultat = await validationPipe.transform(
-            { filters: { status: ["VALIDATED"] } },
+            { filters: { status: ["VALIDATED"], region: ["Bretagne"] } },
             { type: "body", metatype: SearchYoungDto },
         );
-        expect((resultat as SearchYoungDto).filters).toEqual({ status: ["VALIDATED"] });
+        expect((resultat as SearchYoungDto).filters).toEqual({ status: ["VALIDATED"], region: ["Bretagne"] });
     });
 });
