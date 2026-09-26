@@ -6,6 +6,7 @@ import { CampagneJeuneType } from "snu-lib";
 import { CampagneController } from "@plan-marketing/infra/api/Campagne.controller";
 import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneGateway } from "@plan-marketing/core/gateway/Campagne.gateway";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
 import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
 import { BasculerArchivageCampagne } from "@plan-marketing/core/useCase/BasculerArchivageCampagne";
@@ -22,7 +23,10 @@ import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 describe("CampagneController - validation du corps (GOO-90)", () => {
     let app: INestApplication;
 
-    const campagneService = { creerCampagne: jest.fn().mockResolvedValue({ id: "campagne-1" }) };
+    const campagneService = {
+        creerCampagne: jest.fn().mockResolvedValue({ id: "campagne-1" }),
+        findById: jest.fn(),
+    };
     const mettreAJourCampagne = { execute: jest.fn().mockResolvedValue({ id: "campagne-1" }) };
 
     const campagneGeneriqueValide = {
@@ -130,5 +134,30 @@ describe("CampagneController - validation du corps (GOO-90)", () => {
             .send({ generic: false, cohortId: "cohorte-1", campagneGeneriqueId: "generique-1" })
             .expect(201);
         expect(campagneService.creerCampagne).toHaveBeenCalled();
+    });
+
+    /**
+     * PL15 : `getById` appelait directement `campagneGateway.findById` et levait un `Error`
+     * générique sur un ObjectId valide mais inexistant — non catégorisé par
+     * `AllExceptionsFilter`, donc 500 + événement Sentry à chaque appel. `campagneService.findById`
+     * lève déjà `FunctionalException(CAMPAIGN_NOT_FOUND)`.
+     */
+    describe("GET /:id (PL15)", () => {
+        it("renvoie la campagne quand campagneService.findById la trouve", async () => {
+            campagneService.findById.mockResolvedValue({ id: "aaaaaaaaaaaaaaaaaaaaaaaa", nom: "Rappel J-7" });
+
+            const response = await request(app.getHttpServer()).get("/campagne/aaaaaaaaaaaaaaaaaaaaaaaa").expect(200);
+
+            expect(response.body).toEqual({ id: "aaaaaaaaaaaaaaaaaaaaaaaa", nom: "Rappel J-7" });
+            expect(campagneService.findById).toHaveBeenCalledWith("aaaaaaaaaaaaaaaaaaaaaaaa");
+        });
+
+        it("renvoie une erreur fonctionnelle (422), pas une 500, pour un ObjectId valide mais inexistant", async () => {
+            campagneService.findById.mockRejectedValue(new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND));
+
+            const response = await request(app.getHttpServer()).get("/campagne/aaaaaaaaaaaaaaaaaaaaaaaa").expect(422);
+
+            expect(response.body.message).toBe(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
+        });
     });
 });
