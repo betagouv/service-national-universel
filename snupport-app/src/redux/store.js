@@ -4,18 +4,15 @@ import storage from "redux-persist/lib/storage";
 
 import reducers from "./reducers";
 import { registerLocalSession } from "../services/localSession";
+import { toPersistedTicketPreview } from "../utils/ticketPreviewCache";
 
-// Version du cache persisté. Un cache d'une autre version est écarté au démarrage : les aperçus de
-// tickets mis en cache avant le filtrage des contenus (GOO-6) ne sont pas réhydratés.
-const PERSIST_VERSION = 1;
+// Version du cache persisté. Un cache d'une autre version est écarté au démarrage : ceux des versions
+// précédentes contiennent des documents ticket complets (GOO-6, puis FM21/PM55) et ne sont pas réhydratés.
+const PERSIST_VERSION = 2;
 
-// Les aperçus ouverts sont rechargés depuis l'API à l'affichage : seuls les en-têtes de ticket sont
-// gardés en cache. Les fils de messages et la signature n'ont pas à séjourner dans le localStorage (FM21).
-const withoutThreads = createTransform(
-  (ticketPreview) => ({ ...ticketPreview, tickets: (ticketPreview?.tickets || []).map(({ messages, signature, ...rest }) => rest) }),
-  (ticketPreview) => ticketPreview,
-  { whitelist: ["TicketPreview"] }
-);
+// Les aperçus ouverts sont rechargés depuis l'API à l'affichage : le localStorage n'en garde que les
+// identifiants et champs d'en-tête, dans les deux sens (écriture et réhydratation).
+const headersOnly = createTransform(toPersistedTicketPreview, toPersistedTicketPreview, { whitelist: ["TicketPreview"] });
 
 const persistConfig = {
   key: "root",
@@ -23,7 +20,7 @@ const persistConfig = {
   version: PERSIST_VERSION,
   migrate: (state) => Promise.resolve(state?._persist?.version === PERSIST_VERSION ? state : undefined),
   whitelist: ["TicketPreview"], // only TicketPreview will be persisted
-  transforms: [withoutThreads],
+  transforms: [headersOnly],
 };
 
 const persistedReducer = persistReducer(persistConfig, combineReducers({ ...reducers }));
