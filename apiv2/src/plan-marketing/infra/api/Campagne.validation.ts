@@ -7,7 +7,7 @@ import {
 import { CampagneJeuneType, DestinataireListeDiffusion, PlanMarketingRoutes } from "snu-lib";
 import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber } from "class-validator";
 import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
-import { ParseBoolPipe } from "@nestjs/common";
+import { ParseBoolPipe, ValidationPipe } from "@nestjs/common";
 
 class BaseCampagneDto {
     @IsString()
@@ -130,3 +130,36 @@ export type UpdateCampagneDto =
     | UpdateCampagneGeneriqueDto
     | UpdateCampagneSpecifiqueWithoutRefDto
     | UpdateCampagneSpecifiqueWithRefDto;
+
+const pipeStrict = new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true });
+
+const estCorpsGenerique = (corps: Record<string, unknown>): boolean => corps.generic === true;
+const aReferenceCampagneGenerique = (corps: Record<string, unknown>): boolean =>
+    typeof corps.campagneGeneriqueId === "string" && corps.campagneGeneriqueId.length > 0;
+
+/**
+ * `CreateCampagneDto`/`UpdateCampagneDto` sont des unions de classes : TypeScript les réfléchit en
+ * `Object` (`design:paramtypes`), donc le `ValidationPipe` global — basé sur ce métatype — ne les
+ * valide jamais (GOO-90, même cause racine que PC1). On choisit la classe concrète à la main sur
+ * le discriminant `generic`/`campagneGeneriqueId`, puis on rejoue une config stricte indépendante
+ * du pipe global.
+ */
+export const validerCorpsCampagneCreation = (corps: unknown): Promise<CreateCampagneDto> => {
+    const brut = (corps ?? {}) as Record<string, unknown>;
+    const Classe = estCorpsGenerique(brut)
+        ? CreateCampagneGeneriqueDto
+        : aReferenceCampagneGenerique(brut)
+          ? CreateCampagneSpecifiqueWithRefDto
+          : CreateCampagneSpecifiqueWithoutRefDto;
+    return pipeStrict.transform(corps, { type: "body", metatype: Classe }) as Promise<CreateCampagneDto>;
+};
+
+export const validerCorpsCampagneMiseAJour = (corps: unknown): Promise<UpdateCampagneDto> => {
+    const brut = (corps ?? {}) as Record<string, unknown>;
+    const Classe = estCorpsGenerique(brut)
+        ? UpdateCampagneGeneriqueDto
+        : aReferenceCampagneGenerique(brut)
+          ? UpdateCampagneSpecifiqueWithRefDto
+          : UpdateCampagneSpecifiqueWithoutRefDto;
+    return pipeStrict.transform(corps, { type: "body", metatype: Classe }) as Promise<UpdateCampagneDto>;
+};
