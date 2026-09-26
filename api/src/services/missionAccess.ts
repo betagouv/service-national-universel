@@ -182,3 +182,62 @@ export async function checkMissionPayload({ user, payload, storedMission }: Chec
 
   return null;
 }
+
+/**
+ * Champs revus par le référent à la modération d'une mission (GOO-59, PM13). Une structure qui en
+ * change un sur une mission déjà validée la renvoie en modération : sans cela, il lui suffisait de
+ * renvoyer `description` et `actions` à l'identique pour republier aux volontaires un nom, une
+ * adresse, un territoire, des dates ou un caractère « préparation militaire » jamais revus.
+ * Restent modifiables sans revalidation : les places, la visibilité, le tuteur, le statut.
+ */
+const MISSION_MODERATED_FIELDS = [
+  "name",
+  "justifications",
+  "contraintes",
+  "frequence",
+  "duration",
+  "startAt",
+  "endAt",
+  "address",
+  "zip",
+  "city",
+  "department",
+  "region",
+  "isMilitaryPreparation",
+  "hebergement",
+] as const;
+
+const BOOLEAN_STRING_FIELDS: readonly string[] = ["isMilitaryPreparation", "hebergement"];
+const DATE_FIELDS: readonly string[] = ["startAt", "endAt"];
+
+/** Valeur comparable : une date en millisecondes, un drapeau absent vaut « false », un texte absent vaut "". */
+function normalizeModeratedValue(field: string, value: unknown): string {
+  if (DATE_FIELDS.includes(field)) {
+    if (value === undefined || value === null || value === "") return "";
+    const time = new Date(value as string | Date).getTime();
+    return Number.isNaN(time) ? String(value) : String(time);
+  }
+  if (BOOLEAN_STRING_FIELDS.includes(field)) return String(value) === "true" ? "true" : "false";
+  return value === undefined || value === null ? "" : String(value);
+}
+
+type MissionRequiresRevalidationParams = {
+  user: UserDto;
+  /** Corps validé, dates déjà normalisées par le contrôleur. */
+  payload: Record<string, any>;
+  storedMission: Record<string, any>;
+};
+
+/**
+ * La modification doit-elle renvoyer la mission en modération ? Vrai quand un rôle non modérateur
+ * change un champ modéré d'une mission qui, sans cela, resterait validée. Un champ absent du corps
+ * n'est pas modifié et n'est donc pas comparé.
+ */
+export function missionRequiresRevalidation({ user, payload, storedMission }: MissionRequiresRevalidationParams): boolean {
+  if (MISSION_MODERATOR_ROLES.includes(user?.role as string)) return false;
+  const targetStatus = payload.status || storedMission.status;
+  if (targetStatus !== MISSION_STATUS.VALIDATED) return false;
+  return MISSION_MODERATED_FIELDS.some(
+    (field) => payload[field] !== undefined && normalizeModeratedValue(field, payload[field]) !== normalizeModeratedValue(field, storedMission[field]),
+  );
+}

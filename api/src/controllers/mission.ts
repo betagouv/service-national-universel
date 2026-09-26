@@ -24,7 +24,7 @@ import {
   ReferentStatus,
 } from "snu-lib";
 import { serializeMission, serializeApplication } from "../utils/serializer";
-import { checkMissionPayload, getReferentDepartments, isMissionInUserScope, isTutorAllowedForMission } from "../services/missionAccess";
+import { checkMissionPayload, getReferentDepartments, isMissionInUserScope, isTutorAllowedForMission, missionRequiresRevalidation } from "../services/missionAccess";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
@@ -80,6 +80,9 @@ router.post(
 
       const payloadError = await checkMissionPayload({ user: req.user, payload: checkedMission, storedMission: null });
       if (payloadError) return res.status(403).send({ ok: false, code: payloadError });
+
+      // Le nom de la structure part dans les emails aux volontaires : il vient de la structure, pas du corps (GOO-59).
+      if (structure) checkedMission.structureName = structure.name;
 
       if (checkedMission.mainDomain) {
         if (!checkedMission.domains) checkedMission.domains = [];
@@ -177,6 +180,10 @@ router.put(
       const payloadError = await checkMissionPayload({ user: req.user, payload: checkedMission, storedMission: mission });
       if (payloadError) return res.status(403).send({ ok: false, code: payloadError });
 
+      // Le nom de la structure part dans les emails aux volontaires : il vient de la structure, pas du corps (GOO-59).
+      if (structure) checkedMission.structureName = structure.name;
+      else delete checkedMission.structureName;
+
       if (checkedMission.mainDomain) {
         if (!checkedMission.domains) checkedMission.domains = [];
         if (!checkedMission.domains.includes(checkedMission.mainDomain)) {
@@ -202,6 +209,10 @@ router.put(
         if (checkedMission.description !== mission.description || checkedMission.actions !== mission.actions) {
           checkedMission.status = "WAITING_VALIDATION";
         }
+      }
+      // Une structure qui change un autre champ modéré d'une mission validée la renvoie aussi en modération (GOO-59).
+      if (missionRequiresRevalidation({ user: req.user, payload: checkedMission, storedMission: mission.toObject() })) {
+        checkedMission.status = MISSION_STATUS.WAITING_VALIDATION;
       }
       if (checkedMission?.hebergement === "false") {
         delete checkedMission.hebergementPayant;
@@ -264,7 +275,7 @@ router.put(
               },
             });
           }
-          const responsible = await ReferentModel.findById(mission.tutorId);
+          const responsible = mission.tutorId ? await ReferentModel.findById(mission.tutorId) : null;
           if (responsible && responsible.status !== ReferentStatus.INACTIVE)
             await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
               emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
@@ -274,7 +285,7 @@ router.put(
             });
         }
         if (mission.status === MISSION_STATUS.VALIDATED) {
-          const responsible = await ReferentModel.findById(mission.tutorId);
+          const responsible = mission.tutorId ? await ReferentModel.findById(mission.tutorId) : null;
           if (responsible && responsible.status !== ReferentStatus.INACTIVE)
             await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_VALIDATED, {
               emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
@@ -286,7 +297,7 @@ router.put(
         }
       }
 
-      res.status(200).send({ ok: true, data: mission });
+      res.status(200).send({ ok: true, data: serializeMission(mission) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -389,9 +400,9 @@ router.get(
         const authorization = isProposal
           ? (() => {
               const canManage = canManageApplications(req.user as unknown as YoungType, cohort);
-              return { 
-                canApply: canManage, 
-                message: canManage ? "" : "Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée." 
+              return {
+                canApply: canManage,
+                message: canManage ? "" : "Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée.",
               };
             })()
           : await getAuthorizationToApply(mission, req.user as unknown as YoungType, cohort);

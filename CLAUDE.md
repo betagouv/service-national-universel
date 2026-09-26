@@ -25,21 +25,38 @@ bash devops/scripts/worktree-setup.sh
 ```
 
 Sans cette étape le worktree n'est pas isolé : `.claude/settings.local.json`
-place `node_modules` dans `worktree.symlinkDirectories`, donc
-`node_modules/snu-lib` (`-> ../packages/lib`) résout vers le `packages/lib` du
-checkout principal. Un worktree compile alors contre le paquet partagé d'à côté,
-modifications non commitées d'autres sessions comprises. Le script remplace le
-lien racine par une ferme de liens (zéro duplication sur disque), pointe
-`snu-lib`, `@snu/ds` et `@snu/log-redaction` sur le worktree, les construit, et
-vérifie la résolution.
+liste dans `worktree.symlinkDirectories` le `node_modules` racine, mais aussi
+ceux de `packages/lib`, `packages/ds`, `api`, `apiv2`, `app`, `admin`,
+`snupport-api` et `snupport-app`. Un lien direct vers ces répertoires du
+checkout principal ferait résoudre `snu-lib` (`-> ../packages/lib`) vers le
+`packages/lib` du principal — modifications non commitées d'autres sessions
+comprises. Pire : certains de ces répertoires contiennent, **dans le principal
+lui-même**, des coquilles vides pour des paquets pourtant listés (ex.
+`api/node_modules/mongoose`, 0 fichier) ; un miroir naïf les copierait telles
+quelles, et la résolution retomberait alors sur une autre version du même
+paquet plus haut dans l'arborescence, sans erreur bruyante (mongoose 5 racine
+au lieu du 7 attendu par `api`, ou de la version 8 attendue par `apiv2`).
+
+Le script remplace chacun de ces répertoires par une ferme de liens (zéro
+duplication sur disque, entrée par entrée, sans toucher aux entrées déjà
+valides — donc rejouable sur un worktree réutilisé même partiellement monté).
+Il ignore une entrée vide du principal au profit d'une source de repli valide
+(`packages/lib/node_modules`, puis `node_modules` racine), exclut toujours
+`snu-lib`, `@snu/ds` et `@snu/log-redaction` de ces miroirs (ils doivent
+remonter vers CE worktree), construit ces paquets, puis vérifie de façon
+bloquante la résolution de `snu-lib` (racine, `apiv2/`, `api/`) et la version
+de `mongoose` requise par `apiv2/` (8.x) et par `api/` (7.x, via
+`packages/lib`).
 
 Pour vérifier à tout moment qu'on est bien isolé :
 
 ```bash
 node -e "console.log(require.resolve('snu-lib'))"
+(cd apiv2 && node -p "require('mongoose/package.json').version")  # doit être 8.x
+(cd api && node -p "require('mongoose/package.json').version")    # doit être 7.x
 ```
 
-Le chemin doit contenir le nom du worktree.
+Le chemin de `snu-lib` doit contenir le nom du worktree.
 
 ## Environnement
 
@@ -67,5 +84,10 @@ Le chemin doit contenir le nom du worktree.
 - Les rapports d'audit ne se commitent pas : le dépôt est public et ils
   décrivent des failles exploitables en production. Seules les notes par lot
   vont dans `api/docs/`, et elles décrivent ce qui est **corrigé**.
+- Un rapport d'audit (et tout document dérivé : lots de PR, tickets, synthèses)
+  s'écrit directement dans un emplacement privé hors du dépôt, jamais dans le
+  worktree : celui-ci ne garde qu'une copie locale de travail, jetable.
+  `git worktree prune`, la suppression de `.claude/worktrees/` ou
+  `ExitWorktree` peuvent le faire disparaître sans préavis (voir GOO-94).
 - Avant d'affirmer qu'un constat est réel, relire le code concerné pour le
   confirmer. Les numéros de ligne des rapports dérivent vite.

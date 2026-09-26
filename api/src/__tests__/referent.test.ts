@@ -15,8 +15,10 @@ import {
   YOUNG_SOURCE,
   INSCRIPTION_GOAL_LEVELS,
   ROLES_LIST,
+  DECOMMISSIONED_ROLES,
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
+  ReferentStatus,
 } from "snu-lib";
 
 import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
@@ -129,10 +131,13 @@ describe("Referent", () => {
         .send(fixture);
       expect(res.status).toBe(409);
     });
-    // CLE décommissionné (H17) : ce parcours générique ne doit plus permettre de créer un compte
-    // ADMINISTRATEUR_CLE ou REFERENT_CLASSE actif, y compris pour un admin qui peut inviter tout rôle.
-    it("should return 403 when inviting an ADMINISTRATEUR_CLE or REFERENT_CLASSE", async () => {
-      for (const role of [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]) {
+    // Rôles décommissionnés (GOO-56, lot P24, audit du 25/09/2026) : ce parcours générique ne doit
+    // plus permettre de créer de compte sur l'un de ces rôles, y compris pour un admin qui peut
+    // inviter tout rôle par ailleurs. Couvre notamment PH2/PH8 (famille chef de centre) et PH6/PM8
+    // (transporteur), en plus du blocage CLE déjà en place (H17).
+    it("should return 403 when inviting a decommissioned role", async () => {
+      const referentCountBefore = await getReferentsHelper();
+      for (const role of DECOMMISSIONED_ROLES) {
         const referentFixture = { ...getInvitationFixture(), role };
         const res = await request(await getAppHelperWithAcl())
           .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
@@ -140,6 +145,50 @@ describe("Referent", () => {
         expect(res.statusCode).toEqual(403);
         expect(res.body).toEqual({ ok: false, code: "OPERATION_NOT_ALLOWED" });
       }
+      expect(await getReferentsHelper()).toHaveLength(referentCountBefore.length);
+    });
+
+    it("should return 403 when a referent_department or referent_region invites a decommissioned role", async () => {
+      // En production, referent_department/region ont un accès FULL sur la ressource REFERENT
+      // (cf. api/src/__tests__/referent-security.test.ts) : ce test reproduit cet accès, absent du
+      // beforeAll de ce fichier, pour exercer réellement canInviteUser plutôt que d'être arrêté plus
+      // tôt par permissionAccessControlMiddleware.
+      await addPermissionHelper([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION], PERMISSION_RESOURCES.REFERENT, PERMISSION_ACTIONS.FULL);
+      for (const actorRole of [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION]) {
+        for (const role of [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.TRANSPORTER, ROLES.VISITOR]) {
+          const referentFixture = { ...getInvitationFixture(), role };
+          const res = await request(await getAppHelperWithAcl({ role: actorRole, department: ["Ain"], region: "Auvergne-Rhône-Alpes" }))
+            .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
+            .send(referentFixture);
+          expect(res.statusCode).toEqual(403);
+          expect(res.body).toEqual({ ok: false, code: "OPERATION_NOT_ALLOWED" });
+        }
+      }
+    });
+
+    // PM27 : les textes libres fournis par l'appelant (structureName, prénom/nom de l'invité) ne
+    // doivent plus se retrouver tels quels dans l'email officiel envoyé au nom du SNU.
+    it("should read structureName from database and sanitize free-text fields of the official email", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "Structure légitime" });
+      const sendTemplateSpy = jest.spyOn(require("../brevo"), "sendTemplate");
+      const referentFixture = {
+        ...getInvitationFixture(),
+        role: ROLES.RESPONSIBLE,
+        structureId: structure._id.toString(),
+        structureName: "<script>alert(1)</script>Structure usurpée",
+        firstName: "<img src=x onerror=alert(1)>",
+      };
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
+        .send(referentFixture);
+      expect(res.statusCode).toEqual(200);
+
+      const lastCall = sendTemplateSpy.mock.calls[sendTemplateSpy.mock.calls.length - 1] as any;
+      expect(lastCall[1].params.structureName).toEqual(structure.name);
+      expect(lastCall[1].params.toName).not.toContain("<");
+
+      await deleteReferentByIdHelper(res.body.data._id);
+      sendTemplateSpy.mockRestore();
     });
   });
 
@@ -778,6 +827,28 @@ describe("Referent", () => {
           expect(res.statusCode).toEqual(403);
         }
       }
+    });
+
+    // Rôle décommissionné (GOO-56, lot P24) : ni attribution ni réactivation, ADMIN compris
+    // (canUpdateReferent, snu-lib).
+    it("should return 403 when an admin attributes a decommissioned role", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"] }));
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/${referent._id}`)
+        .send({ role: ROLES.HEAD_CENTER });
+      expect(res.statusCode).toEqual(403);
+      const referentAfter = await getReferentByIdHelper(referent._id);
+      expect(referentAfter?.role).toEqual(ROLES.REFERENT_DEPARTMENT);
+    });
+
+    it("should return 403 when an admin reactivates a referent whose role is decommissioned", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.TRANSPORTER, status: ReferentStatus.INACTIVE }));
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/${referent._id}`)
+        .send({ status: ReferentStatus.ACTIVE });
+      expect(res.statusCode).toEqual(403);
+      const referentAfter = await getReferentByIdHelper(referent._id);
+      expect(referentAfter?.status).toEqual(ReferentStatus.INACTIVE);
     });
 
     it("should return 403 if responsible try to change structure", async () => {

@@ -18,6 +18,8 @@ import getNewMissionFixture from "./fixtures/mission";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
 import { PermissionModel } from "../models/permissions/permission";
+import * as fileUtils from "../utils/file";
+import { restrictedData, expectNoHealth, expectNoIdentityFiles } from "./helpers/youngRestrictedFields";
 
 const { ObjectId } = Types;
 
@@ -28,6 +30,19 @@ jest.mock("../brevo", () => ({
   sendTemplate: () => Promise.resolve(),
   sendEmail: () => Promise.resolve(),
 }));
+
+// PH3 : POST /:id/file/:key dépose réellement un fichier (S3, chiffrement, détection de mimetype) —
+// mêmes mocks que young.test.ts pour son équivalent côté /young/:id/documents/:key.
+jest.mock("../utils", () => ({
+  ...jest.requireActual("../utils"),
+  uploadFile: () => Promise.resolve({}),
+}));
+jest.mock("../cryptoUtils", () => ({
+  ...jest.requireActual("../cryptoUtils"),
+  encrypt: () => Buffer.from("test"),
+  decrypt: () => Buffer.from("test"),
+}));
+const getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 
 const DEP_CIBLE = "Yvelines";
 const REGION_CIBLE = "Île-de-France";
@@ -231,6 +246,31 @@ describe("H4 - POST /application/:id/file/:key est cloisonné", () => {
       .post(`/application/${application._id}/file/justificatifsFiles`)
       .send({ body: JSON.stringify({ names: ["fichier.pdf"] }) });
     expect(res.status).toBe(403);
+  });
+
+  it("ne renvoie ni santé ni pièces d'identité au responsable dans son périmètre (PH3)", async () => {
+    const structure = await createStructureHelper({ name: "Structure de la mission" });
+    const young = await createYoungHelper({ ...getNewYoungFixture(), department: DEP_CIBLE, region: REGION_CIBLE, ...restrictedData });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), structureId: structure._id.toString() });
+    const application = await createApplication({
+      ...getNewApplicationFixture(),
+      youngId: young._id.toString(),
+      youngDepartment: DEP_CIBLE,
+      missionId: mission._id.toString(),
+      structureId: structure._id.toString(),
+    });
+    const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() });
+
+    getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+    const res = await request(await getAppHelperWithAcl(responsable))
+      .post(`/application/${application._id}/file/justificatifsFiles`)
+      .field("body", JSON.stringify({ names: ["justificatif.jpeg"] }))
+      .attach("file", Buffer.from("contenu"), { filename: "justificatif.jpeg" });
+
+    expect(res.status).toBe(200);
+    expect(res.body.young.firstName).toBe(young.firstName);
+    expectNoHealth(res.body.young);
+    expectNoIdentityFiles(res.body.young);
   });
 });
 

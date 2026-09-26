@@ -96,7 +96,34 @@ describe("Sécurité — téléchargement des pièces d'un volontaire (audit 202
       expect(res.statusCode).toEqual(403);
     });
 
-    it("autorise un responsable sur un volontaire ayant candidaté dans sa structure", async () => {
+    it("autorise un responsable sur une pièce non restreinte d'un volontaire ayant candidaté dans sa structure", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(),  region: "Grand Est", department: "Bas-Rhin"  });
+      const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString(), region: "Grand Est", department: ["Bas-Rhin"] };
+      const young = await createUnrelatedYoung();
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id.toString(), structureId: structure._id.toString() });
+
+      const res = await request(await getAppHelperWithAcl(actor as any))
+        .get(`/referent/youngFile/${young._id}/imageRightFiles/droit-image.pdf`)
+        .send();
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("autorise un superviseur sur une pièce non restreinte d'un volontaire ayant candidaté dans une structure de son réseau", async () => {
+      const head = await createStructureHelper({ ...getNewStructureFixture(),  region: "Grand Est", department: "Bas-Rhin"  });
+      const child = await createStructureHelper({ ...getNewStructureFixture(),  networkId: head._id.toString(), region: "Grand Est", department: "Bas-Rhin"  });
+      const actor = { role: ROLES.SUPERVISOR, structureId: head._id.toString(), region: "Grand Est", department: ["Bas-Rhin"] };
+      const young = await createUnrelatedYoung();
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id.toString(), structureId: child._id.toString() });
+
+      const res = await request(await getAppHelperWithAcl(actor as any))
+        .get(`/referent/youngFile/${young._id}/imageRightFiles/droit-image.pdf`)
+        .send();
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("refuse cniFiles à un responsable pourtant en périmètre : pièce d'identité hors décision GOO-11 (PH20)", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(),  region: "Grand Est", department: "Bas-Rhin"  });
       const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString(), region: "Grand Est", department: ["Bas-Rhin"] };
       const young = await createUnrelatedYoung();
@@ -106,21 +133,33 @@ describe("Sécurité — téléchargement des pièces d'un volontaire (audit 202
         .get(`/referent/youngFile/${young._id}/cniFiles/cni.pdf`)
         .send();
 
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(403);
     });
 
-    it("autorise un superviseur sur un volontaire ayant candidaté dans une structure de son réseau", async () => {
-      const head = await createStructureHelper({ ...getNewStructureFixture(),  region: "Grand Est", department: "Bas-Rhin"  });
-      const child = await createStructureHelper({ ...getNewStructureFixture(),  networkId: head._id.toString(), region: "Grand Est", department: "Bas-Rhin"  });
-      const actor = { role: ROLES.SUPERVISOR, structureId: head._id.toString(), region: "Grand Est", department: ["Bas-Rhin"] };
+    it("refuse autoTestPCRFiles à un responsable pourtant en périmètre (PH20)", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(),  region: "Grand Est", department: "Bas-Rhin"  });
+      const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString(), region: "Grand Est", department: ["Bas-Rhin"] };
       const young = await createUnrelatedYoung();
-      await createApplication({ ...getNewApplicationFixture(), youngId: young._id.toString(), structureId: child._id.toString() });
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id.toString(), structureId: structure._id.toString() });
 
       const res = await request(await getAppHelperWithAcl(actor as any))
-        .get(`/referent/youngFile/${young._id}/cniFiles/cni.pdf`)
+        .get(`/referent/youngFile/${young._id}/autoTestPCRFiles/pcr.pdf`)
         .send();
 
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("refuse une pièce de préparation militaire à un responsable dont la structure n'est pas de préparation militaire (PH20)", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(),  region: "Grand Est", department: "Bas-Rhin"  });
+      const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString(), region: "Grand Est", department: ["Bas-Rhin"] };
+      const young = await createUnrelatedYoung();
+      await createApplication({ ...getNewApplicationFixture(), youngId: young._id.toString(), structureId: structure._id.toString() });
+
+      const res = await request(await getAppHelperWithAcl(actor as any))
+        .get(`/referent/youngFile/${young._id}/militaryPreparationFilesIdentity/piece.pdf`)
+        .send();
+
+      expect(res.statusCode).toEqual(403);
     });
   });
 

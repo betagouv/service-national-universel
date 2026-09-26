@@ -26,9 +26,7 @@ beforeAll(async () => {
   // Structure : même jeu que la migration 20250624122150 (policies incluses)
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.FULL);
   for (const action of [PERMISSION_ACTIONS.READ, PERMISSION_ACTIONS.WRITE]) {
-    await addPermissionHelper([ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, action, [
-      { where: [{ field: "region", source: "region" }], blacklist: [], whitelist: [] },
-    ]);
+    await addPermissionHelper([ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, action, [{ where: [{ field: "region", source: "region" }], blacklist: [], whitelist: [] }]);
     await addPermissionHelper([ROLES.REFERENT_DEPARTMENT], PERMISSION_RESOURCES.STRUCTURE, action, [
       { where: [{ field: "department", source: "department" }], blacklist: [], whitelist: [] },
     ]);
@@ -99,7 +97,7 @@ describe("Structure", () => {
         .send({ ...structure.toJSON(), description: `<b>Asso</b><img src=x onerror="alert(1)"><a href="javascript:alert(1)">lien</a> & sport` });
       expect(res.status).toBe(200);
       const updated = await getStructureByIdHelper(structure._id);
-      expect(updated?.description).toBe("<b>Asso</b><a rel=\"noopener noreferrer\">lien</a> &amp; sport");
+      expect(updated?.description).toBe('<b>Asso</b><a rel="noopener noreferrer">lien</a> &amp; sport');
     });
 
     it("laisse intacte une description sans balise", async () => {
@@ -214,6 +212,70 @@ describe("Structure", () => {
       const updatedStructure = await getStructureByIdHelper(structure._id);
       expect(updatedStructure?.name).toBe("changed");
     });
+
+    describe("PH13 — drapeau « préparation militaire » réservé aux référents", () => {
+      it("RESPONSIBLE ne déclare pas lui-même sa structure préparation militaire", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false", isMilitaryPreparation: "false" });
+        const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+        const res = await request(await getAppHelperWithAcl(responsible.toJSON()))
+          .put("/structure/" + structure._id)
+          .send({ name: "changed", isMilitaryPreparation: "true" });
+        expect(res.status).toBe(403);
+        const updatedStructure = await getStructureByIdHelper(structure._id);
+        expect(updatedStructure?.isMilitaryPreparation).toBe("false");
+        expect(updatedStructure?.name).toBe(structure.name);
+      });
+
+      it("SUPERVISOR ne retire pas non plus le drapeau d'une structure de son réseau", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "true", isMilitaryPreparation: "true" });
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() }))
+          .put("/structure/" + network._id)
+          .send({ isMilitaryPreparation: "false" });
+        expect(res.status).toBe(403);
+        const updatedStructure = await getStructureByIdHelper(network._id);
+        expect(updatedStructure?.isMilitaryPreparation).toBe("true");
+      });
+
+      it("RESPONSIBLE modifie sa structure en renvoyant le drapeau inchangé", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false", isMilitaryPreparation: "true" });
+        const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+        const res = await request(await getAppHelperWithAcl(responsible.toJSON()))
+          .put("/structure/" + structure._id)
+          .send({ name: "changed", isMilitaryPreparation: "true" });
+        expect(res.status).toBe(200);
+        const updatedStructure = await getStructureByIdHelper(structure._id);
+        expect(updatedStructure?.name).toBe("changed");
+      });
+
+      it("RESPONSIBLE modifie une structure dont le drapeau est absent en base en envoyant « false »", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false", isMilitaryPreparation: undefined });
+        const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+        const res = await request(await getAppHelperWithAcl(responsible.toJSON()))
+          .put("/structure/" + structure._id)
+          .send({ name: "changed", isMilitaryPreparation: "false" });
+        expect(res.status).toBe(200);
+      });
+
+      it("REFERENT_DEPARTMENT du territoire déclare une structure préparation militaire", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false", isMilitaryPreparation: "false", department: "Loire-Atlantique" });
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Loire-Atlantique"] }))
+          .put("/structure/" + structure._id)
+          .send({ isMilitaryPreparation: "true" });
+        expect(res.status).toBe(200);
+        const updatedStructure = await getStructureByIdHelper(structure._id);
+        expect(updatedStructure?.isMilitaryPreparation).toBe("true");
+      });
+
+      it("REFERENT_REGION du territoire retire le drapeau", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false", isMilitaryPreparation: "true", region: "Bretagne" });
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, region: "Bretagne" }))
+          .put("/structure/" + structure._id)
+          .send({ isMilitaryPreparation: "false" });
+        expect(res.status).toBe(200);
+        const updatedStructure = await getStructureByIdHelper(structure._id);
+        expect(updatedStructure?.isMilitaryPreparation).toBe("false");
+      });
+    });
   });
 
   describe("DELETE /structure/:id", () => {
@@ -301,7 +363,9 @@ describe("Structure", () => {
       await mine.save();
       const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: mine._id.toString() })).get(`/structure/${mine._id}/patches`);
       expect(res.status).toBe(200);
-      expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MINE RENAMED" })]) })]));
+      expect(res.body.data).toEqual(
+        expect.arrayContaining([expect.objectContaining({ ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MINE RENAMED" })]) })]),
+      );
     });
   });
 

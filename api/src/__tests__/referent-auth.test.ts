@@ -1,5 +1,5 @@
 import request from "supertest";
-import { ROLES, SUB_ROLES } from "snu-lib";
+import { ROLES, DECOMMISSIONED_ROLES } from "snu-lib";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewStructureFixture from "./fixtures/structure";
@@ -18,13 +18,13 @@ jest.mock("../brevo", () => ({
 }));
 
 beforeAll(async () => {
-    await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
 });
 afterAll(async () => {
-    await dbClose();
+  await dbClose();
 });
 afterEach(() => {
-    resetAppAuth();
+  resetAppAuth();
 });
 
 describe("Referent", () => {
@@ -59,19 +59,30 @@ describe("Referent", () => {
       expect(res.status).toBe(200);
       expect(res.body.redirect).toBeUndefined();
     });
-    it("should return 200 with redirect when user is admin cle with reinscription", async () => {
-      const user = await createReferentHelper(
-        getNewReferentFixture({
-          password: "bar",
-          role: ROLES.ADMINISTRATEUR_CLE,
-          subRole: SUB_ROLES.referent_etablissement,
-          invitationToken: "validToken",
-        }),
+    // Rôle décommissionné (GOO-56, lot P24, audit du 25/09/2026) : ADMINISTRATEUR_CLE est décommissionné,
+    // la branche VERIFICATION_REQUIRED (qui renvoyait l'invitationToken en clair, H62) est supprimée.
+    it("should return 401 when user has a decommissioned role, even with a valid password", async () => {
+      for (const role of DECOMMISSIONED_ROLES) {
+        const user = await createReferentHelper(getNewReferentFixture({ password: "bar", role }));
+        const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
+        expect(res.status).toBe(401);
+        expect(res.body.ok).toBe(false);
+        expect(res.body.token).toBeUndefined();
+        expect(res.headers["set-cookie"]).toBeUndefined();
+      }
+    });
+  });
+  describe("POST /referent/signin-2fa", () => {
+    // Rôle décommissionné (GOO-56, P24) : un code 2FA a pu être émis avant la décommission (ou avant
+    // que le compte ne passe INACTIVE) ; il ne doit plus permettre d'ouvrir de session.
+    it("should return 401 for a decommissioned role even with a valid 2FA code", async () => {
+      const referent = await createReferentHelper(
+        getNewReferentFixture({ password: "bar", role: ROLES.HEAD_CENTER, token2FA: "123456", token2FAExpires: new Date(Date.now() + 60000), attempts2FA: 0 }),
       );
-      const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
-      expect(res.status).toBe(200);
-      expect(res.body.code).toBe("VERIFICATION_REQUIRED");
-      expect(res.body.redirect).toBe(`/verifier-mon-compte?token=${user.invitationToken}`);
+      const res = await request(getAppHelper()).post("/referent/signin-2fa").send({ email: referent.email, token_2fa: "123456", rememberMe: false });
+      expect(res.status).toBe(401);
+      expect(res.body.token).toBeUndefined();
+      expect(res.headers["set-cookie"]).toBeUndefined();
     });
   });
   describe("POST /referent/signup", () => {
@@ -190,6 +201,15 @@ describe("Referent", () => {
       const young = await createReferentHelper({ ...fixture, email: fixture.email?.toLowerCase() });
       const res = await request(getAppHelper()).post("/referent/forgot_password").send({ email: young.email });
       expect(res.status).toBe(200);
+    });
+    // Rôle décommissionné (GOO-56, P24) : même réponse neutre qu'un compte inexistant/désactivé,
+    // et surtout pas de jeton de réinitialisation émis pour ce compte (M66).
+    it("should return 200 without issuing a reset token for a decommissioned role", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.TRANSPORTER }));
+      const res = await request(getAppHelper()).post("/referent/forgot_password").send({ email: referent.email });
+      expect(res.status).toBe(200);
+      const referentAfter = await getReferentByIdHelper(referent._id);
+      expect(referentAfter?.forgotPasswordResetToken).toBeFalsy();
     });
   });
 

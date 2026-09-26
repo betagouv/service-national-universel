@@ -24,6 +24,7 @@ import getNewStructureFixture from "./fixtures/structure";
 import { createReferentHelper } from "./helpers/referent";
 import { createYoungHelper } from "./helpers/young";
 import { createStructureHelper } from "./helpers/structure";
+import { restrictedData, expectNoHealth, expectNoIdentityFiles } from "./helpers/youngRestrictedFields";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -36,35 +37,6 @@ jest.mock("../brevo", () => ({
 }));
 
 const TERRITOIRE = { department: "Ain", region: "Auvergne-Rhône-Alpes" };
-
-/** Dossier portant chaque catégorie de donnée restreinte, pour rendre une fuite visible. */
-const restrictedData = {
-  notes: [{ phase: "PHASE_2", note: "note interne", referent: { firstName: "Réf", role: ROLES.REFERENT_DEPARTMENT } }],
-  handicap: "true",
-  allergies: "true",
-  ppsBeneficiary: "true",
-  paiBeneficiary: "true",
-  medicosocialStructure: "true",
-  medicosocialStructureName: "CMP",
-  specificAmenagment: "true",
-  specificAmenagmentType: "fauteuil",
-  reducedMobilityAccess: "true",
-  latestCNIFileExpirationDate: new Date("2030-01-01"),
-  latestCNIFileCategory: "cniNew",
-  files: { cniFiles: [{ name: "cni.pdf", category: "cniNew" }], imageRightFiles: [{ name: "droit-image.pdf" }] },
-};
-
-const HEALTH_SAMPLE = ["handicap", "allergies", "ppsBeneficiary", "paiBeneficiary", "medicosocialStructure", "medicosocialStructureName", "specificAmenagmentType"];
-
-function expectNoHealth(payload: any) {
-  expect(HEALTH_SAMPLE.filter((field) => payload?.[field] !== undefined)).toEqual([]);
-}
-
-function expectNoIdentityFiles(payload: any) {
-  expect(payload?.files?.cniFiles).toBeUndefined();
-  expect(payload?.latestCNIFileExpirationDate).toBeUndefined();
-  expect(payload?.latestCNIFileCategory).toBeUndefined();
-}
 
 describe("GOO-11 — champs du dossier jeune selon le rôle", () => {
   describe("serializeYoung", () => {

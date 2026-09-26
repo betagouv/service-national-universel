@@ -1021,7 +1021,11 @@ router.post(
 
       await updateYoungApplicationFilesType(application, req.user);
 
-      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
+      // `user` ici est le volontaire (YoungModel.findById(application.youngId), L961) : le second
+      // argument de serializeYoung doit être l'acteur authentifié, pas le jeune candidat, sinon le
+      // masquage GOO-11 (santé, CNI) ne s'applique jamais pour un responsable/superviseur qui dépose
+      // une pièce (constat PH3, audit production 2026-09-25).
+      return res.status(200).send({ young: serializeYoung(user, req.user), data: names, ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });

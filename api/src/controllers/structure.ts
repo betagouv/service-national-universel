@@ -162,6 +162,16 @@ router.put(
         delete checkedStructure.networkId;
       }
 
+      // Le drapeau « préparation militaire » ouvre aux responsables les pièces PM de leurs candidats
+      // (isYoungInMilitaryPreparationStructureScope) : comme à la création, seuls l'administrateur et
+      // les référents du territoire le posent ou le retirent (GOO-59, PH13).
+      if (isResponsibleOrSupervisor(req.user)) {
+        if (checkedStructure.isMilitaryPreparation !== undefined && (checkedStructure.isMilitaryPreparation === "true") !== (structure.isMilitaryPreparation === "true")) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
+        delete checkedStructure.isMilitaryPreparation;
+      }
+
       // La géographie de la structure fixe le périmètre des référents qui l'instruisent (GOO-5) : un
       // responsable ne la déplace pas hors de leur territoire, un référent la garde dans le sien.
       const geographyChanged = (["department", "region"] as const).some((key) => key in checkedStructure && (checkedStructure[key] || "") !== (structure[key] || ""));

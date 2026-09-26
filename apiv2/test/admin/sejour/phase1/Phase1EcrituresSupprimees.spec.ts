@@ -72,11 +72,12 @@ describe("Écritures phase 1 supprimées (apiv2)", () => {
         expect(response.status).toBe(200);
     });
 
-    it("POST /classe/:id/inscription-manuelle reste routée", async () => {
+    // GOO-55 (PM38) : l'inscription manuelle d'élèves CLE est supprimée à son tour.
+    it("POST /classe/:id/inscription-manuelle répond 404", async () => {
         const response = await request(app.getHttpServer())
             .post(`/classe/${new mongoose.Types.ObjectId().toString()}/inscription-manuelle`)
             .send({});
 
-        expect(response.status).not.toBe(404);
+        expect(response.status).toBe(404);
     });
 });

@@ -6,6 +6,7 @@ import {
   ROLES,
   UserDto,
   ContractType,
+  YoungType,
   isAuthorized,
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
@@ -15,7 +16,7 @@ import {
   ReferentStatus,
 } from "snu-lib";
 import { capture } from "../sentry";
-import { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } from "../models";
+import { ContractModel, ContractDocument, YoungModel, ApplicationModel, ReferentModel } from "../models";
 import { ERRORS, isYoung } from "../utils";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
@@ -37,8 +38,7 @@ import { toErrorCode } from "../utils/errorCode";
 async function createContract(data: any, fromUser: UserDto): Promise<ContractType> {
   const { sendMessage } = data;
   const contract = await ContractModel.create(data);
-  const age = getAge(contract.youngBirthdate);
-  const isYoungAdult = age !== "?" && age >= 18;
+  const isYoungAdult = contract.isYoungAdult === "true";
 
   contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
   contract.projectManagerStatus = "WAITING_VALIDATION";
@@ -82,8 +82,7 @@ async function updateContract(id: string, data: any, fromUser: UserDto): Promise
   contract.set(data);
   await contract.save({ fromUser });
 
-  const age = getAge(contract.youngBirthdate);
-  const isYoungAdult = age !== "?" && age >= 18;
+  const isYoungAdult = contract.isYoungAdult === "true";
 
   if (previous.invitationSent !== "true" || previous.projectManagerStatus === "VALIDATED" || previous.projectManagerEmail !== contract.projectManagerEmail) {
     contract.projectManagerStatus = "WAITING_VALIDATION";
@@ -114,6 +113,23 @@ async function updateContract(id: string, data: any, fromUser: UserDto): Promise
   if (sendMessage) contract.invitationSent = "true";
   await contract.save({ fromUser });
   return contract;
+}
+
+/**
+ * Les signataires protégés (jeune majeur ou représentants légaux) et la majorité qui décide
+ * lesquels sont sollicités viennent du dossier du jeune, jamais du corps de la requête :
+ * sinon l'auteur du contrat pourrait recevoir lui-même un lien de signature, ou déclarer
+ * majeur un mineur pour se passer de l'accord de ses représentants légaux (PH4).
+ */
+function getSignatoriesFromYoung(young: YoungType) {
+  const age = young.birthdateAt ? getAge(young.birthdateAt) : "?";
+  return {
+    isYoungAdult: age !== "?" && age >= 18 ? "true" : "false",
+    youngBirthdate: young.birthdateAt ? new Date(young.birthdateAt).toISOString().split("T")[0] : "",
+    youngEmail: young.email || "",
+    parent1Email: young.parent1Email || "",
+    parent2Email: young.parent2Email || "",
+  };
 }
 
 async function sendProjectManagerContractEmail(contract: ContractType, isValidateAgainMail?: boolean): Promise<void> {
@@ -245,45 +261,47 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      let previousStructureId, currentStructureId;
+      let existing: ContractDocument | null = null;
       if (id) {
         if (!isWriteAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user })) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
-        const contract = await ContractModel.findById(id);
-        if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        previousStructureId = contract.structureId;
-        currentStructureId = data.structureId || contract.structureId;
-      } else {
-        if (!isCreateAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user })) {
+        existing = await ContractModel.findById(id);
+        if (!existing) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        // La permission CONTRACT_FULL est seedée sans policy : le périmètre est vérifié ici.
+        if (!(await isContractInUserScope(req.user, existing.toJSON()))) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
-        previousStructureId = data.structureId;
-        currentStructureId = data.structureId;
-      }
-      if (req.user.role === ROLES.RESPONSIBLE) {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (previousStructureId.toString() !== req.user.structureId.toString() || currentStructureId.toString() !== req.user.structureId.toString()) {
+        // Un contrat reste attaché à sa candidature et à son jeune.
+        if ((data.applicationId && data.applicationId !== existing.applicationId) || (data.youngId && data.youngId !== existing.youngId)) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
-      }
-      if (req.user.role === ROLES.SUPERVISOR) {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-        if (!structures.map((e) => e._id.toString()).includes(previousStructureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
+      } else if (!isCreateAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user })) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
-      const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
-      const application = await ApplicationModel.findById(contract.applicationId);
+      // Candidature et jeune sont résolus et rapprochés AVANT toute écriture.
+      const applicationId = existing?.applicationId || data.applicationId;
+      const youngId = existing?.youngId || data.youngId;
+      const application = applicationId ? await ApplicationModel.findById(applicationId) : null;
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const young = youngId ? await YoungModel.findById(youngId) : null;
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const structureId = data.structureId || existing?.structureId || application.structureId;
+      if (String(application.youngId) !== String(young._id) || String(application.structureId) !== String(structureId)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (!(await isContractInUserScope(req.user, { structureId, applicationId: application._id.toString(), youngId: young._id.toString() }))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const contractData = { ...data, structureId, ...getSignatoriesFromYoung(young) };
+      const contract = id ? await updateContract(id, contractData, req.user) : await createContract(contractData, req.user);
       application.contractId = contract._id;
       application.missionDuration = contract.missionDuration;
       await application.save({ fromUser: req.user });
 
-      const young = await YoungModel.findById(contract.youngId);
-      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       await updateYoungStatusPhase2Contract(young, req.user);
       await updateYoungPhase2StatusAndHours(young, req.user);
 
@@ -321,6 +339,15 @@ router.post(
       // les rôles, la permission étant seedée sans policy.
       if (!(await isContractInUserScope(req.user, contract.toJSON()))) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      if (["parent1", "parent2", "young"].includes(type)) {
+        // Contrats antérieurs à PH4 : les adresses stockées ont pu être saisies librement.
+        const young = await YoungModel.findById(contract.youngId);
+        if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const { youngEmail, parent1Email, parent2Email } = getSignatoriesFromYoung(young);
+        contract.set({ youngEmail, parent1Email, parent2Email });
+        await contract.save({ fromUser: req.user });
       }
 
       if (type === "projectManager") await sendProjectManagerContractEmail(contract, false);

@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
 const jwt = require("jsonwebtoken");
-const { ROLES } = require("snu-lib");
+const { ROLES, ReferentStatus, isDecommissionedRole } = require("snu-lib");
 const { getToken } = require("../passport");
 const { config } = require("../config");
 const { cookieOptions } = require("../cookie-options");
@@ -48,9 +48,16 @@ const getSessionToken = (req) => {
   return req.cookies.jwt_ref || req.cookies.jwt_young || null;
 };
 
-// Un compte supprimé ou anonymisé ne doit plus rendre de session, même avec un jeton encore
-// valide : passport.ts applique déjà ce contrôle (L21 de l'audit du 21/09/2026).
-const isRevoked = (account) => account.status === "DELETED" || account.anonymized === "true" || account.anonymized === true || Boolean(account.deletedAt);
+// Un compte supprimé, désactivé, anonymisé ou au rôle décommissionné ne doit plus rendre de
+// session, même avec un jeton encore valide : passport.ts applique déjà ces contrôles côté API
+// (L21 de l'audit du 21/09/2026, GOO-56/P24 pour INACTIVE et les rôles décommissionnés — PL2).
+const isRevoked = (account) =>
+  account.status === "DELETED" ||
+  account.status === ReferentStatus.INACTIVE ||
+  account.anonymized === "true" ||
+  account.anonymized === true ||
+  Boolean(account.deletedAt) ||
+  isDecommissionedRole(account);
 
 /** Renvoie le compte porté par le jeton de session, ou null s'il est absent, invalide ou révoqué. */
 async function getSessionUser(req) {
