@@ -8,8 +8,8 @@ ARG APP_NAME
 RUN --mount=type=bind,src=.,target=/src \
     --mount=type=cache,target=/root/.npm \
 <<EOF
-turbo_version=$(cat /src/package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
-npm install --global "turbo@$turbo_version"
+turbo_version=$(node -p "require('/src/package-lock.json').packages['node_modules/turbo'].version")
+npm install --global --ignore-scripts "turbo@$turbo_version"
 EOF
 
 RUN --mount=type=bind,src=.,target=/src \

@@ -7,6 +7,9 @@ on:
       - main
       - production
 
+permissions:
+  contents: read
+
 jobs:
   prepare:
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
@@ -18,19 +21,23 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Get matrices configuration
         id: config
+        # Nom de branche passé par variable d'environnement, jamais interpolé dans le script.
+        env:
+          REF: ${{ github.ref_name }}
         run: |
           # TEST MATRIX
           git switch main
 
           echo "[]" \
-          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- api packages/lib packages/log-redaction package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- apiv2 packages/lib packages/log-redaction package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- admin packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- packages package-lock.json | cut -d " " -f 1)" > test.json
+          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- api packages/lib packages/log-redaction package-lock.json .github/actions/run-tests-api | cut -d " " -f 1)" \
+          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- apiv2 packages/lib packages/log-redaction package-lock.json .github/actions/run-tests-apiv2 | cut -d " " -f 1)" \
+          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- app packages package-lock.json .github/actions/run-tests-app | cut -d " " -f 1)" \
+          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- admin packages package-lock.json .github/actions/run-tests-admin | cut -d " " -f 1)" \
+          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- packages package-lock.json .github/actions/run-tests-lib | cut -d " " -f 1)" > test.json
 
           echo "Test matrix"
           cat test.json
@@ -46,10 +53,11 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+          persist-credentials: false
 
       - name: Run tests
-        uses: jenseng/dynamic-uses@v1
+        uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1
         if: ${{matrix.app.run_test}}
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
+          with: '{"branch_name": ${{ toJSON(github.ref_name) }}}'
