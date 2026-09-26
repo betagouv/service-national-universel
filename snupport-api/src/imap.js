@@ -18,6 +18,7 @@ const { encrypt } = require("./utils/crypto");
 const { getS3Path, getAttachmentFileName } = require("./utils/file");
 const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
 const { inspectAttachment } = require("./utils/attachments");
+const { scanBuffer } = require("./utils/virusScanner");
 const { sanitizeMessageHtml } = require("./utils/messageHtml");
 const { resolveUnverifiedContact } = require("./utils/contactVerification");
 
@@ -134,6 +135,14 @@ async function addMessage(mail) {
         const { mime, accepted } = await inspectAttachment(attachment.content);
         if (!accepted) {
           console.log(`imap: pièce jointe « ${attachment.filename} » écartée (détecté: ${mime ?? "inconnu"}, annoncé: ${attachment.contentType})`);
+          continue;
+        }
+        // PM49 : l'expéditeur d'un mail entrant n'est jamais authentifié ; sans ce contrôle, une
+        // pièce jointe infectée était stockée et servie telle quelle aux agents (drapeau désactivé
+        // tant que l'infra ClamAV n'est pas confirmée joignable).
+        const { infected } = await scanBuffer(attachment.content, attachment.filename, `ticket:${ticket._id}`);
+        if (infected) {
+          console.log(`imap: pièce jointe « ${attachment.filename} » écartée (analyse antivirus)`);
           continue;
         }
         const encryptedBuffer = encrypt(attachment.content);

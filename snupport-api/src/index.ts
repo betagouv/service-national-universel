@@ -16,6 +16,9 @@ require("./utils/ventilation");
 require("./crons");
 
 const { config } = require("./config");
+const { initVirusScanner } = require("./utils/virusScanner");
+
+initVirusScanner();
 
 const app = express();
 const registerSentryErrorHandler = initSentry(app);

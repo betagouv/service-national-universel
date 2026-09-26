@@ -17,6 +17,7 @@ const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
 const { canAccessTicket } = require("../utils/ticketScope");
 const { inspectAttachment } = require("../utils/attachments");
+const { scanBuffer } = require("../utils/virusScanner");
 const { isKnownThreadParticipant, normalizeEmail } = require("../utils/ticketParticipants");
 const { sanitizeMessageHtml } = require("../utils/messageHtml");
 const { attachmentUpload, MAX_ATTACHMENTS_PER_MESSAGE } = require("../middlewares/attachmentUpload");
@@ -288,6 +289,11 @@ router.post(
     for (const file of files) {
       const { mime, accepted } = await inspectAttachment(file.data);
       if (!accepted) return res.status(400).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      // PM49 : une pièce jointe qu'un agent joint à sa réponse est déchiffrée et rejointe à
+      // l'historique envoyé à d'autres destinataires (M88) ; drapeau désactivé tant que l'infra
+      // ClamAV n'est pas confirmée joignable depuis snupport-api.
+      const { infected } = await scanBuffer(file.data, file.name, `ticket:${ticket._id}`);
+      if (infected) return res.status(400).send({ ok: false, code: "INFECTED_FILE" });
       inspectedFiles.push({ name: getAttachmentFileName(file.name, mime), data: file.data, mime });
     }
 

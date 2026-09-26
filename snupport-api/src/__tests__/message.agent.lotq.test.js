@@ -16,6 +16,9 @@ jest.mock("../middlewares/authenticationGuards", () => ({
 jest.mock("../sentry", () => ({ capture: jest.fn() }));
 jest.mock("../utils/crypto", () => ({ encrypt: (b) => b, decrypt: (b) => b }));
 jest.mock("../utils/ventilation", () => ({ matchVentilationRule: async (t) => t }));
+// PM49 : par défaut { infected: false } (drapeau ENABLE_ANTIVIRUS_SUPPORT désactivé en test comme
+// en prod tant que l'infra ClamAV n'est pas confirmée) ; les tests d'infection le surchargent.
+jest.mock("../utils/virusScanner", () => ({ scanBuffer: jest.fn().mockResolvedValue({ infected: false }) }));
 jest.mock("../utils", () => ({
   getFile: jest.fn(),
   deleteFile: jest.fn(),
@@ -37,6 +40,7 @@ const TicketModel = require("../models/ticket");
 const AgentModel = require("../models/agent");
 const MessageModel = require("../models/message");
 const { deleteFile, sendResponseTicket, uploadAttachment } = require("../utils");
+const { scanBuffer } = require("../utils/virusScanner");
 
 const app = express();
 app.use(express.json());
@@ -158,5 +162,26 @@ describe("POST /message/sendEmailFile/:id (M88, L50)", () => {
 
     expect(res.status).toBe(400);
     expect(sendResponseTicket).not.toHaveBeenCalled();
+  });
+
+  describe("PM49 — analyse antivirus", () => {
+    it("scanne le contenu détecté avant de l'uploader", async () => {
+      const res = await send({}, [{ name: "justificatif.pdf", content: PDF }]);
+
+      expect(res.status).toBe(200);
+      expect(scanBuffer).toHaveBeenCalledTimes(1);
+      expect(scanBuffer.mock.calls[0][0]).toEqual(PDF);
+      expect(uploadAttachment).toHaveBeenCalledTimes(1);
+    });
+
+    it("refuse l'envoi d'une pièce jointe infectée sans jamais l'uploader ni envoyer l'email", async () => {
+      scanBuffer.mockResolvedValueOnce({ infected: true });
+
+      const res = await send({}, [{ name: "justificatif.pdf", content: PDF }]);
+
+      expect(res.status).toBe(400);
+      expect(uploadAttachment).not.toHaveBeenCalled();
+      expect(sendResponseTicket).not.toHaveBeenCalled();
+    });
   });
 });
