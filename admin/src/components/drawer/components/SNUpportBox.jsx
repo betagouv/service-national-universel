@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { ROLES } from "snu-lib";
 import api from "@/services/api";
-import { supportURL } from "@/config";
+import { snupportAdminURL } from "@/config";
 import { translate } from "@/utils";
 import Mail from "../icons/Mail";
 import Separator from "./Separator";
@@ -31,7 +31,7 @@ export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) 
     // Les autres rôles se connectent au support avec leurs propres identifiants : GET /SNUpport/signin
     // leur répond 403.
     if (!SSO_ROLES.includes(user?.role)) {
-      return window.open(`${supportURL}/auth`, "_blank", "noopener,noreferrer");
+      return window.open(`${snupportAdminURL}/auth`, "_blank", "noopener,noreferrer");
     }
     try {
       const { ok, data, code } = await api.get(`/SNUpport/signin`);

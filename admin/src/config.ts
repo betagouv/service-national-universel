@@ -20,7 +20,9 @@ const apiURL = _env(envStr, "VITE_API_URL", "http://localhost:8080");
 const apiv2URL = _env(envStr, "VITE_APIV2_URL", "http://localhost:8086");
 const appURL = _env(envStr, "VITE_APP_URL", "http://localhost:8081");
 const adminURL = _env(envStr, "VITE_ADMIN_URL", "http://localhost:8082");
-const supportURL = _env(envStr, "VITE_SUPPORT_URL", "http://localhost:8092");
+const supportURL = _env(envStr, "VITE_SUPPORT_URL", "http://localhost:8083");
+// Interface agents du support (snupport-app), à ne pas confondre avec son API (VITE_SUPPORT_URL).
+const snupportAdminURL = _env(envStr, "VITE_SNUPPORT_URL_ADMIN", "http://localhost:8092");
 const knowledgebaseURL = _env(envStr, "VITE_KNOWLEDGEBASE_URL", "http://localhost:8084");
 const maintenance = _env(envBool, "VITE_MAINTENANCE", false);
 const SENTRY_TRACING_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_TRACING_SAMPLE_RATE", 0.1);
@@ -36,6 +38,7 @@ export {
   environment,
   adminURL,
   supportURL,
+  snupportAdminURL,
   knowledgebaseURL,
   maintenance,
 };
