@@ -198,6 +198,17 @@ export async function isReferentReadableByUser(user: UserDto, target: ReferentTy
   if (isAdmin(user)) return true;
   if (user._id?.toString() === target._id?.toString()) return true;
 
+  // L'annuaire d'un référent départemental liste les référents régionaux et visiteurs de la région de
+  // ses départements (`buildReferentContext`) ; ces comptes ne portent pas de département, la règle
+  // d'écriture ne les atteint donc jamais et leur fiche répondait 403 (GOO-46). Lecture seule.
+  if (user.role === ROLES.REFERENT_DEPARTMENT && [ROLES.REFERENT_REGION, ROLES.VISITOR].includes(target.role)) {
+    const regions = [user.department || []]
+      .flat()
+      .map((department) => department2region[department])
+      .filter(Boolean);
+    if (target.region && regions.includes(target.region)) return true;
+  }
+
   // Même périmètre qu'en écriture : structure (et réseau) pour les responsables, géographie pour les référents.
   if (isResponsibleOrSupervisor(user) || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
     return isReferentInUserScope(user, target);
