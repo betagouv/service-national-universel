@@ -3,7 +3,7 @@ import express, { Response } from "express";
 import { addMonths } from "date-fns";
 import Joi from "joi";
 import { Router } from "express";
-import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto, COHORT_STATUS } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto, COHORT_STATUS, getYoungFieldsHiddenFrom } from "snu-lib";
 import { capture } from "../../sentry";
 import esClient from "../../es";
 import { ERRORS } from "../../utils";
@@ -16,58 +16,88 @@ import { getCohortNamesEndAfter } from "../../utils/cohort";
 import { populateYoungExport } from "./populate/populateYoung";
 import { UserRequest } from "../request";
 
-function getYoungsFilters(user: UserDto): string[] {
-  return [
-    "cohort.keyword",
-    "originalCohort.keyword",
-    "status.keyword",
-    "country.keyword",
-    "academy.keyword",
-    "region.keyword",
-    "department.keyword",
-    "hasNotes.keyword",
-    "grade.keyword",
-    "gender.keyword",
-    user.role === ROLES.REFERENT_DEPARTMENT ? "schoolName.keyword" : null,
-    "situation.keyword",
-    "ppsBeneficiary.keyword",
-    "paiBeneficiary.keyword",
-    "isRegionRural.keyword",
-    "qpv.keyword",
-    "handicap.keyword",
-    "allergies.keyword",
-    "specificAmenagment.keyword",
-    "reducedMobilityAccess.keyword",
-    "imageRight.keyword",
-    "CNIFileNotValidOnStart.keyword",
-    "statusPhase1.keyword",
-    "hasMeetingInformation.keyword",
-    "handicapInSameDepartment.keyword",
-    "youngPhase1Agreement.keyword",
-    "cohesionStayPresence.keyword",
-    "presenceJDM.keyword",
-    "departInform.keyword",
-    "departSejourMotif.keyword",
-    "cohesionStayMedicalFileReceived.keyword",
-    "ligneId.keyword",
-    "isTravelingByPlane.keyword",
-    "statusPhase2.keyword",
-    "phase2ApplicationStatus.keyword",
-    "statusPhase2Contract.keyword",
-    "statusMilitaryPreparationFiles.keyword",
-    "phase2ApplicationFilesType.keyword",
-    "status_equivalence.keyword",
-    "statusPhase3.keyword",
-    "schoolDepartment.keyword",
-    "parentAllowSNU.keyword",
-    "sessionPhase1Id.keyword",
-    "source.keyword",
-    "classeId.keyword",
-    "etablissementId.keyword",
-    "psc1Info.keyword",
-    "roadCodeRefund.keyword",
-    "frenchNationality.keyword",
-  ].filter(Boolean) as string[];
+/** Univers complet des filtres/agrégations ES sur l'index `young`, avant restriction par rôle. */
+const YOUNG_FILTER_FIELDS: string[] = [
+  "cohort.keyword",
+  "originalCohort.keyword",
+  "status.keyword",
+  "country.keyword",
+  "academy.keyword",
+  "region.keyword",
+  "department.keyword",
+  "hasNotes.keyword",
+  "grade.keyword",
+  "gender.keyword",
+  "schoolName.keyword",
+  "situation.keyword",
+  "ppsBeneficiary.keyword",
+  "paiBeneficiary.keyword",
+  "isRegionRural.keyword",
+  "qpv.keyword",
+  "handicap.keyword",
+  "allergies.keyword",
+  "specificAmenagment.keyword",
+  "reducedMobilityAccess.keyword",
+  "imageRight.keyword",
+  "CNIFileNotValidOnStart.keyword",
+  "statusPhase1.keyword",
+  "hasMeetingInformation.keyword",
+  "handicapInSameDepartment.keyword",
+  "youngPhase1Agreement.keyword",
+  "cohesionStayPresence.keyword",
+  "presenceJDM.keyword",
+  "departInform.keyword",
+  "departSejourMotif.keyword",
+  "cohesionStayMedicalFileReceived.keyword",
+  "ligneId.keyword",
+  "isTravelingByPlane.keyword",
+  "statusPhase2.keyword",
+  "phase2ApplicationStatus.keyword",
+  "statusPhase2Contract.keyword",
+  "statusMilitaryPreparationFiles.keyword",
+  "phase2ApplicationFilesType.keyword",
+  "status_equivalence.keyword",
+  "statusPhase3.keyword",
+  "schoolDepartment.keyword",
+  "parentAllowSNU.keyword",
+  "sessionPhase1Id.keyword",
+  "source.keyword",
+  "classeId.keyword",
+  "etablissementId.keyword",
+  "psc1Info.keyword",
+  "roadCodeRefund.keyword",
+  "frenchNationality.keyword",
+];
+
+/**
+ * Filtres/agrégations ES exposés à `user`, dérivés des mêmes champs que `serializeYoung`
+ * (`getYoungFieldsHiddenFrom`) : un champ masqué de la fiche (santé, pièces d'identité) ne doit pas
+ * non plus permettre de filtrer ou d'agréger dessus, sous peine de le révéler par un autre chemin
+ * (constat PH9, audit production 2026-09-25). `schoolName` reste par ailleurs réservé au référent
+ * départemental, sans rapport avec GOO-11. `hasNotes` est absent de `getYoungFieldsHiddenFrom` (ce
+ * n'est pas le contenu de la note) : extension de politique volontaire, la seule présence d'une
+ * note interne n'a pas à être filtrable par une structure d'accueil.
+ */
+export function getYoungsFilters(user: UserDto): string[] {
+  const hidden = getYoungFieldsHiddenFrom(user);
+  return YOUNG_FILTER_FIELDS.filter((field) => {
+    if (field === "schoolName.keyword") return user.role === ROLES.REFERENT_DEPARTMENT;
+    const mongoField = field.replace(/\.keyword$/, "");
+    if (mongoField === "hasNotes") return !hidden.includes("notes");
+    return !hidden.includes(mongoField);
+  });
+}
+
+/**
+ * `joiElasticSearch` retire silencieusement (`stripUnknown`) un filtre absent de `filterFields` :
+ * impossible ensuite de distinguer un filtre explicitement masqué pour ce rôle d'un filtre inconnu
+ * ou mal orthographié. Un filtre masqué doit être refusé (400), pas ignoré (constat PH9).
+ */
+function hasMaskedFilter(body: any, allowedFields: string[]): boolean {
+  const requested = Object.keys(body?.filters ?? {});
+  const allowedKeys = allowedFields.map((field) => field.replace(/\.keyword$/, ""));
+  const allKeys = YOUNG_FILTER_FIELDS.map((field) => field.replace(/\.keyword$/, ""));
+  return requested.some((key) => allKeys.includes(key) && !allowedKeys.includes(key));
 }
 
 /**
@@ -506,6 +536,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
     }
+    if (hasMaskedFilter(body, filterFields)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { error: errorQuery, value: query } = Joi.object({
       tab: Joi.string().trim().valid("volontaire"),
@@ -566,6 +597,7 @@ router.post(
       if (!canSearchInElasticSearch(user, "young-having-school-in-department") && !canSearchInElasticSearch(user, "young-having-school-in-region")) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
+      if (hasMaskedFilter(body, filterFields)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const { error: errorQuery, value: query } = Joi.object({
         tab: Joi.string().trim().valid("volontaire"),

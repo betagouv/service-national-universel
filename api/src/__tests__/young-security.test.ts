@@ -158,13 +158,46 @@ describe("Sécurité /young/:id/* — audit 2026-09-21 (lot 3)", () => {
       expect(res.status).toBe(403);
     });
 
-    it("autorise le responsable dont la structure porte une candidature du jeune", async () => {
+    it("refuse cniFiles au responsable dont la structure porte pourtant une candidature du jeune (PH20)", async () => {
       const victim = await createYoungHelper(getNewYoungFixture(youngSecrets));
       const structure = await createStructureHelper(getNewStructureFixture());
       const attacker = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
       await ApplicationModel.create({ youngId: victim._id.toString(), structureId: structure._id.toString(), missionId: new ObjectId().toString() });
 
       const res = await request(await getAppHelperWithAcl(attacker, "referent")).get(`/young/${victim._id}/documents/cniFiles`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("refuse autoTestPCRFiles au responsable en périmètre (PH20)", async () => {
+      const victim = await createYoungHelper(getNewYoungFixture(youngSecrets));
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const attacker = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      await ApplicationModel.create({ youngId: victim._id.toString(), structureId: structure._id.toString(), missionId: new ObjectId().toString() });
+
+      const res = await request(await getAppHelperWithAcl(attacker, "referent")).get(`/young/${victim._id}/documents/autoTestPCRFiles`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("refuse une pièce de préparation militaire au responsable dont la structure n'est pas de préparation militaire (PH20)", async () => {
+      const victim = await createYoungHelper(getNewYoungFixture(youngSecrets));
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const attacker = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      await ApplicationModel.create({ youngId: victim._id.toString(), structureId: structure._id.toString(), missionId: new ObjectId().toString() });
+
+      const res = await request(await getAppHelperWithAcl(attacker, "referent")).get(`/young/${victim._id}/documents/militaryPreparationFilesIdentity`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("autorise le responsable dont la structure porte une candidature du jeune, pour une pièce non restreinte", async () => {
+      const victim = await createYoungHelper(getNewYoungFixture(youngSecrets));
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const attacker = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      await ApplicationModel.create({ youngId: victim._id.toString(), structureId: structure._id.toString(), missionId: new ObjectId().toString() });
+
+      const res = await request(await getAppHelperWithAcl(attacker, "referent")).get(`/young/${victim._id}/documents/imageRightFiles`);
 
       expect(res.status).toBe(200);
     });

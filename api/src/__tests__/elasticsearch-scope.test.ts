@@ -7,6 +7,7 @@ import { getNewReferentFixture } from "./fixtures/referent";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES } from "snu-lib";
+import { getYoungsFilters } from "../controllers/elasticsearch/young";
 
 /**
  * Reproduction des constats C3/C4/C9/C10/C11 et H24/H25/H70 :
@@ -382,5 +383,83 @@ describe("H24/H25/H70 — index referent", () => {
     // Sans borne géographique, aucun des champs de périmètre n'apparaît dans la requête.
     expect(query).toMatch(/region\.keyword|department\.keyword|structureId\.keyword/);
     expect(leakedSecrets(res.body, REFERENT_SECRETS)).toEqual([]);
+  });
+});
+
+describe("PH9 — getYoungsFilters retire les filtres masqués selon le rôle (audit production 2026-09-25)", () => {
+  it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])("retire les filtres de santé, d'identité et hasNotes pour %s", (role) => {
+    const filters = getYoungsFilters({ role } as any);
+    for (const masked of [
+      "handicap.keyword",
+      "allergies.keyword",
+      "ppsBeneficiary.keyword",
+      "paiBeneficiary.keyword",
+      "specificAmenagment.keyword",
+      "reducedMobilityAccess.keyword",
+      "handicapInSameDepartment.keyword",
+      "CNIFileNotValidOnStart.keyword",
+      "hasNotes.keyword",
+      "schoolName.keyword",
+    ]) {
+      expect(filters).not.toContain(masked);
+    }
+    // Le reste du périmètre de recherche demeure accessible.
+    expect(filters).toContain("cohort.keyword");
+    expect(filters).toContain("status.keyword");
+  });
+
+  it("laisse tous les filtres de santé et hasNotes à un référent départemental, y compris schoolName", () => {
+    const filters = getYoungsFilters({ role: ROLES.REFERENT_DEPARTMENT } as any);
+    expect(filters).toContain("handicap.keyword");
+    expect(filters).toContain("CNIFileNotValidOnStart.keyword");
+    expect(filters).toContain("hasNotes.keyword");
+    expect(filters).toContain("schoolName.keyword");
+  });
+
+  it("laisse tous les filtres de santé à l'admin, mais pas schoolName (réservé au référent départemental)", () => {
+    const filters = getYoungsFilters({ role: ROLES.ADMIN } as any);
+    expect(filters).toContain("handicap.keyword");
+    expect(filters).toContain("CNIFileNotValidOnStart.keyword");
+    expect(filters).not.toContain("schoolName.keyword");
+  });
+});
+
+describe("PH9 — POST /elasticsearch/young/:action(search|export) refuse un filtre masqué pour le rôle", () => {
+  it("refuse un filtre handicap pour un responsable de structure en périmètre", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: "structure-1" } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: { handicap: ["true"] } });
+    expect(res.status).toBe(400);
+    expect(mockEsCalls.msearch).toHaveLength(0);
+  });
+
+  it("accepte le même filtre pour un référent départemental", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Rhône"] } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: { handicap: ["true"] } });
+    expect(res.status).toBe(200);
+  });
+
+  it("refuse schoolName sur /young-having-school-in-dep-or-region à un référent régional (réservé au départemental)", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Bretagne" } as any))
+      .post("/elasticsearch/young/young-having-school-in-dep-or-region/_msearch")
+      .send({ filters: { schoolName: ["Lycée"] } });
+    expect(res.status).toBe(400);
+  });
+
+  it("accepte schoolName sur /young-having-school-in-dep-or-region pour un référent départemental", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Rhône"] } as any))
+      .post("/elasticsearch/young/young-having-school-in-dep-or-region/_msearch")
+      .send({ filters: { schoolName: ["Lycée"] } });
+    expect(res.status).toBe(200);
+  });
+
+  it("refuse un filtre de santé pour un rôle sans périmètre d'établissement (RESPONSIBLE) : autorisation d'abord (C11)", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: "structure-1" } as any))
+      .post("/elasticsearch/young/young-having-school-in-dep-or-region/_msearch")
+      .send({ filters: { handicap: ["true"] } });
+    // RESPONSIBLE n'a de toute façon aucun périmètre d'établissement sur cette route (C11) : 403,
+    // pas 400 — le contrôle d'autorisation passe avant le contrôle de filtre masqué.
+    expect(res.status).toBe(403);
   });
 });

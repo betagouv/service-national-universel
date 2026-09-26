@@ -1,4 +1,4 @@
-import { ROLES, UserDto, YoungType, canEditYoung } from "snu-lib";
+import { ROLES, UserDto, YoungType, canEditYoung, MILITARY_FILE_KEYS } from "snu-lib";
 
 import { ApplicationModel, ClasseModel, SessionPhase1Model, StructureModel } from "../models";
 import { getResponsibleCenterField } from "../controllers/elasticsearch/utils";
@@ -197,4 +197,33 @@ export async function canAccessYoungDocumentsInScope(
   if (await canEditYoungInScope(user, young)) return true;
   if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return isYoungInStructureScope(user, young);
   return false;
+}
+
+/**
+ * Pièces hors de portée d'un responsable / superviseur même dans son périmètre : ce sont des
+ * pièces de santé ou d'identité que la décision GOO-11 masque déjà côté fiche (`getYoungFieldsHiddenFrom`).
+ * `autoTestPCRFiles` n'y figure pourtant pas (absent de `YOUNG_HEALTH_FIELDS`) : extension de
+ * politique volontaire pour ce helper, pas un simple miroir du serializer (audit production 2026-09-25, PH20).
+ */
+const STRUCTURE_FORBIDDEN_FILE_KEYS: string[] = ["cniFiles", "autoTestPCRFiles"];
+
+/**
+ * Autorisation d'accès à UNE pièce précise du dossier d'un volontaire (téléchargement, liste).
+ *
+ * `canAccessYoungDocumentsInScope` ne connaît que le volontaire, pas la clé demandée : un
+ * responsable ou superviseur en périmètre l'obtenait pour n'importe quelle clé, y compris cniFiles,
+ * autoTestPCRFiles ou les pièces de préparation militaire hors structure de préparation militaire
+ * (constat PH20, audit production 2026-09-25). Un acteur en périmètre d'édition (référent
+ * territorial, chef de centre, référent CLE) garde accès à toute clé, comme aujourd'hui.
+ */
+export async function canAccessYoungFileKeyInScope(
+  user: UserDto,
+  young: Pick<YoungType, "_id" | "sessionPhase1Id" | "classeId" | "region" | "department" | "source">,
+  key: string,
+): Promise<boolean> {
+  if (await canEditYoungInScope(user, young)) return true;
+  if (![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return false;
+  if (MILITARY_FILE_KEYS.includes(key)) return isYoungInMilitaryPreparationStructureScope(user, young);
+  if (STRUCTURE_FORBIDDEN_FILE_KEYS.includes(key)) return false;
+  return isYoungInStructureScope(user, young);
 }
