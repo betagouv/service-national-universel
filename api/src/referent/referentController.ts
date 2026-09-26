@@ -63,7 +63,7 @@ import { validateId, idSchema, validateSelf, validateYoung, validateReferent, re
 import { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } from "../utils/serializer";
 import { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION, JWT_SESSION_ABSOLUTE_MAX_AGE_MS } from "../jwt-options";
 import { getToken } from "../passport";
-import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../cookie-options";
+import { setSessionCookie, clearSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } from "../cookie-options";
 import {
   ROLES_LIST,
   canInviteUser,
@@ -316,9 +316,9 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       },
     );
     if (type === "referent") {
-      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+      setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
     } else if (type === "young") {
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+      setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
     }
 
     let userToReturn = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -354,7 +354,7 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
     // d'origine.
     const sessionStartedAt = typeof jwtPayload.sessionStartedAt === "number" ? jwtPayload.sessionStartedAt : ((jwtPayload.iat as number) || 0) * 1000;
     if (!sessionStartedAt || Date.now() - sessionStartedAt > JWT_SESSION_ABSOLUTE_MAX_AGE_MS) {
-      res.clearCookie("jwt_ref", cookieOptions() as any);
+      clearSessionCookie(res, "jwt_ref");
       return res.status(401).send({ ok: false, user: { restriction: "public" } });
     }
 
@@ -371,7 +371,7 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
       return ta === tb;
     };
     if (!memeInstant(user.lastLogoutAt, jwtPayload._impersonatorLastLogoutAt) || !memeInstant(user.passwordChangedAt, jwtPayload._impersonatorPasswordChangedAt)) {
-      res.clearCookie("jwt_ref", cookieOptions() as any);
+      clearSessionCookie(res, "jwt_ref");
       return res.status(401).send({ ok: false, user: { restriction: "public" } });
     }
 
@@ -382,7 +382,7 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       },
     );
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+    setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
     const userSerialized = serializeReferent(user);
     userSerialized.acl = await getAcl(user);
     return res.status(200).send({ ok: true, data: userSerialized });
@@ -667,7 +667,7 @@ router.post("/signup_invite", requireJsonBody, async (req: UserRequest, res: Res
     }
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+    setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);

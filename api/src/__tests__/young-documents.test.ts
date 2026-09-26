@@ -109,13 +109,42 @@ describe("Young", () => {
     });
   });
 
+  // La convocation au séjour de cohésion n'est plus générée depuis la fermeture de la phase 1 : les
+  // routes renvoyaient 500 (NOT_FOUND levé par le générateur), elles refusent désormais en 400 (GOO-51).
+  describe("Documents non disponibles (GOO-51)", () => {
+    it("devrait renvoyer 400 pour la convocation au séjour de cohésion", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/convocation/cohesion`);
+
+      expect(res.status).toBe(400);
+    });
+
+    it("devrait renvoyer 400 à l'envoi par mail de la convocation, sans lancer de tâche", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/convocation/cohesion/send-email`).send({ fileName: "convocation.pdf" });
+
+      expect(res.status).toBe(400);
+      expect(sendDocumentEmailTask).not.toHaveBeenCalled();
+    });
+
+    it("devrait renvoyer 400 pour un gabarit inconnu d'un type connu", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/4`);
+
+      expect(res.status).toBe(400);
+    });
+  });
+
   describe("POST /young/:id/documents/contract/:template/send-email (H41)", () => {
     it("devrait renvoyer 404 quand le contrat n'appartient pas au jeune", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const autreJeune = await createYoungHelper(getNewYoungFixture());
       const contratDeLAutreJeune = await createContractHelper({ ...getNewContractFixture(), youngId: autreJeune._id.toString() });
 
-      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/contract/1/send-email`).send({ contract_id: contratDeLAutreJeune._id.toString() });
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/contract/2/send-email`).send({ contract_id: contratDeLAutreJeune._id.toString() });
 
       expect(res.status).toBe(404);
       expect(sendDocumentEmailTask).not.toHaveBeenCalled();
@@ -125,7 +154,7 @@ describe("Young", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const contrat = await createContractHelper({ ...getNewContractFixture(), youngId: young._id.toString() });
 
-      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/contract/1/send-email`).send({ contract_id: contrat._id.toString() });
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/contract/2/send-email`).send({ contract_id: contrat._id.toString() });
 
       expect(res.status).toBe(200);
       expect(sendDocumentEmailTask).toHaveBeenCalled();

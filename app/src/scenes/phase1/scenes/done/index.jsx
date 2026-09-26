@@ -9,9 +9,7 @@ import Unlock from "../../../../assets/icons/Unlock";
 import api from "../../../../services/api";
 import { translate } from "../../../../utils";
 import downloadPDF from "../../../../utils/download-pdf";
-import InfoConvocation from "../../components/modals/InfoConvocation";
 import { capture } from "../../../../sentry";
-import { isCohortDone } from "../../../../utils/cohorts";
 import hero from "../../../../assets/hero/phase1.png";
 import JDCDone from "./components/JDCDone";
 import JDCNotDone from "./components/JDCNotDone";
@@ -25,32 +23,8 @@ export default function Done() {
   const { young } = useAuth();
   const { isCohortNeedJdm } = useCohort();
   const [openAttestationButton, setOpenAttestationButton] = React.useState(false);
-  const [modalOpen, setModalOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
-  const [center, setCenter] = React.useState(null);
-  const [meetingPoint, setMeetingPoint] = React.useState(null);
-  const [session, setSession] = React.useState(null);
   const showJDM = young.frenchNationality === "true";
-
-  async function handleClickModal() {
-    try {
-      if (!center || !meetingPoint || !session) {
-        const { data: center, ok: okCenter } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
-        if (!okCenter) throw new Error("Error while fetching center");
-        const { data: meetingPoint, ok: okMeetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
-        if (!okMeetingPoint) throw new Error("Error while fetching meeting point");
-        const { data: session, ok: okSession } = await api.get(`/young/${young._id}/session/`);
-        if (!okSession) throw new Error("Error while fetching session");
-        setCenter(center);
-        setMeetingPoint(meetingPoint);
-        setSession(session);
-      }
-      setModalOpen(true);
-    } catch (e) {
-      capture(e);
-      toastr.error(e.message);
-    }
-  }
 
   const refAttestationButton = React.useRef();
 
@@ -102,15 +76,6 @@ export default function Done() {
         </div>
 
         <div className="mt-4 flex items-center gap-5">
-          {!isCohortDone(young.cohort, 3) && (
-            <>
-              <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500" onClick={handleClickModal}>
-                Mes informations de retour de séjour
-              </button>
-              <InfoConvocation isOpen={modalOpen} onCancel={() => setModalOpen(false)} center={center} meetingPoint={meetingPoint} session={session} />
-            </>
-          )}
-
           <div className="relative" ref={refAttestationButton}>
             <button
               disabled={loading}
