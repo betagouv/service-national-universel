@@ -95,7 +95,30 @@ export class ExportMissionService {
                 );
             }
             const structures = await this.structureGateway.findByIdOrNetworkId(referent.structureId);
+            if (!structures.length) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                    "Referent structures not found",
+                );
+            }
             filters.structureId = structures.map((structure) => structure.id);
+        }
+        // Aligné sur buildMissionContext (GOO-45) : sans ce cloisonnement, un référent
+        // territorial exportait les missions et les contacts de tuteurs de tout le pays (PH21).
+        if (auteur.role === ROLES.REFERENT_DEPARTMENT) {
+            if (!referent.departement?.length) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                    "Referent departement is required",
+                );
+            }
+            filters.department = referent.departement;
+        }
+        if (auteur.role === ROLES.REFERENT_REGION) {
+            if (!referent.region) {
+                throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, "Referent region is required");
+            }
+            filters.region = [referent.region];
         }
 
         this.logger.log(`${JSON.stringify({ filters, searchTerm }, null, 2)}`);
