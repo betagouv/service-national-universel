@@ -77,7 +77,7 @@ describe("Referent", () => {
     // que le compte ne passe INACTIVE) ; il ne doit plus permettre d'ouvrir de session.
     it("should return 401 for a decommissioned role even with a valid 2FA code", async () => {
       const referent = await createReferentHelper(
-        getNewReferentFixture({ password: "bar", role: ROLES.HEAD_CENTER, token2FA: "123456", token2FAExpires: Date.now() + 60000, attempts2FA: 0 }),
+        getNewReferentFixture({ password: "bar", role: ROLES.HEAD_CENTER, token2FA: "123456", token2FAExpires: new Date(Date.now() + 60000), attempts2FA: 0 }),
       );
       const res = await request(getAppHelper()).post("/referent/signin-2fa").send({ email: referent.email, token_2fa: "123456", rememberMe: false });
       expect(res.status).toBe(401);
