@@ -87,6 +87,9 @@ async function updateNetworkName(structure: StructureType, fromUser: UserDto): P
     // Then update their childs.
     const childs = await StructureModel.find({ networkId: structure._id });
     for (const child of childs) await setAndSave(child, { networkName: structure.name }, fromUser);
+  } else if (structure.networkName) {
+    // Rattachée à aucun réseau : un nom de réseau sans rattachement laisserait croire à une affiliation (GOO-43).
+    await setAndSave(structure, { networkName: "" }, fromUser);
   }
 }
 
@@ -118,8 +121,14 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
 
+      // Le nom du réseau se déduit du rattachement (updateNetworkName), il ne vient jamais du client (GOO-43).
+      delete checkedStructure.networkName;
       if (isSupervisor(req.user)) {
         checkedStructure.networkId = req.user.structureId;
+      } else if (!isAdmin(req.user)) {
+        // Le rattachement réseau ouvre un périmètre d'accès : seul un ADMIN le choisit.
+        delete checkedStructure.isNetwork;
+        delete checkedStructure.networkId;
       }
 
       const data = await StructureModel.create(checkedStructure);
@@ -158,9 +167,18 @@ router.put(
         if (checkedStructure.isNetwork !== undefined && isNetworkFlag(checkedStructure.isNetwork) !== isNetworkFlag(structure.isNetwork)) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
+        // Même règle pour le réseau de rattachement : un nom de réseau accepté sans son identifiant affichait une
+        // affiliation que l'API refusait (GOO-43). Un envoi inchangé reste accepté (l'écran renvoie toute la fiche).
+        const networkIdChanged = "networkId" in checkedStructure && (checkedStructure.networkId || "").toString() !== (structure.networkId || "").toString();
+        const networkNameChanged = "networkName" in checkedStructure && (checkedStructure.networkName || "") !== (structure.networkName || "");
+        if (networkIdChanged || networkNameChanged) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
         delete checkedStructure.isNetwork;
         delete checkedStructure.networkId;
       }
+      // Le nom du réseau se déduit du rattachement (updateNetworkName), il ne vient jamais du client.
+      delete checkedStructure.networkName;
 
       // La géographie de la structure fixe le périmètre des référents qui l'instruisent (GOO-5) : un
       // responsable ne la déplace pas hors de leur territoire, un référent la garde dans le sien.

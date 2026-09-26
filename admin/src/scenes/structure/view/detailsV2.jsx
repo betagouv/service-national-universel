@@ -226,16 +226,20 @@ function StructureForm({ structure, setStructure }) {
             {(!data.isNetwork || data.isNetwork === "false") && (
               <div className="my-3 space-y-2">
                 <h3 className="text-xs font-medium leading-4 text-gray-900">Réseau national</h3>
-                <p className="text-xs font-medium leading-4 text-gray-400">
-                  Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
-                  superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
-                </p>
+                {user.role === ROLES.ADMIN ? (
+                  <p className="text-xs font-medium leading-4 text-gray-400">
+                    Si l&apos;organisation est membre d&apos;un réseau national (Les Banques alimentaires, Armée du Salut...), renseignez son nom. Vous permettrez ainsi au
+                    superviseur de votre réseau de visualiser les missions et bénévoles rattachés à votre organisation.
+                  </p>
+                ) : (
+                  <p className="text-xs font-medium leading-4 text-gray-400">Contactez un administrateur pour rattacher la structure à un réseau.</p>
+                )}
                 <AsyncSelect
                   isClearable
                   label="Réseau national"
                   value={{ label: data.networkName }}
                   loadOptions={getNetworkOptions}
-                  isDisabled={!isEditing}
+                  isDisabled={!isEditing || user.role !== ROLES.ADMIN}
                   noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
                   styles={{
                     dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
