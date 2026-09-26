@@ -9,6 +9,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import EngagementPrograms from "@/components/engagement/EngagementPrograms";
 import { YOUNG_STATUS } from "snu-lib";
 import API from "@/services/api";
+import { queryClient } from "@/services/react-query";
 import dayjs from "dayjs";
 import { SignupButtons } from "@snu/ds/dsfr";
 
@@ -21,6 +22,7 @@ export default function NonEligible() {
     setLoading(true);
     await API.post(`/young/logout`);
     dispatch(setYoung(null));
+    queryClient.clear();
     toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
     return history.push("/auth");
   };

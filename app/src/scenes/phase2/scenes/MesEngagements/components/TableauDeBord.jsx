@@ -42,8 +42,8 @@ export default function View() {
   const { young } = useAuth();
   const { canViewMissions, canCreateEquivalences, canAccessMilitaryPreparation } = usePermissions();
   const phase2NumberHoursDone = young.phase2NumberHoursDone || 0;
-  const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
-  const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });
+  const applications = useQuery({ queryKey: ["application", { youngId: young._id }], queryFn: () => fetchApplications(young._id) });
+  const equivalences = useQuery({ queryKey: ["equivalence", { youngId: young._id }], queryFn: () => fetchEquivalences(young._id) });
 
   if (equivalences.isPending || applications.isPending) {
     return <Loader />;

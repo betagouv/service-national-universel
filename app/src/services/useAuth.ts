@@ -3,6 +3,7 @@ import { useHistory } from "react-router-dom";
 import { setYoung } from "../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { logoutYoung } from "./young.service";
+import { queryClient } from "./react-query";
 import { YOUNG_SOURCE, YoungType } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 
@@ -14,6 +15,7 @@ export const useAuth = () => {
   const logout = async ({ redirect } = { redirect: true }) => {
     await logoutYoung();
     dispatch(setYoung(undefined));
+    queryClient.clear();
     if (redirect) {
       toastr.info("Vous avez bien été déconnecté.", "");
       return history.push("/auth");
