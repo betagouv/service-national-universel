@@ -149,5 +149,21 @@ describe("ListeDiffusionController - habilitation", () => {
                 .expect(400);
             expect(listeDiffusionService.updateListeDiffusion).not.toHaveBeenCalled();
         });
+
+        it("refuse un champ non déclaré à la création (mass assignment, GOO-90)", async () => {
+            await request(app.getHttpServer())
+                .post("/liste-diffusion")
+                .send({ ...listeValide, filters: { region: ["Bretagne"] }, role: "admin" })
+                .expect(400);
+            expect(listeDiffusionService.creerListeDiffusion).not.toHaveBeenCalled();
+        });
+
+        it("refuse un champ non déclaré à la modification (mass assignment, GOO-90)", async () => {
+            await request(app.getHttpServer())
+                .put("/liste-diffusion/bbbbbbbbbbbbbbbbbbbbbbbb")
+                .send({ id: "bbbbbbbbbbbbbbbbbbbbbbbb", nom: "Liste", filters: { region: ["Bretagne"] }, role: "admin" })
+                .expect(400);
+            expect(listeDiffusionService.updateListeDiffusion).not.toHaveBeenCalled();
+        });
     });
 });
