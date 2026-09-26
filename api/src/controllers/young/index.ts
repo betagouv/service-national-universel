@@ -33,7 +33,7 @@ import { sendTemplate, unsync } from "../../brevo";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
 import { validateYoung, validateId, idSchema } from "../../utils/validator";
 import patches from "../patches";
-import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
+import { serializeYoung, serializeApplication, serializeContract, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
 import {
   canAccessYoungDocumentsInScope,
@@ -820,11 +820,16 @@ router.get(
       const serialized = data.map((application) => {
         if (application.mission?.tutorId && !application.tutorId) application.tutorId = application.mission.tutorId;
         if (application.mission?.structureId && !application.structureId) application.structureId = application.mission.structureId;
+        // `contractId` et `tutorId` ont longtemps été écrits par le client : une candidature pouvait
+        // pointer le contrat d'un autre volontaire ou n'importe quel référent (PH19). On ne joint que le
+        // contrat de ce volontaire, et un tuteur de la structure réduit à son identité et ses coordonnées.
+        const contract = application.contract && String(application.contract.youngId) === String(young._id) ? application.contract : null;
+        const tutor = application.tutor && String(application.tutor.structureId) === String(application.structureId) ? application.tutor : null;
         return {
           ...serializeApplication(application),
           mission: application.mission ? serializeMission(application.mission as any) : application.mission,
-          tutor: application.tutor ? serializeReferent(application.tutor as any) : application.tutor,
-          contract: application.contract ? serializeContract(application.contract as any) : application.contract,
+          tutor: tutor ? { _id: tutor._id, firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, phone: tutor.phone, mobile: tutor.mobile } : null,
+          contract: contract ? serializeContract(contract as any) : null,
         };
       });
 

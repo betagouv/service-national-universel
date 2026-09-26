@@ -481,7 +481,10 @@ router.get(
         where.youngDepartment = { $in: departments };
       }
       if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
-        where.status = { $ne: "WAITING_ACCEPTATION " };
+        // Une proposition n'est pas une candidature : la structure ne voit le volontaire qu'une fois la
+        // proposition acceptée (même règle que l'index `application`). Le littéral portait une espace
+        // finale et ne filtrait rien (PH11).
+        where.status = { $ne: APPLICATION_STATUS.WAITING_ACCEPTATION };
       }
       const applications = await ApplicationModel.find(where).populate({ path: "mission" });
       const data = applications.map((application) => ({
