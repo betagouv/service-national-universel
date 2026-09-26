@@ -545,4 +545,173 @@ describe("Sécurité des missions", () => {
       expect(res.statusCode).toEqual(200);
     });
   });
+
+  describe("GOO-59 — modération des missions après validation (PM13, PM22, PL1)", () => {
+    const START_AT = "2030-03-01T10:00:00.000Z";
+    const END_AT = "2030-04-01T10:00:00.000Z";
+
+    async function missionValidee(structure: any, overrides: Record<string, unknown> = {}) {
+      return createMission(structure, {
+        startAt: new Date(START_AT),
+        endAt: new Date(END_AT),
+        duration: "3",
+        hebergement: "false",
+        isMilitaryPreparation: "false",
+        department: "Ain",
+        region: "Auvergne-Rhône-Alpes",
+        ...overrides,
+      });
+    }
+
+    /** Corps que renvoie la fiche d'édition : les champs modérés tels qu'en base. */
+    function corpsInchange(mission: any) {
+      return {
+        name: mission.name,
+        description: mission.description,
+        actions: mission.actions,
+        justifications: mission.justifications,
+        contraintes: mission.contraintes,
+        frequence: mission.frequence,
+        duration: mission.duration,
+        startAt: START_AT,
+        endAt: END_AT,
+        address: mission.address,
+        zip: mission.zip,
+        city: mission.city,
+        department: mission.department,
+        region: mission.region,
+        isMilitaryPreparation: mission.isMilitaryPreparation,
+        hebergement: mission.hebergement,
+        placesTotal: mission.placesTotal,
+      };
+    }
+
+    it.each([
+      ["name", "Mission renommée"],
+      ["justifications", "Nouvelle justification"],
+      ["contraintes", "Nouvelles contraintes"],
+      ["frequence", "Tous les jours"],
+      ["duration", "40"],
+      ["startAt", "2030-03-05T10:00:00.000Z"],
+      ["endAt", "2030-05-01T10:00:00.000Z"],
+      ["address", "1 rue ailleurs"],
+      ["zip", "01000"],
+      ["city", "Bourg-en-Bresse"],
+      ["department", "Rhône"],
+      ["isMilitaryPreparation", "true"],
+      ["hebergement", "true"],
+    ])("repasse en modération une mission validée dont le responsable change « %s »", async (field, value) => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await missionValidee(structure);
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), [field]: value });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.WAITING_VALIDATION);
+    });
+
+    it("repasse en modération la mission validée d'un superviseur qui change son adresse", async () => {
+      const structure = await createStructure();
+      const superviseur = await createReferent({ role: ROLES.SUPERVISOR, structureId: String(structure._id) });
+      const mission = await missionValidee(structure);
+
+      const res = await request(await getAppHelperWithAcl(superviseur))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), address: "2 rue ailleurs" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.WAITING_VALIDATION);
+    });
+
+    it("laisse validée une mission dont seuls les champs non modérés changent (places, visibilité)", async () => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await missionValidee(structure);
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), placesTotal: mission.placesTotal! + 2, visibility: "HIDDEN" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.VALIDATED);
+      expect(apres!.placesTotal).toEqual(mission.placesTotal! + 2);
+    });
+
+    it("laisse validée une mission dont le drapeau préparation militaire, absent en base, est renvoyé à « false »", async () => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await missionValidee(structure, { isMilitaryPreparation: undefined, hebergement: undefined });
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), isMilitaryPreparation: "false", hebergement: "" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.VALIDATED);
+    });
+
+    it("n'impose pas de nouvelle modération au référent qui modère la mission", async () => {
+      const structure = await createStructure();
+      const referent = await createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"] });
+      const mission = await missionValidee(structure);
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), name: "Nom corrigé par le référent", duration: "12" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.VALIDATED);
+      expect(apres!.name).toEqual("Nom corrigé par le référent");
+    });
+
+    it("relit le nom de la structure depuis la structure porteuse au lieu du corps", async () => {
+      const structure = await createStructure({ name: "Structure réelle" });
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await missionValidee(structure);
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), structureName: "Gagnez un iPhone sur exemple.com" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.structureName).toEqual("Structure réelle");
+      expect(apres!.status).toEqual(MISSION_STATUS.VALIDATED);
+    });
+
+    it("à la création, relit aussi le nom de la structure depuis la structure porteuse", async () => {
+      const structure = await createStructure({ name: "Structure réelle" });
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .post("/mission")
+        .send(missionCreationPayload(structure, { structureName: "Gagnez un iPhone sur exemple.com" }));
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(res.body.data._id);
+      expect(apres!.structureName).toEqual("Structure réelle");
+    });
+
+    it("ne renvoie pas le dump JeVeuxAider dans la réponse de PUT /mission/:id (PL1)", async () => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await missionValidee(structure, { jvaRawData: { contact: { email: "contact-interne@jva.example" } } });
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), placesTotal: mission.placesTotal! + 1 });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data._id).toEqual(String(mission._id));
+      expect(res.body.data).not.toHaveProperty("jvaRawData");
+    });
+  });
 });

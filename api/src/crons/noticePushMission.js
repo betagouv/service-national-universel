@@ -9,7 +9,24 @@ const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, translate, formatStringDate, calculateAge, COHORT_STATUS, APPLICATION_STATUS } = require("snu-lib");
 const { config } = require("../config");
 const { getCcOfYoung } = require("../utils");
+const { sanitizeEmailText } = require("../email/emailInput");
 const fileName = path.basename(__filename, ".js");
+
+/**
+ * Mission telle que présentée dans le mail MISSION_PROPOSITION_AUTO. Nom, structure et adresse sont
+ * saisis par la structure et partent depuis l'expéditeur officiel vers tous les volontaires proches :
+ * le balisage en est retiré (GOO-59, PM22).
+ */
+const toMailMission = (mission) => ({
+  structureName: sanitizeEmailText(mission._source.structureName)?.toUpperCase(),
+  name: sanitizeEmailText(mission._source.name),
+  startAt: formatStringDate(mission._source.startAt),
+  endAt: formatStringDate(mission._source.endAt),
+  address: sanitizeEmailText(`${mission._source.city}, ${mission._source.zip}`),
+  domains: mission._source.domains?.map(translate)?.join(", "),
+  cta: `${config.APP_URL}/mission/${mission._id}`,
+});
+exports.toMailMission = toMailMission;
 
 exports.handler = async () => {
   try {
@@ -43,15 +60,7 @@ exports.handler = async () => {
       const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(obj)).length;
       if (applicationsCount < 15) {
         const esMissions = await getMissions({ young });
-        const missions = esMissions?.map((mission) => ({
-          structureName: mission._source.structureName?.toUpperCase(),
-          name: mission._source.name,
-          startAt: formatStringDate(mission._source.startAt),
-          endAt: formatStringDate(mission._source.endAt),
-          address: `${mission._source.city}, ${mission._source.zip}`,
-          domains: mission._source.domains?.map(translate)?.join(", "),
-          cta: `${config.APP_URL}/mission/${mission._id}`,
-        }));
+        const missions = esMissions?.map(toMailMission);
         countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
         if (!missions) return;
         countMissionSentCohort[young?.cohort] = (countMissionSentCohort[young?.cohort] || 0) + 1;
