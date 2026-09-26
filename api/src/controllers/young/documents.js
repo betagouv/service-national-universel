@@ -6,6 +6,7 @@ const { capture } = require("../../sentry");
 const { YoungModel, CohortModel, ContractModel, ApplicationModel } = require("../../models");
 const { ERRORS, isYoung, isReferent, uploadFile, deleteFile, getFile } = require("../../utils");
 const { FILE_KEYS, MILITARY_FILE_KEYS, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung, getSafeDownloadFileName } = require("snu-lib");
+const { canAccessYoungFileKeyInScope } = require("../../young/youngScope");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
@@ -302,8 +303,14 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
     // Check permissions
 
-    // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/documents).
+    // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/documents), mais ce
+    // garde-fou ne connaît pas la clé demandée : un responsable/superviseur en périmètre obtenait
+    // cniFiles, autoTestPCRFiles ou des pièces de préparation militaire hors structure PM au même
+    // titre qu'une pièce anodine (constat PH20, audit production 2026-09-25).
     const young = req.targetYoung;
+    if (isReferent(req.user) && !(await canAccessYoungFileKeyInScope(req.user, young, key))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     // Send response
 
@@ -334,8 +341,12 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     }
     const { id, key, fileId } = value;
 
-    // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/documents).
+    // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/documents), mais ce
+    // garde-fou ne connaît pas la clé demandée (constat PH20, audit production 2026-09-25).
     const young = req.targetYoung;
+    if (isReferent(req.user) && !(await canAccessYoungFileKeyInScope(req.user, young, key))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     // Download from s3
 

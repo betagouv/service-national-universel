@@ -16,18 +16,20 @@ const { ObjectId } = Types;
 
 import { ROLES, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 
-import { ApplicationModel, ClasseModel, EtablissementModel, ReferentModel, StructureModel, YoungModel } from "../models";
+import { ApplicationModel, ClasseModel, CohortModel, EtablissementModel, ReferentModel, StructureModel, YoungModel } from "../models";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
 import getNewStructureFixture from "./fixtures/structure";
+import getNewCohortFixture from "./fixtures/cohort";
 import { createFixtureClasse } from "./fixtures/classe";
 import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { createReferentHelper } from "./helpers/referent";
 import { createYoungHelper } from "./helpers/young";
 import { createStructureHelper } from "./helpers/structure";
+import { createCohortHelper } from "./helpers/cohort";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -102,6 +104,7 @@ beforeEach(async () => {
     ApplicationModel.deleteMany(),
     ClasseModel.deleteMany(),
     EtablissementModel.deleteMany(),
+    CohortModel.deleteMany(),
   ]);
   jest.clearAllMocks();
 });
@@ -307,14 +310,39 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
       expect((await YoungModel.findById(victime._id))?.statusMilitaryPreparationFiles).toBe("WAITING_VERIFICATION");
     }, 30000);
 
-    it("autorise le référent régional de la région du volontaire", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, statusMilitaryPreparationFiles: "WAITING_VERIFICATION" } as any));
+    it("autorise le référent régional de la région du volontaire, sans renvoyer de secret (PH16)", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, ...youngSecrets, statusMilitaryPreparationFiles: "WAITING_VERIFICATION" } as any));
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: TERRITOIRE.region, department: [TERRITOIRE.department] }));
 
       const res = await request(await getAppHelperWithAcl(referent, "referent")).post(`/referent/young/${young._id}/refuse-military-preparation-files`);
 
       expect(res.status).toBe(200);
       expect((await YoungModel.findById(young._id))?.statusMilitaryPreparationFiles).toBe("REFUSED");
+      expectNoSecret(res.body.data);
+    }, 30000);
+  });
+
+  describe("PH16 — PUT /referent/young/:id/change-cohort", () => {
+    it("ne renvoie aucun secret du volontaire dans la réponse", async () => {
+      const cohort1 = await createCohortHelper(getNewCohortFixture({ name: "Février 2024" }));
+      const cohort2 = await createCohortHelper(getNewCohortFixture({ name: "Juin 2024" }));
+      const young = await createYoungHelper(
+        getNewYoungFixture({ ...youngSecrets, cohort: cohort1.name, cohortId: cohort1._id.toString(), source: YOUNG_SOURCE.VOLONTAIRE } as any),
+      );
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent"))
+        .put(`/referent/young/${young._id}/change-cohort`)
+        .send({
+          source: YOUNG_SOURCE.VOLONTAIRE,
+          cohort: cohort2.name,
+          message: "Changing cohort for testing purposes",
+          cohortChangeReason: "Testing",
+        });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.cohort).toBe(cohort2.name);
+      expectNoSecret(res.body.data);
     }, 30000);
   });
 

@@ -143,6 +143,7 @@ import {
   isYoungInUserScope,
   isYoungInStructureScope,
   isYoungInMilitaryPreparationStructureScope,
+  canAccessYoungFileKeyInScope,
 } from "../young/youngScope";
 import { canReferentApplyYoungUpdate } from "../young/youngStatusTransitions";
 
@@ -942,7 +943,9 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
 
     young.set(newYoung);
     await young.save({ fromUser: req.user });
-    res.status(200).send({ ok: true, data: young });
+    // Document Mongo brut : jetons de session / réinitialisation compris (constat PH16, audit
+    // production 2026-09-25).
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
     capture(error);
@@ -1179,7 +1182,9 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       classe,
     });
 
-    res.status(200).send({ ok: true, data: young });
+    // Document Mongo brut : jetons de session / réinitialisation compris (constat PH16, audit
+    // production 2026-09-25).
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1341,6 +1346,10 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
         // rattachement réel fait foi (constat H65, audit 2026-09-21).
         if (!req.user.structureId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         if (!(await isYoungInStructureScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        // `key` n'était borné par aucune liste ici : un responsable/superviseur en périmètre
+        // obtenait cniFiles, autoTestPCRFiles ou des pièces de préparation militaire hors structure
+        // PM au même titre qu'une pièce anodine (constat PH20, audit production 2026-09-25).
+        if (!(await canAccessYoungFileKeyInScope(req.user, young, key))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         break;
       }
       case ROLES.ADMIN:
