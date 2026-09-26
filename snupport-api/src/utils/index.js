@@ -313,12 +313,16 @@ function deleteFile(path) {
 const setAgent = async (ticket) => {
   try {
     const agent = await AgentModel.findById(ticket.agentId);
+    // Un id d'agent invalide ou supprimé (règle de ventilation obsolète) ne doit pas planter
+    // l'appelant : renvoyer le ticket inchangé plutôt que de déréférencer un agent inexistant (PM47).
+    if (!agent) return ticket;
     ticket.agentFirstName = agent.firstName;
     ticket.agentLastName = agent.lastName;
     ticket.agentEmail = agent.email;
     return ticket;
   } catch (error) {
     capture(error);
+    return ticket;
   }
 };
 

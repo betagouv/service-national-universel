@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const VentilationModel = require("../models/ventilation");
 const  { agentGuard } = require("../middlewares/authenticationGuards");
+const { requireRole } = require("../middlewares/userRoleGuards");
 const { validateParams, validateBody, idSchema } = require("../middlewares/validation");
 const Joi = require("joi");
 const { SCHEMA_ID, SCHEMA_SOURCE, SCHEMA_TICKET_STATUS } = require("../schemas");
@@ -55,22 +56,24 @@ router.use(agentGuard);
 // ne lit, ne modifie et ne supprime que les règles de son propre périmètre. Le champ `userRole` (et le
 // territoire pour les référents) est forcé côté serveur à la création — il n'est de toute façon pas
 // dans le schéma de validation, donc rejeté s'il est fourni dans le corps.
+// Aucun usage légitime documenté côté UI pour un référent (setting/index.jsx L79 : écran réservé à
+// AGENT) : la création est désormais réservée au support central (PM47).
 router.post("/",
+  requireRole("AGENT"),
   validateBody(SCHEMA_VENTILATION.prefs({ presence: 'required' })),
   async (req, res) => {
-    const data = {
-      ...req.cleanBody,
-      userRole: req.user.role,
-    };
-    if (req.user.role === "REFERENT_DEPARTMENT") data.userDepartment = req.user.departments && req.user.departments[0];
-    if (req.user.role === "REFERENT_REGION") data.userRegion = req.user.region;
-    await VentilationModel.create(data);
+    await VentilationModel.create({ ...req.cleanBody, userRole: req.user.role });
     return res.status(200).send({ ok: true });
   }
 );
 
+// AGENT et DG sont le support central : ils voient toutes les règles, y compris celles des
+// référents, pour pouvoir superviser la ventilation (PL22). DG n'est pas un `userRole` possible
+// d'une règle (pas de ressources qui lui appartiennent), seulement un rôle d'agent lecteur.
+const isCentralSupport = (user) => user.role === "AGENT" || user.role === "DG";
+
 router.get("/", async (req, res) => {
-  const ventilation = await VentilationModel.find(scopeOwnedResourceQuery(req.user));
+  const ventilation = await VentilationModel.find(isCentralSupport(req.user) ? {} : scopeOwnedResourceQuery(req.user));
   return res.status(200).send({ ok: true, data: ventilation });
 });
 
@@ -80,7 +83,11 @@ router.patch("/:id",
   async (req, res) => {
     const ventilation = await VentilationModel.findById(req.cleanParams.id);
     if (!ventilation) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canManageOwnedResource(req.user, ventilation)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Un agent central peut neutraliser une règle de référent (désactivation seule), pas la
+    // réécrire : au-delà de `active:false`, le périmètre par propriétaire s'applique comme avant (PL22).
+    const isDeactivationOnly = Object.keys(req.cleanBody).length === 1 && req.cleanBody.active === false;
+    const canBypassAsAgent = req.user.role === "AGENT" && isDeactivationOnly;
+    if (!canManageOwnedResource(req.user, ventilation) && !canBypassAsAgent) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await VentilationModel.findOneAndUpdate({ _id: ventilation._id }, req.cleanBody);
     return res.status(200).send({ ok: true });
   }
@@ -91,7 +98,9 @@ router.delete("/:id",
   async (req, res) => {
     const ventilation = await VentilationModel.findById(req.cleanParams.id);
     if (!ventilation) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canManageOwnedResource(req.user, ventilation)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Un agent central peut toujours supprimer une règle de référent (PL22).
+    const canBypassAsAgent = req.user.role === "AGENT";
+    if (!canManageOwnedResource(req.user, ventilation) && !canBypassAsAgent) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await VentilationModel.findByIdAndDelete(ventilation._id);
     return res.status(200).send({ ok: true });
   }
