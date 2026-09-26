@@ -3,12 +3,18 @@
 // « facture.doc.exe » et « doc.html » passaient, et un SVG annoncé image/svg+xml passait
 // `contentType.includes("image")` puis était resservi inline par /message/s3file/publicUrl.
 
+const FileType = require("file-type");
 const { inspectAttachment, ALLOWED_MIME_TYPES } = require("../utils/attachments");
 
 const PDF = Buffer.from("%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n%%EOF\n", "binary");
 const PNG = Buffer.concat([Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]), Buffer.alloc(64)]);
 const JPEG = Buffer.concat([Buffer.from([0xff, 0xd8, 0xff, 0xe0]), Buffer.alloc(64)]);
 const EXE = Buffer.concat([Buffer.from("MZ\x90\x00", "binary"), Buffer.alloc(64)]);
+// PH24 : un ASF_Header_Object dont le champ de taille est forgé fait boucler indéfiniment
+// file-type 16.5.4 (strtok3). 80 octets suffisent à figer tout snupport-api (entrée IMAP,
+// réponses d'agent). On ne reproduit pas la boucle ici : la signature doit être écartée avant
+// même l'appel à FileType.fromBuffer.
+const FORGED_ASF = Buffer.concat([Buffer.from([0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9]), Buffer.alloc(70)]);
 const HTML = Buffer.from("<html><script>alert(1)</script></html>");
 const SVG = Buffer.from('<svg xmlns="http://www.w3.org/2000/svg"><script>alert(1)</script></svg>');
 const DOCX = Buffer.from(
@@ -55,6 +61,20 @@ describe("inspectAttachment — vecteurs de H86", () => {
   it("écarte un contenu vide ou non identifiable", async () => {
     expect(await inspectAttachment(Buffer.alloc(0))).toEqual({ mime: null, accepted: false });
     expect(await inspectAttachment(Buffer.from("texte brut sans magic number"))).toEqual({ mime: null, accepted: false });
+  });
+});
+
+describe("inspectAttachment — PH24 : fichier ASF forgé", () => {
+  // Vérifié manuellement (hors suite) : FileType.fromBuffer(FORGED_ASF) fige bien le process
+  // Node — la boucle de strtok3 n'enchaîne que des promesses déjà résolues et ne laisse jamais
+  // passer la timer phase, donc même un jest.setTimeout ne rend pas la main. On mocke
+  // FileType.fromBuffer pour ce test : ce qui est vérifié est que le garde-fou intercepte AVANT
+  // tout appel, jamais le comportement de la bibliothèque vulnérable elle-même.
+  it("écarte un fichier ASF forgé sans jamais appeler FileType.fromBuffer", async () => {
+    const spy = jest.spyOn(FileType, "fromBuffer").mockResolvedValue(undefined);
+    expect(await inspectAttachment(FORGED_ASF)).toEqual({ mime: null, accepted: false });
+    expect(spy).not.toHaveBeenCalled();
+    spy.mockRestore();
   });
 });
 
