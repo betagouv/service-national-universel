@@ -18,6 +18,7 @@ const { encrypt } = require("./utils/crypto");
 const { getS3Path, getAttachmentFileName } = require("./utils/file");
 const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
 const { inspectAttachment } = require("./utils/attachments");
+const { scanBuffer } = require("./utils/virusScanner");
 const { sanitizeMessageHtml } = require("./utils/messageHtml");
 const { resolveUnverifiedContact } = require("./utils/contactVerification");
 
@@ -139,6 +140,11 @@ async function addMessage(mail) {
         const { mime, accepted } = await inspectAttachment(attachment.content);
         if (!accepted) {
           console.log(`imap: pièce jointe « ${attachment.filename} » écartée (détecté: ${mime ?? "inconnu"}, annoncé: ${attachment.contentType})`);
+          continue;
+        }
+        const { infected } = await scanBuffer(attachment.content, attachment.filename);
+        if (infected) {
+          console.log(`imap: pièce jointe « ${attachment.filename} » écartée (antivirus)`);
           continue;
         }
         const encryptedBuffer = encrypt(attachment.content);

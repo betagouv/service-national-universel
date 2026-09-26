@@ -15,6 +15,8 @@ require("./mongo");
 require("./imap");
 require("./utils/ventilation");
 require("./crons");
+const { initVirusScanner } = require("./utils/virusScanner");
+initVirusScanner();
 
 const { config } = require("./config");
 
