@@ -15,8 +15,13 @@ function initSentry() {
       normalizeDepth: 16,
       // Sentry lit `req.body` au moment de l'événement et reçoit tout `extra` : secrets et PII y sont masqués ici
       beforeSend: redactSentryEvent,
+      // PH18 : les transactions de performance (requestDataIntegration) ne passent PAS par beforeSend
+      // — sans ce hook dédié, chaque requête échantillonnée partait avec cookies, en-têtes et corps en clair.
+      beforeSendTransaction: redactSentryEvent,
       integrations: [extraErrorDataIntegration({ depth: 16 }), rewriteFramesIntegration({ root: process.cwd() }), nodeProfilingIntegration()],
-      tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE) || 0.01,
+      // Le repli `|| 0.01` masquait un défaut de config.ts resté à 1 (100%) : le défaut est maintenant
+      // porté par config.ts lui-même (0.01), sans second filet ici qui en camouflerait la valeur réelle.
+      tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE),
       profilesSampleRate: Number(config.SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
       ignoreErrors: [
         /^No error$/,
