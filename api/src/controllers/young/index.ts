@@ -110,9 +110,10 @@ const youngSigninLimiter = signinRateLimiter();
 router.post("/signup", (_req, res) => {
   return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 });
-router.post("/signup/email", emailSendingRateLimiter("young-signup-email"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
-  YoungAuth.changeEmailDuringSignUp(req, res),
-);
+// PH17 de l'audit du 25/09/2026 : `/signup/email` (changeEmailDuringSignUp) appliquait le nouvel
+// email en base avant toute validation par le jeton envoyé à cette adresse — vecteur secondaire pour
+// usurper l'identité support d'un tiers. Sans appelant (les inscriptions sont fermées depuis M3
+// ci-dessus), la route est supprimée plutôt que corrigée.
 router.post("/signin", youngSigninLimiter, requireJsonBody, (req, res) => YoungAuth.signin(req, res));
 router.post("/signin-2fa", youngSigninLimiter, requireJsonBody, (req, res) => YoungAuth.signin2FA(req, res));
 router.post("/email", emailSendingRateLimiter("young-email-update"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
