@@ -534,14 +534,12 @@ router.get(
   resolveKnowledgeBaseReader,
   requireReadableRole,
   async (req, res) => {
-    const existingKb = await KnowledgeBaseModel.findOne({ slug: req.cleanParams.slug, allowedRoles: req.cleanParams.allowedRole, status: "PUBLISHED" })
+    const existingKb = await KnowledgeBaseModel.findOne({ slug: req.cleanParams.slug })
       .populate({
         path: "author",
         select: "_id firstName lastName role",
       })
       .lean(); // to json
-
-    if (!existingKb) {
       // if already connected and document not existing with specified role, we just return NOT_FOUND
       if (req.cleanParams.allowedRole !== "public") return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       // if not connected yet, we check if the document exists for specific roles
@@ -652,6 +650,11 @@ router.delete("/:id", validateParams(idSchema), agentGuard, knowledgeBaseEditorG
   if (kb.type === "section") await revalidateSiteMap();
 
   res.status(200).send({ ok: true });
+});
+
+router.post("/export", agentGuard, async (req, res) => {
+  const articles = await KnowledgeBaseModel.find({ status: "PUBLISHED" });
+  return res.status(200).send({ ok: true, data: articles });
 });
 
 /*
