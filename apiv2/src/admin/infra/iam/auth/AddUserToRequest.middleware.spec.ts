@@ -111,6 +111,20 @@ describe("AddUserToRequestMiddleware - validité de la session", () => {
         );
     });
 
+    // GOO-56 (P24, audit du 25/09/2026) : chaque API refuse la session de son côté pour les rôles
+    // décommissionnés, même sur un compte resté ACTIVE et un jeton par ailleurs valide.
+    it("rejette le jeton d'un compte au rôle décommissionné (GOO-56)", async () => {
+        await expect(appeler(payloadValide, referent({ role: ROLES.TRANSPORTER }))).rejects.toThrow(
+            UnauthorizedException,
+        );
+    });
+
+    it("teste roles[] en plus de role pour les rôles décommissionnés", async () => {
+        await expect(
+            appeler(payloadValide, referent({ role: ROLES.ADMIN, roles: [ROLES.HEAD_CENTER] } as any)),
+        ).rejects.toThrow(UnauthorizedException);
+    });
+
     it("rejette le jeton d'un compte supprimé", async () => {
         await expect(appeler(payloadValide, referent({ deletedAt: new Date() }))).rejects.toThrow(
             UnauthorizedException,

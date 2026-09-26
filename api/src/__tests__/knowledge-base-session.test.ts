@@ -128,6 +128,30 @@ describe("GET /signin/token depuis la base de connaissance", () => {
 
     expect(res.status).toBe(401);
   });
+
+  // PL2 (GOO-56, lot P24) : isRevoked ne testait ni le statut INACTIVE ni les rôles décommissionnés,
+  // alors qu'un jeton de session encore valide (8h) permettait de renouveler le jeton de lecture KB.
+  it("refuse la session d'un référent désactivé (PL2)", async () => {
+    const referent = await createReferentHelper({ ...getNewReferentFixture(), status: "INACTIVE" } as any);
+
+    const res = await request(getAppHelper())
+      .get("/signin/token")
+      .set("Origin", config.KNOWLEDGEBASE_URL)
+      .set("Cookie", `jwt_ref=${signSession(referent)}`);
+
+    expect(res.status).toBe(401);
+  });
+
+  it("refuse la session d'un référent au rôle décommissionné", async () => {
+    const referent = await createReferentHelper({ ...getNewReferentFixture(), role: "transporter" } as any);
+
+    const res = await request(getAppHelper())
+      .get("/signin/token")
+      .set("Origin", config.KNOWLEDGEBASE_URL)
+      .set("Cookie", `jwt_ref=${signSession(referent)}`);
+
+    expect(res.status).toBe(401);
+  });
 });
 
 describe("POST /signin/logout depuis la base de connaissance", () => {

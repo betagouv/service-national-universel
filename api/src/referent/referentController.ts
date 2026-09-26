@@ -113,6 +113,7 @@ import {
   PERMISSION_ACTIONS,
   ReferentStatus,
   isSubRoleAllowedForRole,
+  isDecommissionedRole,
   SUB_ROLE_GOD,
   SUB_ROLES_LIST,
   VISITOR_SUB_ROLES_LIST,
@@ -215,6 +216,9 @@ function cleanReferentData(referent) {
 
 // Lot C de l'audit du 21/09/2026 : quota par IP sur les routes publiques d'auth.
 const referentSigninLimiter = signinRateLimiter();
+
+// GOO-56 (P24) : PM27, quota par compte appelant sur l'invitation (envoi d'email officiel).
+const referentInviteLimiter = userRateLimiter({ prefix: "referent-invite", windowMs: 60 * 60 * 1000, limit: 30 });
 
 router.post("/signin", referentSigninLimiter, requireJsonBody, (req, res) => ReferentAuth.signin(req, res));
 router.post("/signin-2fa", referentSigninLimiter, requireJsonBody, (req, res) => ReferentAuth.signin2FA(req, res));
@@ -331,6 +335,7 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
 router.post(
   "/signup_invite/:template",
   authMiddleware(["referent"]),
+  referentInviteLimiter,
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.CREATE, ignorePolicy: true }]),
   async (req: UserRequest, res: Response) => {
     try {
@@ -370,16 +375,17 @@ router.post(
 
       if (!isSubRoleAllowedForRole(value.role, value.subRole)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+      // Rôle décommissionné (GOO-56, P24, audit du 25/09/2026) : plus aucune création via ce
+      // parcours, ADMIN compris (superset du blocage CLE historique, H17).
+      if (isDecommissionedRole({ role: value.role })) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       if (!(await isInvitationInUserScope(req.user, value))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-      // CLE (H17) : ce parcours générique ne doit plus créer de compte ADMINISTRATEUR_CLE ni REFERENT_CLASSE.
-      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(value.role)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-
-      const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
+      const { template, email, firstName, lastName, role, subRole, region, department, structureId, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
       const referentProperties: Partial<ReferentType> = { roles: [] };
       if (email) referentProperties.email = email.trim().toLowerCase();
       if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
@@ -417,12 +423,25 @@ router.post(
       await updateTutorNameInMissionsAndApplications(referent, req.user);
 
       const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
-      const fromName = `${req.user.firstName} ${req.user.lastName}`;
-      const toName = `${referent.firstName} ${referent.lastName}`;
+      const fromName = sanitizeEmailText(`${req.user.firstName} ${req.user.lastName}`);
+      const toName = sanitizeEmailText(`${referent.firstName} ${referent.lastName}`);
+      // PM27 : structureName vient de la structure en base, jamais du corps de la requête (texte
+      // libre recopié tel quel dans l'email officiel).
+      const structureNameFromDb = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
 
       await sendTemplate(template, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-        params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
+        params: {
+          cta,
+          cohesionCenterName,
+          structureName: structureNameFromDb,
+          // `department` est déjà borné à la liste officielle des départements par le schéma Joi
+          // (referentDepartmentSchema) : ce n'est pas du texte libre, contrairement à `region`.
+          region: sanitizeEmailText(region),
+          department,
+          fromName,
+          toName,
+        },
       });
 
       return res.status(200).send({ data: serializeReferent(referent), ok: true });
@@ -552,8 +571,9 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     // qu'un administrateur venait de couper (FM17, audit des fronts du 23/09/2026).
     if (referent.status === ReferentStatus.INACTIVE) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
-    // CLE (H17) : cette route non authentifiée ne doit plus pouvoir activer de compte ADMINISTRATEUR_CLE ni REFERENT_CLASSE.
-    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role!)) {
+    // Rôle décommissionné (GOO-56, P24) : cette route non authentifiée ne doit plus pouvoir activer
+    // de compte sur l'un de ces rôles (superset du blocage CLE historique, H17).
+    if (isDecommissionedRole(referent)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 

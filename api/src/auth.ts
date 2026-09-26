@@ -30,12 +30,11 @@ import {
   departmentToAcademy,
   DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS,
   DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS,
-  isAdminCle,
-  isReferentClasse,
   YOUNG_STATUS,
   ROLE_JEUNE,
   ROLES,
   ReferentStatus,
+  isDecommissionedRole,
   ERRORS as SNU_ERRORS,
 } from "snu-lib";
 
@@ -468,12 +467,11 @@ class Auth {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
       }
 
-      if (user.invitationToken && (isAdminCle(user) || isReferentClasse(user))) {
-        return res.status(200).send({
-          ok: true,
-          code: "VERIFICATION_REQUIRED",
-          redirect: `/verifier-mon-compte?token=${user.invitationToken}`,
-        });
+      // Rôle décommissionné (GOO-56, P24) : plus aucune session, quel que soit le statut du compte.
+      // Absorbe l'ancien verrou CLE (H17), qui ne visait qu'ADMINISTRATEUR_CLE/REFERENT_CLASSE et
+      // renvoyait en clair l'invitationToken par la branche VERIFICATION_REQUIRED, supprimée ici.
+      if (isReferent(user) && isDecommissionedRole(user)) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
       }
 
       const shouldUse2FA = async () => {
@@ -560,6 +558,10 @@ class Auth {
 
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       if (user.status === "DELETED" || (user as any).anonymized) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      // Rôle décommissionné (GOO-56, P24) : le code 2FA a pu être émis avant la décommission.
+      if (isReferent(user) && isDecommissionedRole(user)) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
+      }
       if (user.token2FA !== token_2fa) {
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
@@ -1007,7 +1009,9 @@ class Auth {
 
     try {
       const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
-      if (!user || user?.status === ReferentStatus.INACTIVE) return res.status(200).send({ ok: true });
+      // Rôle décommissionné (GOO-56, P24) : même réponse « neutre » que pour un compte désactivé,
+      // pour ne pas transformer cette route en oracle sur le rôle du compte (M66).
+      if (!user || user?.status === ReferentStatus.INACTIVE || (isReferent(user) && isDecommissionedRole(user))) return res.status(200).send({ ok: true });
 
       const token = await crypto.randomBytes(20).toString("hex");
       user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });

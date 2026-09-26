@@ -13,6 +13,8 @@ import {
 import { CohortType, MissionType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
 import { isBefore, isPast } from "date-fns";
 import { isCohortArchived, isCohortFullyArchived } from "./sessions";
+import { ReferentStatus } from "./constants/referentConstants";
+import { getUserRoles } from "./permissions/utils";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -149,6 +151,33 @@ const CENTER_ROLES = {
 
 const ROLES_LIST = Object.values(ROLES);
 export const REFERENT_AND_JEUNE_ROLES_LIST = [...ROLES_LIST, ROLE_JEUNE];
+
+/**
+ * Rôles décommissionnés (audit de production du 25/09/2026, lot P24, GOO-56) : plus aucun compte ne
+ * doit pouvoir être créé, invité, activé, réactivé ni authentifié avec l'un de ces rôles. DSNJ et
+ * INJEP sont explicitement conservés par la même décision.
+ */
+const DECOMMISSIONED_ROLES: string[] = [
+  ROLES.HEAD_CENTER,
+  ROLES.HEAD_CENTER_ADJOINT,
+  ROLES.REFERENT_CLASSE,
+  ROLES.ADMINISTRATEUR_CLE,
+  ROLES.REFERENT_SANITAIRE,
+  ROLES.TRANSPORTER,
+  ROLES.VISITOR,
+];
+
+/**
+ * Teste `role` ET `roles[]` : `getUserRoles` (utilisé par `getAcl`) fait primer `roles[]` sur `role`
+ * quand il est renseigné, un compte pourrait donc rester authentifiable via `role` seul sinon.
+ */
+function isDecommissionedRole(user?: Partial<Pick<ReferentType, "role" | "roles">> | null): boolean {
+  if (!user) return false;
+  return getUserRoles(user).some((role) => DECOMMISSIONED_ROLES.includes(role));
+}
+
+/** Rôles qu'un parcours de création ou d'invitation peut encore attribuer. */
+const ASSIGNABLE_ROLES_LIST = ROLES_LIST.filter((role) => !DECOMMISSIONED_ROLES.includes(role));
 const SUB_ROLES_LIST = Object.values(SUB_ROLES);
 const SUPPORT_ROLES_LIST = Object.keys(SUPPORT_ROLES);
 const VISITOR_SUB_ROLES_LIST = Object.keys(VISITOR_SUBROLES);
@@ -209,6 +238,9 @@ const sameGeography = (actor, target) => {
 const referentInSameGeography = (actor, target) => isReferentRegDep(actor) && sameGeography(actor, target);
 
 function canInviteUser(actorRole, targetRole) {
+  // Rôle décommissionné (GOO-56, P24) : plus aucun acteur ne peut en attribuer un, ADMIN compris.
+  if (isDecommissionedRole({ role: targetRole })) return false;
+
   // Admins can invite any user
   if (actorRole === ROLES.ADMIN) return true;
 
@@ -397,6 +429,18 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
   const isActorAdmin = isAdmin(actor);
   const isStructureTeamMember = isResponsibleOrSupervisor(actor);
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
+
+  // Rôle décommissionné (GOO-56, P24) : ni attribution ni réactivation, ADMIN compris. Un compte déjà
+  // sur l'un de ces rôles reste modifiable pour le reste (P25 gère leur retrait).
+  const isRoleAttributionToDecommissioned = !withoutChangingRole && isDecommissionedRole({ role: targetRoleAfterUpdate });
+  const isReactivationOfDecommissioned =
+    originalTarget.status === ReferentStatus.INACTIVE &&
+    !!modifiedTarget?.status &&
+    modifiedTarget.status !== ReferentStatus.INACTIVE &&
+    isDecommissionedRole({ role: targetRoleAfterUpdate });
+  if (isRoleAttributionToDecommissioned || isReactivationOfDecommissioned) {
+    return false;
+  }
 
   // Seul les admins peuvent changer les roles des utilisateurs
   if (!isActorAdmin && modifiedTarget?.role && modifiedTarget.role !== originalTarget.role) {
@@ -1370,6 +1414,9 @@ export {
   ROLES,
   SUB_ROLES,
   ROLES_LIST,
+  DECOMMISSIONED_ROLES,
+  ASSIGNABLE_ROLES_LIST,
+  isDecommissionedRole,
   SUB_ROLES_LIST,
   SUPPORT_ROLES,
   SUPPORT_ROLES_LIST,

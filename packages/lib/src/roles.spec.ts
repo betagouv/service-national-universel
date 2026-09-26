@@ -1,5 +1,20 @@
 import { UserDto } from "./dto";
-import { canSigninAs, getYoungFieldsHiddenFrom, omitYoungFields, ROLES, SUB_ROLE_GOD, YOUNG_HEALTH_FIELDS, YOUNG_IDENTITY_FILE_FIELDS } from "./roles";
+import { ReferentStatus } from "./constants/referentConstants";
+import {
+  ASSIGNABLE_ROLES_LIST,
+  canInviteUser,
+  canSigninAs,
+  canUpdateReferent,
+  DECOMMISSIONED_ROLES,
+  getYoungFieldsHiddenFrom,
+  isDecommissionedRole,
+  omitYoungFields,
+  ROLES,
+  ROLES_LIST,
+  SUB_ROLE_GOD,
+  YOUNG_HEALTH_FIELDS,
+  YOUNG_IDENTITY_FILE_FIELDS,
+} from "./roles";
 
 describe("canSigninAs function", () => {
   it("should return true if actor is admin and target is not god", () => {
@@ -51,6 +66,69 @@ describe("helpers d'administration CLE devenus inutilisés", () => {
     expect(roles).not.toHaveProperty("canWithdrawClasse");
     expect(roles).not.toHaveProperty("canNotifyAdminCleForVerif");
     expect(roles).not.toHaveProperty("canUpdateReferentClasse");
+  });
+});
+
+describe("rôles décommissionnés (GOO-56, lot P24)", () => {
+  it("liste exactement les rôles décommissionnés décidés le 25/09/2026", () => {
+    expect(new Set(DECOMMISSIONED_ROLES)).toEqual(
+      new Set([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_SANITAIRE, ROLES.TRANSPORTER, ROLES.VISITOR]),
+    );
+    // DSNJ et INJEP sont explicitement conservés par la décision du 25/09.
+    expect(DECOMMISSIONED_ROLES).not.toContain(ROLES.DSNJ);
+    expect(DECOMMISSIONED_ROLES).not.toContain(ROLES.INJEP);
+  });
+
+  it("isDecommissionedRole teste role ET roles[] (getAcl fait primer roles[])", () => {
+    expect(isDecommissionedRole({ role: ROLES.HEAD_CENTER })).toBe(true);
+    expect(isDecommissionedRole({ role: ROLES.ADMIN })).toBe(false);
+    // roles[] prime sur role : un compte avec role="admin" mais roles=["transporter"] reste décommissionné.
+    expect(isDecommissionedRole({ role: ROLES.ADMIN, roles: [ROLES.TRANSPORTER] })).toBe(true);
+    expect(isDecommissionedRole(undefined)).toBe(false);
+    expect(isDecommissionedRole(null)).toBe(false);
+  });
+
+  it("ASSIGNABLE_ROLES_LIST exclut les rôles décommissionnés", () => {
+    for (const role of DECOMMISSIONED_ROLES) {
+      expect(ASSIGNABLE_ROLES_LIST).not.toContain(role);
+    }
+    expect(ASSIGNABLE_ROLES_LIST).toContain(ROLES.ADMIN);
+    expect(ASSIGNABLE_ROLES_LIST.length).toBe(ROLES_LIST.length - DECOMMISSIONED_ROLES.length);
+  });
+
+  it("canInviteUser refuse toujours un rôle décommissionné, même pour un ADMIN", () => {
+    for (const role of DECOMMISSIONED_ROLES) {
+      expect(canInviteUser(ROLES.ADMIN, role)).toBe(false);
+      expect(canInviteUser(ROLES.REFERENT_REGION, role)).toBe(false);
+      expect(canInviteUser(ROLES.REFERENT_DEPARTMENT, role)).toBe(false);
+    }
+  });
+
+  it("canInviteUser garde son comportement pour les rôles toujours attribuables", () => {
+    expect(canInviteUser(ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT)).toBe(true);
+    expect(canInviteUser(ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT)).toBe(true);
+    expect(canInviteUser(ROLES.RESPONSIBLE, ROLES.RESPONSIBLE)).toBe(true);
+  });
+
+  it("canUpdateReferent refuse à un ADMIN d'attribuer un rôle décommissionné à un référent", () => {
+    const actor = { _id: "actor", role: ROLES.ADMIN, department: [] } as unknown as UserDto;
+    const originalTarget = { _id: "target", role: ROLES.REFERENT_DEPARTMENT, status: ReferentStatus.ACTIVE, department: ["Paris"] } as any;
+    const modifiedTarget = { role: ROLES.HEAD_CENTER } as any;
+    expect(canUpdateReferent({ actor, originalTarget, modifiedTarget, structure: null })).toBe(false);
+  });
+
+  it("canUpdateReferent refuse à un ADMIN de réactiver un compte au rôle décommissionné", () => {
+    const actor = { _id: "actor", role: ROLES.ADMIN, department: [] } as unknown as UserDto;
+    const originalTarget = { _id: "target", role: ROLES.TRANSPORTER, status: ReferentStatus.INACTIVE } as any;
+    const modifiedTarget = { status: ReferentStatus.ACTIVE } as any;
+    expect(canUpdateReferent({ actor, originalTarget, modifiedTarget, structure: null })).toBe(false);
+  });
+
+  it("canUpdateReferent laisse un ADMIN modifier un compte déjà décommissionné sans changer rôle ni statut", () => {
+    const actor = { _id: "actor", role: ROLES.ADMIN, department: [] } as unknown as UserDto;
+    const originalTarget = { _id: "target", role: ROLES.HEAD_CENTER, status: ReferentStatus.ACTIVE } as any;
+    const modifiedTarget = { phone: "0600000000" } as any;
+    expect(canUpdateReferent({ actor, originalTarget, modifiedTarget, structure: null })).toBe(true);
   });
 });
 

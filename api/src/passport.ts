@@ -5,7 +5,7 @@ import { Strategy as JwtStrategy, ExtractJwt, VerifiedCallback } from "passport-
 import { Model } from "mongoose";
 import Joi from "joi";
 
-import { ROLES, ROLE_JEUNE, ReferentStatus } from "snu-lib";
+import { ROLES, ROLE_JEUNE, ReferentStatus, isDecommissionedRole } from "snu-lib";
 
 import { YoungModel, ReferentModel } from "./models";
 import { checkJwtSigninVersion } from "./jwt-options";
@@ -56,6 +56,9 @@ async function validateUser(userModel: Model<any>, jwtPayload: JwtPayload, done:
       // Compte référent désactivé : la connexion le refuse déjà, mais un JWT émis avant la
       // désactivation restait valable jusqu'à son expiration (GOO-5).
       if (userModel === ReferentModel && user.status === ReferentStatus.INACTIVE) return done(null, false);
+      // Rôle décommissionné (GOO-56, P24) : plus aucune session, même sur un JWT encore valide et
+      // un compte resté ACTIVE (recensement en cours avant P25).
+      if (userModel === ReferentModel && isDecommissionedRole(user)) return done(null, false);
 
       const passwordMatch = user.passwordChangedAt?.getTime() === value.passwordChangedAt?.getTime();
       const logoutMatch = user.lastLogoutAt?.getTime() === value.lastLogoutAt?.getTime();
