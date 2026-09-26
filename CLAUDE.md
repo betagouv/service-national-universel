@@ -85,8 +85,8 @@ Le chemin de `snu-lib` doit contenir le nom du worktree.
   décrivent des failles exploitables en production. Seules les notes par lot
   vont dans `api/docs/`, et elles décrivent ce qui est **corrigé**.
 - Un rapport d'audit (et tout document dérivé : lots de PR, tickets, synthèses)
-  s'écrit directement dans `$HOME/snu-audit-reports/<date>-<sujet>/`, hors de
-  tout worktree. Le worktree ne garde qu'une copie locale de travail, jetable :
+  s'écrit directement dans un emplacement privé hors du dépôt, jamais dans le
+  worktree : celui-ci ne garde qu'une copie locale de travail, jetable.
   `git worktree prune`, la suppression de `.claude/worktrees/` ou
   `ExitWorktree` peuvent le faire disparaître sans préavis (voir GOO-94).
 - Avant d'affirmer qu'un constat est réel, relire le code concerné pour le
