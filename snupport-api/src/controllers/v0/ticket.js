@@ -24,7 +24,10 @@ router.get(
     const query = { email: req.cleanQuery.email };
     const contact = await ContactModel.findOne(query);
     let tickets = [];
-    if (contact) tickets = await TicketModel.find({ contactId: contact._id });
+    // PM46 : un ticket créé sur cet email par un canal non authentifié (formulaire, IMAP) tant que
+    // la victime n'a pas confirmé elle-même son identité ne doit pas apparaître dans son propre
+    // espace d'échanges.
+    if (contact) tickets = await TicketModel.find({ contactId: contact._id, identityVerified: { $ne: false } });
     return res.status(200).send({ ok: true, data: tickets.map(serializeTicketForContact) });
   }
 );
