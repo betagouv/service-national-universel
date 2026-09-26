@@ -244,6 +244,14 @@ const Schema = new mongoose.Schema({
     },
   },
   notes: [{ content: { type: String }, createdAt: { type: Date, default: Date.now }, authorName: { type: String } }],
+  identityVerified: {
+    type: Boolean,
+    default: true,
+    documentation: {
+      description:
+        "Faux si le ticket a été créé sur l'email d'un contact déjà connu via un canal non authentifié (formulaire public, IMAP) : la victime n'a pas encore confirmé elle-même son identité (PM46, PM48)",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

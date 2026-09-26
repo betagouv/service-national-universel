@@ -117,6 +117,29 @@ describe("POST /v0/message — formulaire public (M91)", () => {
   });
 });
 
+// PM46 : le formulaire public n'authentifie jamais l'email saisi. Un ticket créé sur l'email d'un
+// contact déjà connu (référent, admin, jeune) ne doit pas apparaître comme un message venant
+// réellement de la victime tant qu'elle n'a pas confirmé — le ticket est marqué identityVerified:false,
+// exclu ensuite de GET /v0/ticket?email= (v0/ticket.js).
+describe("POST /v0/message — identité non vérifiée du formulaire public (PM46)", () => {
+  it("marque le ticket créé sur l'email d'un contact déjà connu comme identité non vérifiée", async () => {
+    ContactModel.findOne.mockResolvedValue(EXISTING);
+
+    await request(app).post("/v0/message").send(formBody());
+
+    expect(TicketModel.create.mock.calls[0][0]).toMatchObject({ identityVerified: false, contactId: EXISTING._id });
+  });
+
+  it("marque le ticket créé sur un email jamais vu comme identité vérifiée (rien à usurper)", async () => {
+    ContactModel.findOne.mockResolvedValue(null);
+
+    await request(app).post("/v0/message").send(formBody());
+
+    expect(TicketModel.create.mock.calls[0][0]).toMatchObject({ identityVerified: true });
+    expect(ContactModel.create).toHaveBeenCalled();
+  });
+});
+
 describe("POST /v0/message — routes authentifiées", () => {
   it("met à jour la fiche du contact de la session", async () => {
     ContactModel.findOneAndUpdate.mockResolvedValue(EXISTING);
@@ -127,6 +150,18 @@ describe("POST /v0/message — routes authentifiées", () => {
 
     expect(res.status).toBe(200);
     expect(ContactModel.findOneAndUpdate).toHaveBeenCalled();
+  });
+
+  // PM52 : contrairement au formulaire anonyme, une source authentifiée (PLATFORM) transmet
+  // l'identité réelle de la session — l'accusé de réception peut donc continuer à citer le message.
+  it("garde le texte du message dans l'accusé de réception pour une source authentifiée", async () => {
+    ContactModel.findOneAndUpdate.mockResolvedValue(EXISTING);
+
+    await request(app)
+      .post("/v0/message")
+      .send(formBody({ source: "PLATFORM", email: "victime@example.com" }));
+
+    expect(sendNotif.mock.calls[0][0].message).toContain("Bonjour");
   });
 
   it("refuse un message sur le ticket d'un autre contact", async () => {
@@ -157,7 +192,7 @@ describe("POST /v0/message — routes authentifiées", () => {
 });
 
 describe("POST /v0/message — contenu (M92) et réponse (M94)", () => {
-  it("échappe le HTML saisi, dans le message stocké comme dans l'email d'accusé de réception", async () => {
+  it("échappe le HTML saisi dans le message stocké", async () => {
     ContactModel.findOne.mockResolvedValue(null);
 
     await request(app)
@@ -167,7 +202,18 @@ describe("POST /v0/message — contenu (M92) et réponse (M94)", () => {
     const stored = MessageModel.create.mock.calls[0][0].text;
     expect(stored).not.toMatch(/<script|<img/);
     expect(stored).toContain("&lt;script&gt;");
-    expect(sendNotif.mock.calls[0][0].message).not.toMatch(/<script|<img/);
+  });
+
+  // PM52 : le canal FORM n'est jamais authentifié — l'accusé de réception officiel ne doit plus
+  // recopier le texte choisi par l'expéditeur (qu'il soit malveillant ou non).
+  it("ne recopie pas le texte de l'expéditeur dans l'accusé de réception du formulaire anonyme", async () => {
+    ContactModel.findOne.mockResolvedValue(null);
+
+    await request(app)
+      .post("/v0/message")
+      .send(formBody({ message: '<script>alert(1)</script><img src=x onerror="alert(1)">' }));
+
+    expect(sendNotif.mock.calls[0][0].message).toBeUndefined();
   });
 
   it("ne renvoie ni notes internes, ni brouillon, ni email d'agent", async () => {

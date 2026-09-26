@@ -9,6 +9,7 @@ const logger = require("morgan");
 const passport = require("passport");
 const { errorHandler } = require("./middlewares/errorHandler");
 const { validationErrorHandler } = require("./middlewares/validation");
+const { applyJsonBodyParser } = require("./middlewares/httpHardening");
 require("./mongo");
 require("./imap");
 require("./utils/ventilation");
@@ -30,7 +31,7 @@ const origin = [config.SNUPPORT_URL_KB, config.SNUPPORT_URL_ADMIN];
 if (config.ENVIRONMENT === "development") {
   origin.push(config.KNOWLEDGE_BASE_PUBLIC_URL);
 }
-app.use(express.json({ limit: "10mb" }));
+applyJsonBodyParser(app);
 app.use(
   cors({
     credentials: true,
@@ -38,7 +39,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage"],
   })
 );
-app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
 // Pas de parseur urlencoded : aucun client n'en envoie, et c'est le corps qu'un formulaire HTML
 // d'un autre sous-domaine peut poster sans preflight (CSRF, FL11).

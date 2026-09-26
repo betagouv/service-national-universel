@@ -13,6 +13,7 @@ const { weekendRanges, isDateInRange } = require("../../utils/email");
 const { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_SOURCE, SCHEMA_ATTACHMENT_PATH } = require("../../schemas");
 const { plainTextToMessageHtml } = require("../../utils/messageHtml");
 const { serializeTicketForContact, serializeMessageForContact } = require("../../utils/contactTicketSerializer");
+const { resolveUnverifiedContact } = require("../../utils/contactVerification");
 
 const { sendTemplate } = require("../../brevo");
 
@@ -82,11 +83,23 @@ router.post(
     const formatedMessage = plainTextToMessageHtml(message);
     if (isAnonymousForm && ticketId) return res.status(403).send({ ok: false, code: OPERATION_UNAUTHORIZED });
 
-    let user = isAnonymousForm
-      ? await ContactModel.findOne({ email: email.toLowerCase() })
-      : await ContactModel.findOneAndUpdate({ email: email.toLowerCase() }, { email: email.toLowerCase(), firstName, lastName, attributes: filterAttributes });
-    if (!user) user = await AgentModel.findOne({ email: email.toLowerCase() });
-    if (!user) user = await ContactModel.create({ email: email.toLowerCase(), firstName, lastName, attributes: filterAttributes });
+    // PM46 : le formulaire public n'authentifie jamais l'email saisi. On ne réécrit ni ne remplace
+    // la fiche existante, et si elle appartient déjà à un contact connu (référent, admin, jeune),
+    // le ticket créé plus bas est marqué "identité non vérifiée" (identityVerified=false).
+    let user;
+    let identityVerified = true;
+    if (isAnonymousForm) {
+      ({ identity: user, identityVerified } = await resolveUnverifiedContact({
+        ContactModel,
+        AgentModel,
+        email,
+        createAttrs: { firstName, lastName, attributes: filterAttributes },
+      }));
+    } else {
+      user = await ContactModel.findOneAndUpdate({ email: email.toLowerCase() }, { email: email.toLowerCase(), firstName, lastName, attributes: filterAttributes });
+      if (!user) user = await AgentModel.findOne({ email: email.toLowerCase() });
+      if (!user) user = await ContactModel.create({ email: email.toLowerCase(), firstName, lastName, attributes: filterAttributes });
+    }
 
     let ticket = ticketId ? await TicketModel.findById(ticketId) : null;
     // Un message n'est ajouté qu'au ticket de son auteur : l'api v1 le vérifie déjà, c'est la seconde barrière.
@@ -121,11 +134,14 @@ router.post(
         textMessage: [message],
         createdHourAt: new Date().getHours(),
         createdDayAt: weekday[new Date().getDay()],
+        identityVerified,
       });
 
       ticket = await matchVentilationRule(ticket);
 
-      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: formatedMessage });
+      // PM52 : le formulaire public n'est jamais authentifié — l'accusé de réception officiel ne
+      // doit plus recopier le texte choisi par l'expéditeur.
+      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: isAnonymousForm ? undefined : formatedMessage });
 
       if (isDateInRange(new Date(), weekendRanges)) {
         const templateId = SENDINBLUE_TEMPLATES.SNUPPORT_CLOSED;

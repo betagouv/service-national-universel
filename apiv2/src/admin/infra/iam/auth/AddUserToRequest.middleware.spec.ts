@@ -9,13 +9,15 @@ import { UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ClsService } from "nestjs-cls";
-import { ReferentStatus, ROLES } from "snu-lib";
+import { FeatureFlagName, ReferentStatus, ROLES } from "snu-lib";
 
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { PermissionService } from "@auth/core/Permission.service";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 import { AddUserToRequestMiddleware, lireCookie } from "./AddUserToRequest.middleware";
 import { AuthProvider } from "./Auth.provider";
@@ -24,6 +26,8 @@ const LOGOUT = new Date("2026-09-20T10:00:00.000Z");
 const CHANGEMENT_MDP = new Date("2026-09-18T08:30:00.000Z");
 const ADMIN_URL = "https://admin.snu.gouv.fr";
 const configService = { getOrThrow: (cle: string) => ({ "urls.admin": ADMIN_URL })[cle] };
+const featureFlagGateway = { findByName: jest.fn().mockResolvedValue(null) };
+const clockGateway = { now: () => new Date("2026-09-26T10:00:00.000Z") };
 
 describe("AddUserToRequestMiddleware - validité de la session", () => {
     let middleware: AddUserToRequestMiddleware;
@@ -34,6 +38,7 @@ describe("AddUserToRequestMiddleware - validité de la session", () => {
     beforeEach(async () => {
         jest.clearAllMocks();
         permissionService.getAcl.mockResolvedValue([]);
+        featureFlagGateway.findByName.mockResolvedValue(null);
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 AddUserToRequestMiddleware,
@@ -42,6 +47,8 @@ describe("AddUserToRequestMiddleware - validité de la session", () => {
                 { provide: PermissionService, useValue: permissionService },
                 { provide: ClsService, useValue: { set: jest.fn() } },
                 { provide: ConfigService, useValue: configService },
+                { provide: FeatureFlagGateway, useValue: featureFlagGateway },
+                { provide: ClockGateway, useValue: clockGateway },
             ],
         }).compile();
 
@@ -159,6 +166,55 @@ describe("AddUserToRequestMiddleware - validité de la session", () => {
         expect(referentGateway.findById).not.toHaveBeenCalled();
     });
 
+    describe("verrouillage temporaire de l'accès (ADMIN_ACCESS_RESTRICTED)", () => {
+        const AUTORISE = "6600000000000000000000aa";
+        const HORS_LISTE = "6600000000000000000000bb";
+        const verrouillage = { name: FeatureFlagName.ADMIN_ACCESS_RESTRICTED, description: "", enabled: true, allowedReferentIds: [AUTORISE] };
+
+        it("interroge le flag de verrouillage", async () => {
+            await appeler(payloadValide, referent());
+            expect(featureFlagGateway.findByName).toHaveBeenCalledWith(FeatureFlagName.ADMIN_ACCESS_RESTRICTED);
+        });
+
+        it("accepte un référent de la liste", async () => {
+            featureFlagGateway.findByName.mockResolvedValue(verrouillage);
+            const { next } = await appeler(payloadValide, referent());
+            expect(next).toHaveBeenCalled();
+        });
+
+        it("rejette un référent hors liste, session déjà ouverte comprise", async () => {
+            featureFlagGateway.findByName.mockResolvedValue(verrouillage);
+            await expect(
+                appeler({ ...payloadValide, id: HORS_LISTE }, referent({ id: HORS_LISTE } as Partial<ReferentModel>)),
+            ).rejects.toThrow(UnauthorizedException);
+        });
+
+        it("laisse passer tout le monde quand le flag est désactivé", async () => {
+            featureFlagGateway.findByName.mockResolvedValue({ ...verrouillage, enabled: false });
+            const { next } = await appeler(
+                { ...payloadValide, id: HORS_LISTE },
+                referent({ id: HORS_LISTE } as Partial<ReferentModel>),
+            );
+            expect(next).toHaveBeenCalled();
+        });
+
+        it("accepte l'impersonation d'un compte hors liste par un administrateur de la liste", async () => {
+            featureFlagGateway.findByName.mockResolvedValue(verrouillage);
+            const { next } = await appeler(
+                { ...payloadValide, id: HORS_LISTE, impersonateId: AUTORISE },
+                referent({ id: HORS_LISTE } as Partial<ReferentModel>),
+            );
+            expect(next).toHaveBeenCalled();
+        });
+
+        it("rejette l'impersonation par un administrateur hors liste", async () => {
+            featureFlagGateway.findByName.mockResolvedValue(verrouillage);
+            await expect(appeler({ ...payloadValide, impersonateId: HORS_LISTE }, referent())).rejects.toThrow(
+                UnauthorizedException,
+            );
+        });
+    });
+
     it("propage les erreurs techniques du dépôt au lieu de les masquer en 401", async () => {
         authProvider.parseToken.mockResolvedValue(payloadValide);
         referentGateway.findById.mockRejectedValue(new Error("mongo indisponible"));
@@ -179,6 +235,7 @@ describe("AddUserToRequestMiddleware - cookie de session admin", () => {
 
     beforeEach(async () => {
         jest.clearAllMocks();
+        featureFlagGateway.findByName.mockResolvedValue(null);
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 AddUserToRequestMiddleware,
@@ -187,6 +244,8 @@ describe("AddUserToRequestMiddleware - cookie de session admin", () => {
                 { provide: PermissionService, useValue: { getAcl: jest.fn().mockResolvedValue([]) } },
                 { provide: ClsService, useValue: { set: jest.fn() } },
                 { provide: ConfigService, useValue: configService },
+                { provide: FeatureFlagGateway, useValue: featureFlagGateway },
+                { provide: ClockGateway, useValue: clockGateway },
             ],
         }).compile();
 
@@ -235,6 +294,77 @@ describe("AddUserToRequestMiddleware - cookie de session admin", () => {
         await appeler({ authorization: "JWT ", origin: ADMIN_URL, cookie: "jwt_ref=jeton.du.cookie" });
 
         expect(authProvider.parseToken).toHaveBeenCalledWith("jeton.du.cookie");
+    });
+});
+
+/**
+ * PL7 (lot P27, audit du 25/09/2026) : l'apiv2 ne remontait jamais `_impersonateId` — une action
+ * faite sous impersonation référent sur /v2 restait attribuée au compte emprunté, sans trace de
+ * l'admin usurpateur.
+ */
+describe("AddUserToRequestMiddleware - traçabilité de l'impersonation (PL7, lot P27)", () => {
+    let middleware: AddUserToRequestMiddleware;
+    const authProvider = { parseToken: jest.fn() };
+    const referentGateway = { findById: jest.fn() };
+    const cls = { set: jest.fn() };
+
+    beforeEach(async () => {
+        jest.clearAllMocks();
+        featureFlagGateway.findByName.mockResolvedValue(null);
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                AddUserToRequestMiddleware,
+                { provide: AuthProvider, useValue: authProvider },
+                { provide: ReferentGateway, useValue: referentGateway },
+                { provide: PermissionService, useValue: { getAcl: jest.fn().mockResolvedValue([]) } },
+                { provide: ClsService, useValue: cls },
+                { provide: ConfigService, useValue: configService },
+                { provide: FeatureFlagGateway, useValue: featureFlagGateway },
+                { provide: ClockGateway, useValue: clockGateway },
+            ],
+        }).compile();
+
+        middleware = module.get(AddUserToRequestMiddleware);
+        referentGateway.findById.mockResolvedValue({
+            id: "6600000000000000000000aa",
+            role: ROLES.REFERENT_DEPARTMENT,
+            status: ReferentStatus.ACTIVE,
+            metadata: {},
+        } as unknown as ReferentModel);
+    });
+
+    const req = () => ({ headers: { authorization: "JWT un.jeton.signe" } }) as unknown as CustomRequest;
+
+    it("propage impersonateId sur req.user et dans le contexte CLS", async () => {
+        authProvider.parseToken.mockResolvedValue({
+            id: "6600000000000000000000aa",
+            __v: "0",
+            lastLogoutAt: null,
+            passwordChangedAt: null,
+            impersonateId: "6600000000000000000000bb",
+        });
+        const requete = req();
+        const next = jest.fn();
+
+        await middleware.use(requete, {} as any, next);
+
+        expect(next).toHaveBeenCalled();
+        expect(requete.user.impersonateId).toBe("6600000000000000000000bb");
+        expect(cls.set).toHaveBeenCalledWith("user", expect.objectContaining({ impersonateId: "6600000000000000000000bb" }));
+    });
+
+    it("laisse impersonateId absent hors impersonation", async () => {
+        authProvider.parseToken.mockResolvedValue({
+            id: "6600000000000000000000aa",
+            __v: "0",
+            lastLogoutAt: null,
+            passwordChangedAt: null,
+        });
+        const requete = req();
+
+        await middleware.use(requete, {} as any, jest.fn());
+
+        expect(requete.user.impersonateId).toBeUndefined();
     });
 });
 

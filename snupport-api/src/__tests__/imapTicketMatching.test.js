@@ -79,6 +79,7 @@ jest.mock("../models/contact", () => ({
 jest.mock("../models/organisation", () => ({ findOne: jest.fn() }));
 
 const { addMessage } = require("../imap");
+const { sendNotif } = require("../utils");
 
 const VICTIM = "victime@example.com";
 const ATTACKER = "attaquant@evil.tld";
@@ -190,5 +191,43 @@ describe("M97 — HTML d'un mail entrant", () => {
     const stored = mockDb.messages.find((m) => m.messageId === "<xss@evil.tld>");
     expect(stored.text).toContain("Bonjour");
     expect(stored.text).not.toMatch(/script|onclick|onerror|javascript:/i);
+  });
+});
+
+describe("PM46/PM48 — identité de l'expéditeur d'un mail entrant jamais authentifiée", () => {
+  it("marque le nouveau ticket comme identité non vérifiée si l'expéditeur usurpe l'email d'un contact déjà connu", async () => {
+    seedVictimTicket();
+
+    await addMessage(attackerMail({ fromAddress: VICTIM, fromName: "Alice", messageId: "<usurpation@evil.tld>", subject: "Nouvelle demande sans rapport", references: [] }));
+
+    const newTicket = mockDb.tickets.find((t) => t._id !== "ticket_victime");
+    expect(newTicket).toBeDefined();
+    expect(newTicket.identityVerified).toBe(false);
+  });
+
+  it("marque le nouveau ticket comme identité vérifiée si l'expéditeur n'usurpe aucun contact connu", async () => {
+    seedVictimTicket();
+
+    await addMessage(attackerMail({ messageId: "<nouveau-contact@evil.tld>", subject: "Nouvelle demande sans rapport", references: [] }));
+
+    const newTicket = mockDb.tickets.find((t) => t._id !== "ticket_victime");
+    expect(newTicket.identityVerified).toBe(true);
+  });
+
+  it("n'initialise plus ticket.copyRecipient depuis les To/Cc du premier mail entrant", async () => {
+    seedVictimTicket();
+
+    await addMessage(attackerMail({ messageId: "<cc-init@evil.tld>", subject: "Nouvelle demande sans rapport", references: [], copyRecipient: ["relais@evil.tld"] }));
+
+    const newTicket = mockDb.tickets.find((t) => t._id !== "ticket_victime");
+    expect(newTicket.copyRecipient).toBeUndefined();
+  });
+
+  it("ne recopie pas le texte du mail entrant dans l'accusé de réception (canal toujours non authentifié)", async () => {
+    seedVictimTicket();
+
+    await addMessage(attackerMail({ messageId: "<accuse@evil.tld>", subject: "Nouvelle demande sans rapport", references: [], text: "Contenu choisi par l'expéditeur" }));
+
+    expect(sendNotif.mock.calls.at(-1)[0].message).toBeUndefined();
   });
 });

@@ -71,9 +71,9 @@ const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment
             content: buffer.toString("base64"),
             name: attachment.name,
           });
-        }),
+        })
       );
-    } else if (messageHistory !== null && messageHistory !== undefined) mailTicket = await getLastAndSpecificIdMessageFromTicket(lastMessageId, messageHistory);
+    } else if (messageHistory !== null && messageHistory !== undefined) mailTicket = await getLastAndSpecificIdMessageFromTicket(ticket._id, lastMessageId, messageHistory);
     else mailTicket = await getLastMessageFromTicket(lastMessageId);
 
     const formatMessageForReading = (formattedMessage) => {
@@ -205,9 +205,12 @@ const getLastMessageFromTicket = async (lastMessageId) => {
   }
 };
 
-const getLastAndSpecificIdMessageFromTicket = async (lastMessageId, specificMessageId) => {
+// Défense en profondeur (PH25) : specificMessageId est déjà vérifié appartenir au ticket par
+// l'appelant (message.js), mais on le revérifie ici au cas où une future route oublierait ce
+// contrôle avant d'appeler sendEmailWithConditions.
+const getLastAndSpecificIdMessageFromTicket = async (ticketId, lastMessageId, specificMessageId) => {
   try {
-    const specificMessage = await MessageModel.findById(specificMessageId);
+    const specificMessage = await MessageModel.findOne({ _id: specificMessageId, ticketId });
     const lastMessage = await MessageModel.findById(lastMessageId);
     let mailMessages = "";
     mailMessages += `<strong> ${lastMessage.authorFirstName} - Assistance du Service national universel (SNU) <br>

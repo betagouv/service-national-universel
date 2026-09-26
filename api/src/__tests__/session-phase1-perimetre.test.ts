@@ -9,6 +9,8 @@ import { createSessionPhase1 } from "./helpers/sessionPhase1";
 import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import getNewCohortFixture from "./fixtures/cohort";
 import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
+import getNewYoungFixture from "./fixtures/young";
+import { createYoungHelper } from "./helpers/young";
 import { CohortModel, CohesionCenterModel } from "../models";
 
 jest.mock("../brevo", () => ({
@@ -97,6 +99,27 @@ describe("Sessions phase 1 — périmètre des référents (lot K1)", () => {
       const { session } = await createSession("m31-pdt");
       const res = await request(getAppHelper(referentHorsPerimetre())).get(`/session-phase1/${session._id}/plan-de-transport`);
       expect(res.status).toBe(403);
+    });
+  });
+
+  describe("PM14 — GET /:id/cohesion-center : liste d'attente cachée au volontaire", () => {
+    it("retire waitingList pour un volontaire de la session", async () => {
+      const { session, center } = await createSession("pm14-young");
+      await CohesionCenterModel.updateOne({ _id: center._id }, { $set: { waitingList: [{ _id: new ObjectId().toString() }] } });
+      const young = await createYoungHelper({ ...getNewYoungFixture(), sessionPhase1Id: session._id.toString() });
+
+      const res = await request(getAppHelper(young)).get(`/session-phase1/${session._id}/cohesion-center`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.waitingList).toBeUndefined();
+    });
+
+    it("laisse waitingList visible à un référent du périmètre", async () => {
+      const { session, center } = await createSession("pm14-referent");
+      await CohesionCenterModel.updateOne({ _id: center._id }, { $set: { waitingList: [{ _id: new ObjectId().toString() }] } });
+
+      const res = await request(getAppHelper(referentDuPerimetre())).get(`/session-phase1/${session._id}/cohesion-center`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.waitingList).toHaveLength(1);
     });
   });
 

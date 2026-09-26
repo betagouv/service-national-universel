@@ -1,0 +1,90 @@
+name: Snupport API - Run Tests
+
+inputs:
+  branch_name:
+    description: "Branch name"
+    required: true
+  CC_TEST_REPORTER_ID:
+    description: "CC_TEST_REPORTER_ID"
+    required: false
+    default: ""
+
+runs:
+  using: "composite"
+  steps:
+    - name: Git checkout
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ inputs.branch_name }}
+
+    - name: Use Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.17"
+
+    # Les runners self-hosted sont persistants : node_modules survit d'un job a l'autre.
+    # Quand il correspond deja au package-lock courant, restaurer l'archive depuis le cache
+    # GitHub (~305 Mo, plusieurs minutes) ne fait que reecrire a l'identique ce qui est
+    # deja sur le disque. Sur ubuntu-latest le temoin n'existe jamais, donc rien ne change.
+    - name: Detect usable node_modules
+      id: nm
+      shell: bash
+      run: |
+        H="${{ hashFiles('**/package-lock.json') }}"
+        if [ -f node_modules/.snu-lock ] && [ "$(cat node_modules/.snu-lock)" = "$H" ]; then
+          echo "fresh=true" >> "$GITHUB_OUTPUT"
+          echo "node_modules deja aligne sur package-lock : cache et npm ci ignores."
+        else
+          echo "fresh=false" >> "$GITHUB_OUTPUT"
+        fi
+
+    - uses: actions/cache@v4
+      id: cache-npm
+      # Sur runner self-hosted on n'utilise jamais le cache : ni restauration ni
+      # sauvegarde. node_modules persiste sur le disque entre les jobs, et le
+      # televersement de l'archive (~305 Mo) depasse la duree des tests eux-memes.
+      if: runner.environment == 'github-hosted' && steps.nm.outputs.fresh != 'true'
+      with:
+        path: |
+          apiv2/node_modules
+          node_modules
+          api/node_modules
+          app/node_modules
+          admin/node_modules
+          packages/ds/node_modules
+          packages/lib/node_modules
+          packages/log-redaction/node_modules
+          snupport-api/node_modules
+        key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+        restore-keys: |
+          ${{ runner.os }}-nodemodules-
+
+    - name: Install packages
+      if: steps.nm.outputs.fresh != 'true' && steps.cache-npm.outputs.cache-hit != 'true'
+      shell: bash
+      run: npm ci
+
+    # Le temoin permet au prochain job de ce runner de sauter cache et installation.
+    - name: Mark node_modules as matching package-lock
+      shell: bash
+      run: |
+        mkdir -p node_modules
+        echo "${{ hashFiles('**/package-lock.json') }}" > node_modules/.snu-lock
+
+    # snupport-api importe @snu/log-redaction (redaction avant envoi a Sentry, cf. src/sentry.js) :
+    # sans son dist a jour, les tests de redaction (PH18/PM36) passent a tort sur l'ancien
+    # comportement fige dans un dist perime.
+    - name: Build log-redaction
+      working-directory: packages/log-redaction
+      shell: bash
+      run: npm run build
+
+    - name: Lint code
+      working-directory: snupport-api
+      shell: bash
+      run: npm run lint
+
+    - name: Run tests
+      working-directory: snupport-api
+      shell: bash
+      run: npm run test

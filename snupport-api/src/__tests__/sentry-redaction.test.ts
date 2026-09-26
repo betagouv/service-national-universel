@@ -59,9 +59,31 @@ describe("initSentry", () => {
     // ce qui sert au debug est conservé
     expect(sent.request.method).toBe("POST");
     expect(sent.request.headers["user-agent"]).toBe("jest");
-    expect(sent.request.data.password).toBe(REDACTED);
-    expect(sent.request.data.email).toBe("a***@example.org");
+    // PH18/PM36 : request.data est supprimé entièrement, pas seulement redacté champ par champ.
+    expect(sent.request.data).toBeUndefined();
     expect(sent.user.id).toBe("64a0f1c2b3d4e5f60718293a");
+  });
+
+  it("PH18 : installe la même redaction comme hook beforeSendTransaction", () => {
+    initSentry({ use: jest.fn() });
+
+    const options = (init as jest.Mock).mock.calls[0][0];
+    expect(typeof options.beforeSendTransaction).toBe("function");
+
+    const sent = options.beforeSendTransaction({ request: { data: { password: PASSWORD_FIXTURE }, cookies: { jwtzamoud: JWT } } });
+    expect(sent.request.data).toBeUndefined();
+    expect(sent.request.cookies.jwtzamoud).toBe(REDACTED);
+  });
+
+  it("PM36 : limite Handlers.requestHandler() à method/url", () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { Handlers } = require("@sentry/node");
+    const requestHandlerSpy = jest.spyOn(Handlers, "requestHandler");
+
+    initSentry({ use: jest.fn() });
+
+    expect(requestHandlerSpy).toHaveBeenCalledWith({ request: ["method", "url"] });
+    requestHandlerSpy.mockRestore();
   });
 });
 

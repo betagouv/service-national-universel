@@ -19,6 +19,7 @@ const { getS3Path, getAttachmentFileName } = require("./utils/file");
 const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
 const { inspectAttachment } = require("./utils/attachments");
 const { sanitizeMessageHtml } = require("./utils/messageHtml");
+const { resolveUnverifiedContact } = require("./utils/contactVerification");
 
 const regex = /\[#(\w+)\]/i;
 
@@ -35,9 +36,14 @@ cron.schedule("*/30 * * * *", () => {
 
 async function addMessage(mail) {
   try {
-    // create contact if it doesnt exist yet
-    let contact = await ContactModel.findOne({ email: mail.fromAddress.toLowerCase() });
-    if (!contact) contact = await ContactModel.create({ firstName: mail.fromName, lastName: "", email: mail.fromAddress.toLowerCase() });
+    // Le From d'un mail entrant n'est jamais authentifié (ni SPF/DKIM vérifié) : rattacher
+    // silencieusement le ticket à la fiche d'un contact déjà connu permettrait d'usurper son
+    // identité (référent, admin, jeune) par le seul choix de l'adresse d'expédition (PM48).
+    const { identity: contact, identityVerified } = await resolveUnverifiedContact({
+      ContactModel,
+      email: mail.fromAddress,
+      createAttrs: { firstName: mail.fromName, lastName: "" },
+    });
 
     let ticket = null;
 
@@ -91,11 +97,16 @@ async function addMessage(mail) {
       obj.imapEmail = mail?.toAdress === "inscription@mail-support.snu.gouv.fr" ? "inscription@mail-support.snu.gouv.fr" : "contact@mail-support.snu.gouv.fr";
       obj.createdHourAt = new Date().getHours();
       obj.createdDayAt = weekday[new Date().getDay()];
+      obj.identityVerified = identityVerified;
 
-      if (mail.copyRecipient) obj.copyRecipient = mail.copyRecipient;
+      // Les To/Cc du premier mail entrant sont choisis par l'expéditeur, jamais authentifiés : les
+      // enregistrer ici en ferait des "participants connus du fil" pour toujours (ticketParticipants.js),
+      // capables de recevoir toutes les réponses futures et leurs pièces jointes déchiffrées (PM48).
       ticket = await TicketModel.create(obj);
       ticket = await matchVentilationRule(ticket);
-      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: mail.text, attachment: [] });
+      // Canal toujours non authentifié : l'accusé de réception officiel ne recopie plus le texte
+      // choisi par l'expéditeur (PM52).
+      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: undefined, attachment: [] });
     }
 
     // create message

@@ -1,4 +1,5 @@
 const FileType = require("file-type");
+const { hasAsfSignature } = require("snu-lib");
 
 // Types réellement attendus dans un ticket support : justificatifs, captures d'écran,
 // documents bureautiques. La liste est close et ne contient aucun format exécutable, ni
@@ -34,6 +35,11 @@ const ALLOWED_MIME_TYPES = [
 // qu'un navigateur exécuterait.
 async function inspectAttachment(buffer) {
   if (!Buffer.isBuffer(buffer) || buffer.length === 0) return { mime: null, accepted: false };
+  // PH24 : un ASF_Header_Object dont le champ de taille est forgé fait boucler indéfiniment
+  // FileType.fromBuffer (strtok3, file-type 16.5.4) — un timeout applicatif ne rendrait pas la
+  // main. Aucun format ASF n'est de toute façon accepté ici : on le refuse par sa signature
+  // avant tout appel à FileType.
+  if (hasAsfSignature(buffer)) return { mime: null, accepted: false };
   const detected = await FileType.fromBuffer(buffer);
   const mime = detected?.mime ?? null;
   return { mime, accepted: mime !== null && ALLOWED_MIME_TYPES.includes(mime) };

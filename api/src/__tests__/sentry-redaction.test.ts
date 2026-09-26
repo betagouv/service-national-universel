@@ -49,8 +49,9 @@ describe("redactSentryEvent", () => {
     expect(out.level).toBe("error");
     expect(out.request.method).toBe("POST");
     expect(out.request.headers["user-agent"]).toBe("jest");
-    expect(out.request.data.password).toBe(REDACTED);
-    expect(out.request.data.email).toBe("j***@example.org");
+    // PH18/PM36 : request.data est supprimé entièrement, pas seulement redacté champ par champ (le
+    // module ne peut pas reconnaître par nom de clé une PII métier sans nom reconnaissable).
+    expect(out.request.data).toBeUndefined();
     expect(out.request.url).toBe("https://api.snu.gouv.fr/contract/token/**********");
     expect(out.user.id).toBe("64a0f1c2b3d4e5f60718293a");
   });
@@ -77,6 +78,22 @@ describe("initSentry", () => {
     expect(typeof options.beforeSend).toBe("function");
 
     const sent = options.beforeSend({ request: { data: { password: PASSWORD_FIXTURE } } });
-    expect(sent.request.data.password).toBe(REDACTED);
+    expect(sent.request.data).toBeUndefined();
+  });
+
+  it("PH18 : installs the same redaction as a beforeSendTransaction hook, and drops the tracesSampleRate fallback", () => {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { initSentry } = require("../sentry");
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    const { init } = require("@sentry/node");
+
+    initSentry();
+
+    const options = (init as jest.Mock).mock.calls[0][0];
+    expect(typeof options.beforeSendTransaction).toBe("function");
+
+    const sent = options.beforeSendTransaction({ request: { data: { password: PASSWORD_FIXTURE }, cookies: { jwt_ref: "secret" } }, spans: [] });
+    expect(sent.request.data).toBeUndefined();
+    expect(sent.request.cookies.jwt_ref).toBe(REDACTED);
   });
 });

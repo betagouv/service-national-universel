@@ -12,6 +12,7 @@ import { checkJwtSigninVersion } from "./jwt-options";
 import { config } from "./config";
 import { capture } from "./sentry";
 import { isYoung } from "./utils";
+import { isReferentAccessAllowed } from "./featureFlag/adminAccessRestriction";
 
 interface JwtPayload {
   __v: string;
@@ -56,6 +57,9 @@ async function validateUser(userModel: Model<any>, jwtPayload: JwtPayload, done:
       // Compte référent désactivé : la connexion le refuse déjà, mais un JWT émis avant la
       // désactivation restait valable jusqu'à son expiration (GOO-5).
       if (userModel === ReferentModel && user.status === ReferentStatus.INACTIVE) return done(null, false);
+      // Verrouillage temporaire : coupe aussi les sessions ouvertes avant son activation, et le
+      // SSO support qui passe par cette session. En impersonation, l'administrateur réel est contrôlé.
+      if (userModel === ReferentModel && !(await isReferentAccessAllowed(user._id.toString(), value._impersonateId))) return done(null, false);
       // Rôle décommissionné (GOO-56, P24) : plus aucune session, même sur un JWT encore valide et
       // un compte resté ACTIVE (recensement en cours avant P25).
       if (userModel === ReferentModel && isDecommissionedRole(user)) return done(null, false);
@@ -66,7 +70,10 @@ async function validateUser(userModel: Model<any>, jwtPayload: JwtPayload, done:
       if (passwordMatch && logoutMatch && (!role || user.role === role)) {
         if (value._impersonateId) {
           user.impersonateId = value._impersonateId;
-          const impersonateUser = await userModel.findById(value._impersonateId);
+          // PL7 (lot P27) : l'usurpateur est toujours un référent (admin), même quand la cible
+          // impersonée est un jeune — chercher dans `userModel` (YoungModel dans ce cas) ne le
+          // trouvait jamais, et `impersonatedBy` restait vide : aucune trace de l'auteur réel.
+          const impersonateUser = await ReferentModel.findById(value._impersonateId);
           if (impersonateUser) {
             user.impersonatedBy = impersonateUser;
           }
