@@ -10,7 +10,7 @@ export type AuthTokenPayload = {
     __v?: string;
     lastLogoutAt?: string | Date | null;
     passwordChangedAt?: string | Date | null;
-    /** PL7 (lot P27) : identifiant de l'admin usurpateur, présent sous impersonation (v1). */
+    /** Administrateur réel quand la session est une impersonation (`signin_as` v1). */
     impersonateId?: string | null;
 };
 

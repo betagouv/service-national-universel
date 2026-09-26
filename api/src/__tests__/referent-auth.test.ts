@@ -1,11 +1,11 @@
 import request from "supertest";
-import { ROLES, DECOMMISSIONED_ROLES } from "snu-lib";
+import { ROLES, DECOMMISSIONED_ROLES, ERRORS as SNU_ERRORS, FeatureFlagName } from "snu-lib";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewStructureFixture from "./fixtures/structure";
 import { createReferentHelper, getReferentByIdHelper } from "./helpers/referent";
 import { dbConnect, dbClose } from "./helpers/db";
-import { ReferentModel, StructureModel } from "../models";
+import { FeatureFlagModel, ReferentModel, StructureModel } from "../models";
 import { fakerFR as faker } from "@faker-js/faker";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
@@ -82,6 +82,59 @@ describe("Referent", () => {
       const res = await request(getAppHelper()).post("/referent/signin-2fa").send({ email: referent.email, token_2fa: "123456", rememberMe: false });
       expect(res.status).toBe(401);
       expect(res.body.token).toBeUndefined();
+      expect(res.headers["set-cookie"]).toBeUndefined();
+    });
+  });
+  // Verrouillage temporaire : seuls les référents de `allowedReferentIds` peuvent se connecter.
+  describe("ADMIN_ACCESS_RESTRICTED à la connexion", () => {
+    const activerVerrouillage = (allowedReferentIds: string[]) =>
+      FeatureFlagModel.create({ name: FeatureFlagName.ADMIN_ACCESS_RESTRICTED, description: "verrouillage", enabled: true, allowedReferentIds });
+
+    afterEach(async () => {
+      await FeatureFlagModel.deleteMany({ name: FeatureFlagName.ADMIN_ACCESS_RESTRICTED });
+    });
+
+    it("refuse la connexion d'un référent hors liste, sans ouvrir de session", async () => {
+      const user = await createReferentHelper(getNewReferentFixture({ password: "bar", role: ROLES.ADMIN }));
+      await activerVerrouillage([]);
+
+      const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
+
+      expect(res.status).toBe(401);
+      expect(res.body.code).toBe(SNU_ERRORS.ADMIN_ACCESS_RESTRICTED);
+      expect(res.headers["set-cookie"]).toBeUndefined();
+    });
+
+    it("n'oppose pas le code de verrouillage à un mauvais mot de passe", async () => {
+      const user = await createReferentHelper(getNewReferentFixture({ password: "bar", role: ROLES.ADMIN }));
+      await activerVerrouillage([]);
+
+      const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "foo" });
+
+      expect(res.status).toBe(401);
+      expect(res.body.code).not.toBe(SNU_ERRORS.ADMIN_ACCESS_RESTRICTED);
+    });
+
+    it("laisse se connecter un référent de la liste", async () => {
+      const user = await createReferentHelper(getNewReferentFixture({ password: "bar", role: ROLES.ADMIN }));
+      await activerVerrouillage([user._id.toString()]);
+
+      const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+    });
+
+    it("refuse un code 2FA émis avant le verrouillage pour un référent hors liste", async () => {
+      const referent = await createReferentHelper(
+        getNewReferentFixture({ password: "bar", role: ROLES.ADMIN, token2FA: "123456", token2FAExpires: new Date(Date.now() + 60000), attempts2FA: 0 }),
+      );
+      await activerVerrouillage([]);
+
+      const res = await request(getAppHelper()).post("/referent/signin-2fa").send({ email: referent.email, token_2fa: "123456", rememberMe: false });
+
+      expect(res.status).toBe(401);
+      expect(res.body.code).toBe(SNU_ERRORS.ADMIN_ACCESS_RESTRICTED);
       expect(res.headers["set-cookie"]).toBeUndefined();
     });
   });

@@ -34,11 +34,11 @@ describe("JwtTokenService.parseToken — remontée de l'impersonateId", () => {
         expect(payload.impersonateId).toBe("6600000000000000000000bb");
     });
 
-    it("laisse impersonateId absent hors impersonation", async () => {
+    it("laisse impersonateId à null hors impersonation", async () => {
         jwtService.verifyAsync.mockResolvedValue({ _id: "6600000000000000000000aa", __v: "0" });
 
         const payload = await service.parseToken("un.jeton.signe");
 
-        expect(payload.impersonateId).toBeUndefined();
+        expect(payload.impersonateId).toBeNull();
     });
 });

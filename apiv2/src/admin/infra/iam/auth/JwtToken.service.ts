@@ -24,7 +24,7 @@ export class JwtTokenService implements AuthProvider {
                 lastLogoutAt: payload.lastLogoutAt,
                 passwordChangedAt: payload.passwordChangedAt,
                 // PL7 (lot P27) : remonté tel quel, pour que le middleware trace l'admin usurpateur.
-                impersonateId: payload._impersonateId,
+                impersonateId: payload._impersonateId ?? null,
             };
         } catch (error: any) {
             throw new TechnicalException(TechnicalExceptionType.UNAUTORIZED, error);

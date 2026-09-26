@@ -66,6 +66,28 @@ describe("Sécurité séjour / point de rassemblement / éligibilité — audit 
       expect(res.body.data.waitingList).toBeUndefined();
       expect(JSON.stringify(res.body.data)).not.toContain(waitingYoungId);
     });
+
+    it("PM34 : ne renvoie pas l'équipe d'encadrement (team, adjointsIds, sanitaryContactEmail) au jeune affecté", async () => {
+      const adjointId = new ObjectId().toString();
+      const session = await SessionPhase1Model.create(
+        getNewSessionPhase1Fixture({
+          team: [{ firstName: "Chef", lastName: "Centre", email: "chef-centre-pm34@example.org" }],
+          adjointsIds: [adjointId],
+          sanitaryContactEmail: "sanitaire-pm34@example.org",
+        } as any),
+      );
+      const young = await createYoungHelper(getNewYoungFixture({ sessionPhase1Id: session._id.toString() }));
+
+      const res = await request(await getAppHelperWithAcl(young, "young")).get(`/young/${young._id}/session`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.team).toBeUndefined();
+      expect(res.body.data.adjointsIds).toBeUndefined();
+      expect(res.body.data.sanitaryContactEmail).toBeUndefined();
+      expect(JSON.stringify(res.body.data)).not.toContain("chef-centre-pm34@example.org");
+      expect(JSON.stringify(res.body.data)).not.toContain("sanitaire-pm34@example.org");
+      expect(JSON.stringify(res.body.data)).not.toContain(adjointId);
+    });
   });
 
   describe("M56 — GET /young/:id/meeting-point", () => {

@@ -49,7 +49,10 @@ export const config = {
   APIV2_URL: _env(envStr, "APIV2_URL", "http://localhost:8086"),
   APP_URL: _env(envStr, "APP_URL", "http://localhost:8081"),
   ADMIN_URL: _env(envStr, "ADMIN_URL", "http://localhost:8082"),
-  SENTRY_TRACING_SAMPLE_RATE: _env(envFloat, "SENTRY_TRACING_SAMPLE_RATE", 1),
+  // PH18 (25/09/2026) : défaut abaissé de 1 à 0.01, aligné sur apiv2 et snupport-api — tant que la
+  // redaction des transactions n'était pas systématique (beforeSendTransaction, cf. sentry.js),
+  // échantillonner 100% des requêtes envoyait cookies, en-têtes et corps en clair sur chacune.
+  SENTRY_TRACING_SAMPLE_RATE: _env(envFloat, "SENTRY_TRACING_SAMPLE_RATE", 0.01),
   SENTRY_PROFILE_SAMPLE_RATE: _env(envFloat, "SENTRY_PROFILE_SAMPLE_RATE", 1),
   SENTRY_DEBUG_MODE: _env(envBool, "SENTRY_DEBUG_MODE", false),
   MONGO_URL: _env(envStr, "MONGO_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"),

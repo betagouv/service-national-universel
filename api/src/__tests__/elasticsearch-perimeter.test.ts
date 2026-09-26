@@ -143,7 +143,16 @@ beforeEach(() => {
   mockEsCalls.search.length = 0;
   setEsDocs({
     young: [youngDoc()],
-    lignebus: [{ _id: "ligne-1", busId: "BUS-1", cohort: "Juillet 2024", centerId: "center-1", meetingPointsIds: ["pdr-1"] }],
+    lignebus: [
+      {
+        _id: "ligne-1",
+        busId: "BUS-1",
+        cohort: "Juillet 2024",
+        centerId: "center-1",
+        meetingPointsIds: ["pdr-1"],
+        team: [{ _id: "convoyeur-1", firstName: "Convoy", lastName: "Eur", email: "convoyeur@example.org", phone: "0611111111" }],
+      },
+    ],
     pointderassemblement: [{ _id: "pdr-1", region: "Bretagne", department: "Finistère", name: "Gare de Brest" }],
     cohesioncenter: [{ _id: "center-1", name: "Centre de Brest", region: "Bretagne" }],
     application: [{ _id: "app-1", youngId: "6600000000000000000000aa", youngDepartment: "Finistère", youngEmail: "jean.dupont@example.org", status: "VALIDATED" }],
@@ -188,6 +197,71 @@ describe("H27 — POST /elasticsearch/young/by-session/:sessionId/:action", () =
   it("laisse passer un admin", async () => {
     const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
       .post(`/elasticsearch/young/by-session/${SESSION_ID}/search`)
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+  });
+});
+
+describe("PH7 — coordonnées des accompagnateurs de bus (team)", () => {
+  it("retire team de POST /elasticsearch/lignebus/search hors ADMIN", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Bretagne" } as any))
+      .post("/elasticsearch/lignebus/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(res.body)).not.toContain("convoyeur@example.org");
+  });
+
+  it("laisse team à un ADMIN sur POST /elasticsearch/lignebus/search", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/lignebus/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(res.body)).toContain("convoyeur@example.org");
+  });
+
+  it("retire team de POST /elasticsearch/lignebus/export hors ADMIN", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Bretagne" } as any))
+      .post("/elasticsearch/lignebus/export")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(JSON.stringify(res.body)).not.toContain("convoyeur@example.org");
+  });
+});
+
+describe("PH10 — POST /elasticsearch/young/in-bus/:ligneId/:action et by-point-de-rassemblement", () => {
+  it("borne un référent départemental à son département sur /in-bus/:ligneId/search", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Rhône"] } as any))
+      .post("/elasticsearch/young/in-bus/ligne-1/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const queries = allQueries();
+    expect(queries).toContain("department.keyword");
+    expect(queries).toContain("Rhône");
+  });
+
+  it("borne un référent départemental à son département sur /by-point-de-rassemblement/:id/search", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Rhône"] } as any))
+      .post("/elasticsearch/young/by-point-de-rassemblement/pdr-1/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const queries = allQueries();
+    expect(queries).toContain("department.keyword");
+    expect(queries).toContain("Rhône");
+  });
+
+  it("borne un référent départemental à son département sur /by-point-de-rassemblement/aggs", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Rhône"] } as any))
+      .post("/elasticsearch/young/by-point-de-rassemblement/aggs")
+      .send({ filters: { meetingPointIds: ["pdr-1"] } });
+    expect(res.status).toBe(200);
+    const queries = allQueries();
+    expect(queries).toContain("department.keyword");
+    expect(queries).toContain("Rhône");
+  });
+
+  it("laisse un admin sans filtre département sur /in-bus/:ligneId/search", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/young/in-bus/ligne-1/search")
       .send({ filters: {} });
     expect(res.status).toBe(200);
   });
