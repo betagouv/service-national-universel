@@ -31,8 +31,6 @@ export class SearchYoungDto implements SearchParams {
 
     @IsOptional()
     @IsObject()
-    @ValidateNested()
-    @Type(() => Object)
     filters?: Record<string, string | string[]>;
 
     @IsOptional()

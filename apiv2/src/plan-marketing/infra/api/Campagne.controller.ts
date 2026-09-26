@@ -17,7 +17,7 @@ import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneModel, CampagneModelWithNomSession } from "../../core/Campagne.model";
 import { ReferentModelLight } from "@admin/core/iam/Referent.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
-import { CreateCampagneDto, EnvoyerCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
+import { EnvoyerCampagneDto, validerCorpsCampagneCreation, validerCorpsCampagneMiseAJour } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
 import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
 import { BasculerArchivageCampagne } from "@plan-marketing/core/useCase/BasculerArchivageCampagne";
@@ -38,7 +38,8 @@ export class CampagneController {
     ) {}
 
     @Post()
-    async create(@Body() dto: CreateCampagneDto): Promise<CampagneModel> {
+    async create(@Body() corps: unknown): Promise<CampagneModel> {
+        const dto = await validerCorpsCampagneCreation(corps);
         return await this.campagneService.creerCampagne(dto);
     }
 
@@ -83,7 +84,8 @@ export class CampagneController {
     }
 
     @Put(":id")
-    async update(@Param("id") id: string, @Body() dto: UpdateCampagneDto): Promise<CampagneModel | null> {
+    async update(@Param("id") id: string, @Body() corps: unknown): Promise<CampagneModel | null> {
+        const dto = await validerCorpsCampagneMiseAJour(corps);
         return await this.mettreAJourCampagne.execute(dto);
     }
 

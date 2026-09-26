@@ -24,4 +24,7 @@ export class ObjectIdParamsPipe implements PipeTransform {
 }
 
 /** Pipes appliqués à toutes les routes, partagés par le bootstrap et les applications de test. */
-export const pipesGlobaux = () => [new ObjectIdParamsPipe(), new ValidationPipe()];
+export const pipesGlobaux = () => [
+    new ObjectIdParamsPipe(),
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+];
