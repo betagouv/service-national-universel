@@ -491,10 +491,13 @@ async function sendNewInvitation(referent: ReferentDocument, { fromName, fromUse
   const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
 
   await referent.save({ fromUser });
-  await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
+  // PM5 (25/09/2026) : l'appel Brevo n'est plus attendu avant de répondre — sinon la présence ou
+  // l'absence d'un compte référent se lit dans le temps de réponse de POST /referent/signup_retry
+  // (route anonyme, réponse 200 immédiate quand `shouldResendInvitation` est faux).
+  sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
     params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
-  });
+  }).catch(capture);
 }
 
 /**
@@ -547,7 +550,10 @@ router.post("/signup_verify", referentSigninLimiter, async (req: UserRequest, re
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-router.post("/signup_invite", async (req: UserRequest, res: Response) => {
+// PM31 (25/09/2026) : requireJsonBody, déjà posé sur /signin — cette route ouvre elle aussi une
+// session complète (login CSRF résiduel sans lui : un formulaire tiers en x-www-form-urlencoded
+// pouvait déclencher l'activation).
+router.post("/signup_invite", requireJsonBody, async (req: UserRequest, res: Response) => {
   // Elle sert encore cette route ?
   try {
     const { error, value } = Joi.object({
@@ -1830,19 +1836,11 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    // Sous impersonation (`signin_as`), l'acteur n'est pas le titulaire du compte : lui laisser poser
-    // un email ou un mot de passe lui donnait une prise de contrôle définitive, sans autre trace que
-    // `fromUser` (audit 2026-09-21, H61). `reset_password` exige déjà le mot de passe courant ; cette
-    // route s'aligne. Renvoyer l'email courant reste sans effet (le formulaire de profil poste
-    // l'objet complet), mais l'effacer (`null`/`""`) est bien un changement et reste refusé.
-    if (req.user.impersonateId) {
-      const emailChanged = "email" in value && value.email !== user.email;
-      const passwordSubmitted = "password" in value && !!value.password;
-      if (emailChanged || passwordSubmitted) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-    }
-
+    // `validateSelf` retire déjà `email` et `password` du body (PH12/PH17, audit du 25/09/2026) :
+    // `value` ne les contient jamais, impersonation ou non. Un référent - impersoné ou non - ne
+    // s'attribue donc plus l'un ou l'autre par cette route (H61 étendu : le garde-fou ne dépendait
+    // jusque-là que de `req.user.impersonateId`). Le mot de passe se change via
+    // POST /referent/reset_password ; l'email référent se change via PUT /referent/:id (ADMIN).
     user.set(value);
     user.set(cleanReferentData(user));
     await user.save({ fromUser: req.user });

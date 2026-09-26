@@ -105,6 +105,7 @@ else # Create application
         -e "s#ENVIRONMENT=\"ci\"#ENVIRONMENT=\"$env_name\"#g" \
         -e "s#ci.beta-snu.dev#$env_name.$domain#g" \
         -e "s#SUPPORT_URL=\"[^\"]*\"#SUPPORT_URL=\"https://api-support.ci.beta-snu.dev\"#g" \
+        -e "s#SNUPPORT_URL_ADMIN=\"[^\"]*\"#SNUPPORT_URL_ADMIN=\"https://admin-support.ci.beta-snu.dev\"#g" \
         | clever env import --app $app_id
 
     clever domain add api.$env_name.$domain/

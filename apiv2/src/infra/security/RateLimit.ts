@@ -14,6 +14,10 @@ import rateLimit, {
     Store,
 } from "express-rate-limit";
 import Redis from "ioredis";
+import { lireCookie } from "../../admin/infra/iam/auth/AddUserToRequest.middleware";
+
+/** Cookie httpOnly de session posé par la v1 (api/src/auth.ts) pour l'espace admin. */
+const COOKIE_SESSION_ADMIN = "jwt_ref";
 
 const MINUTE = 60 * 1000;
 
@@ -136,13 +140,61 @@ export function rateLimiter({
 /**
  * Routes coûteuses : exports, simulations, validations de simulation et imports. Chacune lance
  * une requête lourde en base, une génération de fichier ou une tâche de fond.
+ * Insensible à la casse (PM26, 25/09/2026) : sans le drapeau `i`, `/V2/Export/...` échappait au
+ * limiteur couteux alors que la route répond identiquement (le routage Express est lui-même
+ * insensible à la casse par défaut).
  */
-const ROUTE_COUTEUSE = /\/(export|simulation|valider|import|importer)(\/|$)/;
+const ROUTE_COUTEUSE = /\/(export|simulation|valider|import|importer)(\/|$)/i;
 /** Appelée par Brevo à la fin d'un import : elle a son propre jeton et ne doit pas être bridée. */
 const WEBHOOK_BREVO = /\/plan-marketing\/import\/webhook$/;
 
+/**
+ * Regroupe une adresse IPv6 par bloc /64 — le sous-réseau qu'un fournisseur alloue en général à un
+ * seul client — pour qu'une rotation d'adresses dans le même bloc ne rouvre pas indéfiniment le
+ * quota (PM26, 25/09/2026) : express-rate-limit 7.5.1 n'agrège pas nativement (`ipKeyGenerator`
+ * n'existe qu'en v8, non adopté ici). Une IPv4 (y compris une IPv4-mappée `::ffff:a.b.c.d`) est
+ * renvoyée telle quelle. Une forme inattendue (ni 8 groupes ni `::`) est renvoyée inchangée : mieux
+ * vaut un regroupement absent qu'un regroupement erroné.
+ */
+export function normaliserIp(ipBrute: string): string {
+    const ip = ipBrute.split("%")[0]; // zone id (ex. fe80::1%eth0)
+    if (!ip.includes(":")) {
+        return ip;
+    }
+    const ipv4Mappee = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+    if (ipv4Mappee) {
+        return ipv4Mappee[1];
+    }
+
+    const [tete, queue = ""] = ip.split("::");
+    const groupesTete = tete ? tete.split(":") : [];
+    const groupesQueue = queue ? queue.split(":") : [];
+    const manquants = ip.includes("::") ? Math.max(8 - groupesTete.length - groupesQueue.length, 0) : 0;
+    const groupes = [...groupesTete, ...Array(manquants).fill("0"), ...groupesQueue];
+    if (groupes.length !== 8) {
+        return ip;
+    }
+
+    return `${groupes.slice(0, 4).join(":")}::/64`;
+}
+
 export function estRouteCouteuse(req: Request): boolean {
     return req.method === "POST" && ROUTE_COUTEUSE.test(req.path) && !WEBHOOK_BREVO.test(req.path);
+}
+
+/**
+ * Jeton de session admin porté par le cookie httpOnly `jwt_ref`, pour la clé du rate limiter
+ * (PM41, 25/09/2026). L'admin s'authentifie surtout par ce cookie depuis GOO-16 (le JWT n'est plus
+ * posé en localStorage) : sans ce repli, la clé de comptage retombait systématiquement sur l'IP
+ * pour lui, jamais sur son identifiant. Même restriction d'origine que
+ * `AddUserToRequestMiddleware.extraireJeton` (le cookie est partagé par tous les sous-domaines :
+ * une autre origine ne doit pas pouvoir s'en réclamer).
+ */
+export function jetonCookieAdmin(req: Pick<Request, "headers">, urlAdmin: string): string | undefined {
+    if (req.headers.origin !== urlAdmin) {
+        return undefined;
+    }
+    return lireCookie(req.headers.cookie, COOKIE_SESSION_ADMIN);
 }
 
 export const RATE_LIMITS = {

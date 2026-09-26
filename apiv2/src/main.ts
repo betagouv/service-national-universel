@@ -7,7 +7,7 @@ import helmet = require("helmet");
 import { AppModule } from "./App.module";
 import { AuthProvider } from "./admin/infra/iam/auth/Auth.provider";
 import { hostGuard, hotesAutorises } from "./infra/security/HostGuard";
-import { RATE_LIMITS, estRouteCouteuse, rateLimitStoreFactory, rateLimiter } from "./infra/security/RateLimit";
+import { RATE_LIMITS, estRouteCouteuse, jetonCookieAdmin, normaliserIp, rateLimitStoreFactory, rateLimiter } from "./infra/security/RateLimit";
 import { pipesGlobaux } from "./shared/infra/ObjectIdParams.pipe";
 
 async function bootstrap() {
@@ -37,9 +37,11 @@ async function bootstrap() {
     const store = rateLimitStoreFactory(config.getOrThrow("environment"), config.getOrThrow("broker.url"));
     // Clé de comptage : l'utilisateur si son jeton est valide (quota par personne, même derrière
     // une IP partagée), l'IP sinon. Le jeton est vérifié : un id forgé ne peut pas épuiser le
-    // quota d'un autre.
+    // quota d'un autre. PM41 : à défaut d'en-tête Authorization, le cookie de session admin est
+    // lu (cf. jetonCookieAdmin).
+    const urlAdmin = config.getOrThrow<string>("urls.admin");
     const cleUtilisateurOuIp = async (req: Request): Promise<string> => {
-        const token = req.headers.authorization?.split(" ")?.[1];
+        const token = req.headers.authorization?.split(" ")?.[1] ?? jetonCookieAdmin(req, urlAdmin);
         if (token) {
             try {
                 const { id } = await authProvider.parseToken(token);
@@ -50,7 +52,9 @@ async function bootstrap() {
                 // jeton invalide : compté sur l'IP
             }
         }
-        return `ip:${req.ip}`;
+        // PM26 (25/09/2026) : IPv6 regroupée par /64, sinon une rotation d'adresses dans le même
+        // bloc rouvre indéfiniment le quota.
+        return `ip:${normaliserIp(req.ip ?? "")}`;
     };
     app.use(rateLimiter({ store: store("global"), ...RATE_LIMITS.global, keyGenerator: cleUtilisateurOuIp }));
     app.use(

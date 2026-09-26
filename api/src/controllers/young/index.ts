@@ -25,7 +25,7 @@ import {
   YoungDocument,
 } from "../../models";
 import AuthObject from "../../auth";
-import { signinRateLimiter, emailSendingRateLimiter } from "../../middlewares/rateLimit";
+import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../../middlewares/rateLimit";
 import { requireJsonBody } from "../../middlewares/requireJsonBody";
 import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
@@ -97,6 +97,10 @@ const YoungAuth = new AuthObject(YoungModel);
 // abus des routes qui envoient un email ou réécrivent un token).
 const youngSigninLimiter = signinRateLimiter();
 
+// PM19 (audit du 25/09/2026) : la soumission de mission phase 3 envoie un email officiel au tuteur
+// renseigné par le volontaire, sans aucune limite de débit.
+const validateMissionPhase3Limiter = userRateLimiter({ prefix: "young-validate-mission-phase3", windowMs: 60 * 60 * 1000, limit: 10 });
+
 // M3 de l'audit du 21/09/2026 : l'inscription en ligne est fermée
 // (`/preinscription` redirige vers snu.gouv.fr/inscriptions-cloturees et plus
 // aucun appelant de cette route ne subsiste dans le dépôt). Tant qu'elle
@@ -110,9 +114,10 @@ const youngSigninLimiter = signinRateLimiter();
 router.post("/signup", (_req, res) => {
   return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 });
-router.post("/signup/email", emailSendingRateLimiter("young-signup-email"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
-  YoungAuth.changeEmailDuringSignUp(req, res),
-);
+// PH17 de l'audit du 25/09/2026 : `/signup/email` (changeEmailDuringSignUp) appliquait le nouvel
+// email en base avant toute validation par le jeton envoyé à cette adresse — vecteur secondaire pour
+// usurper l'identité support d'un tiers. Sans appelant (les inscriptions sont fermées depuis M3
+// ci-dessus), la route est supprimée plutôt que corrigée.
 router.post("/signin", youngSigninLimiter, requireJsonBody, (req, res) => YoungAuth.signin(req, res));
 router.post("/signin-2fa", youngSigninLimiter, requireJsonBody, (req, res) => YoungAuth.signin2FA(req, res));
 router.post("/email", emailSendingRateLimiter("young-email-update"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
@@ -135,7 +140,9 @@ router.post("/forgot_password_reset", youngSigninLimiter, async (req: UserReques
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.resetPassword(req, res));
 router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.checkPassword(req, res));
 
-router.post("/signup_verify", async (req: UserRequest, res) => {
+// PL3 (25/09/2026) : par parité avec referentSigninLimiter, déjà posé côté référent sur la route
+// équivalente.
+router.post("/signup_verify", youngSigninLimiter, async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) {
@@ -156,7 +163,9 @@ router.post("/signup_verify", async (req: UserRequest, res) => {
   }
 });
 
-router.post("/signup_invite", async (req: UserRequest, res) => {
+// PL3 (rate limiter) + PM31 (requireJsonBody, déjà posé sur /signin) : cette route ouvre une session
+// complète contre email + mot de passe + jeton d'invitation, comme /signin.
+router.post("/signup_invite", youngSigninLimiter, requireJsonBody, async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       invitationToken: Joi.string().required(),
@@ -529,7 +538,7 @@ router.get(
   },
 );
 
-router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.put("/:id/validate-mission-phase3", passport.authenticate("young", { session: false, failWithError: true }), validateMissionPhase3Limiter, async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -561,6 +570,14 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     // mission à celle qui a été attestée.
     if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    // PM19 : le volontaire choisit librement l'adresse du « tuteur » qui valide sa mission ; sans ce
+    // garde, il se valide lui-même (ou fait valider par un parent) en renseignant sa propre adresse.
+    if (value.phase3TutorEmail) {
+      const selfEmails = [young.email, young.parent1Email, young.parent2Email].filter(Boolean).map((email) => email!.toLowerCase());
+      if (selfEmails.includes(value.phase3TutorEmail.toLowerCase())) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
     }
     // eslint-disable-next-line no-unused-vars
     const { id, ...values } = value;

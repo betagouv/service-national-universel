@@ -71,9 +71,25 @@ async function findJvaReferentByEmail(email) {
   return { user, structure };
 }
 
+// PM31 (25/09/2026) : cette route pose le cookie de session `jwt_ref` sur une simple requête GET,
+// dont le jeton (`token_jva`) est fourni par l'appelant lui-même — un attaquant qui embarque son
+// propre jeton dans une balise cachée (<img>, <iframe>) sur une page tierce connecte la victime au
+// COMPTE DE L'ATTAQUANT sans aucune interaction (login CSRF, FM2). `Sec-Fetch-Dest` distingue une
+// vraie navigation de premier niveau (`document`, ce qu'envoie le lien SSO de JVA) d'un chargement
+// caché (`image`, `iframe`, `empty`…). Fail-open si l'en-tête est absent : aucun précédent dans le
+// dépôt (`grep Sec-Fetch` négatif avant ce correctif), certains clients ne l'envoient pas encore.
+function estNavigationDePremierNiveau(req) {
+  const dest = req.get("Sec-Fetch-Dest");
+  return !dest || dest === "document";
+}
+
 // ! Appelé par le front de JVA
 router.get("/signin", jvaSigninLimiter, async (req, res) => {
   try {
+    if (!estNavigationDePremierNiveau(req)) {
+      logger.warn(`jeveuxaider: /signin refusé, Sec-Fetch-Dest=${req.get("Sec-Fetch-Dest")}`);
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     const { error, value } = Joi.object({ token_jva: Joi.string().required() }).validate(req.query, { stripUnknown: true });
     if (error) {
       capture(error);
