@@ -23,6 +23,7 @@ export class JwtTokenService implements AuthProvider {
                 __v: payload.__v,
                 lastLogoutAt: payload.lastLogoutAt,
                 passwordChangedAt: payload.passwordChangedAt,
+                impersonateId: payload._impersonateId ?? null,
             };
         } catch (error: any) {
             throw new TechnicalException(TechnicalExceptionType.UNAUTORIZED, error);

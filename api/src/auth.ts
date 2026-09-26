@@ -45,6 +45,7 @@ import { getFilteredSessions } from "./utils/cohort";
 
 import { ClasseModel, EtablissementModel, CohortModel } from "./models";
 import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
+import { isReferentAccessAllowed } from "./featureFlag/adminAccessRestriction";
 import { getAcl } from "./services/iam/Permission.service";
 
 // Le trust token ("cet appareil a déjà passé le 2FA") est lié au compte qui l'a obtenu :
@@ -487,6 +488,11 @@ class Auth {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
       }
 
+      // Verrouillage temporaire de l'accès référent : refusé avant l'envoi du code 2FA.
+      if (isReferent(user) && !(await isReferentAccessAllowed(user._id.toString()))) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.ADMIN_ACCESS_RESTRICTED });
+      }
+
       const shouldUse2FA = async () => {
         try {
           if (!config.ENABLE_2FA) return false;
@@ -577,6 +583,10 @@ class Auth {
       }
       if (user.token2FA !== token_2fa) {
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
+      // Verrouillage temporaire : le code 2FA a pu être émis avant son activation.
+      if (isReferent(user) && !(await isReferentAccessAllowed(user._id.toString()))) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.ADMIN_ACCESS_RESTRICTED });
       }
 
       user.set({ token2FA: null, token2FAExpires: null });

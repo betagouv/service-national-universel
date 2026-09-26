@@ -10,6 +10,8 @@ export type AuthTokenPayload = {
     __v?: string;
     lastLogoutAt?: string | Date | null;
     passwordChangedAt?: string | Date | null;
+    /** Administrateur réel quand la session est une impersonation (`signin_as` v1). */
+    impersonateId?: string | null;
 };
 
 export interface AuthProvider {
