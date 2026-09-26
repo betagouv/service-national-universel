@@ -68,6 +68,11 @@ router.post(
     // arbitraire passée en paramètre.
     if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (!(await areAllowedCopyRecipients(ticket, copyRecipient))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // messageHistory cite un message précis en plus du dernier, dans l'email envoyé à dest : sans ce
+    // contrôle, un agent pouvait faire citer le contenu d'un message d'un AUTRE ticket, hors de son
+    // périmètre (PH25).
+    if (messageHistory && messageHistory !== "all" && !(await MessageModel.findOne({ _id: messageHistory, ticketId: ticket._id })))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     // Le HTML de l'éditeur est rendu chez le jeune et part dans l'email officiel du support (M88, M92).
     const messageHtml = sanitizeMessageHtml(message);
 
@@ -268,6 +273,9 @@ router.post(
     // jointes déchiffrées du ticket.
     if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (!(await areAllowedCopyRecipients(ticket, copyRecipient))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // messageHistory scopé au ticket courant (PH25), voir POST / plus haut.
+    if (messageHistory && messageHistory !== "all" && !(await MessageModel.findOne({ _id: messageHistory, ticketId: ticket._id })))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const messageHtml = sanitizeMessageHtml(body.message);
 
     // If multiple file with same names are provided, file is an array: every entry is kept and checked.
