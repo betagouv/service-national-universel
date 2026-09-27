@@ -11,15 +11,20 @@
  *   - M67 : `POST /referent/:tutorId/email/:template` ne vérifie que le rôle de l'appelant
  *     (`canSendTutorTemplate`, packages/lib/src/roles.ts L977), jamais le lien entre lui et le
  *     tuteur visé.
+ *
+ * Et des constats PM2, PM4, PM15, PM24 et PM37 de l'audit de production du 25/09/2026 : textes
+ * libres recopiés sans assainissement hors des deux routes ci-dessus (refus de candidature, mission
+ * annulée, équivalence, question au support), et gabarits parents ou buckets Cellar tiers encore
+ * accessibles au volontaire.
  */
 import request from "supertest";
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
+import { APPLICATION_STATUS, MISSION_STATUS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ReferentStatus, ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
 
 import { ApplicationModel, MissionModel, ReferentModel, StructureModel, YoungModel } from "../models";
 import { config } from "../config";
 
-import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
+import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
@@ -27,7 +32,10 @@ import getNewMissionFixture from "./fixtures/mission";
 import { getNewApplicationFixture } from "./fixtures/application";
 import getNewStructureFixture from "./fixtures/structure";
 import { createReferentHelper } from "./helpers/referent";
+import { addPermissionHelper } from "./helpers/permissions";
 import { createYoungHelper, getYoungByIdHelper } from "./helpers/young";
+import { updateApplicationStatus } from "../application/applicationService";
+import { notifyReferentNewApplication, notifyYoungChangementStatutEquivalence } from "../application/applicationNotificationService";
 
 const mockSendTemplate = jest.fn().mockResolvedValue(undefined);
 const mockSendEmail = jest.fn().mockResolvedValue(undefined);
@@ -38,8 +46,18 @@ jest.mock("../brevo", () => ({
   sendEmail: (...args: any[]) => mockSendEmail(...args),
 }));
 
+const mockSnupportApi = jest.fn();
+jest.mock("../SNUpport", () => ({
+  api: (...args: any[]) => mockSnupportApi(...args),
+  getCustomerIdByEmail: jest.fn(),
+}));
+jest.mock("../services/support", () => ({
+  getUserAttributes: jest.fn().mockResolvedValue([]),
+}));
+
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL);
 });
 afterAll(dbClose);
 beforeEach(async () => {
@@ -50,6 +68,7 @@ beforeEach(async () => {
   await ApplicationModel.deleteMany();
   mockSendTemplate.mockClear();
   mockSendEmail.mockClear();
+  mockSnupportApi.mockReset();
 });
 afterEach(resetAppAuth);
 
@@ -242,5 +261,191 @@ describe("M67 — email libre à un tuteur", () => {
     const params = dernierMail()[1].params;
     expect(params.message).not.toContain("<a");
     expect(params.message).not.toContain("snu-gouv.example.org");
+  });
+});
+
+/** Un lien d'hameçonnage balisé, tel qu'un compte faible le glisserait dans un texte libre. */
+const TEXTE_PIEGE = 'Reconnectez-vous <a href="https://snu-gouv.example.org/phishing">ici</a> <img src="https://snu-gouv.example.org/x.png">';
+
+function expectSansBalisage(value: string | undefined) {
+  expect(value).toBeDefined();
+  expect(value).not.toContain("<a");
+  expect(value).not.toContain("<img");
+  expect(value).not.toContain("snu-gouv.example.org");
+}
+
+describe("PM2/PM4 — textes libres des structures et des référents dans les emails au volontaire", () => {
+  async function candidatureSurMission(missionFields: Record<string, any> = {}) {
+    const { young } = await jeuneEtSonReferent();
+    const structure = await StructureModel.create({ ...getNewStructureFixture(), department: "Paris", region: "Île-de-France" });
+    const tuteur = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() } as any));
+    const mission = await MissionModel.create({
+      ...getNewMissionFixture(),
+      structureId: structure._id.toString(),
+      tutorId: tuteur._id.toString(),
+      department: "Paris",
+      region: "Île-de-France",
+      ...missionFields,
+    });
+    const application = await ApplicationModel.create({
+      ...getNewApplicationFixture(),
+      youngId: young._id.toString(),
+      youngEmail: young.email,
+      missionId: mission._id.toString(),
+      structureId: structure._id.toString(),
+      status: APPLICATION_STATUS.WAITING_VALIDATION,
+    });
+    return { young, mission, application };
+  }
+
+  it("neutralise le motif de refus d'une candidature (REFUSE_APPLICATION)", async () => {
+    const { application } = await candidatureSurMission({ name: "Mission <b>solidaire</b>" });
+
+    const res = await request(await getAppHelperWithAcl())
+      .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION}`)
+      .send({ message: TEXTE_PIEGE });
+
+    expect(res.statusCode).toEqual(200);
+    const params = dernierMail()[1].params;
+    expectSansBalisage(params.message);
+    expect(params.message).toContain("Reconnectez-vous");
+  });
+
+  it("laisse passer inchangé un motif de refus sans balisage", async () => {
+    const { application } = await candidatureSurMission();
+
+    await request(await getAppHelperWithAcl())
+      .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION}`)
+      .send({ message: "La mission est complète, merci pour votre candidature." });
+
+    expect(dernierMail()[1].params.message).toEqual("La mission est complète, merci pour votre candidature.");
+  });
+
+  it("neutralise le nom et le commentaire d'une mission annulée par son responsable (MISSION_CANCEL)", async () => {
+    const { mission } = await candidatureSurMission({ name: `Mission ${TEXTE_PIEGE}`, statusComment: TEXTE_PIEGE, status: MISSION_STATUS.CANCEL });
+
+    await updateApplicationStatus(mission, { firstName: "Responsable" });
+
+    const [template, { params }] = dernierMail();
+    expect(template).toEqual(SENDINBLUE_TEMPLATES.young.MISSION_CANCEL);
+    expectSansBalisage(params.message);
+    expectSansBalisage(params.missionName);
+  });
+
+  it("neutralise le message d'équivalence d'un référent", async () => {
+    const { young } = await jeuneEtSonReferent();
+
+    await notifyYoungChangementStatutEquivalence(young, "REFUSED", TEXTE_PIEGE);
+
+    const [template, { params }] = dernierMail();
+    expect(template).toEqual(SENDINBLUE_TEMPLATES.young.EQUIVALENCE_REFUSED);
+    expectSansBalisage(params.message);
+  });
+
+  it("neutralise le nom de mission notifié au tuteur", async () => {
+    const { young } = await jeuneEtSonReferent();
+    const tuteur = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, status: ReferentStatus.ACTIVE } as any));
+
+    await notifyReferentNewApplication({ ...getNewApplicationFixture(), youngId: young._id.toString(), tutorId: tuteur._id.toString(), missionName: TEXTE_PIEGE } as any, young);
+
+    expectSansBalisage(dernierMail()[1].params.missionName);
+  });
+});
+
+describe("PM15 — question d'un volontaire relayée aux référents de son département", () => {
+  const supportWriteAcl = [{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE, policy: [] }];
+
+  async function poserUneQuestion(message: string) {
+    const { young } = await jeuneEtSonReferent();
+    await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Paris"], region: "Île-de-France", status: ReferentStatus.ACTIVE } as any));
+    mockSnupportApi.mockResolvedValue({ ok: true, data: { ticket: { contactEmail: young.email } } });
+    (young as any).acl = supportWriteAcl;
+    const res = await request(getAppHelper(young)).post("/SNUpport/ticket").send({ subject: "J'ai une question", message });
+    return { res, young };
+  }
+
+  it("retire le balisage du message avant de l'envoyer aux référents", async () => {
+    const { res } = await poserUneQuestion(TEXTE_PIEGE);
+
+    expect(res.statusCode).toEqual(200);
+    const [template, { params }] = dernierMail();
+    expect(template).toEqual(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION);
+    expectSansBalisage(params.message);
+  });
+
+  it("laisse passer inchangée une question sans balisage", async () => {
+    await poserUneQuestion("Quand aura lieu mon séjour ?");
+
+    expect(dernierMail()[1].params.message).toEqual("Quand aura lieu mon séjour ?");
+  });
+
+  it("plafonne le nombre de questions d'un même volontaire", async () => {
+    const { young } = await poserUneQuestion("Question 1");
+    const app = getAppHelper(young);
+    const statuts: number[] = [];
+    for (let i = 2; i <= 11; i++) {
+      statuts.push(
+        (
+          await request(app)
+            .post("/SNUpport/ticket")
+            .send({ subject: "J'ai une question", message: `Question ${i}` })
+        ).statusCode,
+      );
+    }
+
+    expect(statuts.slice(0, 9).every((statut) => statut === 200)).toBe(true);
+    expect(statuts[9]).toEqual(429);
+  });
+});
+
+describe("PM24/PM37 — gabarits parents et liens Cellar depuis un compte volontaire", () => {
+  it("refuse au volontaire les gabarits parents (consentement parental décommissionné)", async () => {
+    const { young } = await jeuneEtSonReferent();
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT}`)
+      .send({ cta: "https://cellar-c2.services.clever-cloud.com/cni-bucket-prod/file/consentement.pdf" });
+
+    expect(res.statusCode).toEqual(403);
+    expect(mockSendTemplate).not.toHaveBeenCalled();
+  });
+
+  it("refuse un lien vers un autre bucket du stockage Cellar mutualisé", async () => {
+    const { young } = await jeuneEtSonReferent();
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`)
+      .send({ object: "Fiche sanitaire", link: "https://cellar-c2.services.clever-cloud.com/bucket-pirate/consentement.html" });
+
+    expect(res.statusCode).toEqual(400);
+    expect(mockSendTemplate).not.toHaveBeenCalled();
+  });
+
+  it("laisse le volontaire s'envoyer la fiche sanitaire (MedicalFileModal), dans la limite de son quota", async () => {
+    const { young } = await jeuneEtSonReferent();
+    const app = await getAppHelperWithAcl(young);
+    const envoyer = () =>
+      request(app).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`).send({
+        object: "Fiche sanitaire à compléter",
+        message: "Vous trouverez téléchargeable ci-dessous la fiche sanitaire à compléter.",
+        link: "https://cellar-c2.services.clever-cloud.com/cni-bucket-prod/file/fiche-sanitaire-2024.pdf?utm_campaign=transactionnel+telecharger+docum",
+      });
+
+    const statuts: number[] = [];
+    for (let i = 0; i < 11; i++) statuts.push((await envoyer()).statusCode);
+
+    expect(statuts.slice(0, 10).every((statut) => statut === 200)).toBe(true);
+    expect(statuts[10]).toEqual(429);
+    expect(dernierMail()[1].params.link).toContain("/cni-bucket-prod/file/fiche-sanitaire-2024.pdf");
+  });
+
+  it("n'applique pas ce quota aux référents", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+    const app = await getAppHelperWithAcl(referent);
+
+    const statuts: number[] = [];
+    for (let i = 0; i < 11; i++) statuts.push((await request(app).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`).send({ object: "Document" })).statusCode);
+
+    expect(statuts.every((statut) => statut === 200)).toBe(true);
   });
 });
