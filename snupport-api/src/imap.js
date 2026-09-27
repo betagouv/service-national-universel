@@ -163,7 +163,10 @@ async function addMessage(mail) {
       });
     }
   } catch (e) {
-    console.log("error fetching mail : ", mail);
+    // PL20 : mail porte le sujet, le corps texte/HTML, les pièces jointes et les adresses
+    // from/to/cc du mail entrant — jamais dans les logs. Seul messageId, un identifiant sans PII,
+    // est utile au diagnostic ici.
+    console.log("error fetching mail : ", mail?.messageId);
     capture(e);
   }
 }

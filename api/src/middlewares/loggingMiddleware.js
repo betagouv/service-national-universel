@@ -10,7 +10,9 @@ const loggingMiddleware = async (req, res, next) => {
       const responseTimeMs = new Date() - startTime;
       req.responseTimeMs = responseTimeMs;
 
-      const ip = req.ipInfo;
+      // PL6 : req.ip (Express, fiable grâce à `trust proxy`), jamais req.ipInfo (request-ip),
+      // falsifiable via X-Client-IP / X-Forwarded-For sans validation de la chaîne de proxies.
+      const ip = req.ip;
 
       const log = {
         method: req.method,
