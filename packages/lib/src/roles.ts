@@ -892,10 +892,6 @@ function canViewMeetingPointId(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
-function canUpdateInscriptionGoals(actor) {
-  return actor.role === ROLES.ADMIN;
-}
-
 function canViewInscriptionGoals(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.VISITOR].includes(
     actor.role,
@@ -1458,7 +1454,6 @@ export {
   canCreateMeetingPoint,
   canSearchMeetingPoints,
   canViewMeetingPointId,
-  canUpdateInscriptionGoals,
   canViewInscriptionGoals,
   canViewTicketTags,
   canGetYoungByEmail,

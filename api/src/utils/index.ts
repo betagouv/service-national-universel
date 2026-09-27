@@ -3,11 +3,9 @@ import https from "https";
 import http from "http";
 import passwordValidator from "password-validator";
 import sanitizeHtml from "sanitize-html";
-import { YoungModel, ReferentModel, ContractModel, PlanTransportModel, MeetingPointModel, ApplicationModel, MissionEquivalenceModel } from "../models";
+import { YoungModel, ReferentModel, ContractModel, ApplicationModel, MissionEquivalenceModel } from "../models";
 
-import { sendEmail, sendTemplate } from "../brevo";
-import path from "path";
-import fs from "fs";
+import { sendTemplate } from "../brevo";
 import { config } from "../config";
 import { logger } from "../logger";
 import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS, ReferentStatus } from "snu-lib";
@@ -204,109 +202,6 @@ export const updatePlacesCenter = async (center, fromUser) => {
     capture(e);
   }
   return center;
-};
-
-// first iteration
-// duplicate of updatePlacesCenter
-// we'll remove the updatePlacesCenter function once the migration is done
-export const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
-  try {
-    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
-    const placesTaken = youngs.filter(
-      (young) => ["AFFECTED", "DONE"].includes(young.statusPhase1) && young.cohesionStayPresence !== "false" && young.status === "VALIDATED",
-    ).length;
-    const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
-    if (sessionPhase1.placesLeft !== placesLeft) {
-      logger.debug(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
-      sessionPhase1.set({ placesLeft });
-      await sessionPhase1.save({ fromUser });
-    }
-  } catch (e) {
-    capture(e);
-  }
-  return sessionPhase1;
-};
-
-export const placesTakenSessionPhase1 = async (sessionPhase1) => {
-  const placesTaken = await YoungModel.countDocuments({
-    sessionPhase1Id: sessionPhase1._id,
-    status: "VALIDATED",
-    statusPhase1: { $in: ["AFFECTED", "DONE"] },
-    cohesionStayPresence: { $ne: "false" },
-  });
-  return placesTaken;
-};
-
-export const deleteCenterDependencies = async (center, fromUser) => {
-  const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-  youngs.forEach(async (young) => {
-    young.set({
-      cohesionCenterId: undefined,
-      cohesionCenterName: undefined,
-      cohesionCenterZip: undefined,
-      cohesionCenterCity: undefined,
-    });
-    await young.save({ fromUser });
-  });
-  const referents = await ReferentModel.find({ cohesionCenterId: center._id });
-  referents.forEach(async (referent) => {
-    referent.set({ cohesionCenterId: undefined, cohesionCenterName: undefined });
-    await referent.save({ fromUser });
-  });
-  const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
-  meetingPoints.forEach(async (meetingPoint) => {
-    meetingPoint.set({ centerId: undefined, centerCode: undefined });
-    await meetingPoint.save({ fromUser });
-  });
-};
-
-export async function updateSeatsTakenInBusLine(busline) {
-  try {
-    const seatsTaken = await YoungModel.countDocuments({
-      $and: [
-        {
-          status: "VALIDATED",
-          ligneId: busline._id.toString(),
-        },
-        {
-          $or: [{ statusPhase1: { $in: ["AFFECTED", "DONE"] } }, { statusPhase1Tmp: { $in: ["AFFECTED", "DONE"] } }],
-        },
-      ],
-    });
-    if (busline.youngSeatsTaken !== seatsTaken) {
-      busline.set({ youngSeatsTaken: seatsTaken });
-      await busline.save();
-
-      // Do the same update with planTransport
-      const planTransport = await PlanTransportModel.findById(busline._id);
-      if (!planTransport) throw new Error("PlanTransport not found");
-      planTransport.set({ youngSeatsTaken: seatsTaken, lineFillingRate: planTransport.youngCapacity && Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
-      await planTransport.save();
-    }
-  } catch (e) {
-    capture(e);
-  }
-  return busline;
-}
-
-export const sendAutoCancelMeetingPoint = async (young) => {
-  const cc: { email: string }[] = [];
-  if (young.parent1Email) cc.push({ email: young.parent1Email });
-  if (young.parent2Email) cc.push({ email: young.parent2Email });
-  await sendEmail(
-    {
-      name: `${young.firstName} ${young.lastName}`,
-      email: young.email,
-    } as any,
-    "Sélection de votre point de rassemblement - Action à faire",
-    fs
-      .readFileSync(path.resolve(__dirname, "../templates/autoCancelMeetingPoint.html"))
-      .toString()
-      .replace(/{{firstName}}/, sanitizeAll(young.firstName))
-      .replace(/{{lastName}}/, sanitizeAll(young.lastName))
-      .replace(/{{cta}}/g, sanitizeAll(`${config.APP_URL}/auth/login?redirect=phase1`)),
-    { cc },
-  );
 };
 
 export async function updateYoungPhase2StatusAndHours(young, fromUser) {

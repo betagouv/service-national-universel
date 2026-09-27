@@ -4,8 +4,9 @@
  * centres, présence / départ / dispense). Les routes d'écriture de l'API v1 sont SUPPRIMÉES — pas
  * verrouillées — et les lectures restent servies.
  *
- * GOO-65 (lot P23, décision du 25/09/2026) étend ce décommissionnement au changement de séjour et
- * aux champs / branches phase 1 des routes mixtes (PUT /referent/young/:id, PUT /young/withdraw, PUT /young/account/address,
+ * GOO-65 (lot P23, décision du 25/09/2026) étend ce décommissionnement au changement de séjour, à
+ * l'invitation de volontaires, aux objectifs d'inscription et aux champs / branches phase 1 des routes
+ * mixtes (PUT /referent/young/:id, PUT /young/withdraw, PUT /young/account/address,
  * PUT /young-edition/:id/phasestatus). La correction manuelle de statusPhase1 est retirée sans exception.
  *
  * Toutes les requêtes partent d'un administrateur (`getAppHelperWithAcl()`) et visent des documents qui
@@ -58,7 +59,7 @@ jest.mock("../geo", () => ({
 type Method = "get" | "post" | "put" | "delete";
 
 let app: Awaited<ReturnType<typeof getAppHelperWithAcl>>;
-const ids: Record<"young" | "cohort" | "center" | "session" | "pdr" | "ligne" | "ligneToPoint" | "modification" | "bus", string> = {} as any;
+const ids: Record<"young" | "cohort" | "cohortName" | "center" | "session" | "pdr" | "ligne" | "ligneToPoint" | "modification" | "bus", string> = {} as any;
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
@@ -103,6 +104,7 @@ beforeAll(async () => {
   Object.assign(ids, {
     young: young._id.toString(),
     cohort: cohort._id.toString(),
+    cohortName: cohort.name,
     center: center._id.toString(),
     session: session._id.toString(),
     pdr: pdr._id.toString(),
@@ -225,7 +227,13 @@ const removed: Record<string, [Method, string][]> = {
     ["post", "/cohort-session/eligibility/2023"],
     ["post", "/cohort-session/eligibility/2023/{young}"],
   ],
-  "Invitation de volontaires (GOO-65)": [["post", "/young/invite"]],
+  "Invitation de volontaires et objectifs d'inscription (GOO-65)": [
+    ["post", "/young/invite"],
+    ["post", "/inscription-goal/{cohortName}"],
+    ["get", "/inscription-goal/{cohortName}/department/Ain"],
+    ["get", "/inscription-goal/{cohortName}/department/Ain/reached"],
+    ["get", "/inscription-goal/Ain/current"],
+  ],
 };
 
 describe.each(Object.entries(removed))("Écritures phase 1 supprimées — %s", (_domaine, routes) => {
@@ -282,6 +290,10 @@ describe("Lectures phase 1 conservées", () => {
     await expectRouteServed("get", `/session-phase1/${ids.session}/cohesion-center`, 200);
   });
 
+  it("GET /inscription-goal/:cohort (export du tableau de bord) est toujours servie", async () => {
+    await expectRouteServed("get", `/inscription-goal/${ids.cohortName}`, 200);
+  });
+
   it("GET /cohort-session/isInscriptionOpen est toujours servie", async () => {
     await expectRouteServed("get", "/cohort-session/isInscriptionOpen", 200);
   });
@@ -333,34 +345,32 @@ describe("Routes mixtes : champs et branches phase 1 retirés (GOO-65)", () => {
       const young = await createAffectedYoung({ parent1AllowImageRights: "true", parent1AllowSNU: "true", parentConsentment: "true", imageRight: "true" });
       const before = young.toObject();
 
-      const res = await request(app)
-        .put(`/referent/young/${young._id}`)
-        .send({
-          firstName: "Prénommodifié",
-          statusPhase1: YOUNG_STATUS_PHASE1.DONE,
-          statusPhase1Motif: "motif",
-          cohesionStayPresence: "false",
-          presenceJDM: "false",
-          departSejourAt: new Date().toISOString(),
-          departSejourMotif: "motif",
-          cohesionStayMedicalFileReceived: "true",
-          sessionPhase1Id: new Types.ObjectId().toString(),
-          cohesionCenterId: new Types.ObjectId().toString(),
-          meetingPointId: new Types.ObjectId().toString(),
-          deplacementPhase1Autonomous: "true",
-          cohort: "Une autre cohorte",
-          cohortId: new Types.ObjectId().toString(),
-          originalCohort: "Cohorte d'origine",
-          cohortChangeReason: "raison",
-          classeId: new Types.ObjectId().toString(),
-          email: "adresse-remplacee@example.com",
-          consentment: "false",
-          parentConsentment: "false",
-          imageRight: "false",
-          parent1AllowImageRights: "false",
-          parent1AllowSNU: "false",
-          parent1FromFranceConnect: "true",
-        });
+      const res = await request(app).put(`/referent/young/${young._id}`).send({
+        firstName: "Prénommodifié",
+        statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+        statusPhase1Motif: "motif",
+        cohesionStayPresence: "false",
+        presenceJDM: "false",
+        departSejourAt: new Date().toISOString(),
+        departSejourMotif: "motif",
+        cohesionStayMedicalFileReceived: "true",
+        sessionPhase1Id: new Types.ObjectId().toString(),
+        cohesionCenterId: new Types.ObjectId().toString(),
+        meetingPointId: new Types.ObjectId().toString(),
+        deplacementPhase1Autonomous: "true",
+        cohort: "Une autre cohorte",
+        cohortId: new Types.ObjectId().toString(),
+        originalCohort: "Cohorte d'origine",
+        cohortChangeReason: "raison",
+        classeId: new Types.ObjectId().toString(),
+        email: "adresse-remplacee@example.com",
+        consentment: "false",
+        parentConsentment: "false",
+        imageRight: "false",
+        parent1AllowImageRights: "false",
+        parent1AllowSNU: "false",
+        parent1FromFranceConnect: "true",
+      });
 
       expect(res.status).toBe(200);
       const after = await YoungModel.findById(young._id);

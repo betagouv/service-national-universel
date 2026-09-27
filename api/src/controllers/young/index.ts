@@ -11,14 +11,7 @@ import { decrypt, encrypt } from "../../cryptoUtils";
 import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture } from "../../sentry";
-import {
-  YoungModel,
-  ApplicationModel,
-  CohortModel,
-  ApplicationDocument,
-  MissionEquivalenceModel,
-  YoungDocument,
-} from "../../models";
+import { YoungModel, ApplicationModel, CohortModel, ApplicationDocument, MissionEquivalenceModel, YoungDocument } from "../../models";
 import AuthObject from "../../auth";
 import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../../middlewares/rateLimit";
 import { requireJsonBody } from "../../middlewares/requireJsonBody";

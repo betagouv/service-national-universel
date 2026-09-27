@@ -170,6 +170,9 @@ describe("écritures phase 1 et objectifs d'inscription décommissionnés (GOO-6
   it("n'exporte plus les helpers dont les seules routes ont été supprimées", async () => {
     const roles = await import("./roles");
     expect(roles).not.toHaveProperty("canChangeYoungCohort");
+    expect(roles).not.toHaveProperty("canUpdateInscriptionGoals");
+    const common = await import("./common");
+    expect(common).not.toHaveProperty("youngCanChangeSession");
   });
 
   it("ne propose plus aucun statut de phase 1, super-admin compris", () => {

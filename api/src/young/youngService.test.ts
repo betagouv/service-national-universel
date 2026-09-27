@@ -1,12 +1,5 @@
 import * as youngService from "./youngService";
-import {
-  findYoungByIdOrThrow,
-  findYoungsByClasseId,
-  getValidatedYoungsWithSession,
-  getYoungsImageRight,
-  getYoungsParentAllowSNU,
-  mightAddInProgressStatus,
-} from "./youngService";
+import { findYoungByIdOrThrow, findYoungsByClasseId, getValidatedYoungsWithSession, getYoungsImageRight, getYoungsParentAllowSNU, mightAddInProgressStatus } from "./youngService";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { YoungModel } from "../models";
 import { ERRORS, UserDto, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";

@@ -320,7 +320,10 @@ describe("Referent", () => {
     // plus statusPhase1.
     it("should ignore cohesion stay presence true", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture());
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, { cohesionStayPresence: undefined, statusPhase1: "AFFECTED", cohortId: cohort._id });
+      const { young, response } = await createYoungThenUpdate(
+        { cohesionStayPresence: "true" },
+        { cohesionStayPresence: undefined, statusPhase1: "AFFECTED", cohortId: cohort._id },
+      );
       expect(response.statusCode).toEqual(200);
       expect(young?.statusPhase1).toEqual("AFFECTED");
       expect(young?.cohesionStayPresence).toBeUndefined();
