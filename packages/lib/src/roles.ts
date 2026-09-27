@@ -991,14 +991,6 @@ function canCreateOrUpdateDepartmentService(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canChangeYoungCohort(actor, young) {
-  const isAdmin = actor.role === ROLES.ADMIN;
-  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department);
-  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === young.region;
-  const authorized = isAdmin || isReferentDepartmentFromTargetDepartment || isReferentRegionFromTargetRegion;
-  return authorized;
-}
-
 function canViewDepartmentService(actor) {
   return [
     ROLES.ADMIN,
@@ -1484,7 +1476,6 @@ export {
   canViewDepartmentService,
   canSearchInElasticSearch,
   canRefuseMilitaryPreparation,
-  canChangeYoungCohort,
   canSendTutorTemplate,
   canSeeYoungInfo,
   canEditPresenceYoung,

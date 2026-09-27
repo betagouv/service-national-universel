@@ -4,6 +4,8 @@
  * centres, présence / départ / dispense). Les routes d'écriture de l'API v1 sont SUPPRIMÉES — pas
  * verrouillées — et les lectures restent servies.
  *
+ * GOO-65 (lot P23, décision du 25/09/2026) étend ce décommissionnement au changement de séjour.
+ *
  * Toutes les requêtes partent d'un administrateur (`getAppHelperWithAcl()`) et visent des documents qui
  * EXISTENT : un gestionnaire encore monté répondrait donc 200, 400 ou 403, jamais le 404 par défaut
  * d'Express. Le 404 applicatif (`{ ok: false, code: "NOT_FOUND" }`) est en outre distingué par son corps.
@@ -207,6 +209,13 @@ const removed: Record<string, [Method, string][]> = {
     ["put", "/referent/young/{young}/phase1Status/cohesionStayMedical"],
     ["put", "/referent/young/{young}/phase1Status/imageRight"],
   ],
+  "Changement de séjour (GOO-65)": [
+    ["put", "/referent/young/{young}/change-cohort"],
+    ["get", "/young/change-cohort"],
+    ["put", "/young/change-cohort"],
+    ["post", "/cohort-session/eligibility/2023"],
+    ["post", "/cohort-session/eligibility/2023/{young}"],
+  ],
 };
 
 describe.each(Object.entries(removed))("Écritures phase 1 supprimées — %s", (_domaine, routes) => {
@@ -261,6 +270,10 @@ describe("Lectures phase 1 conservées", () => {
 
   it("GET /session-phase1/:id/cohesion-center est toujours servie", async () => {
     await expectRouteServed("get", `/session-phase1/${ids.session}/cohesion-center`, 200);
+  });
+
+  it("GET /cohort-session/isInscriptionOpen est toujours servie", async () => {
+    await expectRouteServed("get", "/cohort-session/isInscriptionOpen", 200);
   });
 
   it("GET /cohesion-center/:id et /:id/session-phase1 sont toujours servies", async () => {

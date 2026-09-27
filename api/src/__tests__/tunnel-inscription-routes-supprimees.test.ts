@@ -5,8 +5,8 @@
  * Les inscriptions sont fermées : `POST /young/signup` répond 403 et `/preinscription` renvoie vers
  * snu.gouv.fr. Les routes du tunnel restaient pourtant servies à tout jeune connecté, quel que soit
  * son statut, et lui permettaient de réécrire son identité vérifiée, son département, sa cohorte ou
- * son statut de dossier. Elles sont supprimées ; le changement de séjour passe par
- * `PUT /young/change-cohort`, qui reste en place.
+ * son statut de dossier. Elles sont supprimées ; le changement de séjour (`PUT /young/change-cohort`)
+ * l'a été à son tour par GOO-65 (lot P23).
  */
 import request from "supertest";
 

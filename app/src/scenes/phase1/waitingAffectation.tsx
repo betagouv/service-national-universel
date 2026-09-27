@@ -27,11 +27,17 @@ export default function WaitingAffectation() {
   return (
     <HomeContainer>
       <HomeHeader title={title} img={hero}>
-        <Link to="/changer-de-sejour">
-          <p className="mt-3 text-sm text-blue-600">
-            Je ne suis plus disponible <HiArrowRight className="inline-block" />
-          </p>
-        </Link>
+        {!isCLE && (
+          <Link
+            to={{
+              pathname: "/changer-de-sejour/se-desister",
+              state: { backlink: "/phase1" },
+            }}>
+            <p className="mt-3 text-sm text-blue-600">
+              Je ne suis plus disponible <HiArrowRight className="inline-block" />
+            </p>
+          </Link>
+        )}
         <br />
         <br />
         <Notice>
