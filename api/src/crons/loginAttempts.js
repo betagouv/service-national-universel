@@ -15,6 +15,12 @@ const { LOGIN_ATTEMPTS_WINDOW_MS } = require("../services/auth/attemptCounters")
  * glissante de `consumeLoginAttempt`. Ce cron ne fait plus que de l'entretien :
  * il efface les compteurs dont la dernière tentative est hors fenêtre, ce qui
  * n'accorde aucune tentative que la fenêtre glissante n'accorderait déjà.
+ *
+ * La mise à jour passe par le driver natif (`model.collection`), pas par
+ * `model.updateMany` : ce dernier déclenche les hooks de mongoose-patch-history,
+ * qui chargent en mémoire tous les comptes visés, deux fois, et faisaient mourir
+ * TASKS en OOM chaque nuit (GOO-97). Aucune traçabilité n'est perdue :
+ * `loginAttempts` et `nextLoginAttemptIn` sont exclus de l'historique.
  */
 exports.handler = async () => {
   await clean(ReferentModel);
@@ -24,7 +30,7 @@ exports.handler = async () => {
 const clean = async (model) => {
   try {
     const windowStart = new Date(Date.now() - LOGIN_ATTEMPTS_WINDOW_MS);
-    await model.updateMany(
+    await model.collection.updateMany(
       {
         loginAttempts: { $gt: 0 },
         $or: [{ nextLoginAttemptIn: { $lt: windowStart } }, { nextLoginAttemptIn: null }, { nextLoginAttemptIn: { $exists: false } }],
