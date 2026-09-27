@@ -19,6 +19,7 @@ import {
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
   ReferentStatus,
+  departmentList,
 } from "snu-lib";
 
 import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
@@ -342,8 +343,11 @@ describe("Referent", () => {
     it("should not update young if region goal reached (not department)", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, cohortId: cohort._id, max: 1 }));
-      // jeune dans la region mais pas dans le departement
-      await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: cohort.name, cohortId: cohort._id }));
+      // jeune dans la region mais pas dans le departement (le département de la fixture est tiré au hasard : on exclut celui de l'objectif)
+      const autreDepartement = faker.helpers.arrayElement(departmentList.filter((department) => department !== inscriptionGoal.department));
+      await createYoungHelper(
+        getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, department: autreDepartement, cohort: cohort.name, cohortId: cohort._id }),
+      );
 
       let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort);
       expect(completionObjectif.department.isAtteint).toBe(false);
