@@ -43,6 +43,7 @@ import { decrypt, encrypt } from "../cryptoUtils";
 import { sendTemplate } from "../brevo";
 import { validateUpdateApplication, validateNewApplication, validateId, idSchema } from "../utils/validator";
 import { config } from "../config";
+import { sanitizeEmailText } from "../email/emailInput";
 import { serializeApplication, serializeYoung, serializeContract } from "../utils/serializer";
 import {
   uploadFile,
@@ -798,7 +799,9 @@ router.post(
       // build default values for params
       // => young name, and mission name
 
-      let params: Params = { youngFirstName: application.youngFirstName || "", youngLastName: application.youngLastName || "", missionName: mission.name };
+      // Nom de mission et motif de refus sont saisis par la structure : on en retire le balisage
+      // avant de les recopier dans le mail (constat PM2).
+      let params: Params = { youngFirstName: application.youngFirstName || "", youngLastName: application.youngLastName || "", missionName: sanitizeEmailText(mission.name) };
 
       if (template === SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED) {
         if (!isReferentActive) return res.status(200).send({ ok: true });
@@ -831,7 +834,7 @@ router.post(
         ].filter((destinataire) => destinataire.email);
         params = {
           ...params,
-          message,
+          message: sanitizeEmailText(message),
           cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater`,
         };
       } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {

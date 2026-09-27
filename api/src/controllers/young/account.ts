@@ -7,9 +7,11 @@ import { getQPV, getDensity } from "../../geo";
 import { YoungModel } from "../../models";
 import { serializeYoung } from "../../utils/serializer";
 import { capture } from "../../sentry";
-import { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { department2region, departmentList, formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, regionList, SENDINBLUE_TEMPLATES } from "snu-lib";
 import validator from "validator";
 import { validateParents } from "../../utils/validator";
+import { userRateLimiter } from "../../middlewares/rateLimit";
+import { sanitizeEmailText } from "../../email/emailInput";
 
 const router = express.Router({ mergeParams: true });
 
@@ -42,10 +44,14 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   }
 });
 
+// Chaque changement de département écrit aux référents de l'ancien et du nouveau département : le
+// quota par compte l'empêche de servir d'envoi en masse (constat PM20).
+const addressChangeLimiter = userRateLimiter({ prefix: "young-account-address", windowMs: 60 * 60 * 1000, limit: 10 });
+
 // Le changement d'adresse ne recalcule plus ni le statut d'inscription ni l'éligibilité au séjour, et ne
 // dépend plus de l'affectation : les écritures phase 1 et les objectifs d'inscription sont décommissionnés
 // (GOO-65). Le statut et la cohorte ne sont jamais lus dans le body (audit 2026-09-21, M41).
-router.put("/address", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.put("/address", passport.authenticate("young", { session: false, failWithError: true }), addressChangeLimiter, async (req: UserRequest, res) => {
   try {
     const { value, error } = Joi.object({
       addressVerified: Joi.string().trim().valid("true").required(),
@@ -63,18 +69,29 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
           lon: undefined,
         })
         .allow({}, null),
-      department: Joi.string().trim().required(),
-      region: Joi.string().trim().required(),
+      // Département et région désignent les référents qui reçoivent l'email de changement : liste
+      // fermée, comme les calcule l'app à partir du géocodage (useAddress), jamais un texte libre (PM20).
+      department: Joi.string()
+        .trim()
+        .valid(...departmentList)
+        .required(),
+      region: Joi.string()
+        .trim()
+        .valid(...regionList)
+        .required(),
       cityCode: Joi.string().trim().default("").allow("", null),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (department2region[value.department] !== value.region) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (young.department && value.department !== young.department) {
-      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
+      // Le département enregistré a pu être écrit librement avant la liste fermée.
+      const previousDepartment = sanitizeEmailText(young.department);
+      await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment });
       await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: value.department });
     }
 

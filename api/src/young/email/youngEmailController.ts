@@ -11,12 +11,19 @@ import { isReferent, isYoung } from "../../utils";
 import { YoungModel } from "../../models";
 import { canEditYoungInScope } from "../youngScope";
 import { isTrustedEmailLink, sanitizeEmailText } from "../../email/emailInput";
+import { userRateLimiter } from "../../middlewares/rateLimit";
 
 import { sendEmailToYoung } from "./youngEmailService";
 
 const router = express.Router();
 
-router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+// Le seul envoi déclenché par un volontaire depuis l'app est la fiche sanitaire (MedicalFileModal) :
+// 10 par heure suffisent, sans lui laisser arroser des adresses de son choix (constats PM24, PM37).
+// Les référents envoient depuis l'admin : ils ne sont pas limités ici.
+const youngEmailLimiter = userRateLimiter({ prefix: "young-email-template", windowMs: 60 * 60 * 1000, limit: 10 });
+const limitYoung = (req: UserRequest, res: Response, next) => (isYoung(req.user) ? youngEmailLimiter(req, res, next) : next());
+
+router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), limitYoung, async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -42,6 +49,13 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     // The template must exist.
     if (!Object.values(SENDINBLUE_TEMPLATES.young).includes(template) && !Object.values(SENDINBLUE_TEMPLATES.parent).includes(template)) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    // Les gabarits « parent » partent vers `parent1Email`, que le volontaire fixe lui-même : ouverts
+    // au volontaire, ils lui font envoyer un faux email officiel (consentement parental, parcours
+    // décommissionné) à l'adresse de son choix (constat PM37).
+    if (isYoung(req.user) && Object.values(SENDINBLUE_TEMPLATES.parent).includes(template)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
     // Le mail part de l'expéditeur officiel du SNU : seuls les liens du service y sont admis,
