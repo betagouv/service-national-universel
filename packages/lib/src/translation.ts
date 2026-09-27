@@ -194,6 +194,8 @@ const translate = (value) => {
       return "Ressource introuvable";
     case "PASSWORD_TOKEN_EXPIRED_OR_INVALID":
       return "Lien expiré ou token invalide";
+    case "PASSWORD_RESET_REQUIRED":
+      return "Par mesure de sécurité, votre mot de passe doit être réinitialisé. Un e-mail contenant le lien de réinitialisation vient de vous être envoyé.";
     case "EMAIL_VALIDATION_TOKEN_EXPIRED_OR_INVALID":
       return "Le code d'activation saisi n'est pas valide ou a expiré";
     case "USER_ALREADY_REGISTERED":

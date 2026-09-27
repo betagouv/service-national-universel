@@ -139,6 +139,13 @@ export const ReferentSchema = {
       description: "Date de dernier changement de password",
     },
   },
+  passwordResetRequired: {
+    type: Boolean,
+    default: false,
+    documentation: {
+      description: "Réinitialisation du mot de passe imposée avant toute nouvelle session (empreinte exposée)",
+    },
+  },
   registredAt: {
     type: Date,
     documentation: {

@@ -48,6 +48,9 @@ import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
 import { isReferentAccessAllowed } from "./featureFlag/adminAccessRestriction";
 import { getAcl } from "./services/iam/Permission.service";
 
+// Délai minimal entre deux envois du lien de réinitialisation imposée à un même compte.
+const PASSWORD_RESET_RESEND_DELAY_MS = 5 * 60 * 1000;
+
 // Le trust token ("cet appareil a déjà passé le 2FA") est lié au compte qui l'a obtenu :
 // sans cette liaison, le nom du cookie (`trust_token-<_id>`) est la seule chose qui porte
 // l'identité, et il est choisi par le client — n'importe quel trust token valide (ou même
@@ -493,6 +496,14 @@ class Auth {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.ADMIN_ACCESS_RESTRICTED });
       }
 
+      // Empreinte du mot de passe exposée (index ES, #5310) : le mot de passe, même juste, n'ouvre
+      // plus de session. Le lien de réinitialisation part vers l'adresse du compte ; ce code n'est
+      // renvoyé qu'après un mot de passe juste, il ne renseigne donc pas sur l'existence du compte.
+      if (user.passwordResetRequired) {
+        await this.sendRequiredPasswordReset(user);
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.PASSWORD_RESET_REQUIRED });
+      }
+
       const shouldUse2FA = async () => {
         try {
           if (!config.ENABLE_2FA) return false;
@@ -587,6 +598,12 @@ class Auth {
       // Verrouillage temporaire : le code 2FA a pu être émis avant son activation.
       if (isReferent(user) && !(await isReferentAccessAllowed(user._id.toString()))) {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.ADMIN_ACCESS_RESTRICTED });
+      }
+      // Le code 2FA a pu être émis avant que la réinitialisation ne soit imposée.
+      if (user.passwordResetRequired) {
+        user.set({ token2FA: null, token2FAExpires: null });
+        await this.sendRequiredPasswordReset(user);
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.PASSWORD_RESET_REQUIRED });
       }
 
       user.set({ token2FA: null, token2FAExpires: null });
@@ -1009,22 +1026,39 @@ class Auth {
       // pour ne pas transformer cette route en oracle sur le rôle du compte (M66).
       if (!user || user?.status === ReferentStatus.INACTIVE || (isReferent(user) && isDecommissionedRole(user))) return res.status(200).send({ ok: true });
 
-      const token = await crypto.randomBytes(20).toString("hex");
-      user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });
-      await user.save();
-
-      // PM5 (25/09/2026) : l'appel Brevo n'est plus attendu avant de répondre — sinon la présence ou
-      // l'absence d'un compte se lit dans le temps de réponse (branche `!user` ci-dessus, immédiate).
-      sendTemplate(SENDINBLUE_TEMPLATES.FORGOT_PASSWORD, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-        params: { cta: `${cta}?token=${token}` },
-      }).catch(capture);
+      await this.sendPasswordResetLink(user, cta);
 
       return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  }
+
+  async sendPasswordResetLink(user, cta: string) {
+    const token = await crypto.randomBytes(20).toString("hex");
+    user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });
+    await user.save();
+
+    // PM5 (25/09/2026) : l'appel Brevo n'est plus attendu avant de répondre — sinon la présence ou
+    // l'absence d'un compte se lit dans le temps de réponse (branche `!user` de forgotPassword, immédiate).
+    sendTemplate(SENDINBLUE_TEMPLATES.FORGOT_PASSWORD, {
+      emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+      params: { cta: `${cta}?token=${token}` },
+    }).catch(capture);
+  }
+
+  /**
+   * Réinitialisation imposée : envoie le lien, sauf s'il vient de partir (tentatives répétées ou
+   * double clic), pour ne pas inonder la boîte du titulaire ni invalider le lien qu'il vient de recevoir.
+   */
+  async sendRequiredPasswordReset(user) {
+    const sentAt = user.forgotPasswordResetExpires ? new Date(user.forgotPasswordResetExpires).getTime() - COOKIE_SIGNIN_MAX_AGE_MS : 0;
+    if (user.forgotPasswordResetToken && Date.now() - sentAt < PASSWORD_RESET_RESEND_DELAY_MS) {
+      await user.save();
+      return;
+    }
+    await this.sendPasswordResetLink(user, `${isYoung(user) ? config.APP_URL : config.ADMIN_URL}/auth/reset`);
   }
 
   async forgotPasswordReset(req, res) {
@@ -1056,6 +1090,7 @@ class Auth {
       user.password = password;
       user.forgotPasswordResetToken = "";
       user.forgotPasswordResetExpires = "";
+      user.passwordResetRequired = false;
       user.passwordChangedAt = Date.now();
       user.loginAttempts = 0;
       await user.save();

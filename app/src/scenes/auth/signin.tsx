@@ -4,7 +4,7 @@ import React, { useState, useEffect } from "react";
 import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { formatToActualTime } from "snu-lib";
+import { formatToActualTime, ERRORS } from "snu-lib";
 import RightArrow from "../../assets/icons/RightArrow";
 import Error from "../../components/error";
 import { capture } from "../../sentry";
@@ -55,6 +55,11 @@ const Signin: React.FC = () => {
         setError({
           text: "Vous avez atteint le maximum de tentatives de connexion autorisées.",
           subText: `Votre accès est bloqué jusqu'à ${date !== "-" ? `à ${date}.` : "demain."}. Revenez d'ici quelques minutes.`,
+        });
+      } else if (e.code === ERRORS.PASSWORD_RESET_REQUIRED) {
+        setError({
+          text: "Votre mot de passe doit être réinitialisé.",
+          subText: "Par mesure de sécurité, un e-mail contenant le lien de réinitialisation vient de vous être envoyé.",
         });
       } else {
         setError({
