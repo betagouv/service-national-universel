@@ -80,7 +80,7 @@ function App() {
             ) : (
               <Switch>
                 <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
-                <Redirect from={"/phase1/changer-de-sejour"} to={"/changer-de-sejour"} />
+                <Redirect from={"/phase1/changer-de-sejour"} to={"/"} />
                 <Route path="/preinscription" component={() => <ExternalRedirect to="https://www.snu.gouv.fr/inscriptions-cloturees/" />} />
 
                 <SentryRoute path="/validate-contract/done" component={ContractDone} />

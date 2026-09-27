@@ -8,22 +8,18 @@ import {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   STATUS_CLASSE,
-  FUNCTIONAL_ERRORS,
   YoungType,
   UserDto,
   SUB_ROLE_GOD,
-  YOUNG_SOURCE,
   INSCRIPTION_GOAL_LEVELS,
   ROLES_LIST,
   DECOMMISSIONED_ROLES,
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
   ReferentStatus,
-  departmentList,
 } from "snu-lib";
 
 import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
-import { getCompletionObjectifs } from "../services/inscription-goal";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
@@ -241,44 +237,19 @@ describe("Referent", () => {
       }
       return { young, modifiedYoung, response, id: originalYoung._id };
     }
-    it("should not update young if goal not defined (null)", async () => {
-      const testName = "Juillet 2023";
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: testName }));
-      // ajout d'un objectif non définie
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, max: null as any }));
-
-      // ajout d'un jeune au departement
-      const { response, id: youngId } = await createYoungThenUpdate(
-        {
-          status: YOUNG_STATUS.VALIDATED,
-        },
-        { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort.id },
-        { keepYoung: true },
-        { role: ROLES.ADMIN, department: [inscriptionGoal.department!], region: inscriptionGoal.region },
-      );
-      expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
-      await deleteYoungByIdHelper(youngId);
-    });
-    it("should not update young if department goal reached", async () => {
-      const testName = "Juillet 2023";
+    it("valide un dossier sans contrôler l'objectif d'inscription (GOO-65, PL9)", async () => {
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(now.getDate() + 1);
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow, objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ instructionEndDate: tomorrow, objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
+      // Objectif déjà atteint dans le département : la validation était refusée avant le décommissionnement.
+      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, cohortId: cohort._id, max: 1 }));
+      await createYoungHelper(
+        getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, department: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id }),
+      );
 
-      // ajout d'un objectif à 1
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: testName, max: 1 }));
-
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort);
-      expect(completionObjectif.department.objectif).toBe(1);
-      expect(completionObjectif.isAtteint).toBe(false);
-
-      // ajout d'un jeune au departement sans depassement
-      const { response: responseSuccessed, id: youngId } = await createYoungThenUpdate(
-        {
-          status: YOUNG_STATUS.VALIDATED,
-        },
+      const { young, response } = await createYoungThenUpdate(
+        { status: YOUNG_STATUS.VALIDATED },
         {
           status: YOUNG_STATUS.WAITING_VALIDATION,
           region: inscriptionGoal.region,
@@ -287,83 +258,11 @@ describe("Referent", () => {
           cohort: cohort.name,
           cohortId: cohort._id,
         },
-        { keepYoung: true },
+        undefined,
         { role: ROLES.REFERENT_DEPARTMENT, department: [inscriptionGoal.department!], region: inscriptionGoal.region },
       );
-      expect(responseSuccessed.statusCode).toEqual(200);
-
-      // ajout d'un jeune au departement avec depassement
-      let response = (
-        await createYoungThenUpdate(
-          {
-            status: YOUNG_STATUS.VALIDATED,
-          },
-          { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
-        )
-      ).response;
-      expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
-      // admin: ajout d'un jeune au departement avec depassement
-      response = (
-        await createYoungThenUpdate(
-          {
-            status: YOUNG_STATUS.VALIDATED,
-          },
-          { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohortId: cohort._id },
-          undefined,
-          { role: ROLES.ADMIN },
-        )
-      ).response;
-      expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
-      // ajout d'un jeune HZR sur un autre departement sans dépassement
-      response = (
-        await createYoungThenUpdate(
-          {
-            status: YOUNG_STATUS.VALIDATED,
-          },
-          { cohortId: cohort._id },
-        )
-      ).response;
-      expect(response.statusCode).not.toEqual(200);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
-      // admin: force l'ajout d'un jeune au departement meme si depassement
-      response = (
-        await createYoungThenUpdate(
-          {
-            status: YOUNG_STATUS.VALIDATED,
-          },
-          { region: inscriptionGoal.region, department: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
-          { queryParam: "?forceGoal=1" },
-        )
-      ).response;
       expect(response.statusCode).toEqual(200);
-      await deleteYoungByIdHelper(youngId);
-    });
-    it("should not update young if region goal reached (not department)", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
-      const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, cohortId: cohort._id, max: 1 }));
-      // jeune dans la region mais pas dans le departement (le département de la fixture est tiré au hasard : on exclut celui de l'objectif)
-      const autreDepartement = faker.helpers.arrayElement(departmentList.filter((department) => department !== inscriptionGoal.department));
-      await createYoungHelper(
-        getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, department: autreDepartement, cohort: cohort.name, cohortId: cohort._id }),
-      );
-
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort);
-      expect(completionObjectif.department.isAtteint).toBe(false);
-      expect(completionObjectif.region.isAtteint).toBe(true);
-      expect(completionObjectif.isAtteint).toBe(true);
-
-      const response = (
-        await createYoungThenUpdate(
-          {
-            status: YOUNG_STATUS.VALIDATED,
-          },
-          { department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, region: inscriptionGoal.region, cohort: cohort.name, cohortId: cohort._id },
-        )
-      ).response;
-      expect(response.statusCode).toEqual(400);
-      expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
+      expect(young?.status).toEqual(YOUNG_STATUS.VALIDATED);
     });
     it("should return 404 if young not found", async () => {
       const res = await request(await getAppHelperWithAcl())
@@ -378,7 +277,7 @@ describe("Referent", () => {
       expect(response.statusCode).toEqual(200);
       expectYoungToEqual(young, modifiedYoung);
     });
-    it("should cascade young statuses when sending status WITHDRAWN", async () => {
+    it("ne touche ni au statut de phase 1 ni à l'affectation au désistement (GOO-65)", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture());
       const { young, response } = await createYoungThenUpdate(
         {
@@ -393,7 +292,7 @@ describe("Referent", () => {
       );
       expect(response.statusCode).toEqual(200);
       expect(young?.status).toEqual("WITHDRAWN");
-      expect(young?.statusPhase1).toEqual("WAITING_AFFECTATION");
+      expect(young?.statusPhase1).toEqual("AFFECTED");
       expect(young?.statusPhase2).toEqual("WAITING_REALISATION");
       expect(young?.statusPhase3).toEqual("WAITING_REALISATION");
     });
@@ -416,21 +315,16 @@ describe("Referent", () => {
       expect(young?.statusPhase2).toEqual("WAITING_REALISATION");
       expect(young?.statusPhase3).toEqual("VALIDATED");
     });
-    it("should update young statuses when sending cohection stay presence true", async () => {
+    it("ignore la présence au séjour et n'en dérive plus le statut de phase 1 (GOO-65, PM28)", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture());
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "true" }, { cohesionStayPresence: undefined, cohortId: cohort._id });
-      expect(response.statusCode).toEqual(200);
-      expect(young?.statusPhase1).toEqual("DONE");
-      expect(young?.cohesionStayPresence).toEqual("true");
+      for (const cohesionStayPresence of ["true", "false"]) {
+        const { young, response } = await createYoungThenUpdate({ cohesionStayPresence }, { cohesionStayPresence: undefined, statusPhase1: "AFFECTED", cohortId: cohort._id });
+        expect(response.statusCode).toEqual(200);
+        expect(young?.statusPhase1).toEqual("AFFECTED");
+        expect(young?.cohesionStayPresence).toBeUndefined();
+      }
     });
-    it("should update young statuses when sending cohection stay presence false", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture());
-      const { young, response } = await createYoungThenUpdate({ cohesionStayPresence: "false" }, { cohortId: cohort._id });
-      expect(response.statusCode).toEqual(200);
-      expect(young?.statusPhase1).toEqual("NOT_DONE");
-      expect(young?.cohesionStayPresence).toEqual("false");
-    });
-    it("should remove places when sending to cohesion center", async () => {
+    it("ne recalcule plus les places de la session (GOO-65)", async () => {
       const sessionPhase1: any = await createSessionPhase1(getNewSessionPhase1Fixture());
       const now = new Date();
       const tomorrow = new Date(now);
@@ -448,7 +342,7 @@ describe("Referent", () => {
       );
       expect(response.statusCode).toEqual(200);
       const updatedSessionPhase1 = await getSessionPhase1ById(young?.sessionPhase1Id);
-      expect(updatedSessionPhase1?.placesLeft).toEqual(placesLeft - 1);
+      expect(updatedSessionPhase1?.placesLeft).toEqual(placesLeft);
     });
   });
   describe("PUT /referent/youngs", () => {
@@ -978,133 +872,6 @@ describe("Referent", () => {
         .send();
       expect(res.statusCode).toEqual(200);
       expect(res.headers["set-cookie"][0]).toContain("jwt_ref=");
-    });
-  });
-  describe("PUT /referent/young/:id/change-cohort", () => {
-    it("should change the cohort of the young and cohortId", async () => {
-      const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
-      const cohort2 = await CohortModel.create({ ...getNewCohortFixture(), name: "à venir" });
-      const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
-
-      expect(young.cohortId).toEqual(cohort1._id.toString());
-
-      const newCohortName = "à venir";
-      const res = await request(await getAppHelperWithAcl())
-        .put(`/referent/young/${young._id}/change-cohort`)
-        .send({
-          source: "VOLONTAIRE",
-          cohort: newCohortName,
-          message: "Changing cohort for testing purposes",
-          cohortChangeReason: "Testing",
-        });
-
-      expect(res.status).toEqual(200);
-      expect(res.body.data.cohort).toEqual(newCohortName);
-      expect(res.body.data.cohortChangeReason).toEqual("Testing");
-      expect(res.body.data.originalCohort).toEqual(young.cohort);
-      expect(res.body.data.cohortId).toEqual(cohort2._id.toString());
-    });
-
-    it("should change the cohort of the young and cohortId to undefined", async () => {
-      const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
-      const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
-
-      const notPersistedCohortName = "à venir";
-      const res = await request(await getAppHelperWithAcl())
-        .put(`/referent/young/${young._id}/change-cohort`)
-        .send({
-          source: "VOLONTAIRE",
-          cohort: notPersistedCohortName,
-          message: "Changing cohort for testing",
-          cohortChangeReason: "Testing",
-        });
-
-      expect(res.status).toEqual(200);
-      expect(res.body.data.cohort).toEqual(notPersistedCohortName);
-      expect(res.body.data.cohortId).toBeUndefined();
-    });
-
-    it("should return 403 if the referent is not authorized to change the cohort", async () => {
-      const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
-      const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.VISITOR }))
-        .put(`/referent/young/${young._id}/change-cohort`)
-        .send({
-          source: "VOLONTAIRE",
-          cohort: cohort1.name,
-          message: "Changing cohort for testing purposes",
-          cohortChangeReason: "Testing",
-        });
-
-      expect(res.status).toEqual(403);
-    });
-
-    it("should return 409 if the cohort is not valid", async () => {
-      const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
-      const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
-      const res = await request(await getAppHelperWithAcl())
-        .put(`/referent/young/${young._id}/change-cohort`)
-        .send({
-          source: "VOLONTAIRE",
-          cohort: "invalid cohort",
-          message: "Changing cohort for testing purposes",
-          cohortChangeReason: "Testing",
-        });
-
-      expect(res.status).toEqual(409);
-    });
-
-    it("should change the cohort of the young from HTS to HTS while keeping school data unchanged", async () => {
-      const cohort1 = await createCohortHelper(getNewCohortFixture({ name: "Février 2024" }));
-      const cohort2 = await createCohortHelper(getNewCohortFixture({ name: "Juin 2024" }));
-
-      const etablissement = createFixtureEtablissement();
-      const school = await createEtablissement(etablissement);
-
-      const young = await createYoungHelper({
-        ...getNewYoungFixture(),
-        cohort: cohort1.name,
-        cohortId: cohort1._id,
-        source: YOUNG_SOURCE.VOLONTAIRE,
-        schoolId: school._id,
-        schoolName: school.name,
-        schoolType: school.type[0],
-        schoolAddress: school.address,
-        schoolZip: school.zip,
-        schoolCity: school.city,
-        schoolDepartment: school.department,
-        schoolRegion: school.region,
-        schoolCountry: school.country,
-      });
-
-      const res = await request(await getAppHelperWithAcl())
-        .put(`/referent/young/${young._id}/change-cohort`)
-        .send({
-          source: YOUNG_SOURCE.VOLONTAIRE,
-          cohort: cohort2.name,
-          message: "Changing cohort for testing purposes",
-          cohortChangeReason: "Testing HTS to HTS",
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.cohort).toBe(cohort2.name);
-      expect(res.body.data.cohortId).toBe(cohort2._id.toString());
-      expect(res.body.data.cohortChangeReason).toBe("Testing HTS to HTS");
-      expect(res.body.data.originalCohort).toBe(cohort1.name);
-
-      // Vérifier que les données de l'école sont inchangées
-      expect(res.body.data.schoolId).toBe(school._id.toString());
-      expect(res.body.data.schoolName).toBe(school.name);
-      expect(res.body.data.schoolType).toBe(school.type[0]);
-      expect(res.body.data.schoolAddress).toBe(school.address);
-      expect(res.body.data.schoolZip).toBe(school.zip);
-      expect(res.body.data.schoolCity).toBe(school.city);
-      expect(res.body.data.schoolDepartment).toBe(school.department);
-      expect(res.body.data.schoolRegion).toBe(school.region);
-      expect(res.body.data.schoolCountry).toBe(school.country);
-
-      // Vérifier que la source reste VOLONTAIRE
-      expect(res.body.data.source).toBe(YOUNG_SOURCE.VOLONTAIRE);
     });
   });
 });
