@@ -6,7 +6,6 @@ const passport = require("passport");
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
 const loggingMiddleware = require("./middlewares/loggingMiddleware");
 const { forceDomain } = require("forcedomain");
-const requestIp = require("request-ip"); // Import request-ip package
 const express = require("express");
 const { createTerminus } = require("@godaddy/terminus");
 
@@ -75,10 +74,6 @@ async function runAPI() {
 
   applyBodyParsers(app);
 
-  app.use(function (req, res, next) {
-    req.ipInfo = requestIp.getClientIp(req);
-    next();
-  });
   app.use(loggingMiddleware);
 
   app.use(cookieParser());
