@@ -5,7 +5,7 @@ Audit de sécurité de la production du 25/09/2026, constats PH15, PM18, PM28, P
 
 Décisions du 25/09 : les écritures qui ne concernent que la phase 1 sont **retirées**, pas corrigées ; les
 lectures phase 1 restent. La correction manuelle de `statusPhase1` est retirée entièrement, ADMIN et
-super-admin compris : un dossier historique mal pointé se corrige par script.
+super-admin compris. Les statuts existants des volontaires ne sont pas modifiés.
 
 ## 1. Ce qui est retiré
 
@@ -95,8 +95,7 @@ de P12.
 
 ## 4. Impact fonctionnel
 
-- ADMIN et super-admin perdent la correction manuelle de `statusPhase1`. Un dossier historique mal pointé se
-  corrige par script.
+- ADMIN et super-admin perdent la correction manuelle de `statusPhase1`.
 - Plus de « Changer de cohorte » côté admin (bascule CLE ↔ HTS et « à venir » compris), plus de « Changer de
   séjour » côté volontaire. Le désistement reste.
 - La validation d'un dossier ne contrôle plus la jauge.
@@ -114,6 +113,5 @@ admin appelle `GET /inscription-goal/:cohort/department/:department` avant de va
 l'ancienne app appelle `POST /cohort-session/eligibility/2023` au changement d'adresse.
 
 apiv2 : aucun changement de code. snu-lib perd des symboles qu'apiv2 n'utilise pas, d'où un simple
-type-check en CI. Aucune migration, aucune variable d'environnement.
-
-Après déploiement : confirmer qu'aucun volontaire n'est encore `AFFECTED`.
+type-check en CI. Aucune migration, aucune variable d'environnement, aucune modification des statuts
+existants.
