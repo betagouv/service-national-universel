@@ -37,7 +37,7 @@ super-admin compris : un dossier historique mal pointé se corrige par script.
   complémentaire via `switchYoungByIdToLC`), de contrôle AFFECTED ni de recalcul des places.
 - `PUT /young-edition/:id/phasestatus` : `statusPhase1` est refusé en 400 (`Joi.forbidden`), et au moins un
   statut de phase 2 ou 3 est exigé. Plus de remise à zéro de l'affectation ni de recalcul des places. Admin :
-  la ligne « Phase 1 » du menu « Statuts de phases » disparaît.
+  la ligne « Phase 1 » du menu « Statuts de phases » reste, en lecture seule (statut affiché, sans sous-menu).
 - `getPhaseStatusOptions` (snu-lib) n'a plus d'entrée pour la phase 1 et renvoie une copie : l'ajout
   d'`AFFECTED` pour le super-admin mutait la matrice partagée (PL23).
 - `PUT /young/withdraw` : le désistement ne remappe plus `statusPhase1` et ne vide plus l'affectation.
