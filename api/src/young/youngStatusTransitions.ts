@@ -21,9 +21,9 @@ const YOUNG_STATUS_TRANSITIONS: Partial<Record<string, string[]>> = {
 };
 
 /**
- * Champs qui ne se modifient pas par PUT /referent/young/:id hors ADMIN : la cohorte passe par
- * /change-cohort (éligibilité, places, notification), l'affectation par les routes d'affectation
- * (décompte des places, et une session d'un autre territoire étendrait le périmètre de lecture).
+ * Champs qui ne se modifient pas par PUT /referent/young/:id hors ADMIN (une session d'un autre territoire
+ * étendrait le périmètre de lecture). Depuis GOO-65, validateYoung ne les accepte plus du tout : ce contrôle
+ * reste en défense en profondeur.
  */
 const COHORT_AND_AFFECTATION_FIELDS = ["cohort", "cohortId", "originalCohort", "sessionPhase1Id", "cohesionCenterId", "meetingPointId"] as const;
 

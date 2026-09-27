@@ -1,5 +1,5 @@
 import request from "supertest";
-import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS, COHORT_TYPE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import * as fileUtils from "../utils/file";
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
@@ -441,55 +441,6 @@ describe("Young", () => {
           invitationToken,
         });
       expect(res.statusCode).toEqual(200);
-    });
-  });
-
-  describe("POST /young/invite", () => {
-    it("should return 403 when user is not authorized to invite young", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }));
-      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: false }));
-      const youngFixture = getNewYoungFixture({ cohortId: cohort._id.toString() });
-
-      const res = await request(await getAppHelperWithAcl(referent))
-        .post("/young/invite")
-        .send(youngFixture);
-
-      expect(res.statusCode).toBe(403);
-      expect(res.body.code).toBe(ERRORS.OPERATION_NOT_ALLOWED);
-    });
-
-    it("should return 200 when user is authorized to invite young", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }));
-      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: true }));
-      const youngFixture = getNewYoungFixture({ cohortId: cohort._id.toString() });
-
-      const res = await request(await getAppHelperWithAcl(referent))
-        .post("/young/invite")
-        .send(youngFixture);
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.young).toBeDefined();
-      expect(res.body.ok).toBe(true);
-    });
-
-    it("should create a new young user and send an invitation email", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentClasse: true, type: COHORT_TYPE.CLE }));
-      const young = getNewYoungFixture({ cohortId: cohort._id.toString() });
-
-      const res = await request(await getAppHelperWithAcl(referent))
-        .post("/young/invite")
-        .send(young);
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty("young");
-      // Le token d'invitation ne doit jamais sortir de l'email d'invitation : il délivre un JWT jeune
-      // via POST /young/signup_verify (constat H43 de l'audit du 21/09/2026).
-      expect(res.body.young).not.toHaveProperty("invitationToken");
-      expect(res.body.young).not.toHaveProperty("invitationExpires");
-      expect(res.body.young).toHaveProperty("status", "WAITING_VALIDATION");
-      expect(res.body.young).toHaveProperty("cohort", cohort.name);
-      expect(res.body.young).toHaveProperty("cohortId", cohort._id.toString());
     });
   });
 

@@ -3,7 +3,7 @@ import { isBefore } from "date-fns";
 import { toastr } from "react-redux-toastr";
 import { HiInformationCircle } from "react-icons/hi";
 
-import { YOUNG_STATUS, YOUNG_SOURCE, YoungDto, getDepartmentForInscriptionGoal, translate } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_SOURCE, YoungDto, translate } from "snu-lib";
 
 import { capture } from "@/sentry";
 import api from "@/services/api";
@@ -15,7 +15,6 @@ import ShieldCheck from "@/assets/icons/ShieldCheck";
 import { REJECTION_REASONS_KEY } from "./commons";
 import { PlainButton } from "./components/Buttons";
 import YoungConfirmationModal, { ConfirmModalContentData } from "./YoungConfirmationModal";
-import { InscriptionGoalService } from "@/services/inscriptionGoalService";
 
 const YOUNG_CLE_REFUSED_MESSAGE =
   "Votre inscription au SNU dans le cadre du dispositif Classe et Lycée Engagés a été refusée. Pour plus d'informations, merci de vous rapprocher de votre établissement.";
@@ -36,11 +35,8 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
   async function handleValidateYoung() {
     try {
       const isDatePassed = young.latestCNIFileExpirationDate ? isBefore(new Date(young.latestCNIFileExpirationDate), new Date()) : false;
-      let isGoalReached, isLCavailable;
+      let isLCavailable;
       if (young.source !== YOUNG_SOURCE.CLE) {
-        const departement = getDepartmentForInscriptionGoal(young);
-        const tauxRemplissage = await InscriptionGoalService.getTauxRemplissage({ cohort: young.cohort!, department: departement });
-        isGoalReached = tauxRemplissage >= 1;
         // on vérifie qu'il n'y pas de jeunes en LC : seul le total compte, aucun dossier n'est téléchargé
         const { responses } = await api.post("/elasticsearch/young/search", {
           filters: { cohort: [young.cohort], status: [YOUNG_STATUS.WAITING_LIST] },
@@ -48,10 +44,10 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
         });
         isLCavailable = (responses?.[0]?.hits?.total?.value || 0) > 0;
       }
-      return setConfirmModal(getConfirmModalContent({ source: young.source, isGoalReached, isLCavailable, isDatePassed, young }));
+      return setConfirmModal(getConfirmModalContent({ source: young.source, isLCavailable, isDatePassed, young }));
     } catch (e) {
       capture(e);
-      toastr.error("Erreur lors de la récupération des objectifs", translate(e.message));
+      toastr.error("Erreur lors de la récupération de la liste complémentaire", translate(e.message));
     }
   }
 
@@ -134,13 +130,11 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
 
 export function getConfirmModalContent({
   source,
-  isGoalReached,
   isLCavailable,
   isDatePassed,
   young,
 }: {
   source: YoungDto["source"];
-  isGoalReached?: boolean;
   isDatePassed: boolean;
   isLCavailable?: boolean;
   young: YoungDto;
@@ -149,7 +143,7 @@ export function getConfirmModalContent({
     icon: <ShieldCheck className="h-[36px] w-[36px] text-[#D1D5DB]" />,
     title: "",
     message: `Souhaitez-vous confirmer l'action ?`,
-    type: isGoalReached ? YOUNG_STATUS.WAITING_LIST : YOUNG_STATUS.VALIDATED,
+    type: YOUNG_STATUS.VALIDATED,
     infoLink: {
       href: "https://support.snu.gouv.fr/base-de-connaissance/procedure-de-validation-des-dossiers",
       text: "Des questions sur ce fonctionnement ?",
@@ -160,13 +154,6 @@ export function getConfirmModalContent({
     title = (
       <span>
         Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur la classe {young?.classe?.name || ""}</strong>.
-      </span>
-    );
-  } else if (isGoalReached) {
-    title = (
-      <span>
-        L&apos;objectif d&apos;inscription de votre département a été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-        <strong className="text-bold">validé sur liste complémentaire</strong>.
       </span>
     );
   } else if (isLCavailable) {
@@ -195,8 +182,7 @@ export function getConfirmModalContent({
   } else {
     title = (
       <span>
-        L&apos;objectif d&apos;inscription de votre département n&apos;a pas été atteint à 100%. Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être{" "}
-        <strong className="text-bold">validé sur liste principale</strong>.
+        Le dossier d&apos;inscription de {young.firstName} {young.lastName} va être <strong className="text-bold">validé sur liste principale</strong>.
       </span>
     );
   }

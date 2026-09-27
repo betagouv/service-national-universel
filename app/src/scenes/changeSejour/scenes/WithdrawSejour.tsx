@@ -18,7 +18,7 @@ export default function WithdrawSejour() {
   const [withdrawnReason, setWithdrawnReason] = useState("");
   const [open, setOpen] = useState(false);
   const location = useLocation<{ backlink?: string }>();
-  const backlink = location.state?.backlink || "/changer-de-sejour/no-date";
+  const backlink = location.state?.backlink || "/";
 
   return (
     <ChangeSejourContainer title={!abandonStatus.includes(young.status) ? "Se désister" : "Abandonner mon inscription"} backlink={backlink}>

@@ -12,14 +12,12 @@ import AuthObject from "../auth";
 import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../middlewares/rateLimit";
 import { requireJsonBody } from "../middlewares/requireJsonBody";
 import patches from "../controllers/patches";
-import ClasseStateManager from "../cle/classe/stateManager";
 
 import {
   YoungModel,
   ClasseModel,
   EtablissementModel,
   ReferentModel,
-  LigneBusModel,
   MissionModel,
   ApplicationModel,
   SessionPhase1Model,
@@ -31,12 +29,10 @@ import {
   CohortModel,
   SessionPhase1Document,
   CohesionCenterDocument,
-  SchoolRAMSESModel,
   YoungDocument,
   ReferentDocument,
 } from "../models";
 
-import emailsEmitter from "../emails";
 import { sendEmailToYoung } from "../young/email/youngEmailService";
 
 import { getQPV, getDensity } from "../geo";
@@ -49,13 +45,10 @@ import {
   uploadFile,
   deleteFile,
   validatePassword,
-  updatePlacesSessionPhase1,
   ERRORS,
   isYoung,
   inSevenDays,
-  STEPS2023,
   notifDepartmentChange,
-  updateSeatsTakenInBusLine,
   cancelPendingApplications,
   cancelPendingEquivalence,
 } from "../utils";
@@ -79,33 +72,24 @@ import {
   canGetReferentByEmail,
   canViewYoungFile,
   canRefuseMilitaryPreparation,
-  canChangeYoungCohort,
   canSendTutorTemplate,
   canSearchSessionPhase1,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
-  YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
   canCheckIfRefExist,
   YOUNG_SOURCE,
-  YOUNG_SOURCE_LIST,
   APPLICATION_STATUS,
   EQUIVALENCE_STATUS,
-  YOUNG_SITUATIONS,
-  CLE_FILIERE,
   canValidateMultipleYoungsInClass,
   ClasseSchoolYear,
-  canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
-  YoungType,
-  getDepartmentForInscriptionGoal,
   isAdmin,
   isReferentReg,
   canValidateYoungToLP,
-  ERRORS as ERRORS_LIB,
   ReferentType,
   PermissionDto,
   ROLE_JEUNE,
@@ -120,18 +104,15 @@ import {
   VISITOR_SUB_ROLES_LIST,
   WITHRAWN_REASONS,
 } from "snu-lib";
-import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { RouteRequest, RouteResponse, UserRequest } from "../controllers/request";
-import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { mightAddInProgressStatus } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import { CohortDocumentWithPlaces } from "../utils/cohort";
 import { handleNotifForYoungWithdrawn } from "../young/youngService";
 import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
@@ -730,73 +711,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
-    // Vérification des objectifs à la validation d'un jeune
-    if (
-      young.source !== YOUNG_SOURCE.CLE &&
-      value.status === YOUNG_STATUS.VALIDATED &&
-      young.status !== YOUNG_STATUS.VALIDATED &&
-      (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
-    ) {
-      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      if (!canValidateYoungToLP(req.user, cohort)) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-
-      const departement = getDepartmentForInscriptionGoal(young);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort);
-      if (completionObjectif.isAtteint) {
-        return res.status(400).send({
-          ok: false,
-          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
-        });
-      }
-    }
-
-    if (newYoung.status === YOUNG_STATUS.REINSCRIPTION) {
-      newYoung.cohesionStayPresence = undefined;
-      newYoung.presenceJDM = undefined;
-      newYoung.departSejourAt = undefined;
-      newYoung.departSejourMotif = undefined;
-      newYoung.departSejourMotifComment = undefined;
-      newYoung.meetingPointId = undefined;
-      newYoung.cohesionCenterId = undefined;
-      newYoung.sessionPhase1Id = undefined;
-      newYoung.statusPhase1 = YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
-    }
-    if (newYoung.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED) {
-      if (young.hasMeetingInformation !== "true" || !young.cohesionCenterId || !young.meetingPointId || (young.source === YOUNG_SOURCE.VOLONTAIRE && !young.ligneId)) {
-        return res.status(400).send({
-          ok: false,
-          code: FUNCTIONAL_ERRORS.MISSING_AFFECTATION_INFORMATIONS,
-        });
-      }
-    }
-
     if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
       await notifDepartmentChange(newYoung.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
       await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: newYoung.department });
-    }
-
-    if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
-      const emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];
-      if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! });
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
-        emailTo,
-        params: {
-          youngFirstName: young.firstName,
-          youngLastName: young.lastName,
-        },
-      });
-
-      // autovalidate the phase 1 if the young is present in the session
-      newYoung.statusPhase1 = "DONE";
-    }
-
-    if (newYoung.cohesionStayPresence === "false" && young.cohesionStayPresence !== "false") {
-      // reject the phase 1 if the young is NOT present in the session
-      newYoung.statusPhase1 = "NOT_DONE";
     }
 
     // Check quartier prioritaires.
@@ -863,24 +780,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const { withdrawnReason, withdrawnMessage } = newYoung;
       await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, withdrawnMessage, req.user);
-      newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
-      // reset des informations d'affectation
-      newYoung.cohesionCenterId = undefined;
-      newYoung.sessionPhase1Id = undefined;
-      newYoung.meetingPointId = undefined;
-      newYoung.ligneId = undefined;
-      newYoung.hasMeetingInformation = undefined;
-      newYoung.transportInfoGivenByLocal = undefined;
-      newYoung.deplacementPhase1Autonomous = undefined;
-      newYoung.cohesionStayPresence = undefined;
-      newYoung.presenceJDM = undefined;
-      newYoung.departInform = undefined;
-      newYoung.departSejourAt = undefined;
-      newYoung.departSejourMotif = undefined;
-      newYoung.departSejourMotifComment = undefined;
     }
-
-    const { sessionPhase1Id, ligneId } = young;
 
     if (value.roadCodeRefund === "true") {
       newYoung.roadCodeRefundDate = new Date();
@@ -907,20 +807,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
     await young.save({ fromUser: req.user });
 
-    // if they had a cohesion center, we check if we need to update the places taken / left
-    if (sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-    }
-
-    if (ligneId) {
-      const bus = await LigneBusModel.findById(ligneId);
-      if (bus) await updateSeatsTakenInBusLine(bus);
-    }
-
-    if (await shouldSwitchYoungByIdToLC(id, value.status)) {
-      await switchYoungByIdToLC(id);
-    }
     await mightAddInProgressStatus(young, req.user);
 
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
@@ -1037,295 +923,6 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-router.put("/young/:id/change-cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      source: Joi.string()
-        .valid(...YOUNG_SOURCE_LIST)
-        .required(),
-      cohort: Joi.string().required(),
-      // HTS
-      message: Joi.alternatives().conditional("source", { is: YOUNG_SOURCE.VOLONTAIRE, then: Joi.string().required() }),
-      cohortChangeReason: Joi.alternatives().conditional("source", { is: YOUNG_SOURCE.VOLONTAIRE, then: Joi.string().required() }),
-      // CLE
-      etablissementId: Joi.alternatives().conditional("source", { is: YOUNG_SOURCE.CLE, then: Joi.string().required() }),
-      classeId: Joi.alternatives().conditional("source", { is: YOUNG_SOURCE.CLE, then: Joi.string().required() }),
-    })
-      .unknown()
-      .validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const payload = value;
-    const { id } = req.params;
-    const young = await YoungModel.findById(id);
-
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    if (!canChangeYoungCohort(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
-    const previousYoung = { ...young.toObject() };
-
-    let classe: any = undefined;
-    let etablissement: any = undefined;
-    if (value.source === YOUNG_SOURCE.CLE) {
-      const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
-      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS_LIB.ETABLISSEMENT_NOT_FOUND });
-      if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS_LIB.CLASSE_NOT_FOUND });
-      classe = dbClasse;
-      etablissement = dbEtablissement;
-      if (classe.seatsTaken >= classe.totalSeats) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    let previousEtablissement: any = undefined;
-    let previousClasse: any = undefined;
-    if (young.source === YOUNG_SOURCE.CLE) {
-      const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(young.etablissementId), await ClasseModel.findById(young.classeId)]);
-      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS_LIB.ETABLISSEMENT_NOT_FOUND });
-      if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS_LIB.CLASSE_NOT_FOUND });
-      previousEtablissement = dbEtablissement;
-      previousClasse = dbClasse;
-    }
-
-    const { cohort, cohortChangeReason } = payload;
-
-    let youngStatus = young.status;
-    let inscriptionStep = young.inscriptionStep2023;
-    let reinscriptionStep = young.reinscriptionStep2023;
-    if (payload.source === YOUNG_SOURCE.CLE && young.status === YOUNG_STATUS.WAITING_LIST) {
-      youngStatus = YOUNG_STATUS.VALIDATED;
-    }
-    if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
-      youngStatus = getYoungStatusForBasculeCLEtoHTS(young) as YoungType["status"];
-    }
-    if (cohort === "à venir ") {
-      youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
-    }
-
-    let sessions: CohortDocumentWithPlaces[] = [];
-    if (req.user.role === ROLES.ADMIN) {
-      sessions = await getAllSessions(young);
-    } else if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
-      sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
-    } else {
-      sessions = await getFilteredSessionsForCLE();
-    }
-
-    if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    const oldSessionPhase1Id = young.sessionPhase1Id;
-    const oldBusId = young.ligneId;
-    if (young.cohort !== cohort && (young.sessionPhase1Id || young.meetingPointId)) {
-      young.set({
-        cohesionCenterId: undefined,
-        sessionPhase1Id: undefined,
-        meetingPointId: undefined,
-        ligneId: undefined,
-        deplacementPhase1Autonomous: undefined,
-        transportInfoGivenByLocal: undefined,
-        cohesionStayPresence: undefined,
-        presenceJDM: undefined,
-        departInform: undefined,
-        departSejourAt: undefined,
-        departSejourMotif: undefined,
-        departSejourMotifComment: undefined,
-        youngPhase1Agreement: "false",
-        hasMeetingInformation: undefined,
-        cohesionStayMedicalFileReceived: undefined,
-      });
-    }
-    const cohortModel = await CohortModel.findOne({ name: cohort });
-    if (
-      cohortModel?.type === YOUNG_SOURCE.CLE &&
-      young.status === YOUNG_STATUS.IN_PROGRESS &&
-      (inscriptionStep === STEPS2023.DOCUMENTS || reinscriptionStep === STEPS2023.DOCUMENTS)
-    ) {
-      young.hasStartedReinscription ? (reinscriptionStep = STEPS2023.REPRESENTANTS) : (inscriptionStep = STEPS2023.REPRESENTANTS);
-    }
-
-    young.set({
-      status: youngStatus,
-      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-      cohort,
-      originalCohort: previousYoung.cohort,
-      cohortChangeReason: cohortChangeReason ?? young.cohortChangeReason,
-      cohesionStayPresence: undefined,
-      cohesionStayMedicalFileReceived: undefined,
-      cohortId: cohortModel?._id,
-    });
-
-    if (payload.source === YOUNG_SOURCE.CLE) {
-      const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];
-      // on ne récupère pas les données d'affectation de la classe (le jeune sera affecté plus tard)
-      young.set({
-        source: YOUNG_SOURCE.CLE,
-        etablissementId: payload.etablissementId,
-        classeId: payload.classeId,
-        cniFiles: [],
-        "files.cniFiles": [],
-        inscriptionStep2023: inscriptionStep,
-        reinscriptionStep2023: reinscriptionStep,
-        latestCNIFileExpirationDate: undefined,
-        latestCNIFileCategory: undefined,
-        correctionRequests: correctionRequestsFiltered,
-        schooled: "true",
-        schoolName: etablissement.name,
-        schoolType: etablissement.type[0],
-        schoolAddress: etablissement.address,
-        schoolZip: etablissement.zip,
-        schoolCity: etablissement.city,
-        schoolDepartment: etablissement.department,
-        schoolRegion: etablissement.region,
-        schoolCountry: etablissement.country,
-        schoolId: undefined,
-        situation: getYoungSituationIfCLE(classe.filiere),
-      });
-    } else if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
-      const step2023 = young.hasStartedReinscription ? "reinscriptionStep2023" : "inscriptionStep2023";
-      const step2023Value =
-        young.status === YOUNG_STATUS.NOT_AUTORISED ? "WAITING_CONSENT" : young.hasStartedReinscription ? young.reinscriptionStep2023 : young.inscriptionStep2023;
-
-      // Only for CLE to HTS changes
-      if (young.source !== YOUNG_SOURCE.VOLONTAIRE) {
-        const school = await SchoolRAMSESModel.findOne({ uai: previousEtablissement?.uai });
-        young.set({
-          statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-          cniFiles: [],
-          "files.cniFiles": [],
-          latestCNIFileExpirationDate: undefined,
-          latestCNIFileCategory: undefined,
-          source: YOUNG_SOURCE.VOLONTAIRE,
-          etablissementId: undefined,
-          classeId: undefined,
-          schoolId: school?._id ?? undefined,
-          schoolName: school?.fullName ?? undefined,
-          schoolType: school?.type ?? undefined,
-          schoolAddress: school?.adresse ?? undefined,
-          schoolZip: school?.postcode ?? undefined,
-          schoolCity: school?.city ?? undefined,
-          schoolDepartment: school?.department ?? undefined,
-          schoolRegion: school?.region ?? undefined,
-          schoolCountry: school?.country ?? undefined,
-        });
-      }
-      // Only for HTS to HTS changes
-      young.set({
-        status: youngStatus,
-        [step2023]: step2023Value,
-      });
-    } else {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const date = new Date();
-    const newNote = {
-      note: `
-        Changement de cohorte de ${previousYoung.cohort} (${previousYoung.source || YOUNG_SOURCE.VOLONTAIRE}) à ${young.cohort} (${young.source}) ${
-          cohortChangeReason ? ` pour la raison suivante : ${cohortChangeReason}` : ""
-        }.\n${previousEtablissement ? `Etablissement précédent : ${previousEtablissement.name}.` : ""}\n${
-          previousClasse ? `Classe précédente : ${previousClasse.uniqueKeyAndId} ${previousClasse.name}.` : ""
-        }\n${previousYoung.cohesionCenterId ? `Centre précédent : ${previousYoung.cohesionCenterId}.` : ""}\n${
-          previousYoung.sessionPhase1Id ? `Session précédente : ${previousYoung.sessionPhase1Id}.` : ""
-        }\n${previousYoung.meetingPointId ? `Point de rendez-vous précédent : ${previousYoung.meetingPointId}.` : ""}\n${
-          Object.prototype.hasOwnProperty.call(previousYoung, "presenceJDM") ? `Présence JDM précédente : ${previousYoung.presenceJDM}.` : ""
-        }
-        `.trim(),
-      phase: "PHASE_1",
-      createdAt: date,
-      updatedAt: date,
-      referent: {
-        _id: req.user._id,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        role: req.user.role,
-      },
-    };
-    young.set({ notes: [...(young.notes ?? []), newNote], hasNotes: "true" });
-
-    await young.save({ fromUser: req.user });
-    if (previousClasse) await ClasseStateManager.compute(previousClasse._id, req.user, { YoungModel });
-    if (classe) await ClasseStateManager.compute(classe._id, req.user, { YoungModel });
-
-    // if they had a session, we check if we need to update the places taken / left
-    if (oldSessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1Model.findById(oldSessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-    }
-
-    // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
-    if (oldBusId) {
-      const bus = await LigneBusModel.findById(oldBusId);
-      if (bus) await updateSeatsTakenInBusLine(bus);
-    }
-
-    emailsEmitter.emit(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
-      young,
-      previousYoung,
-      cohortName: cohort,
-      cohortChangeReason,
-      message: payload.message,
-      classe,
-    });
-
-    // Document Mongo brut : jetons de session / réinitialisation compris (constat PH16, audit
-    // production 2026-09-25).
-    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-const getYoungStatusForAVenir = (young: YoungType) => {
-  switch (young.status) {
-    case YOUNG_STATUS.IN_PROGRESS:
-      return YOUNG_STATUS.IN_PROGRESS;
-    case YOUNG_STATUS.WAITING_VALIDATION:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.WAITING_CORRECTION:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    default:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-  }
-};
-
-const getYoungStatusForBasculeCLEtoHTS = (young: YoungType) => {
-  switch (young.status) {
-    case YOUNG_STATUS.IN_PROGRESS:
-      return YOUNG_STATUS.IN_PROGRESS;
-    case YOUNG_STATUS.REINSCRIPTION:
-      return YOUNG_STATUS.REINSCRIPTION;
-    case YOUNG_STATUS.WITHDRAWN:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.REFUSED:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    case YOUNG_STATUS.NOT_AUTORISED:
-      return YOUNG_STATUS.IN_PROGRESS;
-    case YOUNG_STATUS.VALIDATED:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-    default:
-      return YOUNG_STATUS.WAITING_VALIDATION;
-  }
-};
-
-const getYoungSituationIfCLE = (filiere) => {
-  if (filiere === CLE_FILIERE.GENERAL_AND_TECHNOLOGIC) {
-    return YOUNG_SITUATIONS.GENERAL_SCHOOL;
-  }
-  if (filiere === CLE_FILIERE.PROFESSIONAL) {
-    return YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL;
-  }
-  if (filiere === CLE_FILIERE.APPRENTICESHIP) {
-    return YOUNG_SITUATIONS.APPRENTICESHIP;
-  }
-  if (filiere === CLE_FILIERE.ADAPTED) {
-    return YOUNG_SITUATIONS.SPECIALIZED_SCHOOL;
-  }
-  if (filiere === CLE_FILIERE.MIXED) {
-    return YOUNG_SITUATIONS.GENERAL_SCHOOL;
-  }
-  return null;
-};
 
 router.post("/:tutorId/email/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {

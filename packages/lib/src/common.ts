@@ -2,7 +2,7 @@ import sanitizeHtml from "sanitize-html";
 
 import { SAFE_LINK_PROTOCOLS } from "./utils/safeUrl";
 
-import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ACADEMIQUE_DOMAINS, YOUNG_SOURCE } from "./constants/constants";
+import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ACADEMIQUE_DOMAINS } from "./constants/constants";
 import translation from "./translation";
 import { ROLES } from "./roles";
 
@@ -127,47 +127,6 @@ function canUserUpdateYoungStatus(actor) {
   }
 }
 
-const SESSIONPHASE1ID_CANCHANGESESSION = ["627cd8b873254d073af93147", "6274e6359ea0ba074acf6557"];
-
-const youngCanChangeSession = ({
-  statusPhase1,
-  status,
-  sessionPhase1Id,
-  source,
-  departSejourMotif,
-}: {
-  statusPhase1: string;
-  status: string;
-  sessionPhase1Id?: string;
-  source: string;
-  departSejourMotif?: string;
-}) => {
-  if (source === YOUNG_SOURCE.CLE) return false;
-  if (departSejourMotif === "Exclusion") return false;
-  if (
-    [
-      YOUNG_STATUS.IN_PROGRESS,
-      YOUNG_STATUS.REINSCRIPTION,
-      YOUNG_STATUS.WAITING_LIST,
-      YOUNG_STATUS.WAITING_VALIDATION,
-      YOUNG_STATUS.WAITING_CORRECTION,
-      YOUNG_STATUS.ABANDONED,
-    ].includes(status as any)
-  ) {
-    return true;
-  }
-  if (
-    [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN].includes(status as any) &&
-    [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.NOT_DONE].includes(statusPhase1 as any)
-  ) {
-    return true;
-  }
-  if ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE].includes(statusPhase1 as any) && SESSIONPHASE1ID_CANCHANGESESSION.includes(sessionPhase1Id as any)) {
-    return true;
-  }
-  return false;
-};
-
 const youngCanWithdraw = (young) => {
   if (
     ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && [YOUNG_STATUS_PHASE2.VALIDATED].includes(young.statusPhase2)) ||
@@ -277,7 +236,6 @@ export {
   getLabelWithdrawnReason,
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
-  youngCanChangeSession,
   youngCanWithdraw,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
