@@ -19,7 +19,7 @@ import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper } from "./helpers/young";
 import { createReferentHelper } from "./helpers/referent";
 import { getNewReferentFixture } from "./fixtures/referent";
-import { YoungModel } from "../models";
+import { ReferentModel, YoungModel } from "../models";
 import { config } from "../config";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../jwt-options";
 import { ROLES } from "snu-lib";
@@ -258,6 +258,34 @@ describe("L27 — expiration des compteurs", () => {
 
     const after = await YoungModel.findById(young._id);
     expect(after!.loginAttempts).toBe(0);
+  });
+
+  // GOO-97 : un `Model.updateMany` déclenche les hooks de mongoose-patch-history, qui
+  // chargent en mémoire TOUS les comptes visés, deux fois. En prod, TASKS mourait en
+  // OOM chaque nuit. Le cron ne doit charger aucun document.
+  it("purge sans charger les comptes en mémoire", async () => {
+    const dormant = new Date(Date.now() - 48 * 60 * 60 * 1000);
+    const young = await createYoung({ loginAttempts: 3, nextLoginAttemptIn: dormant });
+    const referent = await createReferentHelper({ ...getNewReferentFixture(), loginAttempts: 5, nextLoginAttemptIn: dormant } as any);
+    const youngFind = jest.spyOn(YoungModel, "find");
+    const referentFind = jest.spyOn(ReferentModel, "find");
+
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const loginAttemptsCron = require("../crons/loginAttempts");
+      await loginAttemptsCron.handler();
+
+      expect(youngFind).not.toHaveBeenCalled();
+      expect(referentFind).not.toHaveBeenCalled();
+    } finally {
+      youngFind.mockRestore();
+      referentFind.mockRestore();
+    }
+
+    expect((await YoungModel.findById(young._id))!.loginAttempts).toBe(0);
+    const referentAfter = await ReferentModel.findById(referent._id);
+    expect(referentAfter!.loginAttempts).toBe(0);
+    expect(referentAfter!.nextLoginAttemptIn).toBeNull();
   });
 });
 
