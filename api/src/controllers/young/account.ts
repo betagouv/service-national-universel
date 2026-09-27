@@ -4,14 +4,12 @@ import passport from "passport";
 import { UserRequest } from "../request";
 import { ERRORS, notifDepartmentChange } from "../../utils";
 import { getQPV, getDensity } from "../../geo";
-import { YoungModel, CohortModel } from "../../models";
+import { YoungModel } from "../../models";
 import { serializeYoung } from "../../utils/serializer";
-import { getFilteredSessions } from "../../utils/cohort";
 import { capture } from "../../sentry";
-import { formatPhoneNumberFromPhoneZone, isCle, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "snu-lib";
+import { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES } from "snu-lib";
 import validator from "validator";
 import { validateParents } from "../../utils/validator";
-import { getCompletionObjectifs } from "../../services/inscription-goal";
 
 const router = express.Router({ mergeParams: true });
 
@@ -44,12 +42,9 @@ router.put("/profile", passport.authenticate("young", { session: false, failWith
   }
 });
 
-// Regles de modification d’adresse :
-// 1, Lorsque je suis affectée et jusqu’au jour de retour de séjour je ne peux pas modifier mon adresse.
-// 2, En cas de changement de département mon eligibilité doit être vérifiée si
-//    - mon statut d’inscription est “validée sur liste principale” OU “validée sur liste complémentaire” ET
-//    - mon statut phase 1 “en attente d’affectation”
-
+// Le changement d'adresse ne recalcule plus ni le statut d'inscription ni l'éligibilité au séjour, et ne
+// dépend plus de l'affectation : les écritures phase 1 et les objectifs d'inscription sont décommissionnés
+// (GOO-65). Le statut et la cohorte ne sont jamais lus dans le body (audit 2026-09-21, M41).
 router.put("/address", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { value, error } = Joi.object({
@@ -77,51 +72,6 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
 
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const currentCohort = await CohortModel.findById(young.cohortId);
-
-    // If the young is affected and the cohort is not ended address can't be updated.
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && currentCohort && new Date(currentCohort.dateEnd).valueOf() > Date.now()) {
-      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
-    }
-
-    // Le statut et la cohorte ne sont jamais lus dans le body : un jeune en liste complémentaire
-    // s'auto-promouvait en VALIDATED en l'envoyant avec sa nouvelle adresse (audit 2026-09-21, M41).
-    // Ils sont recalculés ici à partir de l'éligibilité de la nouvelle adresse.
-    let status: string | undefined;
-    if (
-      // Cohort and status should be checked
-      value.department !== young.department &&
-      !isCle(young) &&
-      young.cohort !== "à venir" &&
-      young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
-      (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
-    ) {
-      // @todo eligibility is based on address, should be based on school address.
-      const availableSessions = await getFilteredSessions(
-        { grade: young.grade, birthdateAt: young.birthdateAt, status: young.status, ...value },
-        Number(req.headers["x-user-timezone"]) || null,
-      );
-
-      if (availableSessions.length === 0) {
-        // Aucun séjour ouvert à la nouvelle adresse : le jeune n'est plus éligible.
-        status = YOUNG_STATUS.NOT_ELIGIBLE;
-      } else {
-        // Le séjour actuel doit rester accessible depuis la nouvelle adresse ; en changer passe par
-        // PUT /young/change-cohort, qui contrôle lui-même l'éligibilité.
-        const cohortDocument = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
-        if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (!availableSessions.some((s) => s.name === cohortDocument.name)) {
-          return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
-        }
-
-        // Objectif atteint dans le nouveau département : un jeune validé passe en liste complémentaire.
-        // L'inverse n'existe pas : sortir de la liste complémentaire relève de l'instruction.
-        if (young.status === YOUNG_STATUS.VALIDATED) {
-          const completionObjectif = await getCompletionObjectifs(value.department, cohortDocument);
-          if (completionObjectif.isAtteint) status = YOUNG_STATUS.WAITING_LIST;
-        }
-      }
-    }
 
     if (young.department && value.department !== young.department) {
       await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
@@ -129,7 +79,6 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
     }
 
     young.set(value);
-    if (status) young.set({ status });
     await young.save({ fromUser: req.user });
 
     // Check quartier prioritaires.

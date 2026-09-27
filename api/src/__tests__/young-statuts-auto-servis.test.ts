@@ -90,7 +90,9 @@ describe("PUT /young/account/address (M41)", () => {
     expect(updated?.cohort).toBe(cohort.name);
   });
 
-  it("passe le jeune en NOT_ELIGIBLE, côté serveur, si aucun séjour n'est ouvert à sa nouvelle adresse", async () => {
+  // GOO-65 : le changement d'adresse ne recalcule plus le statut à partir de l'éligibilité au séjour ni des
+  // objectifs d'inscription, et n'est plus bloqué par l'affectation.
+  it("ne recalcule plus le statut quand aucun séjour n'est ouvert à la nouvelle adresse", async () => {
     const cohort = await createEligibleCohort("Ain");
     const young = await createYoungHelper(
       getNewYoungFixture({
@@ -106,11 +108,34 @@ describe("PUT /young/account/address (M41)", () => {
 
     const res = await request(await getAppHelperWithAcl(young))
       .put("/young/account/address")
-      .send({ ...newAddress("Nord"), status: YOUNG_STATUS.VALIDATED });
+      .send({ ...newAddress("Nord"), status: YOUNG_STATUS.NOT_ELIGIBLE });
 
     expect(res.status).toBe(200);
     const updated = await getYoungByIdHelper(young._id);
-    expect(updated?.status).toBe(YOUNG_STATUS.NOT_ELIGIBLE);
+    expect(updated?.department).toBe("Nord");
+    expect(updated?.status).toBe(YOUNG_STATUS.VALIDATED);
+  });
+
+  it("accepte le changement d'adresse d'un jeune affecté sans toucher à son affectation", async () => {
+    const cohort = await createEligibleCohort("Ain");
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        department: "Ain",
+        status: YOUNG_STATUS.VALIDATED,
+        statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+        cohort: cohort.name,
+        cohortId: cohort._id.toString(),
+      }),
+    );
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put("/young/account/address")
+      .send(newAddress("Rhône"));
+
+    expect(res.status).toBe(200);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.department).toBe("Rhône");
+    expect(updated?.statusPhase1).toBe(YOUNG_STATUS_PHASE1.AFFECTED);
   });
 
   it("ignore le statut envoyé quand le département ne change pas", async () => {

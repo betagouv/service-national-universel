@@ -2,7 +2,9 @@
  * Décision produit du 24/09/2026 : plus aucune création, modification ni suppression sur la phase 1
  * (points de rassemblement, réservation des places, lignes de bus et plan de transport, sessions et
  * centres, présence / départ / dispense). Les routes d'écriture de l'API v1 sont SUPPRIMÉES — pas
- * verrouillées — et les lectures restent servies.
+ * verrouillées — et les lectures restent servies. Décision du 25/09/2026 (GOO-65) : même traitement pour
+ * le changement de séjour, l'invitation, les objectifs d'inscription et les écritures phase 1 des routes
+ * mixtes (PUT /referent/young/:id, /young-edition/:id/phasestatus, /young/withdraw).
  *
  * Toutes les requêtes partent d'un administrateur (`getAppHelperWithAcl()`) et visent des documents qui
  * EXISTENT : un gestionnaire encore monté répondrait donc 200, 400 ou 403, jamais le 404 par défaut
@@ -10,7 +12,7 @@
  */
 import request from "supertest";
 import { Types } from "mongoose";
-import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SUB_ROLE_GOD, getPhaseStatusOptions } from "snu-lib";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -207,6 +209,19 @@ const removed: Record<string, [Method, string][]> = {
     ["put", "/referent/young/{young}/phase1Status/cohesionStayMedical"],
     ["put", "/referent/young/{young}/phase1Status/imageRight"],
   ],
+  // GOO-65 (audit production du 25/09/2026 : PM18, PM29, PL9) : changement de séjour, invitation et objectifs.
+  "Changement de séjour, invitation et objectifs d'inscription": [
+    ["put", "/referent/young/{young}/change-cohort"],
+    ["get", "/young/change-cohort"],
+    ["put", "/young/change-cohort"],
+    ["post", "/young/invite"],
+    ["post", "/cohort-session/eligibility/2023"],
+    ["post", "/cohort-session/eligibility/2023/{young}"],
+    ["post", "/inscription-goal/2025"],
+    ["get", "/inscription-goal/2025/department/Ain"],
+    ["get", "/inscription-goal/2025/department/Ain/reached"],
+    ["get", "/inscription-goal/Ain/current"],
+  ],
 };
 
 describe.each(Object.entries(removed))("Écritures phase 1 supprimées — %s", (_domaine, routes) => {
@@ -267,5 +282,102 @@ describe("Lectures phase 1 conservées", () => {
     const res = await expectRouteServed("get", `/cohesion-center/${ids.center}`, 200);
     expect(res.body.data._id).toBe(ids.center);
     await expectRouteServed("get", `/cohesion-center/${ids.center}/session-phase1`, 200);
+  });
+});
+
+describe("Écritures phase 1 retirées des routes mixtes (GOO-65)", () => {
+  it("GET /inscription-goal/:cohort (tableaux de bord) est toujours servie", async () => {
+    await expectRouteServed("get", "/inscription-goal/2025", 200);
+  });
+
+  it("PUT /referent/young/:id ignore présence, statut de phase 1, classe, email et consentements (PM28, PM29, PH15, PM35)", async () => {
+    const before = await YoungModel.create(getNewYoungFixture({ statusPhase1: "AFFECTED", cohesionStayPresence: undefined }));
+    const payload = {
+      cohesionStayPresence: "false",
+      statusPhase1: "DONE",
+      classeId: new Types.ObjectId().toString(),
+      email: "attaquant@example.org",
+      parent1FromFranceConnect: "true",
+      parent1AllowImageRights: "true",
+      imageRight: "true",
+      parentAllowSNU: "true",
+      consentment: "true",
+    };
+
+    const res = await request(app).put(`/referent/young/${before._id}`).send(payload);
+
+    expect(res.status).toBe(200);
+    const after = await YoungModel.findById(before._id).lean();
+    expect(after?.statusPhase1).toBe("AFFECTED");
+    expect(after?.cohesionStayPresence).toBeUndefined();
+    expect(after?.classeId).toBe(before.classeId);
+    expect(after?.email).toBe(before.email);
+    expect(after?.parent1FromFranceConnect).toBe(before.parent1FromFranceConnect);
+    expect(after?.parent1AllowImageRights).toBe(before.parent1AllowImageRights);
+    expect(after?.imageRight).toBe(before.imageRight);
+    expect(after?.parentAllowSNU).toBe(before.parentAllowSNU);
+    expect(after?.consentment).toBe(before.consentment);
+  });
+
+  it.each([
+    ["ADMIN", { role: ROLES.ADMIN }],
+    ["super-admin", { role: ROLES.ADMIN, subRole: SUB_ROLE_GOD }],
+  ])("PUT /young-edition/:id/phasestatus refuse statusPhase1 à un %s (PL23)", async (_label, user) => {
+    const before = await YoungModel.create(getNewYoungFixture({ statusPhase1: "AFFECTED" }));
+    const res = await request(await getAppHelperWithAcl(user as any))
+      .put(`/young-edition/${before._id}/phasestatus`)
+      .send({ statusPhase1: "DONE" });
+
+    expect(res.status).toBe(400);
+    expect((await YoungModel.findById(before._id).lean())?.statusPhase1).toBe("AFFECTED");
+  });
+
+  it("PUT /young-edition/:id/phasestatus sert toujours la phase 2", async () => {
+    const before = await YoungModel.create(getNewYoungFixture({ statusPhase2: "WAITING_REALISATION" }));
+    const res = await request(app).put(`/young-edition/${before._id}/phasestatus`).send({ statusPhase2: "IN_PROGRESS" });
+
+    expect(res.status).toBe(200);
+    expect((await YoungModel.findById(before._id).lean())?.statusPhase2).toBe("IN_PROGRESS");
+  });
+
+  it("getPhaseStatusOptions ne propose rien pour la phase 1 et renvoie une copie (PL23)", () => {
+    const superAdmin = { role: ROLES.ADMIN, subRole: SUB_ROLE_GOD } as any;
+    expect(getPhaseStatusOptions(superAdmin, 1)).toEqual([]);
+
+    const options = getPhaseStatusOptions(superAdmin, 2);
+    options.push("AFFECTED");
+    expect(getPhaseStatusOptions({ role: ROLES.ADMIN } as any, 2)).not.toContain("AFFECTED");
+  });
+
+  it("PUT /young/withdraw conserve l'affectation phase 1 du volontaire", async () => {
+    const cohort = await CohortModel.findById(ids.cohort);
+    const young = await YoungModel.create(
+      getNewYoungFixture({
+        status: "VALIDATED",
+        statusPhase1: "AFFECTED",
+        statusPhase2: "WAITING_REALISATION",
+        cohort: cohort!.name,
+        cohortId: ids.cohort,
+        sessionPhase1Id: ids.session,
+        cohesionCenterId: ids.center,
+        meetingPointId: ids.pdr,
+        ligneId: ids.ligne,
+      }),
+    );
+    const placesLeft = (await SessionPhase1Model.findById(ids.session).lean())?.placesLeft;
+
+    const res = await request(await getAppHelperWithAcl(young, "young"))
+      .put("/young/withdraw")
+      .send({ withdrawnReason: "other", withdrawnMessage: "Je me désiste" });
+
+    expect(res.status).toBe(200);
+    const after = await YoungModel.findById(young._id).lean();
+    expect(after?.status).toBe("WITHDRAWN");
+    expect(after?.statusPhase1).toBe("AFFECTED");
+    expect(after?.sessionPhase1Id).toBe(ids.session);
+    expect(after?.cohesionCenterId).toBe(ids.center);
+    expect(after?.meetingPointId).toBe(ids.pdr);
+    expect(after?.ligneId).toBe(ids.ligne);
+    expect((await SessionPhase1Model.findById(ids.session).lean())?.placesLeft).toBe(placesLeft);
   });
 });
