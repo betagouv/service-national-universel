@@ -6,6 +6,7 @@ import {
   canSigninAs,
   canUpdateReferent,
   DECOMMISSIONED_ROLES,
+  getPhaseStatusOptions,
   getYoungFieldsHiddenFrom,
   isDecommissionedRole,
   omitYoungFields,
@@ -163,8 +164,28 @@ describe("getYoungFieldsHiddenFrom / omitYoungFields", () => {
 });
 
 describe("écritures phase 1 et objectifs d'inscription décommissionnés (GOO-65, lot P23)", () => {
+  const superAdmin = { role: ROLES.ADMIN, subRole: SUB_ROLE_GOD } as UserDto;
+  const admin = { role: ROLES.ADMIN } as UserDto;
+
   it("n'exporte plus les helpers dont les seules routes ont été supprimées", async () => {
     const roles = await import("./roles");
     expect(roles).not.toHaveProperty("canChangeYoungCohort");
+  });
+
+  it("ne propose plus aucun statut de phase 1, super-admin compris", () => {
+    expect(getPhaseStatusOptions(superAdmin, 1)).toEqual([]);
+    expect(getPhaseStatusOptions(admin, 1)).toEqual([]);
+    expect(getPhaseStatusOptions({ role: ROLES.REFERENT_DEPARTMENT } as UserDto, 1)).toEqual([]);
+  });
+
+  it("renvoie une copie : modifier le résultat ne change pas les options des appels suivants", () => {
+    const first = getPhaseStatusOptions(superAdmin, 2);
+    first.push("AFFECTED");
+    expect(getPhaseStatusOptions(admin, 2)).not.toContain("AFFECTED");
+    expect(getPhaseStatusOptions(admin, 2)).toEqual(["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"]);
+  });
+
+  it("conserve les statuts des phases 2 et 3", () => {
+    expect(getPhaseStatusOptions(admin, 3)).toEqual(["WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"]);
   });
 });

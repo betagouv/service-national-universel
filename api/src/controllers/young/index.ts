@@ -14,10 +14,6 @@ import { capture } from "../../sentry";
 import {
   YoungModel,
   ApplicationModel,
-  SessionPhase1Model,
-  LigneBusModel,
-  ClasseModel,
-  EtablissementModel,
   CohortModel,
   ApplicationDocument,
   MissionEquivalenceModel,
@@ -26,11 +22,11 @@ import {
 import AuthObject from "../../auth";
 import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../../middlewares/rateLimit";
 import { requireJsonBody } from "../../middlewares/requireJsonBody";
-import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
+import { uploadFile, validatePassword, ERRORS, isYoung, isReferent, getCcOfYoung, getFile } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { setSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
-import { validateYoung, validateId, idSchema } from "../../utils/validator";
+import { validateId, idSchema } from "../../utils/validator";
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
@@ -46,7 +42,6 @@ import { purgeYoungFiles } from "../../young/youngFilesPurge";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
-  canInviteYoung,
   canDeletePatchesHistory,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
@@ -54,12 +49,7 @@ import {
   ROLES,
   YOUNG_STATUS_PHASE2,
   YOUNG_STATUS_PHASE3,
-  YOUNG_SOURCE,
   youngCanWithdraw,
-  REGLEMENT_INTERIEUR_VERSION,
-  getDepartmentForInscriptionGoal,
-  FUNCTIONAL_ERRORS,
-  CohortDto,
   MissionType,
   ContractType,
   ReferentType,
@@ -71,7 +61,6 @@ import {
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
 import { keepOnlyUnsharedEmails } from "../../services/rgpdEmailGuard";
-import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import { scanFile } from "../../utils/virusScanner";
 import { UserRequest } from "../request";
@@ -277,96 +266,9 @@ router.post(
   },
 );
 
-router.post("/invite", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = validateYoung(req.body);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const cohortDocument = await CohortModel.findById(value.cohortId);
-    const cohortDto: CohortDto | null = cohortDocument ? (cohortDocument.toObject() as CohortDto) : null;
-
-    if (!canInviteYoung(req.user, cohortDto)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
-    const obj = { ...value };
-
-    if (!obj.cohortId) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const cohort = await CohortModel.findById(obj.cohortId);
-    if (!cohort) {
-      return res.status(404).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    obj.cohort = cohort.name;
-    obj.acceptRI = REGLEMENT_INTERIEUR_VERSION;
-
-    const formatedDate = new Date(obj.birthdateAt).setUTCHours(11, 0, 0);
-    obj.birthdateAt = formatedDate;
-
-    const invitation_token = crypto.randomBytes(20).toString("hex");
-    obj.invitationToken = invitation_token;
-    obj.invitationExpires = inSevenDays(); // 7 days
-
-    obj.country = "France";
-
-    obj.parent1ContactPreference = "email";
-    obj.parent2ContactPreference = "email";
-    obj.status = YOUNG_STATUS.IN_PROGRESS;
-
-    obj.inscriptionDoneDate = new Date();
-    if (obj.classeId) {
-      obj.source = YOUNG_SOURCE.CLE;
-      const classe = await ClasseModel.findById(obj.classeId);
-      if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      obj.etablissementId = classe.etablissementId;
-      const etablissement = await EtablissementModel.findById(classe.etablissementId);
-      if (etablissement) {
-        obj.schoolName = etablissement.name;
-        obj.schoolType = etablissement.type[0];
-        obj.schoolAddress = etablissement.address;
-        obj.schoolZip = etablissement.zip;
-        obj.schoolCity = etablissement.city;
-        obj.schoolDepartment = etablissement.department;
-        obj.schoolRegion = etablissement.region;
-        obj.schoolCountry = etablissement.country;
-        obj.schoolId = etablissement.schoolId;
-      }
-    }
-
-    if (obj.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED) {
-      const departement = getDepartmentForInscriptionGoal(obj);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort);
-      if (completionObjectif.isAtteint) {
-        return res.status(400).send({
-          ok: false,
-          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
-        });
-      }
-    }
-
-    //creating IN_PROGRESS for data
-    const young = await YoungModel.create({ ...obj, fromUser: req.user });
-
-    young.set({ status: YOUNG_STATUS.WAITING_VALIDATION });
-    await young.save({ fromUser: req.user });
-
-    const toName = `${young.firstName} ${young.lastName}`;
-    const cta = `${config.APP_URL}/auth/signup/invite?token=${invitation_token}&utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+166+activer`;
-    const fromName = `${req.user.firstName} ${req.user.lastName}`;
-    await sendTemplate(SENDINBLUE_TEMPLATES.INVITATION_YOUNG, {
-      emailTo: [{ name: toName, email: young.email }],
-      params: { toName, cta, fromName },
-    });
-
-    return res.status(200).send({ young: serializeYoung(young, req.user), ok: true });
-  } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+// GOO-65 (lot P23) : `POST /invite` (création d'un volontaire par un référent, avec contrôle d'objectif
+// d'inscription) est supprimée, sans appelant. Les invitations déjà envoyées s'activent toujours par
+// `/signup_verify` et `/signup_invite`.
 
 // Le lien de validation phase 3 est envoyé au tuteur, à une adresse saisie par le jeune : son porteur
 // ne reçoit que ce dont la page de validation a besoin, pas le dossier du volontaire (santé, parents,
@@ -795,41 +697,16 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, withdrawnMessage, req.user);
 
-    const { sessionPhase1Id, ligneId } = young;
-
+    // GOO-65 (lot P23) : le désistement n'écrit plus rien de la phase 1 (statut, affectation,
+    // décompte des places), décommissionnée.
     young.set({
       status: YOUNG_STATUS.WITHDRAWN,
-      statusPhase1: young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1,
       lastStatusAt: Date.now(),
       withdrawnMessage,
       withdrawnReason,
-      // reset des informations d'affectation
-      cohesionCenterId: undefined,
-      sessionPhase1Id: undefined,
-      meetingPointId: undefined,
-      ligneId: undefined,
-      hasMeetingInformation: undefined,
-      transportInfoGivenByLocal: undefined,
-      deplacementPhase1Autonomous: undefined,
-      cohesionStayPresence: undefined,
-      presenceJDM: undefined,
-      departInform: undefined,
-      departSejourAt: undefined,
-      departSejourMotif: undefined,
-      departSejourMotifComment: undefined,
     });
 
     const updatedYoung = await young.save({ fromUser: req.user });
-    if (sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-    }
-
-    // if they had a bus, we check if we need to update the places taken / left in the bus
-    if (ligneId) {
-      const bus = await LigneBusModel.findById(ligneId);
-      if (bus) await updateSeatsTakenInBusLine(bus);
-    }
 
     res.status(200).send({ ok: true, data: serializeYoung(updatedYoung, updatedYoung) });
   } catch (error) {

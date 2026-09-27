@@ -18,7 +18,6 @@ import {
   ClasseModel,
   EtablissementModel,
   ReferentModel,
-  LigneBusModel,
   MissionModel,
   ApplicationModel,
   SessionPhase1Model,
@@ -46,12 +45,10 @@ import {
   uploadFile,
   deleteFile,
   validatePassword,
-  updatePlacesSessionPhase1,
   ERRORS,
   isYoung,
   inSevenDays,
   notifDepartmentChange,
-  updateSeatsTakenInBusLine,
   cancelPendingApplications,
   cancelPendingEquivalence,
 } from "../utils";
@@ -79,7 +76,6 @@ import {
   canSearchSessionPhase1,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
-  YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   MILITARY_FILE_KEYS,
   department2region,
@@ -90,9 +86,7 @@ import {
   EQUIVALENCE_STATUS,
   canValidateMultipleYoungsInClass,
   ClasseSchoolYear,
-  canUpdateInscriptionGoals,
   FUNCTIONAL_ERRORS,
-  getDepartmentForInscriptionGoal,
   isAdmin,
   isReferentReg,
   canValidateYoungToLP,
@@ -113,9 +107,8 @@ import {
 import { scanFile } from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { RouteRequest, RouteResponse, UserRequest } from "../controllers/request";
-import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
+import { mightAddInProgressStatus } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
@@ -718,73 +711,22 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 
-    // Vérification des objectifs à la validation d'un jeune
-    if (
-      young.source !== YOUNG_SOURCE.CLE &&
-      value.status === YOUNG_STATUS.VALIDATED &&
-      young.status !== YOUNG_STATUS.VALIDATED &&
-      (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
-    ) {
+    // Validation d'un dossier HTS : la cohorte doit exister et l'instruction être ouverte, avant tout
+    // effet de bord. GOO-65 (lot P23) : l'objectif d'inscription n'est plus contrôlé ici, et cette
+    // route n'écrit plus rien de la phase 1 (ni remise à zéro en réinscription, ni statusPhase1 dérivé
+    // de la présence, ni libération de l'affectation au désistement) : ces champs sont hors du schéma
+    // de `validateYoung`.
+    if (young.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED && young.status !== YOUNG_STATUS.VALIDATED) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       if (!canValidateYoungToLP(req.user, cohort)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-
-      const departement = getDepartmentForInscriptionGoal(young);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort);
-      if (completionObjectif.isAtteint) {
-        return res.status(400).send({
-          ok: false,
-          code: completionObjectif.region.isAtteint ? FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED : FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REACHED,
-        });
-      }
-    }
-
-    if (newYoung.status === YOUNG_STATUS.REINSCRIPTION) {
-      newYoung.cohesionStayPresence = undefined;
-      newYoung.presenceJDM = undefined;
-      newYoung.departSejourAt = undefined;
-      newYoung.departSejourMotif = undefined;
-      newYoung.departSejourMotifComment = undefined;
-      newYoung.meetingPointId = undefined;
-      newYoung.cohesionCenterId = undefined;
-      newYoung.sessionPhase1Id = undefined;
-      newYoung.statusPhase1 = YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
-    }
-    if (newYoung.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED) {
-      if (young.hasMeetingInformation !== "true" || !young.cohesionCenterId || !young.meetingPointId || (young.source === YOUNG_SOURCE.VOLONTAIRE && !young.ligneId)) {
-        return res.status(400).send({
-          ok: false,
-          code: FUNCTIONAL_ERRORS.MISSING_AFFECTATION_INFORMATIONS,
-        });
       }
     }
 
     if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
       await notifDepartmentChange(newYoung.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
       await notifDepartmentChange(young.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_OUT, young, { newDepartment: newYoung.department });
-    }
-
-    if (newYoung.cohesionStayPresence === "true" && young.cohesionStayPresence !== "true") {
-      const emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];
-      if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! });
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
-        emailTo,
-        params: {
-          youngFirstName: young.firstName,
-          youngLastName: young.lastName,
-        },
-      });
-
-      // autovalidate the phase 1 if the young is present in the session
-      newYoung.statusPhase1 = "DONE";
-    }
-
-    if (newYoung.cohesionStayPresence === "false" && young.cohesionStayPresence !== "false") {
-      // reject the phase 1 if the young is NOT present in the session
-      newYoung.statusPhase1 = "NOT_DONE";
     }
 
     // Check quartier prioritaires.
@@ -851,24 +793,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const { withdrawnReason, withdrawnMessage } = newYoung;
       await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, withdrawnMessage, req.user);
-      newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
-      // reset des informations d'affectation
-      newYoung.cohesionCenterId = undefined;
-      newYoung.sessionPhase1Id = undefined;
-      newYoung.meetingPointId = undefined;
-      newYoung.ligneId = undefined;
-      newYoung.hasMeetingInformation = undefined;
-      newYoung.transportInfoGivenByLocal = undefined;
-      newYoung.deplacementPhase1Autonomous = undefined;
-      newYoung.cohesionStayPresence = undefined;
-      newYoung.presenceJDM = undefined;
-      newYoung.departInform = undefined;
-      newYoung.departSejourAt = undefined;
-      newYoung.departSejourMotif = undefined;
-      newYoung.departSejourMotifComment = undefined;
     }
-
-    const { sessionPhase1Id, ligneId } = young;
 
     if (value.roadCodeRefund === "true") {
       newYoung.roadCodeRefundDate = new Date();
@@ -895,20 +820,6 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
     await young.save({ fromUser: req.user });
 
-    // if they had a cohesion center, we check if we need to update the places taken / left
-    if (sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Id);
-      if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
-    }
-
-    if (ligneId) {
-      const bus = await LigneBusModel.findById(ligneId);
-      if (bus) await updateSeatsTakenInBusLine(bus);
-    }
-
-    if (await shouldSwitchYoungByIdToLC(id, value.status)) {
-      await switchYoungByIdToLC(id);
-    }
     await mightAddInProgressStatus(young, req.user);
 
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });

@@ -175,7 +175,9 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
       expect((await YoungModel.findById(young._id))?.status).toBe(YOUNG_STATUS.WITHDRAWN);
     }, 30000);
 
-    it("refuse à un référent départemental un changement de cohorte hors /change-cohort", async () => {
+    // GOO-65 (lot P23) : cohorte, affectation et statut phase 1 sont sortis du schéma de la route pour
+    // tous les rôles. Ils ne sont plus refusés (403) mais ignorés : rien n'est écrit.
+    it("n'applique pas un changement de cohorte envoyé par un référent départemental", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED, cohortId: new ObjectId().toString() } as any));
       const referent = await createReferentDuTerritoire();
 
@@ -183,11 +185,13 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
         .put(`/referent/young/${young._id}`)
         .send({ cohort: "Autre cohorte", cohortId: new ObjectId().toString() });
 
-      expect(res.status).toBe(403);
-      expect((await YoungModel.findById(young._id))?.cohortId).toBe(young.cohortId);
+      expect(res.status).toBe(200);
+      const updated = await YoungModel.findById(young._id);
+      expect(updated?.cohortId).toBe(young.cohortId);
+      expect(updated?.cohort).toBe(young.cohort);
     }, 30000);
 
-    it("refuse à un référent départemental une affectation directe à une session", async () => {
+    it("n'applique pas une affectation directe à une session envoyée par un référent départemental", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED } as any));
       const referent = await createReferentDuTerritoire();
       const sessionPhase1Id = new ObjectId().toString();
@@ -196,11 +200,13 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
         .put(`/referent/young/${young._id}`)
         .send({ sessionPhase1Id, cohesionCenterId: new ObjectId().toString() });
 
-      expect(res.status).toBe(403);
-      expect((await YoungModel.findById(young._id))?.sessionPhase1Id).not.toBe(sessionPhase1Id);
+      expect(res.status).toBe(200);
+      const updated = await YoungModel.findById(young._id);
+      expect(updated?.sessionPhase1Id).toBe(young.sessionPhase1Id);
+      expect(updated?.cohesionCenterId).toBe(young.cohesionCenterId);
     }, 30000);
 
-    it("refuse à un référent départemental un statut de phase 1 posé à la main", async () => {
+    it("n'applique pas un statut de phase 1 posé à la main par un référent départemental", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED, statusPhase1: "AFFECTED" } as any));
       const referent = await createReferentDuTerritoire();
 
@@ -208,7 +214,7 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
         .put(`/referent/young/${young._id}`)
         .send({ statusPhase1: "DONE" });
 
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
       expect((await YoungModel.findById(young._id))?.statusPhase1).toBe("AFFECTED");
     }, 30000);
 

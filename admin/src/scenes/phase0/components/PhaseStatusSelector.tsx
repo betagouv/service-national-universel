@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { YOUNG_STATUS_PHASE3, getPhaseStatusOptions, translate, translatePhase1 } from "snu-lib";
+import { YOUNG_STATUS_PHASE3, getPhaseStatusOptions, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import ChevronDown from "@/assets/icons/ChevronDown";
@@ -87,17 +87,11 @@ export default function PhaseStatusSelector({ young, onChange }) {
         </button>
         {phaseChoiceOpened && (
           <div className="absolute top-[100%] right-[0px] z-10 mt-[8px] rounded-[6px] border-[1px] border-[#E5E7EB] bg-[#FFFFFF] text-[#1F2937] shadow-[0px_8px_16px_-3px_rgba(0,0,0,0.05)]">
+            {/* GOO-65 (lot P23) : plus de ligne « Phase 1 », dont la correction manuelle du statut est retirée. */}
             <button
               className={`w-full flex items-center whitespace-nowrap rounded-t-[6px] px-[16px] py-[8px] ${
-                statusOpened === 1 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"
+                statusOpened === 2 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"
               }`}
-              onClick={() => setStatusOpened(1)}>
-              <div className="mr-[9px] text-[14px] text-[#111827]">Phase 1</div>
-              <div className="grow text-[12px] text-[#6B7280]">{translatePhase1(young.statusPhase1)}</div>
-              <ChevronRight className="ml-[9px] text-[#1F2937]" />
-            </button>
-            <button
-              className={`w-full flex items-center whitespace-nowrap px-[16px] py-[8px] ${statusOpened === 2 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"}`}
               onClick={() => setStatusOpened(2)}>
               <div className="mr-[9px] text-[14px] text-[#111827]">Phase 2</div>
               <div className="grow text-[12px] text-[#6B7280]">{translate(young.statusPhase2)}</div>
@@ -147,7 +141,7 @@ function statusButton(young, option, phaseNumber, onSelect) {
       }`}
       onClick={() => onSelect(phaseNumber, option)}>
       {isChecked && <Check />}
-      <div className="ml-[6px]">{phaseNumber === 1 ? translatePhase1(option) : translate(option)}</div>
+      <div className="ml-[6px]">{translate(option)}</div>
     </button>
   );
 }

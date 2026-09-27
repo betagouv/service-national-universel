@@ -1282,22 +1282,19 @@ function canValidateMultipleYoungsInClass(actor: UserDto) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 
-const phaseStatusOptionsByRole = {
+// GOO-65 (lot P23) : plus aucune entrée pour la phase 1, dont la correction manuelle du statut est
+// retirée sans exception (super-administrateur compris).
+const phaseStatusOptionsByRole: Record<number, Record<string, string[]>> = {
   0: { DEFAULT: [] },
-  1: {
-    [ROLES.ADMIN]: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-    DEFAULT: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-  },
   2: { DEFAULT: [YOUNG_STATUS_PHASE2.WAITING_REALISATION, YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.VALIDATED] },
   3: { DEFAULT: [YOUNG_STATUS_PHASE3.WAITING_REALISATION, YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED] },
 };
 
-function getPhaseStatusOptions(actor: UserDto, phase: number) {
-  const phaseStatusOptions = phaseStatusOptionsByRole[phase][actor.role] || phaseStatusOptionsByRole[phase].DEFAULT || [];
-  if (phase === 1 && isSuperAdmin(actor) && !phaseStatusOptions.includes(YOUNG_STATUS_PHASE1.AFFECTED)) {
-    phaseStatusOptions.push(YOUNG_STATUS_PHASE1.AFFECTED);
-  }
-  return phaseStatusOptions;
+/** Statuts qu'un acteur peut poser à la main sur une phase. Toujours une copie : la matrice est partagée. */
+function getPhaseStatusOptions(actor: UserDto, phase: number): string[] {
+  const optionsByRole = phaseStatusOptionsByRole[phase];
+  if (!optionsByRole) return [];
+  return [...(optionsByRole[actor.role] || optionsByRole.DEFAULT || [])];
 }
 
 export function canValidateYoungToLP(actor: UserDto, cohort?: Pick<CohortType, "instructionEndDate" | "youngHTSBasculeLPDisabled">) {

@@ -90,7 +90,9 @@ describe("PUT /young/account/address (M41)", () => {
     expect(updated?.cohort).toBe(cohort.name);
   });
 
-  it("passe le jeune en NOT_ELIGIBLE, côté serveur, si aucun séjour n'est ouvert à sa nouvelle adresse", async () => {
+  // GOO-65 (lot P23) : l'éligibilité au séjour n'est plus recalculée au changement d'adresse ; le
+  // statut reste celui du dossier, quel que soit celui envoyé.
+  it("ne modifie pas le statut, même si aucun séjour n'est ouvert à la nouvelle adresse", async () => {
     const cohort = await createEligibleCohort("Ain");
     const young = await createYoungHelper(
       getNewYoungFixture({
@@ -106,11 +108,12 @@ describe("PUT /young/account/address (M41)", () => {
 
     const res = await request(await getAppHelperWithAcl(young))
       .put("/young/account/address")
-      .send({ ...newAddress("Nord"), status: YOUNG_STATUS.VALIDATED });
+      .send({ ...newAddress("Nord"), status: YOUNG_STATUS.NOT_ELIGIBLE });
 
     expect(res.status).toBe(200);
     const updated = await getYoungByIdHelper(young._id);
-    expect(updated?.status).toBe(YOUNG_STATUS.NOT_ELIGIBLE);
+    expect(updated?.department).toBe("Nord");
+    expect(updated?.status).toBe(YOUNG_STATUS.VALIDATED);
   });
 
   it("ignore le statut envoyé quand le département ne change pas", async () => {

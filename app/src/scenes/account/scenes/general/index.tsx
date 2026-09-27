@@ -61,7 +61,7 @@ const AccountGeneralPage = () => {
 
   return (
     <div className="overflow-hidden bg-white shadow-sm lg:rounded-lg">
-      <ChangeAddressModal isOpen={isChangeAddressModalOpen} onClose={() => setChangeAddressModalOpen(false)} young={young} />
+      <ChangeAddressModal isOpen={isChangeAddressModalOpen} onClose={() => setChangeAddressModalOpen(false)} />
       <ChangeEmailModal
         isOpen={isChangeEmailModalOpen}
         onClose={() => setChangeEmailModalOpen(false)}

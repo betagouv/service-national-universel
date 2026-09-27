@@ -7,7 +7,7 @@
  * C17 GET /young?email=                                   : document jeune brut, aucun périmètre géographique
  * C18 PUT /young/:id/phase2/militaryPreparation/status     : IDOR total + document brut
  * H42 GET /young/:id/documents/:key/:fileId               : mimeType dérivé du nom de fichier (XSS stocké)
- * H43 POST /young/invite                                  : invitationToken renvoyé dans la réponse
+ * H43 POST /young/invite                                  : route supprimée par GOO-65 (phase1-ecritures-supprimees.test.ts)
  * H44 POST /young/note/:youngId                           : aucun périmètre, dossier complet renvoyé
  * H45 POST /young/:id/phase1/:key                         : route supprimée (phase1-ecritures-supprimees.test.ts)
  * H46 POST /young/:id/phase1/dispense                     : idem
@@ -317,28 +317,6 @@ describe("Sécurité /young/:id/* — audit 2026-09-21 (lot 3)", () => {
       expect(res.status).toBe(200);
       const updated = await YoungModel.findById(young._id);
       expect(updated?.statusMilitaryPreparationFiles).toBe("VALIDATED");
-    });
-  });
-
-  describe("H43 — POST /young/invite", () => {
-    it("ne renvoie pas l'invitationToken du compte créé", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
-
-      const res = await request(await getAppHelperWithAcl(referent, "referent"))
-        .post("/young/invite")
-        .send({
-          firstName: "Jean",
-          lastName: "Dupont",
-          email: `invite-${Date.now()}@example.org`,
-          birthdateAt: new Date("2008-01-01"),
-          cohort: cohort.name,
-          cohortId: cohort._id.toString(),
-        });
-
-      if (res.status === 200) {
-        expectNoSecret(res.body.young);
-      }
     });
   });
 
