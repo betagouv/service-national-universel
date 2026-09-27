@@ -1,4 +1,5 @@
 import request from "supertest";
+import { fakerFR as faker } from "@faker-js/faker";
 import { ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 
 import getAppHelper, { resetAppAuth } from "./helpers/app";
@@ -11,7 +12,8 @@ import { ReferentModel, YoungModel } from "../models";
 import { config } from "../config";
 
 const PASSWORD = "SuperSecret1234!";
-const NEW_PASSWORD = "AutreSecret5678?";
+// Généré à l'exécution : un littéral est signalé comme secret par GitGuardian.
+const NEW_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
 const mockSendTemplate = jest.fn((..._args: any[]) => Promise.resolve());
 jest.mock("../brevo", () => ({
