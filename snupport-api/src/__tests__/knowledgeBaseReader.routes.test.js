@@ -17,11 +17,11 @@ jest.mock("../sentry", () => ({ capture: jest.fn() }));
 jest.mock("../utils/sitemap.utils", () => ({ revalidateSiteMap: jest.fn(), formatSectionsIntoSitemap: jest.fn() }));
 jest.mock("../utils/index.js", () => ({ uploadPublicPicture: jest.fn(), diacriticSensitiveRegex: (s) => s }));
 jest.mock("../models/kbSearch", () => ({ create: jest.fn() }));
-jest.mock("../models/knowledgeBase", () => ({ find: jest.fn(), findOne: jest.fn(), findById: jest.fn(), findByIdAndUpdate: jest.fn(), exists: jest.fn() }));
+jest.mock("../models/knowledgeBase", () => ({ find: jest.fn(), findOne: jest.fn(), findById: jest.fn(), findByIdAndUpdate: jest.fn(), exists: jest.fn(), aggregate: jest.fn(), populate: jest.fn() }));
 jest.mock("../models/agent", () => ({ findById: jest.fn() }));
 jest.mock("../models/organisation", () => ({ findOne: jest.fn() }));
 jest.mock("../models/contact", () => ({ findOne: jest.fn(), create: jest.fn() }));
-jest.mock("../models/feedback", () => ({ create: jest.fn() }));
+jest.mock("../models/feedback", () => ({ create: jest.fn(), find: jest.fn(), updateMany: jest.fn(), aggregate: jest.fn() }));
 
 const KnowledgeBaseModel = require("../models/knowledgeBase");
 const AgentModel = require("../models/agent");
@@ -64,6 +64,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   KnowledgeBaseModel.find.mockImplementation(() => query([]));
   KnowledgeBaseModel.findOne.mockImplementation(() => query(null));
+  KnowledgeBaseModel.aggregate.mockResolvedValue([]);
   OrganisationModel.findOne.mockImplementation(({ apikey }) => Promise.resolve(apikey === API_KEY ? { _id: "org" } : null));
   AgentModel.findById.mockImplementation((id) => Promise.resolve(id === "agentsupport" ? { _id: id, role: "AGENT" } : { _id: id, role: "REFERENT_DEPARTMENT" }));
 });
@@ -145,6 +146,30 @@ describe("GET /knowledge-base/:allowedRole (M86)", () => {
   });
 });
 
+describe("GET /knowledge-base/sitemap (PL18)", () => {
+  it("ne filtre le plan du site que sur les sections publiques", async () => {
+    await request(buildApp()).get("/knowledge-base/sitemap");
+    expect(KnowledgeBaseModel.find.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ allowedRoles: "public" })
+    );
+  });
+});
+
+describe("POST /knowledge-base/all (PM44)", () => {
+  const post = (headers) => request(buildApp()).post("/knowledge-base/all").set(headers).send({ allowedRoles: [] });
+
+  it("refuse un agent qui n'édite pas la base (référent synchronisé)", async () => {
+    const res = await post(agentAuth("referentsync"));
+    expect(res.status).toBe(403);
+    expect(KnowledgeBaseModel.find).not.toHaveBeenCalled();
+  });
+
+  it("autorise un éditeur de la base (agent du support central)", async () => {
+    const res = await post(agentAuth("agentsupport"));
+    expect(res.status).toBe(200);
+  });
+});
+
 describe("GET /knowledge-base/:allowedRole/:slug (M86)", () => {
   it("refuse un article d'un rôle réservé à un anonyme", async () => {
     const res = await request(buildApp()).get("/knowledge-base/admin/un-article");
@@ -191,6 +216,14 @@ describe("GET /knowledge-base/:allowedRole/search (M86)", () => {
     expect(res.status).toBe(200);
     expect(lastQuery()).not.toHaveProperty("status");
     expect(lastQuery()).not.toHaveProperty("allowedRoles");
+  });
+
+  it("refuse une recherche de plus de 128 caractères (PL19)", async () => {
+    const res = await request(buildApp())
+      .get("/knowledge-base/public/search")
+      .query({ search: "x".repeat(129) });
+    expect(res.status).toBe(400);
+    expect(KnowledgeBaseModel.find).not.toHaveBeenCalled();
   });
 });
 
@@ -269,5 +302,32 @@ describe("POST /feedback (M83)", () => {
     const res = await post({ isPositive: true, knowledgeBaseArticle: ARTICLE_ID, contactEmail: "connu@example.org" });
     expect(res.status).toBe(200);
     expect(FeedbackModel.create).toHaveBeenCalledWith({ isPositive: true, knowledgeBaseArticle: ARTICLE_ID, createdBy: "contact1" });
+  });
+});
+
+describe("Écrans d'administration du feedback réservés à AGENT (PM44)", () => {
+  beforeEach(() => {
+    FeedbackModel.find.mockResolvedValue([]);
+    FeedbackModel.updateMany.mockResolvedValue({});
+    FeedbackModel.aggregate.mockResolvedValue([]);
+    KnowledgeBaseModel.populate.mockResolvedValue([]);
+  });
+
+  it.each([
+    ["GET", `/feedback?knowledgeBaseArticle=${ARTICLE_ID}`],
+    ["PUT", "/feedback/archivefeedbacks"],
+    ["GET", "/feedback/usefulArticles"],
+  ])("refuse %s %s à un référent synchronisé", async (method, path) => {
+    const res = await request(buildApp())[method.toLowerCase()](path).set(agentAuth("referentsync")).send({ selectedComments: [] });
+    expect(res.status).toBe(403);
+  });
+
+  it.each([
+    ["GET", `/feedback?knowledgeBaseArticle=${ARTICLE_ID}`],
+    ["PUT", "/feedback/archivefeedbacks"],
+    ["GET", "/feedback/usefulArticles"],
+  ])("autorise %s %s à AGENT", async (method, path) => {
+    const res = await request(buildApp())[method.toLowerCase()](path).set(agentAuth("agentsupport")).send({ selectedComments: [] });
+    expect(res.status).toBe(200);
   });
 });
