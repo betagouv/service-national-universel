@@ -5,6 +5,7 @@ const FeedbackModel = require("../models/feedback");
 const ContactModel = require("../models/contact");
 const KnowledgeBaseModel = require("../models/knowledgeBase");
 const { agentGuard, apiKeyGuard } = require("../middlewares/authenticationGuards");
+const { requireRole } = require("../middlewares/userRoleGuards");
 const { validateBody, validateQuery } = require("../middlewares/validation");
 const { SCHEMA_ID, SCHEMA_EMAIL } = require("../schemas");
 const { ERRORS } = require("../errors");
@@ -39,6 +40,7 @@ router.post("/",
 
 router.get("/",
   agentGuard,
+  requireRole("AGENT"),
   validateQuery(Joi.object({
     knowledgeBaseArticle: SCHEMA_ID,
   }).prefs({ presence: 'required' })),
@@ -50,6 +52,7 @@ router.get("/",
 
 router.put("/archivefeedbacks",
   agentGuard,
+  requireRole("AGENT"),
   validateBody(Joi.object({
     selectedComments: Joi.array().items(SCHEMA_ID),
   }).prefs({ presence: 'required' })),
@@ -59,7 +62,7 @@ router.put("/archivefeedbacks",
   }
 );
 
-router.get("/usefulArticles", agentGuard, async (req, res) => {
+router.get("/usefulArticles", agentGuard, requireRole("AGENT"), async (req, res) => {
   const mostUsefulArticles = await FeedbackModel.aggregate([
     {
       $group: {

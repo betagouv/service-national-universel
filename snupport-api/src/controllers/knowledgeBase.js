@@ -18,7 +18,7 @@ const { SCHEMA_ID } = require("../schemas");
 const escapeStringRegexp = require("escape-string-regexp");
 const { pictureUpload } = require("../middlewares/attachmentUpload");
 const { resolveKnowledgeBaseReader, requireReadableRole } = require("../middlewares/knowledgeBaseReader");
-const { KNOWLEDGE_BASE_ROLES } = require("../utils/knowledgeBaseReader");
+const { KNOWLEDGE_BASE_ROLES, PUBLIC_ROLE } = require("../utils/knowledgeBaseReader");
 
 // Écriture de la base de connaissance publique : réservée au support central (voir
 // utils/knowledgeBaseScope). `agentGuard` seul laissait tout agent authentifié, y compris
@@ -444,7 +444,9 @@ router.get("/sitemap", async (req, res) => {
   const sections = await KnowledgeBaseModel.aggregate(pipeline);
   // Filter out null group (sections and orphaned items) and map the rest into an array of IDs.
   const sectionIds = sections.filter((e) => e._id).map((e) => e._id.toString());
-  const data = await KnowledgeBaseModel.find({ type: "section", status: "PUBLISHED", _id: { $in: sectionIds } }, { title: 1, slug: 1, parentId: 1, position: 1, allowedRoles: 1 });
+  // Plan du site public (anonyme) : ne renvoyer que les sections lisibles par tout le monde, pas
+  // les titres/slugs des rubriques réservées aux référents/admin (PL18).
+  const data = await KnowledgeBaseModel.find({ type: "section", status: "PUBLISHED", _id: { $in: sectionIds }, allowedRoles: PUBLIC_ROLE }, { title: 1, slug: 1, parentId: 1, position: 1, allowedRoles: 1 });
   if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   return res.status(200).send({ ok: true, data: formatSectionsIntoSitemap(data) });
 });
@@ -452,6 +454,7 @@ router.get("/sitemap", async (req, res) => {
 router.post(
   "/all",
   agentGuard,
+  knowledgeBaseEditorGuard,
   validateBody(
     Joi.object({
       allowedRoles: Joi.array().items(SCHEMA_ROLE),
@@ -476,7 +479,7 @@ router.get(
   ),
   validateQuery(
     Joi.object({
-      search: Joi.string(),
+      search: Joi.string().max(128),
       status: Joi.string().valid("PUBLISHED", "DRAFT", "ARCHIVED").optional(),
     }).prefs({ presence: "required", stripUnknown: true })
   ),
