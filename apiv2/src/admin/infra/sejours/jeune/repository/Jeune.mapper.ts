@@ -113,6 +113,7 @@ export class JeuneMapper {
         | "attempts2FA"
         | "lastLoginAt"
         | "forgotPasswordResetToken"
+        | "passwordResetRequired"
         | "invitationToken"
         | "phase"
         | "statusPhase2"
