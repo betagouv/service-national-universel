@@ -17,6 +17,7 @@ const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
 const { canAccessTicket } = require("../utils/ticketScope");
 const { inspectAttachment } = require("../utils/attachments");
+const { scanBuffer } = require("../utils/virusScanner");
 const { isKnownThreadParticipant, normalizeEmail } = require("../utils/ticketParticipants");
 const { sanitizeMessageHtml } = require("../utils/messageHtml");
 const { attachmentUpload, MAX_ATTACHMENTS_PER_MESSAGE } = require("../middlewares/attachmentUpload");
@@ -288,6 +289,9 @@ router.post(
     for (const file of files) {
       const { mime, accepted } = await inspectAttachment(file.data);
       if (!accepted) return res.status(400).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      // PM49 : la pièce jointe part telle quelle vers un contact externe, scan antivirus avant envoi.
+      const { infected } = await scanBuffer(file.data, file.name);
+      if (infected) return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
       inspectedFiles.push({ name: getAttachmentFileName(file.name, mime), data: file.data, mime });
     }
 
