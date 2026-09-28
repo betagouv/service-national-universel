@@ -1,11 +1,18 @@
 import { Popover, Transition } from "@headlessui/react";
 import React, { Fragment, useState } from "react";
+import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { ROLES } from "snu-lib";
 import api from "@/services/api";
+import { snupportAdminURL } from "@/config";
 import { translate } from "@/utils";
 import Mail from "../icons/Mail";
 import Separator from "./Separator";
 import { capture, captureMessage } from "../../../sentry";
+
+// Seuls les référents départementaux et régionaux ont un compte agent ouvert par SSO (GOO-13).
+// Ce compte est créé sans mot de passe : leur retirer le SSO les bloquerait à la connexion.
+const SSO_ROLES = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
 
 export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) {
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -18,7 +25,14 @@ export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) 
     setPopoverOpen(false);
   };
 
+  const user = useSelector((state) => state.Auth.user);
+
   const connectToSNUpport = async () => {
+    // Les autres rôles se connectent au support avec leurs propres identifiants : GET /SNUpport/signin
+    // leur répond 403.
+    if (!SSO_ROLES.includes(user?.role)) {
+      return window.open(`${snupportAdminURL}/auth`, "_blank", "noopener,noreferrer");
+    }
     try {
       const { ok, data, code } = await api.get(`/SNUpport/signin`);
       if (!ok) {

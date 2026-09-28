@@ -4,7 +4,7 @@
  * ROUTES
  *   PUT   /young-edition/:id/identite            -> Modifie les données du jeune qui se trouvent dans la première section de la page du jeune (informations générales).
  *   PUT   /young-edition/:id/situationparents    -> Modifie les données du jeune qui se trouvent dans la deuxième section de la page du jeune (Détails).
- *   PUT   /young-edition/:id/phasestatus         -> Permet de modifier le statut du jeune sur une phase.
+ *   PUT   /young-edition/:id/phasestatus         -> Permet de modifier le statut du jeune en phase 2 ou 3 (la phase 1 n'est plus modifiable, GOO-65).
  *   PUT   /young-edition/:id/parent-allow-snu    -> Permet de modifier le consentement d'un parent (utilisé pour l'instant uniquement pour refuser le SNU par le parent 2).
  *   PUT   /young-edition/:id/parent-image-rights-reset
  *                                                -> Remet à undefined le consentement de droit à l'image d'un parent en lui renvoyant une notification pour le redonner.
@@ -17,8 +17,8 @@
 
 import express, { Response } from "express";
 import Joi from "joi";
-import { YoungModel, LigneBusModel, SessionPhase1Model, CohortModel, ApplicationModel } from "../../models";
-import { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } from "../../utils";
+import { YoungModel, CohortModel, ApplicationModel } from "../../models";
+import { ERRORS, notifDepartmentChange } from "../../utils";
 import { capture } from "../../sentry";
 import { validateFirstName } from "../../utils/validator";
 import { serializeYoung } from "../../utils/serializer";
@@ -36,8 +36,6 @@ import {
   canAllowSNU,
   YoungType,
   getPhaseStatusOptions,
-  FUNCTIONAL_ERRORS,
-  YOUNG_SOURCE,
 } from "snu-lib";
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
@@ -291,11 +289,15 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // --- validate data
-    const bodySchema = Joi.object().keys({
-      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE"), // "WAITING_LIST"
-      statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"),
-      statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"),
-    });
+    // Écritures phase 1 décommissionnées (GOO-65, PL23) : statusPhase1 est refusé explicitement, y compris
+    // pour l'ADMIN. Un dossier historique mal pointé se corrige par script.
+    const bodySchema = Joi.object()
+      .keys({
+        statusPhase1: Joi.forbidden(),
+        statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"),
+        statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"),
+      })
+      .or("statusPhase2", "statusPhase3");
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
@@ -306,7 +308,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     for (const [key, val] of Object.entries(value)) {
       const phaseNumber = parseInt(key.replace("statusPhase", ""));
       const authorizedStatuses = getPhaseStatusOptions(req.user, phaseNumber);
-      if (!authorizedStatuses.includes(val)) {
+      if (!authorizedStatuses.includes(val as string)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
@@ -323,43 +325,6 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
 
     // --- update dates
     const now = new Date();
-
-    // reset cohesion/bus/meetingPoint center when new status is WAITING_AFFECTATION
-    let oldSession;
-    let oldBus;
-    if (value.statusPhase1 === "WAITING_AFFECTATION") {
-      if (young?.meetingPointId) oldBus = await LigneBusModel.findById(young.ligneId);
-      if (young?.sessionPhase1Id) {
-        oldSession = await SessionPhase1Model.findById(young.sessionPhase1Id);
-        young.set({
-          cohesionCenterId: undefined,
-          sessionPhase1Id: undefined,
-          meetingPointId: undefined,
-          ligneId: undefined,
-          deplacementPhase1Autonomous: undefined,
-          transportInfoGivenByLocal: undefined,
-          cohesionStayPresence: undefined,
-          presenceJDM: undefined,
-          departInform: undefined,
-          departSejourAt: undefined,
-          departSejourMotif: undefined,
-          departSejourMotifComment: undefined,
-          youngPhase1Agreement: "false",
-          hasMeetingInformation: undefined,
-        });
-      }
-    } else if (value.statusPhase1 === "AFFECTED" && young.statusPhase1 !== "AFFECTED") {
-      if (young.hasMeetingInformation !== "true" || !young.cohesionCenterId || !young.meetingPointId || (young.source === YOUNG_SOURCE.VOLONTAIRE && !young.ligneId)) {
-        return res.status(400).send({
-          ok: false,
-          code: FUNCTIONAL_ERRORS.MISSING_AFFECTATION_INFORMATIONS,
-        });
-      }
-    }
-
-    if (value.statusPhase1 === "DONE" && young.statusPhase1 !== "DONE") {
-      value.statusPhase2OpenedAt = now;
-    }
 
     if (value.statusPhase2) {
       value.statusPhase2UpdatedAt = now;
@@ -385,13 +350,6 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     // --- update young
     young.set(value);
     await young.save({ fromUser: req.user });
-
-    // --- update statusPhase 1 deendencies
-    // if they had a cohesion center, we check if we need to update the places taken / left
-    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
-
-    // if they had a bus, we check if we need to update the places taken / left in the bus
-    if (oldBus) await updateSeatsTakenInBusLine(oldBus);
 
     // --- result
     return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });

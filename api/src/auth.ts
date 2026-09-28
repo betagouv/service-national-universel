@@ -17,7 +17,7 @@ import {
   JWT_TRUST_TOKEN_TYPE,
   checkJwtTrustTokenVersion,
 } from "./jwt-options";
-import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } from "./cookie-options";
+import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, setSessionCookie, clearSessionCookie } from "./cookie-options";
 import { getToken } from "./passport";
 import { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } from "./utils";
 import {
@@ -39,13 +39,17 @@ import {
 } from "snu-lib";
 
 import { serializeYoung, serializeReferent } from "./utils/serializer";
-import { consumeLoginAttempt, resetLoginAttempts, consume2FAAttempt, consumeEmailValidationAttempt, isLoginLocked } from "./services/auth/attemptCounters";
+import { consumeLoginAttempt, resetLoginAttempts, consume2FAAttempt, consumeEmailValidationAttempt, isLoginLocked, compareAgainstDummyHash } from "./services/auth/attemptCounters";
 import { validateFirstName } from "./utils/validator";
 import { getFilteredSessions } from "./utils/cohort";
 
 import { ClasseModel, EtablissementModel, CohortModel } from "./models";
 import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
+import { isReferentAccessAllowed } from "./featureFlag/adminAccessRestriction";
 import { getAcl } from "./services/iam/Permission.service";
+
+// Délai minimal entre deux envois du lien de réinitialisation imposée à un même compte.
+const PASSWORD_RESET_RESEND_DELAY_MS = 5 * 60 * 1000;
 
 // Le trust token ("cet appareil a déjà passé le 2FA") est lié au compte qui l'a obtenu :
 // sans cette liaison, le nom du cookie (`trust_token-<_id>`) est la seule chose qui porte
@@ -264,7 +268,7 @@ class Auth {
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
 
       return res.status(200).send({
         ok: true,
@@ -417,7 +421,7 @@ class Auth {
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: null, passwordChangedAt: null, emailVerified: "false" }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
       return res.status(200).send({
         ok: true,
         user: serializeYoung(user, user),
@@ -437,24 +441,37 @@ class Auth {
     try {
       const now = new Date();
       const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
-      if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
-      // Pré-filtrage : un compte déjà verrouillé est refusé sans consommer de
-      // tentative, pour qu'un attaquant qui persiste ne repousse pas lui-même
-      // indéfiniment la date de déblocage du compte visé.
-      if (isLoginLocked(user, now)) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+      const exists = Boolean(user) && user.status !== "DELETED";
 
+      // PM5 (25/09/2026, résiduel de M4) : un email inconnu doit être indiscernable, en code comme
+      // en temps de réponse, d'un mot de passe faux sur un compte verrouillé. Un hash bcrypt factice
+      // de même coût (10) est comparé pour occuper un temps équivalent à `user.comparePassword`.
+      if (!exists) {
+        await compareAgainstDummyHash(password);
+        return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
+
+      // Pré-filtrage : un compte déjà verrouillé ne fait pas consommer de nouvelle tentative, pour
+      // qu'un attaquant qui persiste ne repousse pas lui-même indéfiniment la date de déblocage du
+      // compte visé (inchangé). Mais le mot de passe soumis est quand même comparé avant de répondre :
+      // seul son titulaire, qui le connaît, apprend qu'il est temporairement bloqué (TOO_MANY_REQUESTS) ;
+      // un mot de passe faux reste EMAIL_OR_PASSWORD_INVALID, qu'il y ait verrou ou non (PM5).
+      const preLocked = isLoginLocked(user, now);
+      const attempt = preLocked ? null : await consumeLoginAttempt(this.model, user._id, now);
       // La tentative est consommée AVANT bcrypt : sinon N requêtes concurrentes
       // franchissent toutes le contrôle de plafond pendant le hachage (M4).
-      const attempt = await consumeLoginAttempt(this.model, user._id, now);
-      if (attempt.blocked) {
-        return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
-      }
+      const rateLimited = preLocked || Boolean(attempt?.blocked) || Boolean(attempt?.delayed);
+      const nextLoginAttemptIn = preLocked ? user.nextLoginAttemptIn : attempt?.nextLoginAttemptIn;
 
       const match = await user.comparePassword(password);
 
       if (!match) {
-        if (attempt.delayed) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+        // Mot de passe faux : jamais de TOO_MANY_REQUESTS (PM5), même verrouillé ou différé — cette
+        // réponse ne dépend plus que de l'exactitude du mot de passe, jamais de l'état du compteur.
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
+      if (rateLimited) {
+        return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn } });
       }
 
       // Mot de passe bon : le compteur est purgé tout de suite, y compris quand
@@ -472,6 +489,19 @@ class Auth {
       // renvoyait en clair l'invitationToken par la branche VERIFICATION_REQUIRED, supprimée ici.
       if (isReferent(user) && isDecommissionedRole(user)) {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
+      }
+
+      // Verrouillage temporaire de l'accès référent : refusé avant l'envoi du code 2FA.
+      if (isReferent(user) && !(await isReferentAccessAllowed(user._id.toString()))) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.ADMIN_ACCESS_RESTRICTED });
+      }
+
+      // Empreinte du mot de passe exposée (index ES, #5310) : le mot de passe, même juste, n'ouvre
+      // plus de session. Le lien de réinitialisation part vers l'adresse du compte ; ce code n'est
+      // renvoyé qu'après un mot de passe juste, il ne renseigne donc pas sur l'existence du compte.
+      if (user.passwordResetRequired) {
+        await this.sendRequiredPasswordReset(user);
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.PASSWORD_RESET_REQUIRED });
       }
 
       const shouldUse2FA = async () => {
@@ -519,8 +549,8 @@ class Auth {
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
-      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
-      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      if (isYoung(user)) setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
+      else if (isReferent(user)) setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
@@ -565,6 +595,16 @@ class Auth {
       if (user.token2FA !== token_2fa) {
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
+      // Verrouillage temporaire : le code 2FA a pu être émis avant son activation.
+      if (isReferent(user) && !(await isReferentAccessAllowed(user._id.toString()))) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.ADMIN_ACCESS_RESTRICTED });
+      }
+      // Le code 2FA a pu être émis avant que la réinitialisation ne soit imposée.
+      if (user.passwordResetRequired) {
+        user.set({ token2FA: null, token2FAExpires: null });
+        await this.sendRequiredPasswordReset(user);
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.PASSWORD_RESET_REQUIRED });
+      }
 
       user.set({ token2FA: null, token2FAExpires: null });
       user.set({ loginAttempts: 0, attempts2FA: 0 });
@@ -583,15 +623,15 @@ class Auth {
       if (isYoung(user)) {
         if (rememberMe) {
           const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC);
-          res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
+          setSessionCookie(res, `trust_token-${user._id}`, trustToken, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS);
         }
-        res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
       } else if (isReferent(user)) {
         if (rememberMe) {
           const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC);
-          res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS));
+          setSessionCookie(res, `trust_token-${user._id}`, trustToken, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS);
         }
-        res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
       }
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -600,49 +640,6 @@ class Auth {
         ok: true,
         user: data,
         data,
-      });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  }
-
-  async changeEmailDuringSignUp(req, res) {
-    try {
-      const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).validate(req.body, { stripUnknown: true });
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const user = await this.model.findOne({
-        email: req.user.email,
-        emailVerified: "false",
-      });
-
-      if (!user) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-
-      const existingUser = await this.model.findOne({
-        email: value.email,
-      });
-
-      if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-
-      const tokenEmailValidation = await crypto.randomInt(1000000);
-      user.set({ email: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60 });
-      await user.save();
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: value.email }],
-        params: {
-          registration_code: tokenEmailValidation,
-          cta: `${config.APP_URL}/preinscription/email-validation?token=${tokenEmailValidation}`,
-        },
-      });
-
-      return res.status(200).send({
-        ok: true,
-        user: serializeYoung(user, user),
       });
     } catch (error) {
       capture(error);
@@ -758,12 +755,12 @@ class Auth {
       });
       if (isYoung(user)) {
         const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC);
-        res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
-        res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, `trust_token-${user._id}`, trustToken, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS);
+        setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
       } else if (isReferent(user)) {
         const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC);
-        res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS));
-        res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, `trust_token-${user._id}`, trustToken, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS);
+        setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
       }
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -820,8 +817,8 @@ class Auth {
       const { user } = req;
       user.set({ lastLogoutAt: Date.now() });
       await user.save();
-      if (isYoung(user)) res.clearCookie("jwt_young", cookieOptions());
-      else if (isReferent(user)) res.clearCookie("jwt_ref", cookieOptions());
+      if (isYoung(user)) clearSessionCookie(res, "jwt_young");
+      else if (isReferent(user)) clearSessionCookie(res, "jwt_ref");
 
       return res.status(200).send({ ok: true });
     } catch (error) {
@@ -878,7 +875,7 @@ class Auth {
       const currentPayload = jwt.decode(getToken(req) || "") as jwt.JwtPayload | null;
       const sessionStartedAt = typeof currentPayload?.sessionStartedAt === "number" ? currentPayload.sessionStartedAt : (currentPayload?.iat || 0) * 1000;
       if (!sessionStartedAt || Date.now() - sessionStartedAt > JWT_SESSION_ABSOLUTE_MAX_AGE_MS) {
-        res.clearCookie("jwt_ref", cookieOptions());
+        clearSessionCookie(res, "jwt_ref");
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
 
@@ -909,7 +906,7 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
 
-      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
       res.send({ ok: true, user: data, data });
     } catch (error) {
       capture(error);
@@ -973,12 +970,28 @@ class Auth {
     }
 
     try {
+      const now = new Date();
+      const user = await this.model.findById(req.user._id);
+
+      // PM6 (25/09/2026, résiduel de M4) : même verrou que `checkPassword` — sans lui, une session
+      // volée ou une XSS peut soumettre le mot de passe courant sans aucune limite de tentatives.
+      if (isLoginLocked(user, now)) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+
+      const attempt = await consumeLoginAttempt(this.model, user._id, now);
+      if (attempt.blocked) {
+        return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+      }
+
       const match = await req.user.comparePassword(password);
-      if (!match) return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      if (!match) {
+        if (attempt.delayed) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+        return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      }
+      await resetLoginAttempts(this.model, user._id);
+
       if (newPassword !== verifyPassword) return res.status(422).send({ ok: false, code: ERRORS.PASSWORDS_NOT_MATCH });
       if (newPassword === password) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
 
-      const user = await this.model.findById(req.user._id);
       const passwordChangedAt = Date.now();
       user.set({ password: newPassword, passwordChangedAt, loginAttempts: 0 });
       await user.save();
@@ -987,10 +1000,10 @@ class Auth {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       if (isYoung(user)) {
-        res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
         user.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
       } else if (isReferent(user)) {
-        res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
         user.acl = await getAcl(user);
       }
 
@@ -1013,20 +1026,39 @@ class Auth {
       // pour ne pas transformer cette route en oracle sur le rôle du compte (M66).
       if (!user || user?.status === ReferentStatus.INACTIVE || (isReferent(user) && isDecommissionedRole(user))) return res.status(200).send({ ok: true });
 
-      const token = await crypto.randomBytes(20).toString("hex");
-      user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });
-      await user.save();
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.FORGOT_PASSWORD, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email }],
-        params: { cta: `${cta}?token=${token}` },
-      });
+      await this.sendPasswordResetLink(user, cta);
 
       return res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  }
+
+  async sendPasswordResetLink(user, cta: string) {
+    const token = await crypto.randomBytes(20).toString("hex");
+    user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });
+    await user.save();
+
+    // PM5 (25/09/2026) : l'appel Brevo n'est plus attendu avant de répondre — sinon la présence ou
+    // l'absence d'un compte se lit dans le temps de réponse (branche `!user` de forgotPassword, immédiate).
+    sendTemplate(SENDINBLUE_TEMPLATES.FORGOT_PASSWORD, {
+      emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
+      params: { cta: `${cta}?token=${token}` },
+    }).catch(capture);
+  }
+
+  /**
+   * Réinitialisation imposée : envoie le lien, sauf s'il vient de partir (tentatives répétées ou
+   * double clic), pour ne pas inonder la boîte du titulaire ni invalider le lien qu'il vient de recevoir.
+   */
+  async sendRequiredPasswordReset(user) {
+    const sentAt = user.forgotPasswordResetExpires ? new Date(user.forgotPasswordResetExpires).getTime() - COOKIE_SIGNIN_MAX_AGE_MS : 0;
+    if (user.forgotPasswordResetToken && Date.now() - sentAt < PASSWORD_RESET_RESEND_DELAY_MS) {
+      await user.save();
+      return;
+    }
+    await this.sendPasswordResetLink(user, `${isYoung(user) ? config.APP_URL : config.ADMIN_URL}/auth/reset`);
   }
 
   async forgotPasswordReset(req, res) {
@@ -1058,6 +1090,7 @@ class Auth {
       user.password = password;
       user.forgotPasswordResetToken = "";
       user.forgotPasswordResetExpires = "";
+      user.passwordResetRequired = false;
       user.passwordChangedAt = Date.now();
       user.loginAttempts = 0;
       await user.save();

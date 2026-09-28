@@ -8,38 +8,47 @@
  * officiel du SNU, un message balisé pointant vers le domaine de son choix.
  *
  * Les seules URL légitimes sont celles du service lui-même : les deux fronts, la base de
- * connaissance et le stockage objet d'où sont servis les documents (cf. `CDN_BASE_URL`,
- * app/src/scenes/representants-legaux/commons.js). Tout le reste est refusé.
+ * connaissance et les buckets d'où sont servis les documents (cf. `CDN_BASE_URL` côté app et
+ * admin). Tout le reste est refusé.
+ *
+ * Le stockage objet Clever Cloud est mutualisé entre tous ses clients et adressé par chemin
+ * (`https://cellar-c2.services.clever-cloud.com/<bucket>/...`) : son origine seule ne prouve rien,
+ * n'importe qui peut y publier une page (constats PM24 et PM37). On y exige donc le préfixe d'un
+ * bucket du SNU.
  */
 import { config } from "../config";
 import { sanitizeAll } from "../utils";
 
-/** Hôte du stockage objet Clever Cloud, écrit en dur côté front comme côté infra. */
-const CELLAR_HOST = "https://cellar-c2.services.clever-cloud.com";
+/** Buckets publics du SNU, écrits en dur côté fronts (`CDN_BASE_URL`). */
+const TRUSTED_STORAGE_PREFIXES = ["https://cellar-c2.services.clever-cloud.com/cni-bucket-prod/", "https://cellar-c2.services.clever-cloud.com/cni-bucket-staging/"];
 
-function toOrigin(value?: string | null): string | null {
-  if (!value) return null;
+function toUrl(value: string): URL | null {
   try {
-    // `CELLAR_ENDPOINT` est configuré sous forme d'endpoint S3, parfois sans schéma.
-    return new URL(/^https?:\/\//i.test(value) ? value : `https://${value}`).origin.toLowerCase();
+    return new URL(value);
   } catch {
     return null;
   }
 }
 
 function getTrustedOrigins(): string[] {
-  return [config.APP_URL, config.ADMIN_URL, config.KNOWLEDGEBASE_URL, config.CELLAR_ENDPOINT, CELLAR_HOST].map(toOrigin).filter((origin): origin is string => !!origin);
+  return [config.APP_URL, config.ADMIN_URL, config.KNOWLEDGEBASE_URL]
+    .map((value) => (value ? toUrl(value)?.origin.toLowerCase() : null))
+    .filter((origin): origin is string => !!origin);
 }
 
 /**
- * Une URL absolue http(s) sur un domaine du service. Une valeur vide est acceptée : l'appelant
- * n'a alors rien fourni et le serveur applique son lien par défaut.
+ * Une URL absolue http(s) sur un domaine du service, ou dans un bucket du SNU. Une valeur vide est
+ * acceptée : l'appelant n'a alors rien fourni et le serveur applique son lien par défaut.
  */
 export function isTrustedEmailLink(value?: string | null): boolean {
   if (!value) return true;
   if (!/^https?:\/\//i.test(value)) return false;
-  const origin = toOrigin(value);
-  return !!origin && getTrustedOrigins().includes(origin);
+  const url = toUrl(value);
+  if (!url) return false;
+  if (getTrustedOrigins().includes(url.origin.toLowerCase())) return true;
+  // `URL` a déjà résolu les segments `..` (y compris encodés) : le chemin comparé est le chemin servi.
+  const target = `${url.origin.toLowerCase()}${url.pathname}`;
+  return TRUSTED_STORAGE_PREFIXES.some((prefix) => target.startsWith(prefix));
 }
 
 /**

@@ -163,6 +163,28 @@ describe("M71 — GET /jeveuxaider/signin", () => {
     const res = await request(app).get("/jeveuxaider/signin").query({ token_jva: body.data.token_jva });
     expect(res.status).toBe(401);
   });
+
+  it("PM31 : refuse un chargement caché (Sec-Fetch-Dest != document) — login CSRF", async () => {
+    const { referent } = await createJvaResponsible();
+    const app = getAppHelper();
+    const { body } = await request(app).get("/jeveuxaider/getToken").set("x-api-key", JVA_TOKEN).query({ email: referent.email });
+
+    for (const dest of ["image", "iframe", "empty", "script"]) {
+      const res = await request(app).get("/jeveuxaider/signin").set("Sec-Fetch-Dest", dest).query({ token_jva: body.data.token_jva });
+      expect(res.status).toBe(403);
+      expect(res.headers["set-cookie"]).toBeUndefined();
+    }
+  });
+
+  it("PM31 : accepte une navigation de premier niveau (Sec-Fetch-Dest=document)", async () => {
+    const { referent } = await createJvaResponsible();
+    const app = getAppHelper();
+    const { body } = await request(app).get("/jeveuxaider/getToken").set("x-api-key", JVA_TOKEN).query({ email: referent.email });
+
+    const res = await request(app).get("/jeveuxaider/signin").set("Sec-Fetch-Dest", "document").query({ token_jva: body.data.token_jva });
+    expect(res.status).toBe(302);
+    expect(String(res.headers["set-cookie"])).toContain("jwt_ref=");
+  });
 });
 
 describe("M64 / M40 / L37 — routes publiques supprimées", () => {

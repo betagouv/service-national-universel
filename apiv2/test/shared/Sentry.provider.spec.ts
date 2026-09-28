@@ -44,6 +44,12 @@ describe("SentryProvider - redaction avant envoi", () => {
         return init.mock.calls[0][0].beforeSend;
     };
 
+    const beforeSendTransaction = () => {
+        (SentryProvider as any).useFactory(configProduction);
+        expect(init).toHaveBeenCalledTimes(1);
+        return init.mock.calls[0][0].beforeSendTransaction;
+    };
+
     it("masque les secrets portés par un événement avant son envoi", () => {
         const evenement = beforeSend()({
             message: "erreur",
@@ -58,5 +64,15 @@ describe("SentryProvider - redaction avant envoi", () => {
         const evenement = beforeSend()({ message: "erreur", extra: { correlationId: "abc-123" } });
 
         expect(evenement.extra.correlationId).toBe("abc-123");
+    });
+
+    it("PH18 : masque aussi les secrets d'une transaction de performance avant son envoi", () => {
+        const transaction = beforeSendTransaction()({
+            request: { data: { password: "Motdepasse!2026" }, cookies: { jwt_ref: "jeton-de-session" } },
+            spans: [{ data: { "http.url": "https://api.snu.gouv.fr/v2/jeune/export?token=jeton-de-session" } }],
+        });
+
+        expect(transaction.request.data).toBeUndefined();
+        expect(JSON.stringify(transaction)).not.toContain("jeton-de-session");
     });
 });

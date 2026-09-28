@@ -8,6 +8,7 @@ import MenuButton from "./MenuButton";
 import useTickets from "../useTickets";
 import { toastr } from "react-redux-toastr";
 import usePermissions from "@/hooks/usePermissions";
+import { queryClient } from "@/services/react-query";
 
 export default function UserMenu({ onClose }) {
   const dispatch = useDispatch();
@@ -22,6 +23,7 @@ export default function UserMenu({ onClose }) {
       setIsLoggingOut(true);
       await API.post(`/young/logout`);
       dispatch(setYoung(null));
+      queryClient.clear();
       toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
       return history.push("/auth");
     } catch (e) {

@@ -1,4 +1,4 @@
-import { REDACTED, isSensitiveKey, maskEmail, redactValue, redactString, redactUrl, redactLogInfo } from "../index";
+import { REDACTED, isSensitiveKey, maskEmail, redactValue, redactString, redactUrl, redactLogInfo, redactSentryEvent, isUrlKey } from "../index";
 
 const TOKEN_40 = "a".repeat(40);
 const OTHER_TOKEN_40 = "b".repeat(40);
@@ -42,6 +42,11 @@ describe("logRedaction", () => {
         "api-key",
         "SENDINBLUEKEY",
         "JWT_SECRET",
+        // PH26 : cookie de confiance 2FA, un par compte — ni préfixe ni suffixe "token" une fois l'id concaténé.
+        "trust_token-64a0f1c2b3d4e5f60718293a",
+        // PH18/PM36 : `_original` (mongoose-patch-history) reprend parfois le document entier avant modification.
+        "_original",
+        "original",
       ]) {
         expect({ key, sensitive: isSensitiveKey(key) }).toEqual({ key, sensitive: true });
       }
@@ -365,7 +370,10 @@ describe("logRedaction", () => {
         ],
       });
 
-      expect(out._original).toEqual({ email: "j***@example", password: REDACTED, zip: "29200" });
+      // PH26/PM36 : `_original` (le corps entier soumis à Joi) est désormais masqué en bloc, pas
+      // seulement champ par champ — un champ métier non reconnu (adresse, santé…) y restait sinon en
+      // clair, contrairement aux clés `details[].context` déjà reconnues et sélectivement redactées.
+      expect(out._original).toBe(REDACTED);
       expect(out.details[0].context).toEqual({ key: "email", label: "email", value: "j***@example", invalids: ["j***@example"] });
       expect(out.details[1].context).toEqual({ key: "password", label: "password", limit: 8, value: REDACTED });
       expect(out.details[2].context).toEqual({ key: "zip", label: "zip", value: "29200" });
@@ -413,6 +421,46 @@ describe("logRedaction", () => {
       expect(out[LEVEL]).toBe("info");
       expect(out.password).toBe(REDACTED);
       expect(JSON.stringify(out[SPLAT] ?? null)).not.toContain("Secret1!");
+    });
+  });
+
+  describe("isUrlKey — attributs de span OTel", () => {
+    it("flags http.url and http.target", () => {
+      expect(isUrlKey("http.url")).toBe(true);
+      expect(isUrlKey("http.target")).toBe(true);
+    });
+  });
+
+  describe("redactSentryEvent (PH18/PH26/PM36)", () => {
+    it("supprime entièrement request.data plutôt que de le redacter par nom de clé", () => {
+      const event: any = { request: { data: { firstName: "Jean", freeText: "numéro de sécu 1 85 12..." } } };
+      const out: any = redactSentryEvent(event);
+      expect(out.request.data).toBeUndefined();
+      expect("data" in out.request).toBe(false);
+    });
+
+    it("redacte les clés de span http.url / http.target (transactions de performance)", () => {
+      const event: any = {
+        spans: [{ description: "GET /young", data: { "http.url": "https://api.snu.gouv.fr/young?email=victime@example.org", "http.target": "/young?token=abc" } }],
+      };
+      const out: any = redactSentryEvent(event);
+      expect(JSON.stringify(out.spans)).not.toContain("victime@example.org");
+      expect(JSON.stringify(out.spans)).not.toContain("token=abc");
+    });
+
+    it("redacte exception.values[].value (message d'erreur MongoServerError avec un email)", () => {
+      const event: any = {
+        exception: { values: [{ type: "MongoServerError", value: 'E11000 duplicate key error: dup key: { email: "victime@example.org" }' }] },
+      };
+      const out: any = redactSentryEvent(event);
+      expect(out.exception.values[0].value).not.toContain("victime@example.org");
+    });
+
+    it("redacte le cookie trust_token-<id>", () => {
+      const event: any = { request: { cookies: { "trust_token-64a0f1c2b3d4e5f60718293a": "jeton-secret", jwt_ref: "autre-secret" } } };
+      const out: any = redactSentryEvent(event);
+      expect(out.request.cookies["trust_token-64a0f1c2b3d4e5f60718293a"]).toBe(REDACTED);
+      expect(out.request.cookies.jwt_ref).toBe(REDACTED);
     });
   });
 });

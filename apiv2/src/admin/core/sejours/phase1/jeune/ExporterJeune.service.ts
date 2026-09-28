@@ -1,6 +1,6 @@
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { Injectable } from "@nestjs/common";
-import { ROLES } from "snu-lib";
+import { getYoungFieldsHiddenFrom, ROLES } from "snu-lib";
 
 export const EXPORT_JEUNE_FOLDER = "file/admin/sejours/phase1/jeune/export";
 
@@ -86,9 +86,12 @@ export class ExporterJeuneService {
             "frenchNationality",
             ...(user.role === ROLES.REFERENT_DEPARTMENT ? ["schoolName"] : []),
         ];
+        // Les champs qu'un rôle ne peut pas voir en colonne ne doivent pas non plus être
+        // filtrables : sinon un filtre `handicap=true` révèle la donnée même colonne masquée (PH22).
+        const hiddenFields = getYoungFieldsHiddenFrom(user);
         const filters = Object.keys(filtersRaw).reduce(
             (acc, filterKey) => {
-                if (allowedFilters.includes(filterKey)) {
+                if (allowedFilters.includes(filterKey) && !hiddenFields.includes(filterKey)) {
                     acc[filterKey] = filtersRaw[filterKey];
                 }
                 return acc;

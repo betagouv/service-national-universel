@@ -44,6 +44,7 @@ const buildApp = () => {
 
 const REFERENT = { _id: "dddddddddddddddddddddddd", role: "REFERENT_REGION", region: "Bretagne" };
 const AGENT = { _id: "eeeeeeeeeeeeeeeeeeeeeeee", role: "AGENT" };
+const DG = { _id: "ffffffffffffffffffffffff", role: "DG" };
 
 const validRule = { name: "r", description: "d", active: true, actions: [], conditionsEt: [], conditionsOu: [] };
 
@@ -53,27 +54,38 @@ beforeEach(() => {
 });
 
 describe("GET /ventilation", () => {
-  it("ne renvoie à un agent que les règles centrales", async () => {
-    mockCurrentUser = AGENT;
-    await request(buildApp()).get("/ventilation");
-    expect(VentilationModel.find).toHaveBeenCalledWith({ userRole: "AGENT" });
-  });
-
   it("borne un référent régional à ses propres règles", async () => {
     mockCurrentUser = REFERENT;
     await request(buildApp()).get("/ventilation");
     expect(VentilationModel.find).toHaveBeenCalledWith({ userRole: "REFERENT_REGION", userRegion: "Bretagne" });
   });
+
+  it("donne à un agent central la lecture de toutes les règles, y compris des référents (PL22)", async () => {
+    mockCurrentUser = AGENT;
+    await request(buildApp()).get("/ventilation");
+    expect(VentilationModel.find).toHaveBeenCalledWith({});
+  });
+
+  it("donne à DG la lecture de toutes les règles (PL22)", async () => {
+    mockCurrentUser = DG;
+    await request(buildApp()).get("/ventilation");
+    expect(VentilationModel.find).toHaveBeenCalledWith({});
+  });
 });
 
-describe("POST /ventilation", () => {
-  it("force le rôle et le territoire d'un référent à la création", async () => {
+describe("POST /ventilation (PM47)", () => {
+  it("refuse la création à un référent (aucun usage légitime documenté côté UI)", async () => {
     mockCurrentUser = REFERENT;
     const res = await request(buildApp()).post("/ventilation").send(validRule);
+    expect(res.status).toBe(403);
+    expect(VentilationModel.create).not.toHaveBeenCalled();
+  });
+
+  it("autorise la création à un agent central", async () => {
+    mockCurrentUser = AGENT;
+    const res = await request(buildApp()).post("/ventilation").send(validRule);
     expect(res.status).toBe(200);
-    expect(VentilationModel.create).toHaveBeenCalledWith(
-      expect.objectContaining({ userRole: "REFERENT_REGION", userRegion: "Bretagne" })
-    );
+    expect(VentilationModel.create).toHaveBeenCalledWith(expect.objectContaining({ userRole: "AGENT" }));
   });
 });
 
@@ -97,6 +109,27 @@ describe("PATCH /ventilation/:id", () => {
     const res = await request(buildApp()).patch(`/ventilation/${UNKNOWN_RULE_ID}`).send({ name: "x" });
     expect(res.status).toBe(404);
   });
+
+  it("laisse un agent central désactiver une règle de référent (PL22)", async () => {
+    mockCurrentUser = AGENT;
+    const res = await request(buildApp()).patch(`/ventilation/${REFERENT_RULE_ID}`).send({ active: false });
+    expect(res.status).toBe(200);
+    expect(VentilationModel.findOneAndUpdate).toHaveBeenCalledWith({ _id: REFERENT_RULE_ID }, { active: false });
+  });
+
+  it("interdit à un agent central de réécrire le contenu d'une règle de référent (PL22)", async () => {
+    mockCurrentUser = AGENT;
+    const res = await request(buildApp()).patch(`/ventilation/${REFERENT_RULE_ID}`).send({ name: "pris en main" });
+    expect(res.status).toBe(403);
+    expect(VentilationModel.findOneAndUpdate).not.toHaveBeenCalled();
+  });
+
+  it("interdit à un agent central de réécrire le contenu ET de désactiver en même temps une règle de référent (PL22)", async () => {
+    mockCurrentUser = AGENT;
+    const res = await request(buildApp()).patch(`/ventilation/${REFERENT_RULE_ID}`).send({ active: false, name: "pris en main" });
+    expect(res.status).toBe(403);
+    expect(VentilationModel.findOneAndUpdate).not.toHaveBeenCalled();
+  });
 });
 
 describe("DELETE /ventilation/:id", () => {
@@ -105,5 +138,12 @@ describe("DELETE /ventilation/:id", () => {
     const res = await request(buildApp()).delete(`/ventilation/${AGENT_RULE_ID}`);
     expect(res.status).toBe(403);
     expect(VentilationModel.findByIdAndDelete).not.toHaveBeenCalled();
+  });
+
+  it("laisse un agent central supprimer une règle de référent (PL22)", async () => {
+    mockCurrentUser = AGENT;
+    const res = await request(buildApp()).delete(`/ventilation/${REFERENT_RULE_ID}`);
+    expect(res.status).toBe(200);
+    expect(VentilationModel.findByIdAndDelete).toHaveBeenCalledWith(REFERENT_RULE_ID);
   });
 });

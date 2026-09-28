@@ -36,6 +36,9 @@ export const SentryProvider: Provider = {
                 // Filet global : tout événement (y compris ceux capturés hors du filtre d'exception)
                 // passe par la redaction des secrets avant de quitter le service.
                 beforeSend: redactSentryEvent,
+                // PH18 : les transactions de performance ne passent pas par beforeSend — sans ce hook
+                // dédié, chaque requête /v2/* échantillonnée partait avec cookies, en-têtes et corps en clair.
+                beforeSendTransaction: redactSentryEvent,
             });
             console.log("Sentry initialized successfully");
         }

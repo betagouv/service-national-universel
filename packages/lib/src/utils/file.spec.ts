@@ -1,4 +1,4 @@
-import { detectMimeTypeFromBytes, getSafeDownloadFileName, toSheetCellValue } from "./file";
+import { detectMimeTypeFromBytes, getSafeDownloadFileName, hasAsfSignature, toSheetCellValue } from "./file";
 
 describe("getSafeDownloadFileName", () => {
   it("impose l'extension du type détecté au nom du déposant", () => {
@@ -64,6 +64,25 @@ describe("detectMimeTypeFromBytes", () => {
     expect(detectMimeTypeFromBytes(bytes("<html><script>"))).toBeUndefined();
     expect(detectMimeTypeFromBytes(bytes("%PD"))).toBeUndefined();
     expect(detectMimeTypeFromBytes(undefined)).toBeUndefined();
+  });
+});
+
+describe("hasAsfSignature", () => {
+  // PH24 : un ASF_Header_Object dont le champ de taille est forgé fait boucler indéfiniment
+  // le décodeur de file-type 16.5.4 (strtok3) — un timeout applicatif ne rendrait pas la main.
+  // On refuse le format par sa signature, avant tout appel à FileType.fromBuffer/fromFile.
+  const ASF_MAGIC = [0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9];
+
+  it("reconnaît la signature ASF_Header_Object", () => {
+    expect(hasAsfSignature(ASF_MAGIC)).toBe(true);
+    expect(hasAsfSignature(Buffer.from([...ASF_MAGIC, 0x00, 0xaa, 0x00, 0x62, 0xce, 0x6c]))).toBe(true);
+  });
+
+  it("ne signale pas un format légitime ni un contenu trop court", () => {
+    expect(hasAsfSignature(Array.from(Buffer.from("%PDF-1.7\n", "latin1")))).toBe(false);
+    expect(hasAsfSignature(ASF_MAGIC.slice(0, 4))).toBe(false);
+    expect(hasAsfSignature(undefined)).toBe(false);
+    expect(hasAsfSignature(null)).toBe(false);
   });
 });
 

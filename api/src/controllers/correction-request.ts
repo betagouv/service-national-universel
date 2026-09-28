@@ -23,6 +23,7 @@ import { sendTemplate } from "../brevo";
 import { UserRequest } from "./request";
 import { validateId } from "../utils/validator";
 import { canEditYoungInScope } from "../young/youngScope";
+import { canReferentChangeYoungStatus } from "../young/youngStatusTransitions";
 
 const router = express.Router({ mergeParams: true });
 
@@ -80,7 +81,9 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       }
     }
 
-    if (!canUpdateYoungStatus({ body: { status: YOUNG_STATUS.WAITING_CORRECTION }, current: young })) {
+    // PH5 : une demande de correction ne rouvre que les dossiers en attente de validation (le dossier
+    // reste éligible s'il y est déjà) ; l'ADMIN garde toute latitude via canReferentChangeYoungStatus.
+    if (young.status !== YOUNG_STATUS.WAITING_CORRECTION && !canReferentChangeYoungStatus(req.user, young.status, YOUNG_STATUS.WAITING_CORRECTION)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 

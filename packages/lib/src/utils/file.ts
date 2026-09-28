@@ -84,6 +84,22 @@ export function detectMimeTypeFromBytes(bytes?: ArrayLike<number> | null): strin
   return undefined;
 }
 
+const ASF_HEADER_OBJECT_SIGNATURE = [0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9];
+
+/**
+ * `true` si `bytes` commence par la signature de l'ASF_Header_Object (30 26 B2 75 8E 66 CF 11
+ * A6 D9). Un fichier ASF forgé (en-tête de 80 octets suffit) fait boucler indéfiniment le
+ * décodeur de file-type 16.5.4 (strtok3) : la boucle n'enchaîne que des promesses déjà
+ * résolues et ne laisse jamais passer la timer phase, donc un timeout applicatif ne rendrait
+ * pas la main (PH24). Aucun format ASF, WMA ou WMV n'étant accepté nulle part dans ce dépôt, on
+ * refuse le format par sa signature avant tout appel à FileType.fromBuffer/fromFile (PH24,
+ * PM33), plutôt que de tenter de borner le décodage en aval.
+ */
+export function hasAsfSignature(bytes?: ArrayLike<number> | null): boolean {
+  if (!bytes || bytes.length < ASF_HEADER_OBJECT_SIGNATURE.length) return false;
+  return ASF_HEADER_OBJECT_SIGNATURE.every((byte, index) => bytes[index] === byte);
+}
+
 /**
  * SheetJS interprète certaines valeurs au lieu de les écrire : un tableau `[valeur, formule]` passé à
  * `aoa_to_sheet` devient une vraie formule, et un objet passé à `json_to_sheet` est recopié tel quel

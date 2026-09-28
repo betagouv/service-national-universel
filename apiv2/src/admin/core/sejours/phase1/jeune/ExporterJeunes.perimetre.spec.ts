@@ -175,6 +175,22 @@ describe("ExporterJeunes - périmètre", () => {
         const params = searchYoungGateway.searchYoung.mock.calls[0][0];
         expect(params.filters.region).toEqual(["Nouvelle-Aquitaine"]);
     });
+
+    it("refuse l'export d'un référent départemental sans département au lieu d'un périmètre vide silencieusement ignoré (PM39)", async () => {
+        referentGateway.findById.mockResolvedValue({ id: "ref-dep", departement: [] });
+
+        await expect(exporter({ id: "ref-dep", role: ROLES.REFERENT_DEPARTMENT })).rejects.toThrow(
+            ForbiddenException,
+        );
+        expect(searchYoungGateway.searchYoung).not.toHaveBeenCalled();
+    });
+
+    it("refuse l'export d'un référent régional sans région au lieu d'un périmètre vide silencieusement ignoré (PM39)", async () => {
+        referentGateway.findById.mockResolvedValue({ id: "ref-reg", region: "" });
+
+        await expect(exporter({ id: "ref-reg", role: ROLES.REFERENT_REGION })).rejects.toThrow(ForbiddenException);
+        expect(searchYoungGateway.searchYoung).not.toHaveBeenCalled();
+    });
 });
 
 describe("isExportScolariseAllowed", () => {

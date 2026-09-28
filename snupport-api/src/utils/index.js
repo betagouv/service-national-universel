@@ -71,9 +71,9 @@ const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment
             content: buffer.toString("base64"),
             name: attachment.name,
           });
-        }),
+        })
       );
-    } else if (messageHistory !== null && messageHistory !== undefined) mailTicket = await getLastAndSpecificIdMessageFromTicket(lastMessageId, messageHistory);
+    } else if (messageHistory !== null && messageHistory !== undefined) mailTicket = await getLastAndSpecificIdMessageFromTicket(ticket._id, lastMessageId, messageHistory);
     else mailTicket = await getLastMessageFromTicket(lastMessageId);
 
     const formatMessageForReading = (formattedMessage) => {
@@ -205,9 +205,12 @@ const getLastMessageFromTicket = async (lastMessageId) => {
   }
 };
 
-const getLastAndSpecificIdMessageFromTicket = async (lastMessageId, specificMessageId) => {
+// Défense en profondeur (PH25) : specificMessageId est déjà vérifié appartenir au ticket par
+// l'appelant (message.js), mais on le revérifie ici au cas où une future route oublierait ce
+// contrôle avant d'appeler sendEmailWithConditions.
+const getLastAndSpecificIdMessageFromTicket = async (ticketId, lastMessageId, specificMessageId) => {
   try {
-    const specificMessage = await MessageModel.findById(specificMessageId);
+    const specificMessage = await MessageModel.findOne({ _id: specificMessageId, ticketId });
     const lastMessage = await MessageModel.findById(lastMessageId);
     let mailMessages = "";
     mailMessages += `<strong> ${lastMessage.authorFirstName} - Assistance du Service national universel (SNU) <br>
@@ -310,12 +313,16 @@ function deleteFile(path) {
 const setAgent = async (ticket) => {
   try {
     const agent = await AgentModel.findById(ticket.agentId);
+    // Un id d'agent invalide ou supprimé (règle de ventilation obsolète) ne doit pas planter
+    // l'appelant : renvoyer le ticket inchangé plutôt que de déréférencer un agent inexistant (PM47).
+    if (!agent) return ticket;
     ticket.agentFirstName = agent.firstName;
     ticket.agentLastName = agent.lastName;
     ticket.agentEmail = agent.email;
     return ticket;
   } catch (error) {
     capture(error);
+    return ticket;
   }
 };
 

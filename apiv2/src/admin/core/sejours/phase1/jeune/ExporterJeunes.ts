@@ -15,6 +15,7 @@ import {
     formatLongDateFR,
     formatPhoneE164,
     getLabelWithdrawnReason,
+    getYoungFieldsHiddenFrom,
     isAdmin,
     isInRuralArea,
     isReferentDep,
@@ -28,6 +29,7 @@ import {
     LigneToPointType,
     MeetingPointType,
     MIME_TYPES,
+    omitYoungFields,
     ROLES,
     SchoolType,
     SessionPhase1Type,
@@ -296,6 +298,10 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
         filtreResidence: "region" | "department",
         perimetre: string[],
     ): void {
+        if (!perimetre.length) {
+            throw new ForbiddenException(`${filtreResidence} du référent est vide`);
+        }
+
         const demandes = [filters[filtreScolarise] ?? []].flat().filter(Boolean) as string[];
 
         if (!demandes.length) {
@@ -355,9 +361,16 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
             etablissementsById = await this.retrieveEtablissements(jeunes);
         }
 
+        // GOO-11 retire ces champs des réponses de l'api v1 aux structures d'accueil
+        // (RESPONSIBLE, SUPERVISOR) ; l'export v2 doit appliquer la même règle (PH22).
+        const champsMasques = getYoungFieldsHiddenFrom(auteur);
+
         // Enrichit un jeune avec ses données liées puis le mappe vers la ligne d'export.
         // Appelé à la demande pour chaque ligne (jamais tout le dataset en même temps).
         const mapOne = (jeune: YoungType) => {
+            if (champsMasques.length) {
+                omitYoungFields(jeune, champsMasques);
+            }
             if (jeune.schoolId) {
                 // @ts-ignore
                 jeune.school = schoolsById[jeune.schoolId];

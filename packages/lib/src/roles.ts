@@ -892,10 +892,6 @@ function canViewMeetingPointId(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
-function canUpdateInscriptionGoals(actor) {
-  return actor.role === ROLES.ADMIN;
-}
-
 function canViewInscriptionGoals(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.VISITOR].includes(
     actor.role,
@@ -989,14 +985,6 @@ function canSendTemplateToYoung(actor, young) {
 
 function canCreateOrUpdateDepartmentService(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
-function canChangeYoungCohort(actor, young) {
-  const isAdmin = actor.role === ROLES.ADMIN;
-  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department);
-  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === young.region;
-  const authorized = isAdmin || isReferentDepartmentFromTargetDepartment || isReferentRegionFromTargetRegion;
-  return authorized;
 }
 
 function canViewDepartmentService(actor) {
@@ -1290,22 +1278,17 @@ function canValidateMultipleYoungsInClass(actor: UserDto) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 
+// Pas d'entrée pour la phase 1 : son statut ne se modifie plus manuellement, y compris par l'ADMIN (GOO-65).
 const phaseStatusOptionsByRole = {
   0: { DEFAULT: [] },
-  1: {
-    [ROLES.ADMIN]: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-    DEFAULT: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-  },
   2: { DEFAULT: [YOUNG_STATUS_PHASE2.WAITING_REALISATION, YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.VALIDATED] },
   3: { DEFAULT: [YOUNG_STATUS_PHASE3.WAITING_REALISATION, YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED] },
 };
 
-function getPhaseStatusOptions(actor: UserDto, phase: number) {
-  const phaseStatusOptions = phaseStatusOptionsByRole[phase][actor.role] || phaseStatusOptionsByRole[phase].DEFAULT || [];
-  if (phase === 1 && isSuperAdmin(actor) && !phaseStatusOptions.includes(YOUNG_STATUS_PHASE1.AFFECTED)) {
-    phaseStatusOptions.push(YOUNG_STATUS_PHASE1.AFFECTED);
-  }
-  return phaseStatusOptions;
+// Renvoie une copie : la matrice est partagée entre les appels (PL23, audit production 2026-09-25).
+function getPhaseStatusOptions(actor: UserDto, phase: number): string[] {
+  const phaseStatusOptions = phaseStatusOptionsByRole[phase]?.[actor.role] || phaseStatusOptionsByRole[phase]?.DEFAULT || [];
+  return [...phaseStatusOptions];
 }
 
 export function canValidateYoungToLP(actor: UserDto, cohort?: Pick<CohortType, "instructionEndDate" | "youngHTSBasculeLPDisabled">) {
@@ -1469,7 +1452,6 @@ export {
   canCreateMeetingPoint,
   canSearchMeetingPoints,
   canViewMeetingPointId,
-  canUpdateInscriptionGoals,
   canViewInscriptionGoals,
   canViewTicketTags,
   canGetYoungByEmail,
@@ -1484,7 +1466,6 @@ export {
   canViewDepartmentService,
   canSearchInElasticSearch,
   canRefuseMilitaryPreparation,
-  canChangeYoungCohort,
   canSendTutorTemplate,
   canSeeYoungInfo,
   canEditPresenceYoung,

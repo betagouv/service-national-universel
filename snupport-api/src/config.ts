@@ -99,6 +99,9 @@ export const config = {
   LOG_LEVEL: _env(envStr, "LOG_LEVEL", "debug"), // error, warn, info, http, debug
   SENDINBLUEKEY: _env(envStr, "SENDINBLUEKEY"),
   SENTRY_DEBUG_MODE: _env(envBool, "SENTRY_DEBUG_MODE", false),
+  // Désactivé par défaut : l'activation attend la confirmation que ClamAV est joignable depuis
+  // snupport-api (PM49).
+  ENABLE_ANTIVIRUS_SUPPORT: _env(envBool, "ENABLE_ANTIVIRUS_SUPPORT", false),
 };
 
 if (environment !== "development" && environment !== "test") {

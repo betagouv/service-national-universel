@@ -506,8 +506,16 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       const db = mongoose.connection.db;
       let patches: any[] = [];
 
+      // PL8 (25/09/2026, résiduel de H58) : ne garder la branche `{ cohortId: cohort._id }` du `$or`
+      // que pour ADMIN — pour un référent scopé, elle contournait le périmètre par centre et
+      // renvoyait l'historique national du cohort. Même bascule qu'au L466 (scopedCenterIds).
+      const patchesFilter = scopedCenterIds === null ? { $or: [{ ref: { $in: lineIds } }, { cohortId: cohort._id }] } : { ref: { $in: lineIds } };
+      // PL8 : l'auteur d'un patch n'est projeté que sur {_id, firstName, lastName} pour un non-admin,
+      // comme le fait déjà /patches/filter-options (L397) — email, rôle et département ne sortent plus.
+      const projectPatchUser = (user: any) => (scopedCenterIds === null || !user ? user : { _id: user._id, firstName: user.firstName, lastName: user.lastName });
+
       // --- lignebus patches...
-      let cursor = db.collection("lignebus_patches").find({ $or: [{ ref: { $in: lineIds } }, { cohortId: cohort._id }] });
+      let cursor = db.collection("lignebus_patches").find(patchesFilter);
       for await (const doc of cursor) {
         if (doc.ops && filterUserFunction(doc)) {
           const bus = lineSet[doc.ref];
@@ -528,7 +536,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
                 path: op.path,
                 value: op.value,
                 originalValue: op.originalValue,
-                user: doc.user,
+                user: projectPatchUser(doc.user),
               });
             }
           }
@@ -552,7 +560,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
                 path: op.path,
                 value: op.value,
                 originalValue: op.originalValue,
-                user: doc.user,
+                user: projectPatchUser(doc.user),
               });
             }
           }

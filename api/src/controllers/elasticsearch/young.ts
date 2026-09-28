@@ -190,7 +190,12 @@ async function buildYoungContext(user: UserDto, options: YoungContextOptions = {
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
-  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
+  // PH10 (25/09/2026) : ce bloc portait la même condition `!showAffectedToRegionOrDep` que celui du
+  // dessus (copié-collé), jamais la branche symétrique de REFERENT_REGION (ci-dessus,
+  // showAffectedToRegionOrDep=true). Un référent départemental n'avait donc plus AUCUN filtre
+  // département sur /in-bus, /by-point-de-rassemblement et /by-point-de-rassemblement/aggs, qui
+  // passent tous `showAffectedToRegionOrDep: true` : accès nationnal aux jeunes de n'importe quel bus.
+  if (user.role === ROLES.REFERENT_DEPARTMENT && showAffectedToRegionOrDep) {
     const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
     if (sessionPhase1.length === 0) {
       contextFilters.push({ terms: { "department.keyword": user.department } });
@@ -568,7 +573,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       }
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       let data = serializeYoungs(response, req.user);
-      data = await populateYoungExport(data, exportFields);
+      data = await populateYoungExport(data, exportFields, user);
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });

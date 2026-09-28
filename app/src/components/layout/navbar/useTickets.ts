@@ -1,5 +1,7 @@
 import API from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/redux/auth/reducer";
 
 async function queryFn() {
   const { ok, data } = await API.get(`/SNUpport/ticketsInfo`);
@@ -8,6 +10,9 @@ async function queryFn() {
   return data;
 }
 
-const useTickets = () => useQuery({ queryKey: ["ticketsInfo"], queryFn });
+const useTickets = () => {
+  const young = useSelector((state: AuthState) => state.Auth.young);
+  return useQuery({ queryKey: ["ticketsInfo", { youngId: young?._id }], queryFn });
+};
 
 export default useTickets;

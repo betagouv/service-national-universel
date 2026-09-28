@@ -68,6 +68,19 @@ describe("GET /v0/ticket (M94)", () => {
     expect(res.body.data[0]).toEqual(expect.objectContaining({ _id: "t1", number: 12, status: "OPEN", subject: "Question" }));
     for (const field of INTERNAL_TICKET_FIELDS) expect(res.body.data[0]).not.toHaveProperty(field);
   });
+
+  // PM46 : un ticket créé sur l'email d'un contact par un canal non authentifié (formulaire public,
+  // IMAP) est marqué identityVerified:false tant que la victime n'a pas confirmé elle-même son
+  // identité — il ne doit pas apparaître dans son propre espace « Mes échanges ».
+  it("exclut les tickets à l'identité non vérifiée", async () => {
+    ContactModel.findOne.mockResolvedValue({ _id: "c1" });
+    TicketModel.find.mockResolvedValue([TICKET]);
+
+    const res = await request(app).get("/v0/ticket").query({ email: "jeune@example.com" });
+
+    expect(res.status).toBe(200);
+    expect(TicketModel.find).toHaveBeenCalledWith(expect.objectContaining({ contactId: "c1", identityVerified: { $ne: false } }));
+  });
 });
 
 describe("GET /v0/ticket/withMessages (M94)", () => {

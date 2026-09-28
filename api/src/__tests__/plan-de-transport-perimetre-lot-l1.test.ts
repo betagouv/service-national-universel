@@ -154,6 +154,57 @@ describe("Plan de transport — périmètre (lot L1)", () => {
     });
   });
 
+  describe("PL8 — historique du plan de transport (/patches/:cohort)", () => {
+    it("la branche cohortId ne contourne plus le périmètre pour un référent scopé", async () => {
+      const { cohort } = await createLigne();
+      // Patch rattaché au cohort, mais sur une ligne étrangère au périmètre du référent testé (pas
+      // dans `lineIds`) : seule la branche `{ cohortId: cohort._id }` pouvait le faire remonter.
+      await mongoose.connection.db!.collection("lignebus_patches").insertOne({
+        ref: new ObjectId(),
+        cohortId: cohort._id,
+        ops: [{ op: "replace", path: "/busId", value: "HORS-PERIMETRE", originalValue: "Avant" }],
+        user: { _id: new ObjectId(), firstName: "Auteur", lastName: "Etranger", email: "etranger-pl8@example.com" },
+        date: new Date(),
+      });
+
+      const res = await request(await getAppHelperWithAcl(referentDepDuPerimetre() as any)).get(`/ligne-de-bus/patches/${cohort.name}?nopagination=true`);
+      expect(res.status).toBe(200);
+      expect(JSON.stringify(res.body)).not.toContain("HORS-PERIMETRE");
+    });
+
+    it("un admin voit toujours la branche cohortId", async () => {
+      const { cohort } = await createLigne();
+      await mongoose.connection.db!.collection("lignebus_patches").insertOne({
+        ref: new ObjectId(),
+        cohortId: cohort._id,
+        ops: [{ op: "replace", path: "/busId", value: "VIA-COHORT-ADMIN", originalValue: "Avant" }],
+        user: { _id: new ObjectId(), firstName: "Auteur", lastName: "Admin" },
+        date: new Date(),
+      });
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN } as any)).get(`/ligne-de-bus/patches/${cohort.name}?nopagination=true`);
+      expect(res.status).toBe(200);
+      expect(JSON.stringify(res.body)).toContain("VIA-COHORT-ADMIN");
+    });
+
+    it("ne renvoie que le nom de l'auteur à un référent scopé", async () => {
+      const { cohort, bus } = await createLigne();
+      await mongoose.connection.db!.collection("lignebus_patches").insertOne({
+        ref: bus._id,
+        ops: [{ op: "replace", path: "/busId", value: "X", originalValue: "Avant" }],
+        user: { _id: new ObjectId(), firstName: "Auteur", lastName: "Patch", email: "auteur-pl8@example.com", role: ROLES.ADMIN, department: "Paris" },
+        date: new Date(),
+      });
+
+      const res = await request(await getAppHelperWithAcl(referentDepDuPerimetre() as any)).get(`/ligne-de-bus/patches/${cohort.name}?nopagination=true`);
+      expect(res.status).toBe(200);
+      const patch = res.body.data.find((p: any) => p.ref === bus._id.toString());
+      expect(patch).toBeDefined();
+      expect(Object.keys(patch.user).sort()).toEqual(["_id", "firstName", "lastName"]);
+      expect(JSON.stringify(res.body)).not.toContain("auteur-pl8@example.com");
+    });
+  });
+
   describe("L17 — liaison ligne ↔ PDR", () => {
     it("un référent hors périmètre ne lit pas la liaison d'un PDR", async () => {
       const { pdr } = await createLigne();

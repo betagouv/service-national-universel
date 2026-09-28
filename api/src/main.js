@@ -6,7 +6,6 @@ const passport = require("passport");
 const validateCustomHeader = require("./middlewares/validateCustomHeader");
 const loggingMiddleware = require("./middlewares/loggingMiddleware");
 const { forceDomain } = require("forcedomain");
-const requestIp = require("request-ip"); // Import request-ip package
 const express = require("express");
 const { createTerminus } = require("@godaddy/terminus");
 
@@ -25,6 +24,7 @@ const { runMigrations } = require("./migration");
 const { applyBodyParsers, handleError } = require("./middlewares/httpHardening");
 
 const { initQueues, closeQueues, initWorkers, closeWorkers } = require("./queues/redisQueue");
+const { corsOptionsDelegate } = require("./cors-options");
 
 async function runAPI() {
   if (config.ENVIRONMENT !== "test") {
@@ -67,25 +67,13 @@ async function runAPI() {
     );
   }
 
-  const origin = [config.APP_URL, config.ADMIN_URL, config.SUPPORT_URL, config.SUPPORT_FRONT_URL, config.KNOWLEDGEBASE_URL, "https://inscription.snu.gouv.fr"];
-
-  app.use(
-    cors({
-      credentials: true,
-      origin,
-      allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage", "x-user-timezone"],
-    }),
-  );
+  app.use(cors(corsOptionsDelegate));
 
   //Check custom header
   app.use(validateCustomHeader);
 
   applyBodyParsers(app);
 
-  app.use(function (req, res, next) {
-    req.ipInfo = requestIp.getClientIp(req);
-    next();
-  });
   app.use(loggingMiddleware);
 
   app.use(cookieParser());

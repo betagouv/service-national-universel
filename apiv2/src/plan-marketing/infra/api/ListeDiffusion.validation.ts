@@ -1,5 +1,14 @@
 import { CreateListeDiffusionModel, UpdateListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
-import { IsEnum, IsNotEmpty, IsObject, IsString, ValidationOptions, registerDecorator } from "class-validator";
+import {
+    IsBoolean,
+    IsEnum,
+    IsNotEmpty,
+    IsObject,
+    IsOptional,
+    IsString,
+    ValidationOptions,
+    registerDecorator,
+} from "class-validator";
 import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
 
 // Clés de ciblage acceptées : union des filtres proposés par l'admin sur les listes
@@ -115,4 +124,25 @@ export class UpdateListeDiffusionDto implements UpdateListeDiffusionModel {
     @IsNotEmpty()
     @IsListeDiffusionFiltres()
     filters: ListeDiffusionFiltres;
+
+    // Le front (ListeDiffusionForm) réémet ces champs depuis ses defaultValues (react-hook-form,
+    // shouldUnregister: false) sans intention de les modifier. Ils sont acceptés ici pour ne pas
+    // rejeter la requête (forbidNonWhitelisted), mais toujours écrasés depuis l'existant côté
+    // service (ListeDiffusionService.updateListeDiffusion) : `isArchived` ne doit être changé que
+    // par le point d'entrée dédié `toggle-archivage`.
+    @IsOptional()
+    @IsEnum(ListeDiffusionEnum)
+    type?: ListeDiffusionEnum;
+
+    @IsOptional()
+    @IsBoolean()
+    isArchived?: boolean;
+
+    @IsOptional()
+    @IsString()
+    createdAt?: string;
+
+    @IsOptional()
+    @IsString()
+    updatedAt?: string;
 }

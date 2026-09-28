@@ -100,7 +100,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       let data = serializeYoungs(response, req.user);
-      data = await populateYoungExport(data, exportFields);
+      data = await populateYoungExport(data, exportFields, req.user);
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({

@@ -17,6 +17,7 @@ const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
 const { canAccessTicket } = require("../utils/ticketScope");
 const { inspectAttachment } = require("../utils/attachments");
+const { scanBuffer } = require("../utils/virusScanner");
 const { isKnownThreadParticipant, normalizeEmail } = require("../utils/ticketParticipants");
 const { sanitizeMessageHtml } = require("../utils/messageHtml");
 const { attachmentUpload, MAX_ATTACHMENTS_PER_MESSAGE } = require("../middlewares/attachmentUpload");
@@ -68,6 +69,11 @@ router.post(
     // arbitraire passée en paramètre.
     if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (!(await areAllowedCopyRecipients(ticket, copyRecipient))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // messageHistory cite un message précis en plus du dernier, dans l'email envoyé à dest : sans ce
+    // contrôle, un agent pouvait faire citer le contenu d'un message d'un AUTRE ticket, hors de son
+    // périmètre (PH25).
+    if (messageHistory && messageHistory !== "all" && !(await MessageModel.findOne({ _id: messageHistory, ticketId: ticket._id })))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     // Le HTML de l'éditeur est rendu chez le jeune et part dans l'email officiel du support (M88, M92).
     const messageHtml = sanitizeMessageHtml(message);
 
@@ -268,6 +274,9 @@ router.post(
     // jointes déchiffrées du ticket.
     if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (!(await areAllowedCopyRecipients(ticket, copyRecipient))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // messageHistory scopé au ticket courant (PH25), voir POST / plus haut.
+    if (messageHistory && messageHistory !== "all" && !(await MessageModel.findOne({ _id: messageHistory, ticketId: ticket._id })))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const messageHtml = sanitizeMessageHtml(body.message);
 
     // If multiple file with same names are provided, file is an array: every entry is kept and checked.
@@ -280,6 +289,9 @@ router.post(
     for (const file of files) {
       const { mime, accepted } = await inspectAttachment(file.data);
       if (!accepted) return res.status(400).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      // PM49 : la pièce jointe part telle quelle vers un contact externe, scan antivirus avant envoi.
+      const { infected } = await scanBuffer(file.data, file.name);
+      if (infected) return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
       inspectedFiles.push({ name: getAttachmentFileName(file.name, mime), data: file.data, mime });
     }
 

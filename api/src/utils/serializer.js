@@ -32,8 +32,14 @@ function serializeCohesionCenter(center, user) {
 function serializeSessionPhase1(session, user) {
   const raw = typeof session.toObject === "function" ? session.toObject() : session;
 
+  // PM34 (25/09/2026, résiduel de M59) : team, adjointsIds et sanitaryContactEmail donnent l'état
+  // civil, l'email et le téléphone de l'équipe d'encadrement — un volontaire n'y a pas droit, sur le
+  // modèle de serializeLigneBusForYoung (H48) qui retire déjà `team` d'une ligne de bus.
   if (isYoung(user)) {
     delete raw.waitingList;
+    delete raw.team;
+    delete raw.adjointsIds;
+    delete raw.sanitaryContactEmail;
   }
 
   return raw;

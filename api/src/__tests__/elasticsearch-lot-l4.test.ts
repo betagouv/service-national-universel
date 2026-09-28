@@ -226,6 +226,34 @@ describe("L12 — POST /elasticsearch/lignebus", () => {
   });
 });
 
+describe("PM9 — POST /elasticsearch/plandetransport", () => {
+  it("borne un référent départemental à son centre et ses points de rassemblement", async () => {
+    const res = await request(referentDepartement()).post("/elasticsearch/plandetransport/search").send({ filters: {} });
+    expect(res.status).toBe(200);
+    const query = JSON.stringify(msearchHitsBodies()[0].query);
+    expect(query).toContain("centerId.keyword");
+    expect(query).toContain("pointDeRassemblements.meetingPointId.keyword");
+  });
+
+  it("borne aussi l'export d'un référent régional", async () => {
+    const res = await request(referentRegion()).post("/elasticsearch/plandetransport/export").send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(allQueries()).toContain("centerId.keyword");
+  });
+
+  it("laisse l'admin sans filtre géographique", async () => {
+    const res = await request(referent({ role: ROLES.ADMIN })).post("/elasticsearch/plandetransport/search").send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(allQueries()).not.toContain("centerId.keyword");
+  });
+
+  it("laisse le transporteur national", async () => {
+    const res = await request(referent({ role: ROLES.TRANSPORTER })).post("/elasticsearch/plandetransport/search").send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(allQueries()).not.toContain("centerId.keyword");
+  });
+});
+
 describe("L14 — POST /elasticsearch/pointderassemblement", () => {
   it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR])("refuse le rôle %s", async (role) => {
     const res = await request(referent({ role })).post("/elasticsearch/pointderassemblement/export").send({ filters: {} });

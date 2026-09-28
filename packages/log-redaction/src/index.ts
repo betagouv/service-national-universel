@@ -31,6 +31,9 @@ const EXPLICIT_SENSITIVE_KEYS = new Set([
   "secretaccesskey",
   "privatekey",
   "encryptionkey",
+  // `_original` (mongoose-patch-history, normalisé "original") : reprend parfois le document entier
+  // avant modification, secrets et PII compris.
+  "original",
 ]);
 
 // Clés génériques dont la valeur est celle d'un autre champ (détails de validation Joi : { key, label, value, invalids })
@@ -62,8 +65,10 @@ export function isSensitiveKey(key: unknown): boolean {
   // `token2FAExpires`, `passwordChangedAt`, `invitationExpires`… : dates et compteurs, utiles au debug
   if (hasNonSecretSuffix(key)) return false;
   if (EXPLICIT_SENSITIVE_KEYS.has(normalized)) return true;
-  // suffixe (`invitationToken`) et préfixe (`token`, `token2FA`, `token_jva`, `token_ref`)
-  if (normalized.endsWith("token") || normalized.startsWith("token")) return true;
+  // suffixe (`invitationToken`), préfixe (`token`, `token2FA`, `token_jva`, `token_ref`) et occurrence
+  // au milieu (`trust_token-<id>`, normalisé "trusttoken<hex>" : ni préfixe ni suffixe une fois l'id
+  // du cookie de confiance 2FA concaténé).
+  if (normalized.includes("token")) return true;
   // cookies de session, une valeur par application : `jwt`, `jwt_ref`, `jwt_young` (api), `jwtzamoud` (snupport)
   if (normalized.startsWith("jwt")) return true;
   if (normalized.includes("password") || normalized.includes("passwd") || normalized.includes("secret")) return true;
@@ -78,7 +83,9 @@ export function isEmailKey(key: unknown): boolean {
 }
 
 // Clés dont la valeur est une URL : un secret peut y être porté par un segment de chemin, invisible pour `redactString`
-const URL_KEYS = new Set(["url", "originalurl", "requesturl", "href", "link", "cta", "redirect", "location"]);
+// httpurl/httptarget (normalisés de `http.url`/`http.target`) : attributs de span OTel des transactions
+// Sentry, qui portent l'URL complète de la requête (segments de chemin, query string).
+const URL_KEYS = new Set(["url", "originalurl", "requesturl", "href", "link", "cta", "redirect", "location", "httpurl", "httptarget"]);
 
 export function isUrlKey(key: unknown): boolean {
   return URL_KEYS.has(normalizeKey(key));
@@ -285,17 +292,32 @@ export function redactSentryEvent<T>(event: T): T {
   if (!event || typeof event !== "object") return event;
   const target = event as unknown as Record<string, unknown>;
   try {
-    for (const key of ["extra", "contexts", "user", "breadcrumbs", "tags"]) {
+    // "spans" (transactions de performance, PH18) : chaque span porte ses propres attributs OTel
+    // (http.url, http.target…), redactés comme le reste par isUrlKey/isSensitiveKey.
+    for (const key of ["extra", "contexts", "user", "breadcrumbs", "tags", "spans"]) {
       if (target[key] !== undefined) target[key] = redactValue(target[key]);
     }
     if (typeof target.message === "string") target.message = redactString(target.message);
     const request = target.request as Record<string, unknown> | undefined;
     if (request && typeof request === "object") {
-      for (const key of ["data", "headers", "cookies", "env"]) {
+      // `data` (corps de la requête) est supprimé entièrement plutôt que redacté par nom de clé : ce
+      // module ne peut par construction pas reconnaître la PII métier sans nom de clé reconnaissable
+      // (cf. l'avertissement en tête de fichier) — un corps de requête arbitraire reste dangereux
+      // même après redaction ciblée.
+      delete request.data;
+      for (const key of ["headers", "cookies", "env"]) {
         if (request[key] !== undefined) request[key] = redactValue(request[key]);
       }
       if (typeof request.url === "string") request.url = redactUrl(request.url);
       if (typeof request.query_string === "string") request.query_string = redactString(request.query_string);
+    }
+    // `exception.values[].value` (PM36) : le message d'erreur brut, par exemple un MongoServerError
+    // "E11000 duplicate key error … dup key: { email: \"victime@example.org\" }".
+    const exception = target.exception as { values?: Array<Record<string, unknown>> } | undefined;
+    if (exception && Array.isArray(exception.values)) {
+      for (const value of exception.values) {
+        if (typeof value.value === "string") value.value = redactString(value.value);
+      }
     }
     return event;
   } catch {

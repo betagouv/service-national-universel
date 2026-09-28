@@ -8,11 +8,12 @@ import { v4 as uuid } from "uuid";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES, ReferentStatus, getSafeDownloadFileName } from "snu-lib";
 
 import slack from "../slack";
-import { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } from "../cookie-options";
+import { sharedCookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } from "../cookie-options";
 import { capture } from "../sentry";
 import SNUpport from "../SNUpport";
 import { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } from "../utils";
 import { config } from "../config";
+import { sanitizeEmailText } from "../email/emailInput";
 import { sendTemplate } from "../brevo";
 import { YoungModel, ClasseModel, ReferentModel } from "../models";
 import { validateId } from "../utils/validator";
@@ -24,7 +25,7 @@ import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
 import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import { authRateLimiter } from "../middlewares/rateLimit";
+import { authRateLimiter, userRateLimiter } from "../middlewares/rateLimit";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { KNOWLEDGE_BASE_PUBLIC_RESTRICTION, KNOWLEDGE_BASE_RESTRICTIONS, knowledgeBaseReadableRoles } from "../services/knowledgeBaseReader";
 import { claimAttachments, consumeUploadQuota, MAX_FILES_PER_UPLOAD, rememberAttachment, SupportAttachment } from "../services/supportAttachments";
@@ -184,7 +185,7 @@ router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) 
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const options: CookieOptions = {
-      ...cookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS),
+      ...sharedCookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS),
       sameSite: "lax" as const,
     };
     res.cookie("jwtzamoud", token, options);
@@ -313,9 +314,14 @@ router.get("/ticket/:id", authMiddleware(["referent", "young"]), async (req: Use
   }
 });
 
+// Une question d'un volontaire part par email à tous les référents de son département (PM15) :
+// le quota par compte l'empêche d'en faire un canal d'envoi en masse. Les référents ne sont pas limités.
+const youngTicketLimiter = userRateLimiter({ prefix: "support-ticket-young", windowMs: 60 * 60 * 1000, limit: 10 });
+
 router.post(
   "/ticket",
   authMiddleware(["referent", "young"]),
+  (req: UserRequest, res, next) => (isYoung(req.user) ? youngTicketLimiter(req, res, next) : next()),
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }]),
   async (req: UserRequest, res) => {
     try {
@@ -674,10 +680,11 @@ const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean>
   for (let referent of departmentReferents) {
     sendTemplate(SENDINBLUE_TEMPLATES.referent.MESSAGE_NOTIFICATION, {
       emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: `${referent.email}` }],
+      // Texte saisi par le volontaire : on en retire le balisage avant de le recopier (constat PM15).
       params: {
         cta: `${config.ADMIN_URL}/boite-de-reception`,
-        message,
-        from: `${ticketCreator.firstName} ${ticketCreator.lastName}`,
+        message: sanitizeEmailText(message),
+        from: sanitizeEmailText(`${ticketCreator.firstName} ${ticketCreator.lastName}`),
       },
     });
   }

@@ -21,6 +21,36 @@ const MINUTE = 60 * 1000;
 const HOUR = 60 * MINUTE;
 
 /**
+ * Regroupe une adresse IPv6 par bloc /64 — le sous-réseau qu'un fournisseur alloue en général à un
+ * seul client — pour qu'une rotation d'adresses dans le même bloc ne rouvre pas indéfiniment le
+ * quota (PM26, 25/09/2026) : le keyGenerator par défaut d'express-rate-limit 7.5.1 est `request.ip`,
+ * sans agrégation (`ipKeyGenerator` n'existe qu'en v8, non adopté ici). Une IPv4 (y compris une
+ * IPv4-mappée `::ffff:a.b.c.d`) est renvoyée telle quelle. Une forme inattendue (ni 8 groupes ni
+ * `::`) est renvoyée inchangée : mieux vaut un regroupement absent qu'un regroupement erroné.
+ */
+export function normaliserIp(ipBrute: string): string {
+  const ip = ipBrute.split("%")[0]; // zone id (ex. fe80::1%eth0)
+  if (!ip.includes(":")) {
+    return ip;
+  }
+  const ipv4Mappee = ip.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/i);
+  if (ipv4Mappee) {
+    return ipv4Mappee[1];
+  }
+
+  const [tete, queue = ""] = ip.split("::");
+  const groupesTete = tete ? tete.split(":") : [];
+  const groupesQueue = queue ? queue.split(":") : [];
+  const manquants = ip.includes("::") ? Math.max(8 - groupesTete.length - groupesQueue.length, 0) : 0;
+  const groupes = [...groupesTete, ...Array(manquants).fill("0"), ...groupesQueue];
+  if (groupes.length !== 8) {
+    return ip;
+  }
+
+  return `${groupes.slice(0, 4).join(":")}::/64`;
+}
+
+/**
  * Les limiteurs sont instanciés au chargement des modules de routes : un seul
  * jeu de compteurs par process, ce qui est le comportement attendu en
  * production mais isole mal les tests. On garde une référence sur les stores
@@ -86,7 +116,9 @@ export function authRateLimiter({ windowMs, limit, prefix, skipSuccessfulRequest
     limit,
     skipSuccessfulRequests,
     ...(requestWasSuccessful ? { requestWasSuccessful } : {}),
-    ...(keyGenerator ? { keyGenerator } : {}),
+    // PM26 : sans keyGenerator explicite, on remplace le défaut d'express-rate-limit (`request.ip`
+    // brut) par la même IP regroupée par /64 — jamais l'IP nue, même pour un appelant du module.
+    keyGenerator: keyGenerator ?? ((req) => normaliserIp(req.ip ?? "")),
     standardHeaders: "draft-7",
     legacyHeaders: false,
     handler: (_req, res) => res.status(429).send({ ok: false, code: "TOO_MANY_REQUESTS" }),
@@ -113,6 +145,6 @@ export const userRateLimiter = ({ prefix, windowMs, limit }: { prefix: string; w
     limit,
     keyGenerator: (req) => {
       const userId = (req as any).user?._id;
-      return userId ? `user:${userId}` : `ip:${req.ip}`;
+      return userId ? `user:${userId}` : `ip:${normaliserIp(req.ip ?? "")}`;
     },
   });

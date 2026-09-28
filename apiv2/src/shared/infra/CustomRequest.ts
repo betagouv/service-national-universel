@@ -5,7 +5,7 @@ import { PermissionDto } from "snu-lib";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 
 export interface CustomRequest extends Request {
-    user: Partial<ReferentModel> & { acl: PermissionDto[] };
+    user: Partial<ReferentModel> & { acl: PermissionDto[]; impersonateId?: string | null };
     correlationId: string;
     token: string;
     classe: any;

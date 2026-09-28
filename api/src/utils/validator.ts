@@ -219,30 +219,6 @@ export function validateFirstName() {
   );
 }
 
-const applicationKeys = {
-  youngId: Joi.string().allow(null, ""),
-  youngFirstName: Joi.string().allow(null, ""),
-  youngLastName: Joi.string().allow(null, ""),
-  youngEmail: Joi.string().allow(null, ""),
-  youngBirthdateAt: Joi.string().allow(null, ""),
-  youngCity: Joi.string().allow(null, ""),
-  youngDepartment: Joi.string().allow(null, ""),
-  youngCohort: Joi.string().allow(null, ""),
-  missionId: Joi.string().allow(null, ""),
-  missionName: Joi.string().allow(null, ""),
-  missionDepartment: Joi.string().allow(null, ""),
-  missionRegion: Joi.string().allow(null, ""),
-  missionDuration: Joi.string().allow(null, ""),
-  structureId: Joi.string().allow(null, ""),
-  tutorId: Joi.string().allow(null, ""),
-  tutorName: Joi.string().allow(null, ""),
-  contractId: Joi.string().allow(null, ""),
-  priority: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  hidden: Joi.string().allow(null, ""),
-  status: Joi.string().allow(null, ""),
-  statusComment: Joi.string().allow(null, ""),
-};
-
 /**
  * Transitions de statut qu'un volontaire peut déclencher lui-même sur sa candidature :
  * accepter une proposition (WAITING_VALIDATION / WAITING_VERIFICATION pour une PM),
@@ -262,13 +238,24 @@ const YOUNG_ALLOWED_UPDATE_APPLICATION_STATUS = [
 /** À la création, un volontaire ne peut candidater qu'en attente de validation / de vérification (PM). */
 const YOUNG_ALLOWED_NEW_APPLICATION_STATUS = [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION];
 
+/**
+ * Une candidature ne se modifie que par son statut, sa durée, son masquage et son rang.
+ *
+ * Volontaire, mission, structure, tuteur et contrat sont dénormalisés et dérivés côté serveur. Écrits
+ * par le client, ils rattachaient une candidature à un autre volontaire ou à une autre mission, et
+ * faisaient joindre un contrat ou un référent tiers à la liste des candidatures du volontaire
+ * (constats PH1 et PH19, audit du 25/09/2026). Les autres clés sont ignorées ; `youngId` reste
+ * contrôlé pour refuser explicitement une réaffectation.
+ */
 export function validateUpdateApplication(application, user) {
   const young = isYoung(user);
   return Joi.object()
     .keys({
-      ...applicationKeys,
       // A young can only update a mission for him/herself.
-      youngId: young ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
+      youngId: young ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.forbidden(),
+      priority: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
+      hidden: Joi.string().allow(null, ""),
+      statusComment: young ? Joi.any().strip() : Joi.string().allow(null, ""),
       status: young
         ? Joi.string()
             .valid(...YOUNG_ALLOWED_UPDATE_APPLICATION_STATUS)
@@ -282,11 +269,15 @@ export function validateUpdateApplication(application, user) {
     .validate(application, { stripUnknown: true });
 }
 
+/**
+ * À la création, seuls le volontaire, la mission et le statut viennent du client ; la durée aussi pour
+ * un référent (mission personnalisée). Tout le reste est dérivé du volontaire et de la mission par
+ * `POST /application` (constats PH1 et PH19).
+ */
 export function validateNewApplication(application, user) {
   const young = isYoung(user);
   return Joi.object()
     .keys({
-      ...applicationKeys,
       // A young can only apply to a mission for him/herself.
       youngId: young ? Joi.string().equal(user._id.toString()).required() : Joi.string().required(),
       status: young
@@ -294,6 +285,7 @@ export function validateNewApplication(application, user) {
             .valid(...YOUNG_ALLOWED_NEW_APPLICATION_STATUS)
             .allow(null, "")
         : Joi.string().allow(null, ""),
+      missionDuration: young ? Joi.any().strip() : Joi.string().allow(null, ""),
       missionId: Joi.string().required(),
     })
     .validate(application, { stripUnknown: true });
@@ -334,6 +326,17 @@ export function validateUpdateCohesionCenter(application) {
   return Joi.object().keys(cohesionCenterKeys()).validate(application, { stripUnknown: true });
 }
 
+/**
+ * Schéma de PUT /referent/young/:id. Les clés absentes sont ignorées sans erreur (stripUnknown) : un client
+ * qui renvoie le dossier complet n'est pas rejeté, mais ces champs ne sont plus écrits par cette route
+ * (GOO-65, audit production 2026-09-25) :
+ * - cohorte, affectation, présence et statut de phase 1, classeId : écritures phase 1 et CLE décommissionnées
+ *   (PM28, PM29) ;
+ * - email : se change par PUT /young-edition/:id/identite, qui révoque les sessions et prévient l'ancienne
+ *   adresse (PH15) ;
+ * - consentements, droit à l'image, attestations et drapeaux FranceConnect : plus aucun parcours ne les
+ *   produit (PM35).
+ */
 export function validateYoung(young: YoungDto) {
   const keys = {
     firstName: Joi.string().allow(null, ""),
@@ -342,7 +345,6 @@ export function validateYoung(young: YoungDto) {
     birthCountry: Joi.string().allow(null, ""),
     birthCity: Joi.string().allow(null, ""),
     birthCityZip: Joi.string().allow(null, ""),
-    email: Joi.string().lowercase().trim().email().allow(null, ""),
     phone: Joi.string().allow(null, ""),
     phoneZone: Joi.string()
       .trim()
@@ -350,17 +352,8 @@ export function validateYoung(young: YoungDto) {
       .allow("", null),
     gender: Joi.string().allow(null, ""),
     birthdateAt: Joi.string().allow(null, ""),
-    cohort: Joi.string().allow(null, ""),
-    cohortId: Joi.string().allow(null, ""),
-    parentStatementOfHonorInvalidId: Joi.string().allow(null, ""),
-    originalCohort: Joi.string().allow(null, ""),
-    cohortChangeReason: Joi.string().allow(null, ""),
-    cohortDetailedChangeReason: Joi.string().allow(null, ""),
     phase: Joi.string().allow(null, ""),
     status: Joi.string().allow(null, ""),
-    statusPhase1: Joi.string().allow(null, ""),
-    statusPhase1Motif: Joi.string().allow(null, ""),
-    statusPhase1MotifDetail: Joi.string().allow(null, ""),
     statusPhase2: Joi.string().allow(null, ""),
     statusPhase2UpdatedAt: Joi.string().allow(null, ""),
     statusPhase2ValidatedAt: Joi.string().allow(null, ""),
@@ -374,29 +367,12 @@ export function validateYoung(young: YoungDto) {
     inscriptionCorrectionMessage: Joi.string().allow(null, ""),
     inscriptionRefusedMessage: Joi.string().allow(null, ""),
     inscriptionStep: Joi.string().allow(null, ""),
-    cohesion2020Step: Joi.string().allow(null, ""),
     // `historic` n'est jamais inscriptible depuis une requête : il est reconstruit côté serveur à
     // chaque changement de statut (cf. FM13).
     lastLoginAt: Joi.string().allow(null, ""),
     // Les jetons d'authentification (reset de mot de passe, invitation, phase 3) ne sont jamais
     // inscriptibles depuis une requête : ils sont générés par les flux dédiés côté serveur.
     cniFiles: Joi.array().items(Joi.string().allow(null, "")),
-    acceptCGU: Joi.string().allow(null, ""),
-    acceptRI: Joi.string().allow(null, ""),
-    cohesionStayPresence: Joi.string().allow(null, ""),
-    presenceJDM: Joi.string().allow(null, ""),
-    departSejourAt: Joi.string().allow(null, ""),
-    departSejourMotif: Joi.string().allow(null, ""),
-    departSejourMotifComment: Joi.string().allow(null, ""),
-    cohesionStayMedicalFileReceived: Joi.string().allow(null, ""),
-    sessionPhase1Id: Joi.string().allow(null, ""),
-    cohesionCenterId: Joi.string().allow(null, ""),
-    cohesionCenterName: Joi.string().allow(null, ""),
-    cohesionCenterZip: Joi.string().allow(null, ""),
-    cohesionCenterCity: Joi.string().allow(null, ""),
-    autoAffectationPhase1ExpiresAt: Joi.string().allow(null, ""),
-    meetingPointId: Joi.string().allow(null, ""),
-    deplacementPhase1Autonomous: Joi.string().allow(null, ""),
     phase2ApplicationStatus: Joi.array().items(Joi.string().allow(null, "")),
     phase2NumberHoursDone: Joi.string().allow(null, ""),
     phase2NumberHoursEstimated: Joi.string().allow(null, ""),
@@ -462,12 +438,10 @@ export function validateYoung(young: YoungDto) {
     schoolId: Joi.string().allow(null, ""),
     academy: Joi.string().allow(null, ""),
     employed: Joi.string().allow(null, ""),
-    parentAllowSNU: Joi.string().allow(null, ""),
     parent1Status: Joi.string().allow(null, ""),
     parent1FirstName: Joi.string().allow(null, ""),
     parent1LastName: Joi.string().allow(null, ""),
     parent1Email: Joi.string().allow(null, ""),
-    parent1AllowSNU: Joi.string().allow(null, ""),
     parent1Phone: Joi.string().allow(null, ""),
     parent1PhoneZone: Joi.string()
       .trim()
@@ -476,7 +450,6 @@ export function validateYoung(young: YoungDto) {
     parent1OwnAddress: Joi.string().allow(null, ""),
     parent1Address: Joi.string().allow(null, ""),
     parent1ComplementAddress: Joi.string().allow(null, ""),
-    parent1AllowImageRights: Joi.string().allow(null, ""),
     parent1Zip: Joi.string().allow(null, ""),
     parent1City: Joi.string().allow(null, ""),
     parent1Department: Joi.string().allow(null, ""),
@@ -488,9 +461,7 @@ export function validateYoung(young: YoungDto) {
         lon: Joi.number().allow(null),
       })
       .allow(null),
-    parent1FromFranceConnect: Joi.string().allow(null, ""),
     parent2Status: Joi.string().allow(null, ""),
-    parent2AllowSNU: Joi.string().allow(null, ""),
     parent2FirstName: Joi.string().allow(null, ""),
     parent2LastName: Joi.string().allow(null, ""),
     parent2Email: Joi.string().allow(null, ""),
@@ -502,7 +473,6 @@ export function validateYoung(young: YoungDto) {
     parent2OwnAddress: Joi.string().allow(null, ""),
     parent2Address: Joi.string().allow(null, ""),
     parent2ComplementAddress: Joi.string().allow(null, ""),
-    parent2AllowImageRights: Joi.string().allow(null, ""),
     parent2Zip: Joi.string().allow(null, ""),
     parent2City: Joi.string().allow(null, ""),
     parent2Department: Joi.string().allow(null, ""),
@@ -514,7 +484,6 @@ export function validateYoung(young: YoungDto) {
         lon: Joi.number().allow(null),
       })
       .allow(null),
-    parent2FromFranceConnect: Joi.string().allow(null, ""),
     allergies: Joi.string().allow(null, ""),
     handicap: Joi.string().allow(null, ""),
     handicapInSameDepartment: Joi.string().allow(null, ""),
@@ -542,22 +511,6 @@ export function validateYoung(young: YoungDto) {
     highSkilledActivityInSameDepartment: Joi.string().allow(null, ""),
     highSkilledActivityType: Joi.string().allow(null, ""),
     highSkilledActivityProofFiles: Joi.array().items(Joi.string().allow(null, "")),
-    dataProcessingConsentmentFiles: Joi.array().items(Joi.string().allow(null, "")),
-    parentConsentment: Joi.string().allow(null, ""),
-    parentConsentmentFiles: Joi.array().items(Joi.string().allow(null, "")),
-    parentConsentmentFilesCompliant: Joi.string().allow(null, ""),
-    parentConsentmentFilesCompliantInfo: Joi.string().allow(null, ""),
-    consentment: Joi.string().allow(null, ""),
-    imageRight: Joi.string().allow(null, ""),
-    imageRightFiles: Joi.array().items(Joi.string().allow(null, "")),
-    autoTestPCR: Joi.string().allow(null, ""),
-    autoTestPCRFiles: Joi.array().items(Joi.string().allow(null, "")),
-    rulesYoung: Joi.string().allow(null, ""),
-    rulesParent1: Joi.string().allow(null, ""),
-    rulesParent2: Joi.string().allow(null, ""),
-    rulesFiles: Joi.array().items(Joi.string().allow(null, "")),
-    informationAccuracy: Joi.string().allow(null, ""),
-    aknowledgmentTerminaleSessionAvailability: Joi.string().allow(null, ""),
     jdc: Joi.string().allow(null, ""),
     motivations: Joi.string().allow(null, ""),
     domains: Joi.array().items(Joi.string().allow(null, "")),
@@ -598,7 +551,6 @@ export function validateYoung(young: YoungDto) {
     statusMilitaryPreparationFiles: Joi.string().allow(null, ""),
     militaryPreparationCorrectionMessage: Joi.string().allow(null, ""),
     missionsInMail: Joi.array().items(Joi.any().allow(null, "")),
-    classeId: Joi.string().allow(null, ""),
     psc1Info: Joi.string().allow(null, ""),
     roadCodeRefund: Joi.string().valid("true", "false").allow(null, ""),
     // `password` n'est volontairement pas listé : le mot de passe d'un volontaire ne se change que
@@ -681,13 +633,15 @@ export function validateEvent(event) {
 }
 
 export function validateSelf(referent) {
-  // Referents can not update their role.
+  // Referents can not update their role. Ni son email ni son mot de passe (PH12/PH17, audit du
+  // 25/09/2026) : `stripUnknown` les retire silencieusement du body, impersonation ou non. Le mot de
+  // passe se change via POST /referent/reset_password (exige l'ancien) ; l'email référent n'a pas
+  // d'équivalent vérifié et devient non modifiable en self-service (un ADMIN le fait via
+  // PUT /referent/:id).
   return Joi.object()
     .keys({
       firstName: validateFirstName().allow(null, ""),
       lastName: Joi.string().uppercase().allow(null, ""),
-      email: Joi.string().lowercase().trim().email().allow(null, ""),
-      password: Joi.string().allow(null, ""),
       // `god` reste accepté ici car un superadmin renvoie son propre sous-rôle en sauvegardant son
       // profil ; c'est le handler (PUT /referent) qui interdit de *changer* de sous-rôle.
       subRole: Joi.string()
@@ -734,17 +688,6 @@ export function validateStructureManager(structureManager) {
       role: Joi.string().allow(null, ""),
     })
     .validate(structureManager, { stripUnknown: true });
-}
-
-export function validateHeadOfCenterCohortChange(values) {
-  return Joi.object()
-    .keys({
-      cohesionCenterId: Joi.string().regex(idRegex, "id").required(),
-      headCenterId: Joi.string().regex(idRegex, "id").required(),
-      oldCohort: Joi.string().required(),
-      newCohort: Joi.string().required(),
-    })
-    .validate(values, { stripUnknown: true });
 }
 
 export const representantSchema = (isRequired) => {

@@ -22,6 +22,7 @@ import { ReferentModel } from "../models";
 import { Email, sendTemplate } from "../brevo";
 import { config } from "../config";
 import { getCcOfYoung } from "../utils";
+import { sanitizeEmailText } from "../email/emailInput";
 import { getTutorName } from "../services/mission";
 import { capture } from "../sentry";
 import { logger } from "../logger";
@@ -131,10 +132,11 @@ export const updateApplicationStatus = async (mission, fromUser) => {
 
         await sendTemplate(sendinblueTemplate, {
           emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+          // Nom et commentaire de statut sont saisis par le responsable de la mission (constats PM2, PM4).
           params: {
             cta,
-            missionName: mission.name,
-            message: mission.statusComment,
+            missionName: sanitizeEmailText(mission.name),
+            message: sanitizeEmailText(mission.statusComment),
           },
           cc,
         });

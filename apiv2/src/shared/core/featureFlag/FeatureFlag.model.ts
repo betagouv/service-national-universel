@@ -6,4 +6,5 @@ export interface FeatureFlagModel {
         from?: Date;
         to?: Date;
     };
+    allowedReferentIds?: string[];
 }

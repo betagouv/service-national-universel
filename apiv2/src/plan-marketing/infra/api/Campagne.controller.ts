@@ -17,7 +17,7 @@ import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneModel, CampagneModelWithNomSession } from "../../core/Campagne.model";
 import { ReferentModelLight } from "@admin/core/iam/Referent.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
-import { CreateCampagneDto, EnvoyerCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
+import { EnvoyerCampagneDto, validerCorpsCampagneCreation, validerCorpsCampagneMiseAJour } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
 import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
 import { BasculerArchivageCampagne } from "@plan-marketing/core/useCase/BasculerArchivageCampagne";
@@ -38,17 +38,17 @@ export class CampagneController {
     ) {}
 
     @Post()
-    async create(@Body() dto: CreateCampagneDto): Promise<CampagneModel> {
+    async create(@Body() corps: unknown): Promise<CampagneModel> {
+        const dto = await validerCorpsCampagneCreation(corps);
         return await this.campagneService.creerCampagne(dto);
     }
 
     @Get(":id")
     async getById(@Param("id") id: string): Promise<CampagneModel> {
-        const campagne = await this.campagneGateway.findById(id);
-        if (!campagne) {
-            throw new Error("Campagne not found");
-        }
-        return campagne;
+        // PL15 (25/09/2026) : un ObjectId valide mais inexistant levait un Error générique, non
+        // catégorisé par AllExceptionsFilter → 500 + événement Sentry à chaque appel. Le service
+        // lève déjà FunctionalException(CAMPAIGN_NOT_FOUND), qui répond en 422 sans bruit Sentry.
+        return await this.campagneService.findById(id);
     }
 
     @Get(":id/campagnes-specifiques")
@@ -83,7 +83,8 @@ export class CampagneController {
     }
 
     @Put(":id")
-    async update(@Param("id") id: string, @Body() dto: UpdateCampagneDto): Promise<CampagneModel | null> {
+    async update(@Param("id") id: string, @Body() corps: unknown): Promise<CampagneModel | null> {
+        const dto = await validerCorpsCampagneMiseAJour(corps);
         return await this.mettreAJourCampagne.execute(dto);
     }
 

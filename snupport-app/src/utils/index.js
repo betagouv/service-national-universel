@@ -2,8 +2,8 @@ import { STATUS } from "../constants";
 import { useState, useEffect } from "react";
 import { ENVIRONMENT } from "../config";
 
-export { htmlCleaner, htmlToText, urlify, noteToSafeHtml } from "./html";
-export { sanitizeLinkUrl, sanitizeImageUrl, sanitizeVideoUrl, sanitizeHttpsUrl } from "./safeUrl";
+export { hasHiddenRemoteImages, htmlCleaner, htmlToText, revealRemoteImages, urlify, noteToSafeHtml } from "./html";
+export { sanitizeLinkUrl, sanitizeImageUrl, sanitizeVideoUrl, sanitizeHttpsUrl, sanitizeKnownHttpsUrl } from "./safeUrl";
 
 export function classNames(...classes) {
   return classes.filter(Boolean).join(" ");

@@ -9,10 +9,14 @@ const logger = require("morgan");
 const passport = require("passport");
 const { errorHandler } = require("./middlewares/errorHandler");
 const { validationErrorHandler } = require("./middlewares/validation");
+const { applyJsonBodyParser } = require("./middlewares/httpHardening");
+const { morganLogStream } = require("./utils/morganLogStream");
 require("./mongo");
 require("./imap");
 require("./utils/ventilation");
 require("./crons");
+const { initVirusScanner } = require("./utils/virusScanner");
+initVirusScanner();
 
 const { config } = require("./config");
 
@@ -21,7 +25,9 @@ const registerSentryErrorHandler = initSentry(app);
 app.use(helmet());
 
 console.log("ENVIRONMENT:", config.ENVIRONMENT);
-app.use(logger("dev"));
+// PL20 : morgan écrivait ses lignes d'accès directement sur la console, hors du pipeline
+// winston + redaction (@snu/log-redaction) déjà en place pour le reste de l'application.
+app.use(logger("dev", { stream: morganLogStream }));
 
 // L'admin SNU et moncompte n'appellent jamais snupport-api directement (tout passe par l'api v1,
 // authentifiée par clé d'API) : leur ouvrir le CORS avec credentials faisait d'une XSS dans l'un de
@@ -30,7 +36,7 @@ const origin = [config.SNUPPORT_URL_KB, config.SNUPPORT_URL_ADMIN];
 if (config.ENVIRONMENT === "development") {
   origin.push(config.KNOWLEDGE_BASE_PUBLIC_URL);
 }
-app.use(express.json({ limit: "10mb" }));
+applyJsonBodyParser(app);
 app.use(
   cors({
     credentials: true,
@@ -38,7 +44,6 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization", "X-Requested-With", "Accept", "Origin", "Referer", "User-Agent", "sentry-trace", "baggage"],
   })
 );
-app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
 // Pas de parseur urlencoded : aucun client n'en envoie, et c'est le corps qu'un formulaire HTML
 // d'un autre sous-domaine peut poster sans preflight (CSRF, FL11).

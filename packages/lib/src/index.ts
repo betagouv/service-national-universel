@@ -1,6 +1,7 @@
 export * from "./actions";
 export * from "./cohort";
 export * from "./common";
+export * from "./adminAccessRestriction";
 export * from "./constants/academy";
 export * from "./constants/cle/classeConstants";
 export * from "./constants/cohesionCenter";

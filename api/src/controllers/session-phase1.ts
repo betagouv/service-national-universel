@@ -53,7 +53,9 @@ router.get("/:id/cohesion-center", passport.authenticate(["referent", "young"], 
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter) });
+    // PM14 (25/09/2026, résiduel de M59) : sans req.user, isYoung(undefined) est toujours faux —
+    // waitingList (identifiants d'autres volontaires) n'était jamais retiré pour un jeune.
+    return res.status(200).send({ ok: true, data: serializeCohesionCenter(cohesionCenter, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

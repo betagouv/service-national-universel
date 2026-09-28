@@ -2,7 +2,7 @@ import { NextFunction, Response } from "express";
 import { ClsService } from "nestjs-cls";
 import { Inject, Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
-import { ReferentStatus, isDecommissionedRole } from "snu-lib";
+import { FeatureFlagName, ReferentStatus, isAdminAccessAllowed, isDecommissionedRole } from "snu-lib";
 import { CustomRequest } from "../../../../shared/infra/CustomRequest";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { AuthProvider, AuthTokenPayload } from "./Auth.provider";
@@ -10,6 +10,8 @@ import { PermissionService } from "@auth/core/Permission.service";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { ReferentMapper } from "../repository/mongo/Referent.mapper";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 /**
  * Version de signature des JWT de session émis par la v1.
@@ -52,6 +54,8 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
         @Inject(ReferentGateway) private referentGateway: ReferentGateway,
         @Inject(AuthProvider) private authProvider: AuthProvider,
         @Inject(PermissionService) private permissionService: PermissionService,
+        @Inject(FeatureFlagGateway) private featureFlagGateway: FeatureFlagGateway,
+        @Inject(ClockGateway) private clockGateway: ClockGateway,
         private readonly cls: ClsService,
         private readonly config: ConfigService,
     ) {}
@@ -73,10 +77,17 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
         if (!this.estSessionValide(payload, user)) {
             throw new UnauthorizedException();
         }
+        // Verrouillage temporaire de l'accès référent, même règle que la passport v1.
+        if (!(await this.estAccesAutorise(payload, user))) {
+            throw new UnauthorizedException();
+        }
         const acl = await this.permissionService.getAcl(ReferentMapper.toEntity(user as ReferentModel));
         req.user = {
             ...user,
             acl,
+            // PL7 (lot P27) : sans ceci, une action faite sous impersonation référent sur /v2 restait
+            // attribuée au compte emprunté, sans trace de l'admin usurpateur.
+            impersonateId: payload.impersonateId,
         };
 
         this.cls.set("user", {
@@ -86,6 +97,7 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             role: user?.role,
             subRole: user?.sousRole,
             acl,
+            impersonateId: payload.impersonateId,
         });
         next();
     }
@@ -125,6 +137,19 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             return undefined;
         }
         return lireCookie(req.headers.cookie, COOKIE_SESSION_ADMIN);
+    }
+
+    /**
+     * Pendant une impersonation, l'administrateur réel est contrôlé (`impersonateId`), pas le
+     * compte consulté : voir snu-lib `adminAccessRestriction`.
+     */
+    private async estAccesAutorise(payload: AuthTokenPayload, user: ReferentModel): Promise<boolean> {
+        const flag = await this.featureFlagGateway.findByName(FeatureFlagName.ADMIN_ACCESS_RESTRICTED);
+        return isAdminAccessAllowed(
+            flag,
+            { referentId: user.id, impersonatorId: payload.impersonateId },
+            this.clockGateway.now(),
+        );
     }
 
     private estSessionValide(payload: AuthTokenPayload, user: ReferentModel): boolean {

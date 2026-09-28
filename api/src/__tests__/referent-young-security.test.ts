@@ -23,13 +23,11 @@ import { dbConnect, dbClose } from "./helpers/db";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
 import getNewStructureFixture from "./fixtures/structure";
-import getNewCohortFixture from "./fixtures/cohort";
 import { createFixtureClasse } from "./fixtures/classe";
 import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { createReferentHelper } from "./helpers/referent";
 import { createYoungHelper } from "./helpers/young";
 import { createStructureHelper } from "./helpers/structure";
-import { createCohortHelper } from "./helpers/cohort";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -177,7 +175,9 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
       expect((await YoungModel.findById(young._id))?.status).toBe(YOUNG_STATUS.WITHDRAWN);
     }, 30000);
 
-    it("refuse à un référent départemental un changement de cohorte hors /change-cohort", async () => {
+    // Depuis GOO-65, la cohorte, l'affectation et le statut de phase 1 ne font plus partie du schéma de la route :
+    // ils sont ignorés (200, dossier inchangé) au lieu d'être refusés.
+    it("ignore un changement de cohorte demandé par un référent départemental", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED, cohortId: new ObjectId().toString() } as any));
       const referent = await createReferentDuTerritoire();
 
@@ -185,11 +185,11 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
         .put(`/referent/young/${young._id}`)
         .send({ cohort: "Autre cohorte", cohortId: new ObjectId().toString() });
 
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
       expect((await YoungModel.findById(young._id))?.cohortId).toBe(young.cohortId);
     }, 30000);
 
-    it("refuse à un référent départemental une affectation directe à une session", async () => {
+    it("ignore une affectation directe à une session", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED } as any));
       const referent = await createReferentDuTerritoire();
       const sessionPhase1Id = new ObjectId().toString();
@@ -198,11 +198,11 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
         .put(`/referent/young/${young._id}`)
         .send({ sessionPhase1Id, cohesionCenterId: new ObjectId().toString() });
 
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
       expect((await YoungModel.findById(young._id))?.sessionPhase1Id).not.toBe(sessionPhase1Id);
     }, 30000);
 
-    it("refuse à un référent départemental un statut de phase 1 posé à la main", async () => {
+    it("ignore un statut de phase 1 posé à la main", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED, statusPhase1: "AFFECTED" } as any));
       const referent = await createReferentDuTerritoire();
 
@@ -210,7 +210,7 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
         .put(`/referent/young/${young._id}`)
         .send({ statusPhase1: "DONE" });
 
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
       expect((await YoungModel.findById(young._id))?.statusPhase1).toBe("AFFECTED");
     }, 30000);
 
@@ -318,30 +318,6 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
 
       expect(res.status).toBe(200);
       expect((await YoungModel.findById(young._id))?.statusMilitaryPreparationFiles).toBe("REFUSED");
-      expectNoSecret(res.body.data);
-    }, 30000);
-  });
-
-  describe("PH16 — PUT /referent/young/:id/change-cohort", () => {
-    it("ne renvoie aucun secret du volontaire dans la réponse", async () => {
-      const cohort1 = await createCohortHelper(getNewCohortFixture({ name: "Février 2024" }));
-      const cohort2 = await createCohortHelper(getNewCohortFixture({ name: "Juin 2024" }));
-      const young = await createYoungHelper(
-        getNewYoungFixture({ ...youngSecrets, cohort: cohort1.name, cohortId: cohort1._id.toString(), source: YOUNG_SOURCE.VOLONTAIRE } as any),
-      );
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
-
-      const res = await request(await getAppHelperWithAcl(referent, "referent"))
-        .put(`/referent/young/${young._id}/change-cohort`)
-        .send({
-          source: YOUNG_SOURCE.VOLONTAIRE,
-          cohort: cohort2.name,
-          message: "Changing cohort for testing purposes",
-          cohortChangeReason: "Testing",
-        });
-
-      expect(res.status).toBe(200);
-      expect(res.body.data.cohort).toBe(cohort2.name);
       expectNoSecret(res.body.data);
     }, 30000);
   });

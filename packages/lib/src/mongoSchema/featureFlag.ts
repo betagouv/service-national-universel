@@ -25,6 +25,11 @@ export const FeatureFlagSchema = {
       default: null,
     },
   },
+  // Utilisé par ADMIN_ACCESS_RESTRICTED : identifiants des référents qui gardent l'accès.
+  allowedReferentIds: {
+    type: [String],
+    default: undefined,
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 };

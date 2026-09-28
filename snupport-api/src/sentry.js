@@ -38,6 +38,9 @@ function initSentry(app) {
       // `Handlers.requestHandler()` joint à l'événement le corps de la requête, les en-têtes et les cookies :
       // secrets et PII y sont masqués ici, ainsi que dans tout `extra`.
       beforeSend: redactSentryEvent,
+      // PH18 : les transactions de performance ne passent pas par beforeSend — sans ce hook dédié,
+      // chaque requête échantillonnée partait avec cookies, en-têtes et corps en clair.
+      beforeSendTransaction: redactSentryEvent,
       integrations: [
         new ExtraErrorData({ depth: 16 }),
         new RewriteFrames({ root: process.cwd() }),
@@ -76,7 +79,10 @@ function initSentry(app) {
       ],
     });
     // The request handler must be the first middleware on the app
-    app.use(Handlers.requestHandler());
+    // PM36 : par défaut ce handler legacy (v7) joint aussi les en-têtes, cookies et le corps bruts à
+    // chaque transaction, en amont de beforeSendTransaction — restreint à method/url, seuls attributs
+    // dont ce lot garantit l'absence de secret.
+    app.use(Handlers.requestHandler({ request: ["method", "url"] }));
   
     // TracingHandler creates a trace for every incoming request
     app.use(Handlers.tracingHandler());

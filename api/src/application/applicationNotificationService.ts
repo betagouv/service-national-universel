@@ -2,6 +2,7 @@ import { config } from "../config";
 import { ApplicationType, ReferentStatus, SENDINBLUE_TEMPLATES, YoungType } from "snu-lib";
 import { getCcOfYoung, getReferentManagerPhase2 } from "../utils";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { ReferentModel, YoungDocument } from "../models";
 import { getReferentsPhase2 } from "./applicationService";
 
@@ -15,13 +16,15 @@ export async function notifyReferentMilitaryPreparationFilesSubmitted(user: Youn
 }
 
 export async function notifyReferentNewApplication(application: ApplicationType, young: YoungType) {
+  // Mission sans tuteur : `tutorId` vide ferait échouer la conversion en ObjectId.
+  if (!application.tutorId) return;
   const referent = await ReferentModel.findById(application.tutorId);
   if (!referent || referent.status === ReferentStatus.INACTIVE) return;
   const emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
   const template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
   const params = {
     cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`,
-    missionName: application.missionName,
+    missionName: sanitizeEmailText(application.missionName),
     youngFirstName: young.firstName,
     youngLastName: young.lastName,
   };
@@ -29,6 +32,8 @@ export async function notifyReferentNewApplication(application: ApplicationType,
 }
 
 export async function notifySupervisorMilitaryPreparationFilesValidated(application: ApplicationType) {
+  // Mission sans tuteur : `tutorId` vide ferait échouer la conversion en ObjectId.
+  if (!application.tutorId) return;
   const superviseur = await ReferentModel.findById(application.tutorId);
   if (!superviseur || superviseur.status === ReferentStatus.INACTIVE) return;
   const emailTo = [{ name: `${superviseur.firstName} ${superviseur.lastName}`, email: superviseur.email }];
@@ -58,7 +63,8 @@ export async function notifyReferentsEquivalenceSubmitted(young: YoungType) {
 export async function notifyYoungChangementStatutEquivalence(young: YoungDocument, status: string, message: string) {
   const template = SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${status}`];
   const emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-  const params = { message };
+  // Message libre du référent qui instruit l'équivalence (constats PM2, PM4).
+  const params = { message: sanitizeEmailText(message) };
   const cc = getCcOfYoung({ template, young });
   return await sendTemplate(template, { emailTo, params, cc });
 }

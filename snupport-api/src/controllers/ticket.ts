@@ -13,6 +13,7 @@ import { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_TICKET_STATUS } from "
 import { sendEmailWithConditions, weekday, getHoursDifference, sendNotif, SENDINBLUE_TEMPLATES, diacriticSensitiveRegex } from "../utils";
 import { matchVentilationRule } from "../utils/ventilation";
 import { canAccessTicket, scopeTicketQuery } from "../utils/ticketScope";
+import { canAccessContact } from "../utils/contactScope";
 import { getForbiddenTicketUpdateFields, reconcileTicketNotes } from "../utils/ticketUpdate";
 import { sanitizeUserHtml } from "../utils/userContent";
 const { sanitizeMessageHtml } = require("../utils/messageHtml");
@@ -72,11 +73,17 @@ router.post(
     const { subject, contactEmail, canal, tags, message, copyRecipients, files, agentId } = req.cleanBody;
 
     const user = req.user;
+    // PM45 : un référent est borné à son département/sa région. Il ne doit ni voir la fiche d'un
+    // contact jeune hors périmètre, ni pouvoir créer de contact inconnu sur un simple email saisi.
+    const isScopedReferent = user.role === "REFERENT_DEPARTMENT" || user.role === "REFERENT_REGION";
 
     let contact = await ContactModel.findOne({ email: contactEmail });
-    if (!contact) contact = await ContactModel.create({ email: contactEmail });
-
+    if (!contact) {
+      if (isScopedReferent) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      contact = await ContactModel.create({ email: contactEmail });
+    }
     if (!contact) return res.status(402).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    if (isScopedReferent && !canAccessContact(user, contact)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const lastTicket = await TicketModel.find().sort({ number: -1 }).collation({ locale: "en_US", numericOrdering: true }).limit(1);
 
     const ticket: any = {
@@ -162,7 +169,10 @@ router.post(
       if (!newMessage) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
     }
 
-    return res.status(200).send({ ok: true, data: { ticket: newTicket } });
+    // Un référent hors périmètre ne doit récupérer ni la fiche complète du contact, ni les champs
+    // internes du ticket (agent, ventilation…) : projection minimale (PM45).
+    const responseTicket = isScopedReferent ? { _id: newTicket._id, number: newTicket.number } : newTicket;
+    return res.status(200).send({ ok: true, data: { ticket: responseTicket } });
   }
 );
 

@@ -11,7 +11,7 @@ import Header from "./components/header";
 import UnavailabilityBanner from "./components/unavailabilityBanner";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
-import { formatToActualTime, ERRORS, isInternalRedirectUrl } from "snu-lib";
+import { formatToActualTime, ERRORS, isInternalRedirectUrl, translate } from "snu-lib";
 import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import useDocumentCss from "../../hooks/useDocumentCss";
@@ -26,6 +26,8 @@ export default function Signin() {
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
   const [isReferentInactive, setIsReferentInactive] = useState(false);
+  const [isAccessRestricted, setIsAccessRestricted] = useState(false);
+  const [isPasswordResetRequired, setIsPasswordResetRequired] = useState(false);
 
   const [tooManyRequests, setTooManyRequests] = useState({ status: false, date: null });
 
@@ -66,6 +68,8 @@ export default function Signin() {
                 onSubmit={async ({ email, password }, actions) => {
                   try {
                     setIsReferentInactive(false);
+                    setIsAccessRestricted(false);
+                    setIsPasswordResetRequired(false);
                     const { user, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
                     if (code === "2FA_REQUIRED") {
                       return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
@@ -85,6 +89,12 @@ export default function Signin() {
                     if (e.code === ERRORS.REFERENT_INACTIVE) {
                       setIsReferentInactive(true);
                     }
+                    if (e.code === ERRORS.ADMIN_ACCESS_RESTRICTED) {
+                      setIsAccessRestricted(true);
+                    }
+                    if (e.code === ERRORS.PASSWORD_RESET_REQUIRED) {
+                      return setIsPasswordResetRequired(true);
+                    }
                     if (e.code === "TOO_MANY_REQUESTS") {
                       setTooManyRequests({ status: true, date: formatToActualTime(e?.data?.nextLoginAttemptIn) });
                     }
@@ -101,6 +111,14 @@ export default function Signin() {
                       )}
                       {isReferentInactive && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">Votre compte a été désactivé</div>
+                      )}
+                      {isAccessRestricted && (
+                        <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
+                          L'accès à la plateforme est temporairement restreint.
+                        </div>
+                      )}
+                      {isPasswordResetRequired && (
+                        <div className="block w-full rounded border border-blue-400 bg-blue-50 py-2.5 px-4 text-sm text-blue-700">{translate(ERRORS.PASSWORD_RESET_REQUIRED)}</div>
                       )}
                       {tooManyRequests?.status && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
