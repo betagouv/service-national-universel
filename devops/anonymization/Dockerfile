@@ -2,7 +2,8 @@ FROM node:20.17-alpine AS base
 
 RUN apk --no-cache add bash mongodb-tools jq curl util-linux gettext-envsubst
 RUN curl -L https://github.com/rwynn/monstache/releases/download/v6.7.14/monstache_v6.7.14_linux_x86_64.tar.gz | tar -xvz && mv monstache /usr/local/bin
-RUN npm install -g clever-tools
+# clever-tools 4+ exige Node 22+, 5+ Node 24+ : 3.14.0 est la dernière version compatible avec cette image Node 20.
+RUN npm install --global --ignore-scripts clever-tools@3.14.0
 
 WORKDIR /build/devops/anonymization
 
