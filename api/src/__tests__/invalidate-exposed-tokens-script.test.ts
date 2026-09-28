@@ -73,11 +73,11 @@ describe("script invalidateExposedTokens", () => {
       const ok = { MAIL_TRANSPORT: "BREVO", ENABLE_SENDINBLUE: true, SENDINBLUEKEY: "cle", APP_URL: "https://moncompte.snu.gouv.fr", ADMIN_URL: "https://admin.snu.gouv.fr" };
       expect(mailDeliveryProblem(ok, ["invitations"])).toBeNull();
       expect(mailDeliveryProblem({ ...ok, ENABLE_SENDINBLUE: false }, ["invitations"])).toMatch(/ENABLE_SENDINBLUE/);
-      expect(mailDeliveryProblem({ ...ok, MAIL_TRANSPORT: "SMTP" }, ["phase3"])).toMatch(/MAIL_TRANSPORT/);
-      expect(mailDeliveryProblem({ ...ok, SENDINBLUEKEY: "" }, ["phase3"])).toMatch(/SENDINBLUEKEY/);
+      expect(mailDeliveryProblem({ ...ok, MAIL_TRANSPORT: "SMTP" }, ["invitations"])).toMatch(/MAIL_TRANSPORT/);
+      expect(mailDeliveryProblem({ ...ok, SENDINBLUEKEY: "" }, ["invitations"])).toMatch(/SENDINBLUEKEY/);
       expect(mailDeliveryProblem({ ...ok, ADMIN_URL: "http://localhost:8082" }, ["invitations"])).toMatch(/ADMIN_URL/);
       expect(mailDeliveryProblem({ ...ok, APP_URL: undefined }, ["invitations"])).toMatch(/APP_URL/);
-      expect(mailDeliveryProblem({ ...ok, ENABLE_SENDINBLUE: false }, ["passwords", "purge"])).toBeNull();
+      expect(mailDeliveryProblem({ ...ok, ENABLE_SENDINBLUE: false }, ["phase3", "passwords", "purge"])).toBeNull();
     });
   });
 
@@ -206,37 +206,30 @@ describe("script invalidateExposedTokens", () => {
   });
 
   describe("phase3", () => {
-    it("réémet le lien du tuteur pour une validation en attente", async () => {
-      const young = await createYoung({
+    // La phase 3 n'existe plus : aucun tuteur n'est relancé, tous les liens deviennent inutilisables.
+    it("efface tous les jetons tuteur, validation en attente comprise, sans email ni changement de statut", async () => {
+      const waiting = await createYoung({
         phase3Token: "ancien",
         statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION,
         phase3TutorEmail: "tuteur@example.org",
-        phase3TutorFirstName: "Tu",
-        phase3TutorLastName: "Teur",
       });
+      const validated = await createYoung({ phase3Token: "residuel", statusPhase3: YOUNG_STATUS_PHASE3.VALIDATED });
 
       const report = await run(["phase3"]);
 
-      expect(report.phase3).toMatchObject({ reissued: 1, cleared: 0, failed: [] });
-      const doc = await raw(YoungModel, young._id);
-      expect(doc.phase3Token).toMatch(/^[0-9a-f]{40}$/);
-      expect(mockSendTemplate).toHaveBeenCalledWith(
-        SENDINBLUE_TEMPLATES.referent.VALIDATE_MISSION_PHASE3,
-        expect.objectContaining({
-          emailTo: [{ name: "Tu Teur", email: "tuteur@example.org" }],
-          params: expect.objectContaining({ cta: `${config.ADMIN_URL}/validate?token=${doc.phase3Token}&young_id=${young._id}` }),
-        }),
-      );
+      expect(report.phase3).toEqual({ cleared: 2 });
+      const doc = await raw(YoungModel, waiting._id);
+      expect(doc.phase3Token).toBe("");
+      expect(doc.statusPhase3).toBe(YOUNG_STATUS_PHASE3.WAITING_VALIDATION);
+      expect((await raw(YoungModel, validated._id)).phase3Token).toBe("");
+      expect(mockSendTemplate).not.toHaveBeenCalled();
     });
 
-    it("efface le jeton résiduel d'une phase 3 qui n'attend plus de validation", async () => {
-      const young = await createYoung({ phase3Token: "residuel", statusPhase3: YOUNG_STATUS_PHASE3.VALIDATED });
+    it("compte sans effacer en dry-run", async () => {
+      const young = await createYoung({ phase3Token: "ancien", statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION });
 
-      const report = await run(["phase3"]);
-
-      expect(report.phase3).toMatchObject({ reissued: 0, cleared: 1 });
-      expect((await raw(YoungModel, young._id)).phase3Token).toBe("");
-      expect(mockSendTemplate).not.toHaveBeenCalled();
+      expect((await run(["phase3"], false)).phase3).toEqual({ cleared: 1 });
+      expect((await raw(YoungModel, young._id)).phase3Token).toBe("ancien");
     });
   });
 
