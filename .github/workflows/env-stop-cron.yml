@@ -15,7 +15,6 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
-    environment: recette
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Unlabel open PRs with deploy label

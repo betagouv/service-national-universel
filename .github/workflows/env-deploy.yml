@@ -25,9 +25,6 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
-    # Les secrets Clever Cloud vivent dans cet environnement GitHub, protégé par des
-    # relecteurs obligatoires : modifier ce workflow dans une PR ne suffit pas à les lire.
-    environment: recette
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     if: |
       (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
