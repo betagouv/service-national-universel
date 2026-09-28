@@ -55,6 +55,10 @@ function anonymize(itemToAnonymize) {
   item.invitationToken = "";
   item.forgotPasswordResetToken = "";
   item.token2FA = "";
+  // Secret d'authentification : l'empreinte bcrypt de l'agent ne doit pas être
+  // recopiée en recette. Le moteur de whitelist (anonymizeNonDeclaredFields) est
+  // un no-op ; sans cette affectation explicite le hash survivait (cf. young.js).
+  item.password = "";
 
   return item;
 }
