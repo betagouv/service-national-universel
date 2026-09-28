@@ -6,8 +6,8 @@
  *   invitations  jetons d'invitation (jeunes et référents) émis avant TOKEN_EXPOSURE_CLOSED_AT et
  *                encore valables : réémis et renvoyés au titulaire ; si le compte ne doit plus être
  *                activé (désactivé, supprimé, rôle décommissionné…), l'invitation expire sans renvoi.
- *   phase3       phase3Token (sans expiration) : lien réémis et renvoyé au tuteur si la validation
- *                est en attente, jeton effacé sinon.
+ *   phase3       phase3Token (sans expiration) : effacé, sans email. La phase 3 n'existe plus ; le
+ *                statut de phase 3 du volontaire n'est pas touché.
  *   passwords    empreintes bcrypt présentes dans l'index ES jusqu'au 22/09 : réinitialisation imposée
  *                (passwordResetRequired, lu à la connexion par auth.ts) et sessions coupées
  *                (passwordChangedAt). Nécessite que le code qui lit le drapeau soit déployé.
@@ -18,9 +18,7 @@
  * Les écritures passent par la collection native : ni hooks mongoose (synchro Brevo, calcul d'état
  * des classes) ni patch-history, qui charge chaque document et a déjà fait tomber TASKS en mémoire.
  *
- * Idempotence : `invitations` et `passwords` ne reprennent pas ce qu'ils ont déjà traité. `phase3`
- * réémet à chaque exécution les liens des validations en attente soumises avant la fermeture de la
- * fuite (aucun champ ne date l'émission du jeton) : ne la lancer qu'une fois.
+ * Idempotence : aucune étape ne reprend ce qu'elle a déjà traité.
  *
  * Usage (depuis api/) :
  *   npx tsx src/scripts/invalidateExposedTokens.effect.ts                              # dry-run, toutes les étapes
@@ -29,7 +27,7 @@
 
 import crypto from "crypto";
 import { Data, Effect } from "effect";
-import { ReferentStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, YOUNG_STATUS_PHASE3, isDecommissionedRole } from "snu-lib";
+import { ReferentStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, isDecommissionedRole } from "snu-lib";
 
 import { ReferentModel, StructureModel, YoungModel } from "../models";
 import { sendTemplate } from "../brevo";
@@ -50,7 +48,7 @@ export type Step = (typeof STEPS)[number];
 
 export type Report = {
   invitations?: { reissued: number; expired: number; failed: string[] };
-  phase3?: { reissued: number; cleared: number; skipped: number; failed: string[] };
+  phase3?: { cleared: number };
   passwords?: { young: number; referent: number };
   purge?: { young: number; referent: number };
 };
@@ -79,7 +77,7 @@ export const mailDeliveryProblem = (
   cfg: { MAIL_TRANSPORT?: string | null; ENABLE_SENDINBLUE?: boolean; SENDINBLUEKEY?: string | null; APP_URL?: string | null; ADMIN_URL?: string | null },
   steps: readonly Step[],
 ): string | null => {
-  if (!steps.includes("invitations") && !steps.includes("phase3")) return null;
+  if (!steps.includes("invitations")) return null;
   if (cfg.MAIL_TRANSPORT !== "BREVO") return `MAIL_TRANSPORT=${cfg.MAIL_TRANSPORT} : aucun email ne partirait (BREVO attendu)`;
   if (!cfg.ENABLE_SENDINBLUE) return "ENABLE_SENDINBLUE est faux : aucun email ne partirait";
   if (!cfg.SENDINBLUEKEY) return "SENDINBLUEKEY absente : aucun email ne partirait";
@@ -199,49 +197,18 @@ const invitationsStep = (options: Options) =>
 // ---------------------------------------------------------------------------------------------
 // phase3
 
-/** Paramètres repris de PUT /young/phase3/... (controllers/young/index.ts). */
-const sendPhase3TutorLink = (young, token: string) => {
-  const toName = `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`;
-  return sendTemplate(SENDINBLUE_TEMPLATES.referent.VALIDATE_MISSION_PHASE3, {
-    emailTo: [{ name: toName, email: young.phase3TutorEmail }],
-    params: {
-      toName,
-      youngName: `${young.firstName} ${young.lastName}`,
-      structureName: young.phase3StructureName,
-      startAt: young.phase3MissionStartAt?.toLocaleDateString("fr"),
-      endAt: young.phase3MissionEndAt?.toLocaleDateString("fr"),
-      cta: `${config.ADMIN_URL}/validate?token=${token}&young_id=${young._id}`,
-    },
-  });
-};
-
+/**
+ * La phase 3 n'existe plus : aucun tuteur n'est relancé. Effacer le jeton rend le lien de validation
+ * inutilisable ; le statut de phase 3 du volontaire n'est pas touché.
+ */
 const phase3Step = ({ apply }: Options) =>
   Effect.gen(function* () {
-    const docs: any[] = yield* Effect.tryPromise(() => YoungModel.collection.find({ phase3Token: nonEmpty }).toArray());
-    const waiting = (d) => d.statusPhase3 === YOUNG_STATUS_PHASE3.WAITING_VALIDATION && d.phase3TutorEmail && !d.deletedAt && d.status !== YOUNG_STATUS.DELETED && !d.anonymized;
-    // Soumise après la fermeture de la fuite : le jeton n'a pas pu être exposé.
-    const recent = (d) => d.statusPhase3UpdatedAt && new Date(d.statusPhase3UpdatedAt) >= TOKEN_EXPOSURE_CLOSED_AT;
-    const toReissue = docs.filter((d) => waiting(d) && !recent(d));
-    const skipped = docs.filter((d) => waiting(d) && recent(d)).length;
-    const toClear = docs.filter((d) => !waiting(d));
-    logger.info(`[phase3] ${toReissue.length} lien(s) tuteur à réémettre, ${toClear.length} jeton(s) résiduel(s) à effacer, ${skipped} récent(s) laissé(s)`);
-    if (!apply) return { reissued: toReissue.length, cleared: toClear.length, skipped, failed: [] as string[] };
-
-    if (toClear.length) {
-      yield* Effect.tryPromise(() => YoungModel.collection.updateMany({ _id: { $in: toClear.map((d) => d._id) } }, { $set: { phase3Token: "" } }));
-    }
-    const reissued: { doc: any; token: string }[] = [];
-    for (const doc of toReissue) {
-      const token = newToken();
-      yield* Effect.tryPromise(() => YoungModel.collection.updateOne({ _id: doc._id }, { $set: { phase3Token: token } }));
-      reissued.push({ doc, token });
-    }
-    const failed = yield* sendAll(
-      reissued,
-      ({ doc, token }) => sendPhase3TutorLink(doc, token),
-      ({ doc }) => `young:${doc._id}`,
-    );
-    return { reissued: reissued.length, cleared: toClear.length, skipped, failed };
+    const filter = { phase3Token: nonEmpty };
+    const cleared: number = apply
+      ? (yield* Effect.tryPromise(() => YoungModel.collection.updateMany(filter, { $set: { phase3Token: "" } }) as Promise<{ modifiedCount: number }>)).modifiedCount
+      : yield* Effect.tryPromise(() => YoungModel.collection.countDocuments(filter) as Promise<number>);
+    logger.info(`[phase3] ${cleared} jeton(s) tuteur ${apply ? "effacé(s)" : "à effacer"}`);
+    return { cleared };
   });
 
 // ---------------------------------------------------------------------------------------------
@@ -349,7 +316,7 @@ const main = Effect.gen(function* () {
 if (require.main === module) {
   Effect.runPromise(main.pipe(Effect.catchTag("UsageError", (e) => Effect.fail(e.message))))
     .then((report) => {
-      const failed = [...(report.invitations?.failed || []), ...(report.phase3?.failed || [])];
+      const failed = report.invitations?.failed || [];
       if (failed.length) logger.warn(`Emails à renvoyer à la main (jeton déjà réémis) : ${failed.join(", ")}`);
       process.exit(failed.length ? 2 : 0);
     })
