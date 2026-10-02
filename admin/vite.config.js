@@ -72,9 +72,6 @@ export default defineConfig(({ command, mode }) => {
       rollupOptions: {
         output: {
           manualChunks(id) {
-            // @sentry/* et @sentry-internal/* s'importent mutuellement depuis que @sentry/core n'est plus
-            // dupliqué (8.55) : séparés, les deux chunks forment un cycle et l'admin plante au chargement.
-            if (id.includes("node_modules/@sentry")) return "@sentry";
             const HugeLibraries = [
               "xlsx",
               "date-fns",
