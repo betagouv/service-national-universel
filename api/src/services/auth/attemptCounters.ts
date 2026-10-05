@@ -46,9 +46,10 @@ export type ConsumedLoginAttempt = {
   loginAttempts: number;
   nextLoginAttemptIn: Date;
   /**
-   * Verrou dur : le plafond haut est franchi, la tentative est refusée sans
-   * même comparer le mot de passe. C'est ce qui borne le nombre de hachages
-   * bcrypt qu'une rafale concurrente peut déclencher.
+   * La tentative est refusée sans même comparer le mot de passe : soit le plafond haut est franchi
+   * par cette tentative, soit un verrou (délai ou blocage) était déjà actif quand elle a été
+   * présentée. Dans ce second cas rien n'est consommé et le verrou n'est pas prolongé. C'est ce qui
+   * borne le nombre de hachages bcrypt qu'une rafale concurrente peut déclencher.
    */
   blocked: boolean;
   /**
@@ -74,23 +75,42 @@ export function isLoginLocked(user: { nextLoginAttemptIn?: Date | null }, now: D
  * L'incrément, la remise à zéro de fenêtre et le calcul du prochain créneau
  * autorisé sont faits dans un unique update à pipeline, donc atomiques
  * vis-à-vis des autres requêtes portant sur le même document.
+ *
+ * Le verrou est décidé par cette même opération : si un délai ou un blocage est encore actif au
+ * moment où l'update s'applique, le pipeline ne touche à rien (ni incrément, ni nouvelle échéance) et
+ * la tentative est rendue `blocked`. Le contrôle ne repose donc pas sur un document lu plus tôt,
+ * qu'une requête concurrente a pu verrouiller entre-temps.
+ *
+ * L'update rend le document tel qu'il était AVANT modification : c'est lui qui dit si le verrou était
+ * actif. Les valeurs « après » en sont déduites par la même transition que le pipeline (une seule
+ * lecture, donc exactes). Le filtre ne porte que sur l'identifiant : un filtre qui exclurait les
+ * comptes verrouillés ne rendrait aucun document, et le hook post-update de mongoose-patch-history
+ * échoue alors sur ce résultat vide.
  */
 export async function consumeLoginAttempt(model: Model<any>, userId: any, now: Date = new Date()): Promise<ConsumedLoginAttempt> {
   const windowStart = new Date(now.getTime() - LOGIN_ATTEMPTS_WINDOW_MS);
   const delayedUntil = new Date(now.getTime() + LOGIN_ATTEMPT_DELAY_MS);
   const blockedUntil = new Date(now.getTime() + LOGIN_BLOCK_MS);
+  const lockActive = { $gt: [{ $ifNull: ["$nextLoginAttemptIn", new Date(0)] }, now] };
 
-  const updated = await model.findOneAndUpdate(
+  const before = await model.findOneAndUpdate(
     { _id: userId },
     [
       {
         $set: {
           loginAttempts: {
             $cond: [
-              // Dernière tentative hors fenêtre (ou jamais) : le compteur repart à 1.
-              { $lt: [{ $ifNull: ["$nextLoginAttemptIn", new Date(0)] }, windowStart] },
-              1,
-              { $add: [{ $ifNull: ["$loginAttempts", 0] }, 1] },
+              lockActive,
+              // Verrou actif : rien n'est consommé.
+              "$loginAttempts",
+              {
+                $cond: [
+                  // Dernière tentative hors fenêtre (ou jamais) : le compteur repart à 1.
+                  { $lt: [{ $ifNull: ["$nextLoginAttemptIn", new Date(0)] }, windowStart] },
+                  1,
+                  { $add: [{ $ifNull: ["$loginAttempts", 0] }, 1] },
+                ],
+              },
             ],
           },
         },
@@ -98,22 +118,37 @@ export async function consumeLoginAttempt(model: Model<any>, userId: any, now: D
       {
         $set: {
           nextLoginAttemptIn: {
-            $switch: {
-              branches: [
-                { case: { $gt: ["$loginAttempts", MAX_LOGIN_ATTEMPTS_BEFORE_BLOCK] }, then: blockedUntil },
-                { case: { $gt: ["$loginAttempts", MAX_LOGIN_ATTEMPTS_BEFORE_DELAY] }, then: delayedUntil },
-              ],
-              default: now,
-            },
+            $cond: [
+              // Verrou actif : l'échéance n'est pas prolongée.
+              lockActive,
+              "$nextLoginAttemptIn",
+              {
+                $switch: {
+                  branches: [
+                    { case: { $gt: ["$loginAttempts", MAX_LOGIN_ATTEMPTS_BEFORE_BLOCK] }, then: blockedUntil },
+                    { case: { $gt: ["$loginAttempts", MAX_LOGIN_ATTEMPTS_BEFORE_DELAY] }, then: delayedUntil },
+                  ],
+                  default: now,
+                },
+              },
+            ],
           },
         },
       },
     ],
-    { new: true, projection: { loginAttempts: 1, nextLoginAttemptIn: 1 } },
+    { new: false, projection: { loginAttempts: 1, nextLoginAttemptIn: 1 } },
   );
 
-  const loginAttempts = updated?.loginAttempts ?? 0;
-  const nextLoginAttemptIn = updated?.nextLoginAttemptIn ?? now;
+  const previousAttempts: number = before?.loginAttempts ?? 0;
+  const previousNextAttemptIn: Date = before?.nextLoginAttemptIn ?? new Date(0);
+
+  // Verrou déjà actif (ou compte disparu entre-temps) : rien n'a été consommé.
+  if (!before || previousNextAttemptIn > now) {
+    return { loginAttempts: previousAttempts, nextLoginAttemptIn: before?.nextLoginAttemptIn ?? now, blocked: true, delayed: true };
+  }
+
+  const loginAttempts = previousNextAttemptIn < windowStart ? 1 : previousAttempts + 1;
+  const nextLoginAttemptIn = loginAttempts > MAX_LOGIN_ATTEMPTS_BEFORE_BLOCK ? blockedUntil : loginAttempts > MAX_LOGIN_ATTEMPTS_BEFORE_DELAY ? delayedUntil : now;
 
   return {
     loginAttempts,

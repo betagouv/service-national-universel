@@ -63,7 +63,7 @@ const Signin: React.FC = () => {
       } else {
         setError({
           text: "E-mail et/ou mot de passe incorrect(s)",
-          subText: "",
+          subText: "Après plusieurs échecs consécutifs, la connexion est temporairement suspendue. Réessayez dans quelques minutes.",
         });
       }
     }
