@@ -1,11 +1,18 @@
 import fs from "fs";
 
-import FileType from "file-type";
 import { hasAsfSignature } from "snu-lib";
 
-// PM33 : un fichier ASF forgé fait boucler indéfiniment FileType.fromFile/fromBuffer (strtok3,
-// file-type 16.5.4) — un timeout applicatif ne rendrait pas la main. On lit juste assez d'octets
-// pour écarter la signature avant tout appel à FileType.
+import { loadFileType } from "./loadFileType";
+
+type FileTypeResult = { mime: string } | undefined;
+type FileTypeModule = {
+  fileTypeFromBuffer: (buffer: Uint8Array) => Promise<FileTypeResult>;
+  fileTypeFromFile: (filePath: string) => Promise<FileTypeResult>;
+};
+
+// PM33 : aucun format ASF n'est accepté, on écarte sa signature en lisant juste assez d'octets,
+// sans lancer la détection. Défense en profondeur seulement : elle n'écarte que la forme directe,
+// la protection réelle est la version de file-type (voir loadFileType.js).
 const ASF_SIGNATURE_PROBE_SIZE = 10;
 
 async function readsAsAsf(filePath: string): Promise<boolean> {
@@ -21,12 +28,14 @@ async function readsAsAsf(filePath: string): Promise<boolean> {
 
 export const getMimeFromFile = async (filePath: string) => {
   if (await readsAsAsf(filePath)) return null;
-  const rawMimeFromFile = await FileType.fromFile(filePath);
+  const { fileTypeFromFile }: FileTypeModule = await loadFileType();
+  const rawMimeFromFile = await fileTypeFromFile(filePath);
   return rawMimeFromFile?.mime || null;
 };
 
 export const getMimeFromBuffer = async (buffer: Buffer) => {
   if (hasAsfSignature(buffer)) return null;
-  const rawMimeFromFile = await FileType.fromBuffer(buffer);
+  const { fileTypeFromBuffer }: FileTypeModule = await loadFileType();
+  const rawMimeFromFile = await fileTypeFromBuffer(buffer);
   return rawMimeFromFile?.mime || null;
 };

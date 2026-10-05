@@ -88,12 +88,12 @@ const ASF_HEADER_OBJECT_SIGNATURE = [0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0
 
 /**
  * `true` si `bytes` commence par la signature de l'ASF_Header_Object (30 26 B2 75 8E 66 CF 11
- * A6 D9). Un fichier ASF forgé (en-tête de 80 octets suffit) fait boucler indéfiniment le
- * décodeur de file-type 16.5.4 (strtok3) : la boucle n'enchaîne que des promesses déjà
- * résolues et ne laisse jamais passer la timer phase, donc un timeout applicatif ne rendrait
- * pas la main (PH24). Aucun format ASF, WMA ou WMV n'étant accepté nulle part dans ce dépôt, on
- * refuse le format par sa signature avant tout appel à FileType.fromBuffer/fromFile (PH24,
- * PM33), plutôt que de tenter de borner le décodage en aval.
+ * A6 D9). Aucun format ASF, WMA ou WMV n'étant accepté nulle part dans ce dépôt, on le refuse par
+ * sa signature avant tout appel à file-type (PH24, PM33).
+ *
+ * Défense en profondeur seulement : un ASF forgé faisait boucler indéfiniment file-type 16.5.4
+ * (strtok3), qu'un timeout applicatif ne ferait pas lâcher. Cette garde n'écartait que la forme
+ * directe du fichier ; la protection réelle est la version de file-type (≥ 21.3.1).
  */
 export function hasAsfSignature(bytes?: ArrayLike<number> | null): boolean {
   if (!bytes || bytes.length < ASF_HEADER_OBJECT_SIGNATURE.length) return false;
