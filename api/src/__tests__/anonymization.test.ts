@@ -18,6 +18,7 @@
  * qu'un champ absent du fixture ne fasse pas passer le test à vide.
  */
 import anonymizeYoung from "../anonymization/young";
+import anonymizeReferent from "../anonymization/referent";
 import anonymizeApplication from "../anonymization/application";
 import anonymizeContract from "../anonymization/contract";
 import { anonymizeNonDeclaredFields } from "../anonymization/utils/anonymise-model-fields";
@@ -25,6 +26,7 @@ import { STAR_EMAIL } from "../anonymization/utils/anonymise";
 import { buildUpdate, resolveOldCohorts, DEFAULT_OLD_COHORTS } from "../scripts/anonymizeOldCohorts.helpers";
 
 import getNewYoungFixture from "./fixtures/young";
+import { getNewReferentFixture } from "./fixtures/referent";
 import { FIXTURE_PASSWORD } from "./fixtures/password";
 import { getNewApplicationFixture } from "./fixtures/application";
 import getNewContractFixture from "./fixtures/contract";
@@ -137,6 +139,46 @@ describe("anonymize (young) — invariant RGPD", () => {
     // (sinon le code lisant status:DELETED / cohort:"-" casserait en silence).
     expect(result.status).toEqual(o.status);
     expect(result.cohort).toEqual(o.cohort);
+  });
+});
+
+describe("anonymize (referent) — invariant sécurité", () => {
+  // Copie prod → recette : la collection `referents` (les agents) passe par
+  // devops/anonymization/anonymize_collection.js → anonymization/referent.js.
+  // Le hash bcrypt de l'agent ne doit jamais atterrir en recette (réutilisation
+  // du mot de passe sur d'autres services si la base de recette fuite).
+  it("efface le hash de mot de passe et les jetons d'authentification de l'agent", () => {
+    const referent: any = getNewReferentFixture({
+      password: FIXTURE_PASSWORD,
+      invitationToken: "invitation-token-xyz",
+      forgotPasswordResetToken: "forgot-token-xyz",
+      token2FA: "2fa-token-xyz",
+    } as any);
+
+    // Garde anti-test-vide : les secrets étaient bien présents au départ.
+    const o = {
+      password: referent.password,
+      invitationToken: referent.invitationToken,
+      forgotPasswordResetToken: referent.forgotPasswordResetToken,
+      token2FA: referent.token2FA,
+      role: referent.role,
+      email: referent.email,
+    };
+    Object.entries(o).forEach(([, value]) => expect(value).toBeTruthy());
+
+    const result: any = anonymizeReferent(referent);
+
+    // 🔴 Secret d'authentification → effacé
+    expect(result.password).toEqual("");
+    expect(result.invitationToken).toEqual("");
+    expect(result.forgotPasswordResetToken).toEqual("");
+    expect(result.token2FA).toEqual("");
+
+    // Identité → régénérée
+    expect(result.email).not.toEqual(o.email);
+
+    // Champ technique légitime → conservé
+    expect(result.role).toEqual(o.role);
   });
 });
 
