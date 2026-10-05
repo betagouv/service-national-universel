@@ -675,6 +675,56 @@ describe("POST /contract - cloisonnement de l'écriture et signataires (PH4)", (
       expect(res.status).toBe(200);
     });
 
+    describe("proposition de mission non acceptée par le volontaire", () => {
+      async function setupProposition(status: string) {
+        const dossier = await setupDossier();
+        for (const etape of ["WAITING_ACCEPTATION", status]) {
+          if (dossier.application.status === etape) continue;
+          dossier.application.set({ status: etape });
+          await dossier.application.save({ fromUser: { firstName: "[TEST]" } });
+        }
+        return dossier;
+      }
+
+      it.each(["WAITING_ACCEPTATION", "REFUSED", "CANCEL"])("devrait refuser le responsable de la structure (%s)", async (status) => {
+        const { structure, body } = await setupProposition(status);
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+          .post("/contract")
+          .send(body);
+        expect(res.status).toBe(403);
+        expect(await ContractModel.countDocuments({ applicationId: body.applicationId })).toBe(0);
+      });
+
+      it("devrait refuser le superviseur du réseau", async () => {
+        const tete = await createStructureHelper({ ...getNewStructureFixture(), networkId: "" });
+        const dossier = await setupDossier({ networkId: tete._id.toString() });
+        dossier.application.set({ status: "WAITING_ACCEPTATION" });
+        await dossier.application.save({ fromUser: { firstName: "[TEST]" } });
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: tete._id.toString() }))
+          .post("/contract")
+          .send(dossier.body);
+        expect(res.status).toBe(403);
+      });
+
+      it("devrait accepter le responsable une fois la proposition acceptée par le volontaire", async () => {
+        const { structure, application, body } = await setupProposition("WAITING_ACCEPTATION");
+        application.set({ status: "WAITING_VALIDATION" });
+        await application.save({ fromUser: { firstName: "[TEST]" } });
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+          .post("/contract")
+          .send(body);
+        expect(res.status).toBe(200);
+      });
+
+      it("devrait laisser l'administrateur créer le contrat", async () => {
+        const { body } = await setupProposition("WAITING_ACCEPTATION");
+        const res = await request(await getAppHelperWithAcl())
+          .post("/contract")
+          .send(body);
+        expect(res.status).toBe(200);
+      });
+    });
+
     it("devrait refuser un superviseur hors réseau", async () => {
       const { body } = await setupDossier();
       const autreTete = await createStructureHelper({ ...getNewStructureFixture(), networkId: "" });

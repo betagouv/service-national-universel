@@ -1,6 +1,7 @@
-import { ROLES, UserDto } from "snu-lib";
+import { APPLICATION_STATUS, ROLES, UserDto } from "snu-lib";
 
 import { ApplicationModel, StructureModel, YoungModel } from "../models";
+import { isStructureActor } from "../application/applicationProposal";
 
 /**
  * Périmètre d'un contrat / d'une candidature pour un utilisateur référent.
@@ -17,6 +18,9 @@ type ScopedDocument = {
   youngId?: string | null;
   youngDepartment?: string | null;
 };
+
+/** Une candidature porte en plus son statut. */
+type ScopedApplication = ScopedDocument & { status?: string | null };
 
 /** Certains contrats anciens n'ont pas de `structureId` : on retombe alors sur celui de la candidature. */
 async function getStructureId({ structureId, applicationId }: ScopedDocument): Promise<string | undefined> {
@@ -81,6 +85,9 @@ export async function isContractInUserScope(user: UserDto, contract: ScopedDocum
   return isInUserScope(user, contract);
 }
 
-export async function isApplicationInUserScope(user: UserDto, application: ScopedDocument): Promise<boolean> {
+export async function isApplicationInUserScope(user: UserDto, application: ScopedApplication): Promise<boolean> {
+  // Une proposition en attente d'acceptation ne relève pas de la structure : ni la candidature
+  // (qui porte l'identité du volontaire), ni ses pièces.
+  if (isStructureActor(user) && application.status === APPLICATION_STATUS.WAITING_ACCEPTATION) return false;
   return isInUserScope(user, application);
 }

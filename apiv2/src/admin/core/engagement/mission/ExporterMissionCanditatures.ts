@@ -157,11 +157,12 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
                 sourceFields: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
                 full: true,
             });
+            const candidaturesExportables = this.exportMissionService.ecarterPropositions(auteur, candidatures.hits);
 
-            this.logger.log(`candidatures count: ${candidatures.hits.length}`, ExporterMissionCanditatures.name);
+            this.logger.log(`candidatures count: ${candidaturesExportables.length}`, ExporterMissionCanditatures.name);
 
-            if (candidatures?.hits?.length) {
-                updatedMissions = await this.populateCandidatures(updatedMissions, candidatures.hits);
+            if (candidaturesExportables.length) {
+                updatedMissions = await this.populateCandidatures(updatedMissions, candidaturesExportables);
             } else {
                 updatedMissions = updatedMissions.map((item) => ({ ...item, candidatures: [] }));
             }

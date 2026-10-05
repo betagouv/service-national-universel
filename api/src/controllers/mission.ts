@@ -6,6 +6,7 @@ import { logger } from "../logger";
 import { MissionModel, ApplicationModel, StructureModel, ReferentModel, CohortModel, StructureDocument } from "../models";
 import { ERRORS, isYoung } from "../utils/index";
 import { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } from "../application/applicationService";
+import { NOT_A_PROPOSAL } from "../application/applicationProposal";
 import { getTutorName } from "../services/mission";
 import { validateId, validateMission, idSchema } from "../utils/validator";
 import {
@@ -484,7 +485,7 @@ router.get(
         // Une proposition n'est pas une candidature : la structure ne voit le volontaire qu'une fois la
         // proposition acceptée (même règle que l'index `application`). Le littéral portait une espace
         // finale et ne filtrait rien (PH11).
-        where.status = { $ne: APPLICATION_STATUS.WAITING_ACCEPTATION };
+        Object.assign(where, NOT_A_PROPOSAL);
       }
       const applications = await ApplicationModel.find(where).populate({ path: "mission" });
       const data = applications.map((application) => ({

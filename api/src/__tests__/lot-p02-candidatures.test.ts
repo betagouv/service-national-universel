@@ -128,8 +128,8 @@ function forgedFields() {
   };
 }
 
-describe("PH1 — POST /application : une structure ne crée qu'une proposition", () => {
-  it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])("impose WAITING_ACCEPTATION et la durée de la mission au rôle %s", async (role) => {
+describe("PH1 — POST /application : une structure ne crée pas de candidature", () => {
+  it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])("refuse le rôle %s, sans candidature créée ni phase 2 validée", async (role) => {
     const { structure, mission } = await createStructureScenario({ duration: "12" });
     const young = await createYoungWithCohort();
     const acteur = await createReferentHelper(getNewReferentFixture({ role, structureId: structure._id.toString() }));
@@ -138,9 +138,8 @@ describe("PH1 — POST /application : une structure ne crée qu'une proposition"
       .post("/application")
       .send({ youngId: young._id.toString(), missionId: mission._id.toString(), status: APPLICATION_STATUS.DONE, missionDuration: "84" });
 
-    expect(res.status).toBe(200);
-    expect(res.body.data.status).toBe(APPLICATION_STATUS.WAITING_ACCEPTATION);
-    expect(res.body.data.missionDuration).toBe("12");
+    expect(res.status).toBe(403);
+    expect(await ApplicationModel.countDocuments({ youngId: young._id.toString() })).toBe(0);
     const updatedYoung = await getYoungByIdHelper(young._id);
     expect(updatedYoung!.statusPhase2).not.toBe(YOUNG_STATUS_PHASE2.VALIDATED);
   });
