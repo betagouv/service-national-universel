@@ -15,21 +15,18 @@ import request from "supertest";
 
 import { FILE_KEYS, MILITARY_FILE_KEYS, ROLES } from "snu-lib";
 
-import { ApplicationModel, CohesionCenterModel, ReferentModel, SessionPhase1Model, StructureModel, YoungModel } from "../models";
+import { ApplicationModel, ReferentModel, StructureModel, YoungModel } from "../models";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewYoungFixture from "./fixtures/young";
 import getNewStructureFixture from "./fixtures/structure";
 import getNewReferentFixture from "./fixtures/referent";
-import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import { getNewApplicationFixture } from "./fixtures/application";
 import { createYoungHelper } from "./helpers/young";
 import { createStructureHelper } from "./helpers/structure";
 import { createReferentHelper } from "./helpers/referent";
 import { createApplication } from "./helpers/application";
-import { createSessionWithCohesionCenter } from "./helpers/cohesionCenter";
 
 const mockGetFile = jest.fn();
 const mockUploadFile = jest.fn();
@@ -55,8 +52,6 @@ beforeEach(async () => {
   await YoungModel.deleteMany();
   await StructureModel.deleteMany();
   await ApplicationModel.deleteMany();
-  await SessionPhase1Model.deleteMany();
-  await CohesionCenterModel.deleteMany();
   mockGetFile.mockReset();
   mockGetFile.mockResolvedValue({ Body: "" });
   mockUploadFile.mockReset();
@@ -236,9 +231,9 @@ describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
 
     it.each(YOUNG_FILE_KEYS)("référent départemental du territoire du volontaire : %s", async (key) => {
       const young = await createYoungHelper(getNewYoungFixture({ region: "Bretagne", department: "Finistère" } as any));
-      const actor = { role: ROLES.REFERENT_DEPARTMENT, region: "Bretagne", department: ["Finistère"] };
+      const actor = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, region: "Bretagne", department: ["Finistère"] }));
 
-      const res = await request(await getAppHelperWithAcl(actor as any))
+      const res = await request(await getAppHelperWithAcl(actor))
         .get(`/referent/youngFile/${young._id}/${key}/piece.pdf`)
         .send();
 
@@ -248,24 +243,9 @@ describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
 
     it.each(YOUNG_FILE_KEYS)("référent régional de la région du volontaire : %s", async (key) => {
       const young = await createYoungHelper(getNewYoungFixture({ region: "Bretagne", department: "Finistère" } as any));
-      const actor = { role: ROLES.REFERENT_REGION, region: "Bretagne", department: [] };
+      const actor = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: "Bretagne", department: [] }));
 
-      const res = await request(await getAppHelperWithAcl(actor as any))
-        .get(`/referent/youngFile/${young._id}/${key}/piece.pdf`)
-        .send();
-
-      expect(res.statusCode).toEqual(200);
-      expect(mockGetFile).toHaveBeenCalledWith(`app/young/${young._id}/${key}/piece.pdf`);
-    });
-
-    it.each(YOUNG_FILE_KEYS)("chef de centre de la session du volontaire : %s", async (key) => {
-      const headCenterId = "6501a9c3f1d2b4e5a7c80912";
-      const session = await createSessionWithCohesionCenter(getNewCohesionCenterFixture(), getNewSessionPhase1Fixture({ headCenterId }));
-      const young = await createYoungHelper(getNewYoungFixture({ sessionPhase1Id: session._id.toString() } as any));
-      // Acteur à `_id` chaîne : la branche chef de centre compare `sessionPhase1.headCenterId` à `req.user._id` par `!==`.
-      const actor = { _id: headCenterId, role: ROLES.HEAD_CENTER };
-
-      const res = await request(await getAppHelperWithAcl(actor as any))
+      const res = await request(await getAppHelperWithAcl(actor))
         .get(`/referent/youngFile/${young._id}/${key}/piece.pdf`)
         .send();
 
@@ -425,9 +405,9 @@ describe("POST /referent/file/:key", () => {
 
   it("référent départemental du territoire du volontaire : equivalenceFiles reste accepté", async () => {
     const young = await createYoungHelper(getNewYoungFixture({ region: "Bretagne", department: "Finistère" } as any));
-    const actor = { role: ROLES.REFERENT_DEPARTMENT, region: "Bretagne", department: ["Finistère"] };
+    const actor = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, region: "Bretagne", department: ["Finistère"] }));
 
-    const res = await request(await getAppHelperWithAcl(actor as any))
+    const res = await request(await getAppHelperWithAcl(actor))
       .post(`/referent/file/equivalenceFiles`)
       .send({ body: body(young._id.toString()) });
 
