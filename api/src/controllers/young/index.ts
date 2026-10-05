@@ -752,11 +752,11 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
     }
     if (!canGetYoungByEmail(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await YoungModel.findOne({ email: value });
-    if (!data) return res.status(200).send({ ok: true, data: null });
     // `canGetYoungByEmail` n'est qu'une matrice de rôles : sans périmètre, un référent départemental
-    // lisait le dossier (et les tokens) de n'importe quel volontaire du pays.
-    if (req.user.role !== ROLES.ADMIN && !isYoungInReferentGeography(req.user, data)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // lisait le dossier (et les tokens) de n'importe quel volontaire du pays. Hors périmètre, la
+    // réponse est celle d'une adresse inconnue : un 403 distinct révélait qu'un compte existe (PM21).
+    if (!data || (req.user.role !== ROLES.ADMIN && !isYoungInReferentGeography(req.user, data))) {
+      return res.status(200).send({ ok: true, data: null });
     }
     return res.status(200).send({ ok: true, data: serializeYoung(data, req.user) });
   } catch (error) {

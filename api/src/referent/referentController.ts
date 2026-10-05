@@ -1360,8 +1360,12 @@ router.get("/", passport.authenticate(["referent"], { session: false }), async (
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     if (!canGetReferentByEmail(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let data = await ReferentModel.findOne({ email: value });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, error: "Aucun utilisateur trouvé" });
+    const data = await ReferentModel.findOne({ email: value });
+    // Hors périmètre, même réponse qu'un compte inconnu : un 403 distinct ferait de la route un
+    // oracle national d'existence d'adresse (PM30), comme l'était GET /young?email= (PM21).
+    if (!data || !(await isReferentReadableByUser(req.user, data))) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, error: "Aucun utilisateur trouvé" });
+    }
 
     return res.status(200).send({
       ok: true,
