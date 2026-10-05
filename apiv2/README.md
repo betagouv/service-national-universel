@@ -11,6 +11,8 @@
 
 Par défaut, les tests démarrent leur base dans un conteneur Docker (`mongo:6.0.1`). Si la variable d'environnement `TEST_MONGO_URI` est définie et non vide, aucun conteneur n'est démarré : les tests utilisent ce serveur (les tests qui demandent une base dédiée y reçoivent une base au nom unique).
 Le serveur doit être un jeu de réplicas si les tests utilisent des transactions. Exemple : `TEST_MONGO_URI="mongodb://127.0.0.1:27017/?directConnection=true" npx jest --runInBand`.
+La variable doit être exportée dans l'environnement du shell (pas chargée depuis un fichier `.env`), et l'URI doit viser un seul hôte (`directConnection` est forcé).
+Les bases de test ne sont pas supprimées à la fin : la base partagée persiste entre deux lancements et les bases `snu_test_<hex>` s'accumulent. Pour les nettoyer : `mongosh --quiet --eval 'db.adminCommand("listDatabases").databases.filter(d => d.name.startsWith("snu_test_")).forEach(d => db.getSiblingDB(d.name).dropDatabase())'`.
 La CI ne définit pas cette variable et continue d'utiliser Docker.
 
 Domaine : https://www.figma.com/board/whn9m3PNb72IYSQjjSHTeZ/SNU-Identification-des-Domaines?node-id=0-1&t=37n9Fla1p9oMVVZT-0
