@@ -33,6 +33,11 @@ import getNewMissionFixture from "./fixtures/mission";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewStructureFixture from "./fixtures/structure";
 import getNewYoungFixture from "./fixtures/young";
+import { insertLegacyApplication } from "./helpers/legacyApplication";
+
+// Rattrapage du marqueur sur les candidatures antérieures (module CommonJS { up, down }).
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const rattrapage = require("../../migrations/20261005120000-rattrapage-propositions-non-acceptees");
 
 const { ObjectId } = Types;
 
@@ -668,5 +673,130 @@ describe("I4 — parcours légitimes inchangés", () => {
     expect(res.status).toBe(200);
     const res2 = await request(app).put("/application").send({ _id: proposition.body.data._id, status: APPLICATION_STATUS.VALIDATED });
     expect(res2.status).toBe(200);
+  });
+});
+
+describe("candidatures antérieures au marqueur, après le rattrapage", () => {
+  /** Une proposition née avant le marqueur : insérée sans hook, avec son historique de statuts, déjà sortie de WAITING_ACCEPTATION. */
+  async function createLegacyProposal(s: Scenario, young: any, status: string, history: string[] = [APPLICATION_STATUS.WAITING_ACCEPTATION, status]) {
+    const { _id } = await insertLegacyApplication(
+      {
+        youngId: young._id.toString(),
+        youngFirstName: young.firstName,
+        youngLastName: young.lastName,
+        youngEmail: young.email,
+        youngDepartment: young.department,
+        missionId: s.mission._id.toString(),
+        structureId: s.structure._id.toString(),
+        tutorId: s.tuteur._id.toString(),
+        missionDuration: "84",
+      },
+      history,
+    );
+    return (await ApplicationModel.findById(_id))!;
+  }
+  const SORTIES = [APPLICATION_STATUS.REFUSED, APPLICATION_STATUS.CANCEL];
+
+  describe.each(SORTIES)("proposition sortie en %s avant le marqueur", (depart) => {
+    it.each(ROLES_STRUCTURE)("I1 : PUT /application et lot (%s) refusent tout changement de statut, la phase 2 reste intacte", async (role) => {
+      const s = await createScenario();
+      const young = await createYoungWithCohort();
+      const application = await createLegacyProposal(s, young, depart);
+      await rattrapage.up();
+
+      for (const cible of STATUTS.filter((statut) => statut !== depart)) {
+        const put = await request(await getAppHelperWithAcl(s.acteurs[role], "referent"))
+          .put("/application")
+          .send({ _id: application._id.toString(), status: cible, missionDuration: "84" });
+        const lot = await request(await getAppHelperWithAcl(s.acteurs[role], "referent"))
+          .post(`/application/multiaction/change-status/${cible}`)
+          .send({ ids: [application._id.toString()] });
+
+        expect([depart, cible, put.status, lot.status]).toEqual([depart, cible, 403, 403]);
+      }
+      expect((await reload(application))!.status).toBe(depart);
+      const updatedYoung = await getYoungByIdHelper(young._id.toString());
+      expect(updatedYoung!.statusPhase2).not.toBe(YOUNG_STATUS_PHASE2.VALIDATED);
+      expect(updatedYoung!.phase2NumberHoursDone).not.toBe("84");
+    });
+
+    it.each(ROLES_STRUCTURE)("I1 : la suite VALIDATED, IN_PROGRESS, DONE (84 h) n'aboutit pas (%s)", async (role) => {
+      const s = await createScenario({ duration: "84" });
+      const young = await createYoungWithCohort();
+      const application = await createLegacyProposal(s, young, depart);
+      await rattrapage.up();
+      const app = await getAppHelperWithAcl(s.acteurs[role], "referent");
+
+      for (const statut of [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE]) {
+        await request(app).put("/application").send({ _id: application._id.toString(), status: statut, missionDuration: "84" });
+      }
+
+      expect((await reload(application))!.status).toBe(depart);
+      const updatedYoung = await getYoungByIdHelper(young._id.toString());
+      expect(updatedYoung!.statusPhase2).toBe(YOUNG_STATUS_PHASE2.IN_PROGRESS);
+      expect(updatedYoung!.phase2NumberHoursDone).not.toBe("84");
+    });
+
+    it.each(ROLES_STRUCTURE)("I2 : le volontaire est hors du périmètre de la structure (%s)", async (role) => {
+      const s = await createScenario();
+      const young = await createYoungWithCohort();
+      const autreVolontaire = await createYoungWithCohort();
+      const application = await createLegacyProposal(s, young, depart);
+      const candidature = await createCandidature(s, autreVolontaire);
+      await rattrapage.up();
+      const app = await getAppHelperWithAcl(s.acteurs[role], "referent");
+
+      expect((await request(app).get(`/referent/young/${young._id}`)).status).toBe(403);
+      expect((await request(app).get(`/young/${young._id}/application`)).status).toBe(403);
+      expect((await request(app).get(`/application/${application._id}`)).status).toBe(403);
+      const liste = await request(app).get(`/mission/${s.mission._id}/application`);
+      expect(liste.body.data.map((a) => a._id)).toEqual([candidature._id.toString()]);
+      expect(await isEmailInUserScope(s.acteurs[role], young.email)).toBe(false);
+      const { youngContextFilters } = await buildYoungContext(s.acteurs[role]);
+      expect(youngContextFilters.find((filtre) => filtre.terms?._id).terms._id).toEqual([autreVolontaire._id.toString()]);
+    });
+  });
+
+  it.each(ROLES_STRUCTURE)("I4 : la candidature refusée du volontaire lui-même reste dans le périmètre et se revalide (%s)", async (role) => {
+    const s = await createScenario();
+    const young = await createYoungWithCohort();
+    const candidature = await createLegacyProposal(s, young, APPLICATION_STATUS.REFUSED, [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.REFUSED]);
+    await rattrapage.up();
+    const app = await getAppHelperWithAcl(s.acteurs[role], "referent");
+
+    expect((await request(app).get(`/referent/young/${young._id}`)).status).toBe(200);
+    expect((await request(app).get(`/application/${candidature._id}`)).status).toBe(200);
+    expect(await isEmailInUserScope(s.acteurs[role], young.email)).toBe(true);
+    expect((await request(app).put("/application").send({ _id: candidature._id.toString(), status: APPLICATION_STATUS.VALIDATED })).status).toBe(200);
+    expect((await reload(candidature))!.status).toBe(APPLICATION_STATUS.VALIDATED);
+  });
+
+  it.each(ROLES_STRUCTURE)("I4 : la proposition que le volontaire avait acceptée avant son refus reste une candidature ordinaire (%s)", async (role) => {
+    const s = await createScenario();
+    const young = await createYoungWithCohort();
+    const candidature = await createLegacyProposal(s, young, APPLICATION_STATUS.REFUSED, [
+      APPLICATION_STATUS.WAITING_ACCEPTATION,
+      APPLICATION_STATUS.WAITING_VALIDATION,
+      APPLICATION_STATUS.REFUSED,
+    ]);
+    await rattrapage.up();
+    const app = await getAppHelperWithAcl(s.acteurs[role], "referent");
+
+    expect((await request(app).get(`/referent/young/${young._id}`)).status).toBe(200);
+    expect((await request(app).put("/application").send({ _id: candidature._id.toString(), status: APPLICATION_STATUS.VALIDATED })).status).toBe(200);
+  });
+
+  it("l'administrateur et le référent départemental gardent la main sur une proposition refusée antérieure au marqueur", async () => {
+    const s = await createScenario();
+    const young = await createYoungWithCohort();
+    const proposition = await createLegacyProposal(s, young, APPLICATION_STATUS.REFUSED);
+    await rattrapage.up();
+
+    for (const acteur of [s.admin, s.referentDepartemental]) {
+      const app = await getAppHelperWithAcl(acteur, "referent");
+      expect((await request(app).get(`/application/${proposition._id}`)).status).toBe(200);
+      expect((await request(app).put("/application").send({ _id: proposition._id.toString(), status: APPLICATION_STATUS.VALIDATED })).status).toBe(200);
+      expect((await request(app).put("/application").send({ _id: proposition._id.toString(), status: APPLICATION_STATUS.REFUSED })).status).toBe(200);
+    }
   });
 });
