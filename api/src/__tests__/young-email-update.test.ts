@@ -60,7 +60,7 @@ async function createYoung(fields: Record<string, any> = {}) {
 const recipients = () => (sendTemplate as jest.Mock).mock.calls.flatMap(([, options]) => options.emailTo.map((to) => to.email));
 
 describe("changement d'email : le code part à la nouvelle adresse", () => {
-  it("n'envoie rien à l'adresse actuelle quand le code est redemandé après POST /young/email", async () => {
+  it("n'envoie pas le code à l'adresse actuelle quand il est redemandé après POST /young/email", async () => {
     const young = await createYoung({ emailVerified: "true" });
     const app = getAppHelper(young as any, "young");
 
@@ -164,6 +164,25 @@ describe("POST /young/email : le mot de passe est compté", () => {
 
     expect(res.status).toBe(200);
     expect((await YoungModel.findById(young._id))!.loginAttempts).toBe(0);
+  });
+
+  it("un compte verrouillé répond TOO_MANY_REQUESTS, même si la nouvelle adresse est déjà prise", async () => {
+    await createYoung({ email: NEW_EMAIL });
+    const young = await createYoung({ loginAttempts: 12, nextLoginAttemptIn: new Date(Date.now() + 30 * 60 * 1000) });
+    const res = await requestChange(getAppHelper(young as any, "young"), PASSWORD);
+
+    expect(res.status).toBe(400);
+    expect(res.body.code).toBe("TOO_MANY_REQUESTS");
+  });
+
+  it("des essais simultanés ne produisent aucune erreur serveur et le compteur reste borné", async () => {
+    const young = await createYoung();
+    const app = getAppHelper(young as any, "young");
+
+    const responses = await Promise.all(Array.from({ length: 10 }, () => requestChange(app, WRONG_PASSWORD)));
+
+    responses.forEach((res) => expect(res.status).toBe(400));
+    expect((await YoungModel.findById(young._id))!.loginAttempts).toBe(MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1);
   });
 
   it("un compte verrouillé ne voit pas son verrou prolongé", async () => {
