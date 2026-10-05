@@ -1,6 +1,6 @@
 import express, { CookieOptions } from "express";
 import passport from "passport";
-import { tempFileUpload } from "../middlewares/tempUpload";
+import fileUpload from "express-fileupload";
 import fs from "fs";
 import Joi from "joi";
 import { v4 as uuid } from "uuid";
@@ -564,7 +564,7 @@ const removeTempFiles = (req: UserRequest) => {
 router.post(
   "/upload",
   authMiddleware(["referent", "young"]),
-  ...tempFileUpload(),
+  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req: UserRequest, res) => {
     try {
       const { error: filesError, value: files } = Joi.array()
