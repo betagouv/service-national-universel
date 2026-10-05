@@ -157,7 +157,7 @@ export async function buildYoungContext(user: UserDto, options: YoungContextOpti
       return { youngContextError: { status: 404, body: { ok: true, code: "no cohort available" } } };
     }
   }
-  // A responsible can only see youngs in application of their structure (une proposition en attente d'acceptation n'est pas une candidature).
+  // A responsible can only see youngs in application of their structure (une proposition non acceptée n'est pas une candidature).
   if (user.role === ROLES.RESPONSIBLE) {
     if (!user.structureId) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     const applications = await ApplicationModel.find({ structureId: user.structureId, ...NOT_A_PROPOSAL });

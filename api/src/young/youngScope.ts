@@ -143,8 +143,8 @@ async function getActorStructureIds(user: UserDto): Promise<string[]> {
  * mission portée par la structure de l'utilisateur (ou, pour un superviseur, par une structure de
  * son réseau). C'est le contrôle que `canDownloadYoungDocuments` laissait en commentaire.
  *
- * Une proposition de mission en attente d'acceptation n'ouvre rien à la structure : ni son dossier, ni ses
- * pièces, ni la candidature (PH11, PH1, `NOT_A_PROPOSAL`).
+ * Une proposition de mission que le volontaire n'a pas acceptée n'ouvre rien à la structure, qu'elle soit
+ * en attente, refusée ou annulée : ni son dossier, ni ses pièces, ni la candidature (PH11, PH1, `NOT_A_PROPOSAL`).
  */
 export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
   const structureIds = await getActorStructureIds(user);
@@ -162,7 +162,7 @@ export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungTy
  * voient le dossier au titre de leur territoire ou de leur rattachement : toutes les candidatures
  * du volontaire relèvent alors de leur périmètre.
  */
-export async function getApplicationScopeFilter(user: UserDto): Promise<{ structureId?: { $in: string[] }; status?: { $ne: string } }> {
+export async function getApplicationScopeFilter(user: UserDto): Promise<{ structureId?: { $in: string[] }; status?: { $ne: string }; proposalNotAccepted?: { $ne: boolean } }> {
   if (![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return {};
   return { structureId: { $in: await getActorStructureIds(user) }, ...NOT_A_PROPOSAL };
 }

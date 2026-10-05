@@ -152,9 +152,11 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
                 ...new Set(missions.map((mission) => mission._id.toString()).filter((missionId) => missionId)),
             ];
 
+            const champsCandidature = missionCandidatureExportFields.find((f) => f.id === "application")?.fields;
             const candidatures = await this.searchApplicationGateway.searchApplication({
                 filters: { missionId: missionIds, status: filters.applicationStatus, ...perimetreCandidatures },
-                sourceFields: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
+                // Le marqueur d'une proposition non acceptée sert à l'écarter de l'export d'une structure.
+                sourceFields: champsCandidature && [...champsCandidature, "proposalNotAccepted"],
                 full: true,
             });
             const candidaturesExportables = this.exportMissionService.ecarterPropositions(auteur, candidatures.hits);

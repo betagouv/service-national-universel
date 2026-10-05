@@ -17,6 +17,7 @@ import { APPLICATION_STATUS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLE_JEUN
 import { ApplicationModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { buildYoungContext } from "../controllers/elasticsearch/young";
+import { buildApplicationContext } from "../controllers/elasticsearch/utils";
 import { isEmailInUserScope } from "../email/emailNotificationScope";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
@@ -364,7 +365,7 @@ describe("I1 — une proposition non acceptée ne mène jamais à VALIDATED, IN_
 });
 
 describe("I2 — un volontaire seulement destinataire d'une proposition est hors du périmètre de la structure", () => {
-  describe.each([APPLICATION_STATUS.WAITING_ACCEPTATION])("proposition au statut %s", (statut) => {
+  describe.each(SANS_ACCEPTATION)("proposition au statut %s", (statut) => {
     it.each(ROLES_STRUCTURE)("GET /referent/young/:id (%s) refuse le dossier", async (role) => {
       const s = await createScenario();
       const young = await createYoungWithCohort();
@@ -411,6 +412,14 @@ describe("I2 — un volontaire seulement destinataire d'une proposition est hors
       expect(filtreIds.terms._id).toEqual([autreVolontaire._id.toString()]);
     });
 
+    it.each(ROLES_STRUCTURE)("l'index ES des candidatures (%s) écarte les propositions non acceptées", async (role) => {
+      const s = await createScenario();
+
+      const { applicationContextFilters } = await buildApplicationContext(s.acteurs[role]);
+
+      expect(applicationContextFilters).toContainEqual({ bool: { must_not: [{ term: { proposalNotAccepted: true } }] } });
+    });
+
     it.each(ROLES_STRUCTURE)("le périmètre des notifications mail (%s) n'inclut pas l'adresse du volontaire", async (role) => {
       const s = await createScenario();
       const young = await createYoungWithCohort();
@@ -455,7 +464,7 @@ describe("I2 — un volontaire seulement destinataire d'une proposition est hors
       structureId: s.structure._id.toString(),
       tutorId: s.tuteur._id.toString(),
     } as any);
-    await createProposal(s, young);
+    await createProposal(s, young, APPLICATION_STATUS.CANCEL);
     const candidature = await createCandidature(s, young, APPLICATION_STATUS.WAITING_VALIDATION, autreMission._id.toString());
     const app = await getAppHelperWithAcl(s.acteurs[role], "referent");
 

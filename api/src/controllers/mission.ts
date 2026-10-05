@@ -483,8 +483,8 @@ router.get(
       }
       if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
         // Une proposition n'est pas une candidature : la structure ne voit le volontaire qu'une fois la
-        // proposition acceptée (même règle que l'index `application`). Le littéral portait une espace
-        // finale et ne filtrait rien (PH11).
+        // proposition acceptée (même règle que l'index `application`), qu'elle soit en attente, refusée
+        // ou annulée. Le littéral portait une espace finale et ne filtrait rien (PH11).
         Object.assign(where, NOT_A_PROPOSAL);
       }
       const applications = await ApplicationModel.find(where).populate({ path: "mission" });

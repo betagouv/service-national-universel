@@ -1,6 +1,6 @@
 /**
- * Export des candidatures d'une mission : une proposition de mission en attente d'acceptation n'est pas
- * une candidature pour une structure.
+ * Export des candidatures d'une mission : une proposition de mission que le volontaire n'a pas acceptée
+ * (en attente, refusée ou annulée) n'est pas une candidature pour une structure.
  */
 import { Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
@@ -22,23 +22,25 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ExportMissionService } from "./ExportMission.service";
 import { ExporterMissionCanditatures } from "./ExporterMissionCanditatures";
 
-describe("ExporterMissionCanditatures - propositions en attente", () => {
+describe("ExporterMissionCanditatures - propositions non acceptées", () => {
     let exporter: ExporterMissionCanditatures;
     let searchApplication: jest.Mock;
     let populateCandidatures: jest.SpyInstance;
 
-    const candidature = (id: string, status: string) => ({
+    const candidature = (id: string, status: string, proposalNotAccepted?: boolean) => ({
         _id: id,
         missionId: "mission-1",
         youngId: `young-${id}`,
         status,
+        ...(proposalNotAccepted === undefined ? {} : { proposalNotAccepted }),
     });
     const hits = [
         candidature("a", APPLICATION_STATUS.WAITING_VALIDATION),
         candidature("b", APPLICATION_STATUS.REFUSED),
-        candidature("c", APPLICATION_STATUS.WAITING_ACCEPTATION),
-        candidature("d", APPLICATION_STATUS.CANCEL),
-        candidature("e", APPLICATION_STATUS.VALIDATED),
+        candidature("c", APPLICATION_STATUS.WAITING_ACCEPTATION, true),
+        candidature("d", APPLICATION_STATUS.REFUSED, true),
+        candidature("e", APPLICATION_STATUS.CANCEL, true),
+        candidature("f", APPLICATION_STATUS.VALIDATED, false),
     ];
 
     beforeEach(async () => {
@@ -79,16 +81,23 @@ describe("ExporterMissionCanditatures - propositions en attente", () => {
     };
 
     it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])(
-        "%s : écarte les propositions en attente, garde les candidatures",
+        "%s : écarte les propositions non acceptées, garde les candidatures",
         async (role) => {
-            expect(await exporterPour(role)).toEqual(["a", "b", "d", "e"]);
+            expect(await exporterPour(role)).toEqual(["a", "b", "f"]);
         },
     );
 
     it.each([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION])(
         "%s : garde toutes les candidatures",
         async (role) => {
-            expect(await exporterPour(role)).toEqual(["a", "b", "c", "d", "e"]);
+            expect(await exporterPour(role)).toEqual(["a", "b", "c", "d", "e", "f"]);
         },
     );
+
+    it("demande à l'index le marqueur d'une proposition non acceptée", async () => {
+        await exporterPour(ROLES.RESPONSIBLE);
+
+        const { sourceFields } = searchApplication.mock.calls[0][0];
+        expect(sourceFields).toEqual(expect.arrayContaining(["status", "proposalNotAccepted"]));
+    });
 });

@@ -177,15 +177,22 @@ export class ExportMissionService {
     }
 
     /**
-     * Une proposition de mission en attente d'acceptation n'est pas une candidature pour une structure : elle
-     * n'apparaît pas dans son export, qui porte l'identité du volontaire et de ses représentants légaux. Les autres
-     * rôles exportent toutes les candidatures de leur périmètre.
+     * Une proposition de mission que le volontaire n'a pas acceptée (en attente, refusée ou annulée) n'est pas une
+     * candidature pour une structure : elle n'apparaît pas dans son export, qui porte l'identité du volontaire et
+     * de ses représentants légaux. Les autres rôles exportent toutes les candidatures de leur périmètre.
      */
-    ecarterPropositions<T extends { status?: string }>(auteur: { role?: string }, candidatures: T[]): T[] {
+    ecarterPropositions<T extends { status?: string; proposalNotAccepted?: boolean | null }>(
+        auteur: { role?: string },
+        candidatures: T[],
+    ): T[] {
         if (auteur.role !== ROLES.RESPONSIBLE && auteur.role !== ROLES.SUPERVISOR) {
             return candidatures;
         }
-        return candidatures.filter((candidature) => candidature.status !== APPLICATION_STATUS.WAITING_ACCEPTATION);
+        return candidatures.filter(
+            (candidature) =>
+                candidature.status !== APPLICATION_STATUS.WAITING_ACCEPTATION &&
+                candidature.proposalNotAccepted !== true,
+        );
     }
 
     async retrieveTutors(missions: MissionType[]) {

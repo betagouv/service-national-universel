@@ -4,7 +4,8 @@ import { APPLICATION_STATUS, ROLES } from "snu-lib";
  * Proposition de mission : une candidature créée par un référent territorial ou un administrateur
  * (statut WAITING_ACCEPTATION), que le volontaire accepte en la passant en attente de validation.
  *
- * Tant que le volontaire ne l'a pas acceptée, la proposition ne relève pas de la structure. Le statut
+ * Tant que le volontaire ne l'a pas acceptée, la proposition n'ouvre rien à la structure : ni le dossier
+ * du volontaire, ni sa candidature, ni aucun changement de statut. Le statut
  * seul ne suffit pas à la reconnaître : elle sort de WAITING_ACCEPTATION sans acceptation (annulation à
  * J+14, annulation de la mission, refus, décision du volontaire). Le marqueur `proposalNotAccepted` la
  * suit au-delà.
@@ -22,9 +23,10 @@ type ApplicationProposalState = { status?: string | null; proposalNotAccepted?: 
 
 /**
  * Filtre Mongo à ajouter au périmètre d'une structure : les candidatures qu'elle a le droit de voir.
- * Une proposition en attente d'acceptation n'en fait pas partie.
+ * Une proposition n'en fait pas partie tant que le volontaire ne l'a pas acceptée, qu'elle soit en
+ * attente, refusée ou annulée.
  */
-export const NOT_A_PROPOSAL = { status: { $ne: WAITING_ACCEPTATION } };
+export const NOT_A_PROPOSAL = { status: { $ne: WAITING_ACCEPTATION }, proposalNotAccepted: { $ne: true } };
 
 export function isUnacceptedProposal(application?: ApplicationProposalState | null): boolean {
   return !!application && (application.status === WAITING_ACCEPTATION || application.proposalNotAccepted === true);

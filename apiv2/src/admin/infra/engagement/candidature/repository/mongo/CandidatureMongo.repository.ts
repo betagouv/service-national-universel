@@ -8,10 +8,10 @@ import { CandidatureGateway } from "@admin/core/engagement/candidature/Candidatu
 import { CandidatureModel } from "@admin/core/engagement/candidature/Candidature.model";
 
 /**
- * Une proposition de mission en attente d'acceptation n'est pas une candidature pour la structure : elle ne lui
- * ouvre pas le volontaire. Même règle que le périmètre de l'api v1.
+ * Une proposition de mission que le volontaire n'a pas acceptée (en attente, refusée ou annulée) n'est pas une
+ * candidature pour la structure : elle ne lui ouvre pas le volontaire. Même règle que le périmètre de l'api v1.
  */
-const NOT_A_PROPOSAL = { status: { $ne: APPLICATION_STATUS.WAITING_ACCEPTATION } };
+const NOT_A_PROPOSAL = { status: { $ne: APPLICATION_STATUS.WAITING_ACCEPTATION }, proposalNotAccepted: { $ne: true } };
 
 @Injectable()
 export class CandidatureRepository implements CandidatureGateway {

@@ -9,7 +9,8 @@ import { getSharedConnectionString } from "../../initMongoContainer";
 
 /**
  * Les candidatures d'une structure servent de périmètre aux exports de volontaires d'un responsable
- * et d'un superviseur. Une proposition de mission en attente d'acceptation n'en fait pas partie.
+ * et d'un superviseur. Une proposition de mission que le volontaire n'a pas acceptée n'en fait pas
+ * partie, qu'elle soit en attente, refusée ou annulée.
  */
 describe("CandidatureRepository - périmètre d'une structure", () => {
     let connection: Connection;
@@ -32,13 +33,20 @@ describe("CandidatureRepository - périmètre d'une structure", () => {
         await model.deleteMany({});
     });
 
-    const creer = (structureId: string, status: string) =>
-        model.create({ structureId, status, youngId: `young-${status}` });
+    const creer = (structureId: string, status: string, proposalNotAccepted?: boolean) =>
+        model.create({
+            structureId,
+            status,
+            youngId: `young-${status}`,
+            ...(proposalNotAccepted ? { proposalNotAccepted } : {}),
+        });
 
-    it("findByStructureId ne renvoie pas les propositions en attente d'acceptation", async () => {
+    it("findByStructureId ne renvoie pas les propositions non acceptées, quel que soit leur statut", async () => {
         const candidature = await creer("structure-1", APPLICATION_STATUS.WAITING_VALIDATION);
         const refusee = await creer("structure-1", APPLICATION_STATUS.REFUSED);
-        await creer("structure-1", APPLICATION_STATUS.WAITING_ACCEPTATION);
+        await creer("structure-1", APPLICATION_STATUS.WAITING_ACCEPTATION, true);
+        await creer("structure-1", APPLICATION_STATUS.REFUSED, true);
+        await creer("structure-1", APPLICATION_STATUS.CANCEL, true);
         await creer("structure-2", APPLICATION_STATUS.WAITING_VALIDATION);
 
         const resultat = await repository.findByStructureId("structure-1");
@@ -46,10 +54,11 @@ describe("CandidatureRepository - périmètre d'une structure", () => {
         expect(resultat.map((c) => c.id).sort()).toEqual([candidature._id.toString(), refusee._id.toString()].sort());
     });
 
-    it("findByStructureIds ne renvoie pas les propositions en attente d'acceptation", async () => {
+    it("findByStructureIds ne renvoie pas les propositions non acceptées, quel que soit leur statut", async () => {
         const chezUne = await creer("structure-1", APPLICATION_STATUS.VALIDATED);
         const chezAutre = await creer("structure-2", APPLICATION_STATUS.DONE);
         await creer("structure-1", APPLICATION_STATUS.WAITING_ACCEPTATION);
+        await creer("structure-2", APPLICATION_STATUS.CANCEL, true);
         await creer("structure-3", APPLICATION_STATUS.VALIDATED);
 
         const resultat = await repository.findByStructureIds(["structure-1", "structure-2"]);
