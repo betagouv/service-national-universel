@@ -78,10 +78,13 @@ describe("removeTempFiles", () => {
 describe("tempFileUpload", () => {
   let uploadDir: string;
   let app: express.Express;
+  let handlerCalls: number;
   beforeEach(() => {
     uploadDir = fs.mkdtempSync(path.join(workDir, "upload-"));
+    handlerCalls = 0;
     app = express();
     app.post("/upload", ...tempFileUpload({ tempFileDir: uploadDir }), (req, res) => {
+      handlerCalls++;
       const files = Object.values(req.files || {}).flat();
       res.status(Number(req.query.status || 200)).send({ ok: true, count: files.length });
     });
@@ -122,6 +125,42 @@ describe("tempFileUpload", () => {
     expect(res.status).toBe(413);
     await waitUntil(() => fs.readdirSync(uploadDir).length === 0);
     expect(fs.readdirSync(uploadDir)).toEqual([]);
+  });
+});
+
+describe("tempFileUpload : fichier trop gros suivi d'autres fichiers", () => {
+  let uploadDir: string;
+  let app: express.Express;
+  let handlerCalls: number;
+  beforeEach(() => {
+    uploadDir = fs.mkdtempSync(path.join(workDir, "upload-"));
+    handlerCalls = 0;
+    app = express();
+    app.post("/upload", ...tempFileUpload({ tempFileDir: uploadDir }), (req, res) => {
+      handlerCalls++;
+      res.send({ ok: true });
+    });
+  });
+
+  it("répond 413 en JSON, ne garde aucun fichier et n'appelle pas le gestionnaire", async () => {
+    const req = request(app).post("/upload").attach("gros", Buffer.alloc(MAX_FILE_SIZE + 1, "a"), "gros.txt");
+    for (let i = 0; i < 20; i++) req.attach(`petit${i}`, Buffer.alloc(1, "a"), `petit-${i}.txt`);
+    const res = await req;
+    expect(res.status).toBe(413);
+    expect(res.body).toEqual({ ok: false, code: "INVALID_BODY" });
+    await waitUntil(() => fs.readdirSync(uploadDir).length === 0);
+    expect(fs.readdirSync(uploadDir)).toEqual([]);
+    expect(handlerCalls).toBe(0);
+  });
+
+  it("ne laisse pas de fichier partiel quand un fichier plus gros que la limite précède un fichier moyen", async () => {
+    const req = request(app).post("/upload").attach("petit", Buffer.alloc(10, "a"), "petit.txt");
+    req.attach("gros", Buffer.alloc(MAX_FILE_SIZE + 1, "a"), "gros.txt").attach("moyen", Buffer.alloc(5 * 1024 * 1024, "a"), "moyen.txt");
+    const res = await req;
+    expect(res.status).toBe(413);
+    await waitUntil(() => fs.readdirSync(uploadDir).length === 0);
+    expect(fs.readdirSync(uploadDir)).toEqual([]);
+    expect(handlerCalls).toBe(0);
   });
 });
 
