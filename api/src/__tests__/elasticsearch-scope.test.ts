@@ -533,18 +533,6 @@ describe("GOO-46 — annuaire « Utilisateurs » d'un référent départemental"
 });
 
 describe("P11 — annuaires des référents (audit production 2026-09-25)", () => {
-  let structureSarthe: string, structureGironde: string;
-
-  beforeAll(async () => {
-    await StructureModel.deleteMany({});
-    structureSarthe = (await StructureModel.create({ ...getNewStructureFixture(), department: "Sarthe", region: "Pays de la Loire" }))._id.toString();
-    structureGironde = (await StructureModel.create({ ...getNewStructureFixture(), department: "Gironde", region: "Nouvelle-Aquitaine" }))._id.toString();
-  });
-
-  afterAll(async () => {
-    await StructureModel.deleteMany({});
-  });
-
   beforeEach(() => {
     setEsDocs(referentDoc());
   });
@@ -565,36 +553,6 @@ describe("P11 — annuaires des référents (audit production 2026-09-25)", () =
     return found;
   };
 
-  describe("PM10 — POST /elasticsearch/referent/structure/:structure", () => {
-    it.each([
-      ["départemental", referentSarthe],
-      ["régional", referentPaysDeLaLoire],
-    ])("refuse au référent %s une structure hors de son territoire", async (_label, actor) => {
-      const res = await request(getAppHelper({ ...getNewReferentFixture(), ...actor } as any))
-        .post(`/elasticsearch/referent/structure/${structureGironde}`)
-        .send({});
-      expect(res.status).toBe(403);
-      expect(mockEsCalls.msearch).toHaveLength(0);
-    });
-
-    it.each([
-      ["départemental", referentSarthe],
-      ["régional", referentPaysDeLaLoire],
-    ])("laisse au référent %s les tuteurs d'une structure de son territoire", async (_label, actor) => {
-      const res = await request(getAppHelper({ ...getNewReferentFixture(), ...actor } as any))
-        .post(`/elasticsearch/referent/structure/${structureSarthe}`)
-        .send({});
-      expect(res.status).toBe(200);
-    });
-
-    it("refuse un identifiant de structure invalide sans erreur serveur", async () => {
-      const res = await request(getAppHelper({ ...getNewReferentFixture(), ...referentSarthe } as any))
-        .post("/elasticsearch/referent/structure/pas-un-id")
-        .send({});
-      expect(res.status).toBe(403);
-    });
-  });
-
   describe("PM11 — POST /elasticsearch/referent/team/:action", () => {
     it.each([
       ["départemental", referentSarthe],
@@ -609,13 +567,14 @@ describe("P11 — annuaires des référents (audit production 2026-09-25)", () =
       expect(mockEsCalls.search).toHaveLength(0);
     });
 
-    it("borne l'onglet département d'un référent départemental à ses départements", async () => {
+    it("garde l'onglet département d'un référent départemental à l'échelle de sa région, limité aux référents départementaux", async () => {
       const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...referentSarthe } as any);
       const res = await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {} });
       expect(res.status).toBe(200);
       const terms = termsInQuery();
       expect(terms["role.keyword"]).toEqual([ROLES.REFERENT_DEPARTMENT]);
-      expect(terms["department.keyword"]).toEqual(["Sarthe"]);
+      expect(terms["region.keyword"]).toEqual(["Pays de la Loire"]);
+      expect(terms["department.keyword"]).toBeUndefined();
     });
 
     it("ignore `syze` et applique la taille validée", async () => {

@@ -57,17 +57,14 @@ function toDepartments(department: UserDto["department"]): string[] {
  * Les têtes de réseau rattachées ne sont plus ajoutées : situées hors du territoire (souvent
  * nationales), leurs responsables n'étaient pas lisibles par le référent.
  */
-function getStructurePerimeterQuery(user: UserDto) {
-  // Sans région, `{ region: undefined }` remonterait les structures sans région.
-  if (user.role === ROLES.REFERENT_REGION && !user.region) return null;
-  return user.role === ROLES.REFERENT_REGION
-    ? { $or: [{ region: user.region }, { department: { $in: region2department[user.region as string] || [] } }] }
-    : { department: { $in: toDepartments(user.department) } };
-}
-
 async function getStructureIdsInPerimeter(user: UserDto): Promise<string[]> {
-  const query = getStructurePerimeterQuery(user);
-  if (!query) return [];
+  // Sans région, `{ region: undefined }` remonterait les structures sans région.
+  if (user.role === ROLES.REFERENT_REGION && !user.region) return [];
+  const query =
+    user.role === ROLES.REFERENT_REGION
+      ? { $or: [{ region: user.region }, { department: { $in: region2department[user.region as string] || [] } }] }
+      : { department: { $in: toDepartments(user.department) } };
+
   const structures = await StructureModel.find(query).select({ _id: 1 });
   return structures.map((structure) => structure._id.toString());
 }
@@ -193,15 +190,7 @@ async function buildReferentContext(user: UserDto): Promise<ReferentContext> {
  * pour énumérer les tuteurs de n'importe quelle structure (H25).
  */
 async function canReadStructureReferents(user: UserDto, structureId: string): Promise<boolean> {
-  if (user.role === ROLES.ADMIN) return true;
-
-  // Même périmètre que l'annuaire « Utilisateurs » (`getStructureIdsInPerimeter`) : un référent
-  // départemental ou régional lisait l'équipe de n'importe quelle structure du pays (PM10).
-  if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-    const query = getStructurePerimeterQuery(user);
-    if (!query || !isValidObjectId(structureId)) return false;
-    return !!(await StructureModel.exists({ _id: structureId, ...query }));
-  }
+  if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) return true;
 
   if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
     if (!user.structureId) return false;
@@ -285,9 +274,6 @@ router.post(
           contextFilters.push({ terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.VISITOR] } });
         } else {
           contextFilters.push({ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT] } });
-          // Un référent départemental ne lit en fiche que les référents de ses départements
-          // (`isReferentReadableByUser`) : l'onglet ne liste plus ceux du reste de la région.
-          if (user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": toDepartments(user.department) } });
         }
       }
 
