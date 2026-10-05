@@ -36,6 +36,13 @@ du verrou, au lieu de l'écran « maximum de tentatives atteint » avec l'heure 
 suppression de la dépendance au mot de passe : dire au seul détenteur du bon mot de passe que le compte est verrouillé
 est exactement ce qui était à retirer.
 
+## Message d'échec de connexion (commit « visible »)
+
+Pour atténuer la conséquence ci-dessus sans rien révéler, le message d'échec de connexion des fronts (`app` et `admin`)
+mentionne désormais, pour tout échec, que la connexion est temporairement suspendue après plusieurs échecs
+consécutifs. Le texte est identique quel que soit l'état du compte. Ce commit est séparé du correctif et peut être
+écarté sans rouvrir quoi que ce soit côté api.
+
 ## Examiné, sans modification
 
 - `POST /young|referent/signin-2fa` : le plafond de 3 essais est porté par le filtre de `consume2FAAttempt`, sans
