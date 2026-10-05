@@ -656,8 +656,23 @@ class Auth {
       // Le mot de passe est vérifié AVANT toute recherche sur l'email visé :
       // sinon la route sert d'oracle d'existence de compte à tout jeune
       // authentifié, sans qu'il ait à connaître son propre mot de passe (M6).
+      // Même verrou que `resetPassword` : l'essai est consommé atomiquement avant la comparaison.
+      const now = new Date();
+      const lockedUser = await this.model.findById(req.user._id);
+      if (!lockedUser) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      if (isLoginLocked(lockedUser, now)) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: lockedUser.nextLoginAttemptIn } });
+
+      const attempt = await consumeLoginAttempt(this.model, lockedUser._id, now);
+      if (attempt.blocked) {
+        return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+      }
+
       const match = await req.user.comparePassword(password);
-      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      if (!match) {
+        if (attempt.delayed) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      }
+      await resetLoginAttempts(this.model, lockedUser._id);
 
       // is new email already used?
       const existingUser = await this.model.findOne({
@@ -787,7 +802,7 @@ class Auth {
       await user.save();
 
       await sendTemplate(user.newEmail ? SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION : SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.newEmail || user.email }],
         params: {
           registration_code: tokenEmailValidation,
           cta: user.newEmail
