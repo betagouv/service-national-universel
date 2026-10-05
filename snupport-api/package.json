@@ -9,8 +9,8 @@
     "start": "node ./src/index.js",
     "build": "tsc -b ./tsconfig.build.json",
     "check-types": "tsc -p tsconfig.check.json --emitDeclarationOnly",
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
-    "test:watch": "NODE_OPTIONS=--experimental-vm-modules jest --watch",
+    "test": "jest",
+    "test:watch": "jest --watch",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint --ext .js --fix src",
     "clean": "rm -fr node_modules .turbo build .swc"

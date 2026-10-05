@@ -20,15 +20,22 @@ dépôt sont `^20.17`. Vérifié sous Node 20.17.0 et 20.20.2.
 ## 2. Choix
 
 - **`file-type` ≥ 17 est ESM-only**, et `api` et `snupport-api` sont en CommonJS : la bibliothèque
-  se charge par `import()` dynamique (`snupport-api/src/utils/attachments.js`,
+  se charge par `import()` dynamique (`snupport-api/src/utils/loadFileType.js`,
   `api/src/utils/loadFileType.js`). Les appelants ne changent pas.
-- **`loadFileType.js` reste en JavaScript** : `ts-jest` force CommonJS et réécrirait un `import()`
-  écrit dans un `.ts` en `require()`, que jest ne sait pas résoudre sur un paquet ESM-only. Le
-  contourner par `new Function` a été essayé et écarté : jest réutilise alors le callback d'import
-  d'une suite déjà démontée (« Test environment has been torn down »), de façon intermittente.
-- **Les scripts de test portent `NODE_OPTIONS=--experimental-vm-modules`** (`api` et
-  `snupport-api`, scripts `test`, `test:debug`, `test:watch`) : sans ce drapeau jest refuse
-  l'`import()` dynamique. Un `npx jest` lancé directement doit le reprendre.
+- **Un module de chargement à part, remplacé sous jest** (`api/src/utils/loadFileType.js`,
+  `snupport-api/src/utils/loadFileType.js`, substitués par `src/__tests__/helpers/loadFileType.js`
+  via `moduleNameMapper`). Le module reste en JavaScript : `ts-jest` réécrirait un `import()` écrit
+  dans un `.ts` en `require()`, que jest ne sait pas résoudre sur un paquet ESM-only. En test, le
+  remplaçant compile l'`import()` dans le contexte principal de Node
+  (`vm.constants.USE_MAIN_CONTEXT_DEFAULT_LOADER`, Node ≥ 20.12) : `file-type` n'est chargé qu'une
+  fois par processus, hors des contextes jest.
+- **Approches écartées** : `new Function` (jest réutilise le callback d'import d'une suite déjà
+  démontée, « Test environment has been torn down », de façon intermittente) et
+  `--experimental-vm-modules` : avec ce drapeau, `test (api)` a fini en OOM en CI (heap 3,8 Go sur
+  4 Go à la 35e suite, code 134). Sans lui, la suite complète (121 suites) passe en local avec un
+  pic de 3,7 Go, et 3,05 Go à la 35e suite : l'écart (~0,7 Go) est un indice fort, pas une preuve
+  (machines différentes). Le drapeau écrasait aussi le `NODE_OPTIONS=--max-old-space-size=4096` de la
+  CI. **Attention** : la suite api reste proche du plafond de 4 Go, avec ou sans ce changement.
 - **Pas de régression de détection** : comparaison 16.5.4 / 21.3.4 sur de vrais fichiers de chaque
   type de la liste blanche (PDF, PNG, JPEG, GIF, HEIC, HEIF, WebP, DOCX, XLSX, PPTX, ODT, ODS, ODP) :
   types identiques. La 21.x est plus stricte sur les fichiers fabriqués à la main (un PNG réduit à sa

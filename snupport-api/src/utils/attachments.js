@@ -1,9 +1,5 @@
 const { hasAsfSignature } = require("snu-lib");
-
-// file-type ≥ 17 est ESM-only et ce service est en CommonJS : seul un import() dynamique le charge.
-// On ne descend pas sous 21.3.1, qui borne l'analyse d'un en-tête ASF forgé (GHSA-5v7r-6r5c-r473) :
-// la 16.5.4, dernière version CommonJS, boucle sans fin dessus — y compris derrière un tag ID3.
-const loadFileType = () => import("file-type");
+const { loadFileType } = require("./loadFileType");
 
 // Types réellement attendus dans un ticket support : justificatifs, captures d'écran,
 // documents bureautiques. La liste est close et ne contient aucun format exécutable, ni
