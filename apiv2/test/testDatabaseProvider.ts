@@ -16,7 +16,7 @@ export const testDatabaseProviders = (newContainer: boolean) => ({
                 connectionString = mongodbContainer.getConnectionString();
             }
         }
-        return (await mongoose.connect(connectionString, { directConnection: true, ...(dbName && { dbName }) }))
+        return (await mongoose.connect(connectionString, { directConnection: true, ...(dbName ? { dbName } : {}) }))
             .connection;
     },
 });
