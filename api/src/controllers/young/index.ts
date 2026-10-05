@@ -60,7 +60,6 @@ import { keepOnlyUnsharedEmails } from "../../services/rgpdEmailGuard";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import { scanFile } from "../../utils/virusScanner";
 import { UserRequest } from "../request";
-import { FileTypeResult } from "file-type";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
@@ -796,7 +795,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
-    let mimeFromFile: FileTypeResult["mime"] | null = null;
+    let mimeFromFile: string | null = null;
     try {
       mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {
