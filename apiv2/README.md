@@ -7,6 +7,12 @@
 - nest start api
 - nest start job
 
+## Tests avec une base MongoDB externe
+
+Par défaut, les tests démarrent leur base dans un conteneur Docker (`mongo:6.0.1`). Si la variable d'environnement `TEST_MONGO_URI` est définie et non vide, aucun conteneur n'est démarré : les tests utilisent ce serveur (les tests qui demandent une base dédiée y reçoivent une base au nom unique).
+Le serveur doit être un jeu de réplicas si les tests utilisent des transactions. Exemple : `TEST_MONGO_URI="mongodb://127.0.0.1:27017/?directConnection=true" npx jest --runInBand`.
+La CI ne définit pas cette variable et continue d'utiliser Docker.
+
 Domaine : https://www.figma.com/board/whn9m3PNb72IYSQjjSHTeZ/SNU-Identification-des-Domaines?node-id=0-1&t=37n9Fla1p9oMVVZT-0
 
 En cours:
