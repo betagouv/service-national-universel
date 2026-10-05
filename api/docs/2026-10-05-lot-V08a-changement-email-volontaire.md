@@ -25,10 +25,9 @@ changement d'email en libre-service d'un volontaire, et réponses des routes de 
   opération atomique, la garantie sous concurrence est inchangée (vérifiée par test sous rafale).
   Cette voie a été préférée à la capture de l'exception du hook, qui aurait masqué d'autres erreurs.
 
-## 3. Décision à valider (hors périmètre, non traitée)
+## 3. Hors périmètre
 
-L'unicité d'une adresse n'est vérifiée que parmi les volontaires : étendre le contrôle aux
-référents, responsables et parents est une décision produit, à trancher avant tout changement.
+Le périmètre du contrôle d'unicité de l'adresse email n'est pas modifié par ce lot.
 
 ## 4. Tests
 
