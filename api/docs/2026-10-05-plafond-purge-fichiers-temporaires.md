@@ -18,10 +18,12 @@ Les quatre routes de dépôt partagent désormais le middleware `api/src/middlew
 - **Plafond** : une requête ne peut porter que 10 fichiers au plus (`MAX_UPLOAD_FILES`). Au-delà, la
   réponse est un 413 (`INVALID_BODY`) et rien n'est conservé.
 - **Taille** : la limite de 10 Mo par fichier est inchangée, mais un fichier plus gros est maintenant
-  refusé en 413 au lieu d'être transmis tronqué au traitement.
+  refusé en 413 (JSON, code `INVALID_BODY`) au lieu d'être transmis tronqué au traitement. La réception
+  va à son terme avant la purge, pour que tous les fichiers déjà reçus soient supprimés et que le
+  traitement de la route ne soit pas exécuté après la réponse.
 - **Purge** : les fichiers temporaires de la requête sont supprimés à la fin de chaque réponse, quel
-  que soit le statut (200, 400, 403, 404, 413, 500) et même si la connexion est coupée. Une erreur de
-  suppression est journalisée et n'altère jamais la réponse.
+  que soit le statut (200, 400, 403, 404, 413, 500). Une erreur de suppression est journalisée et
+  n'altère jamais la réponse.
 
 ## 2. Choix
 
@@ -36,6 +38,10 @@ Les quatre routes de dépôt partagent désormais le middleware `api/src/middlew
 
 ## 3. Hors périmètre, signalé
 
+- Si le client coupe la connexion en plein envoi d'un fichier, le fichier partiel est supprimé par le
+  délai d'envoi du parseur (60 s) et non à la coupure ; la purge à la fin de la réponse peut aussi
+  survenir avant la fin du traitement de la route. Comportement non modifié par ce lot, à traiter
+  séparément si besoin.
 - Pas de limite cumulative par clé côté serveur dans `documents.js` : ce serait un changement
   fonctionnel, à décider séparément.
 - Dans `documents.js`, la limite de 3 CNI repose sur une catégorie fournie par le client : non traité ici.
