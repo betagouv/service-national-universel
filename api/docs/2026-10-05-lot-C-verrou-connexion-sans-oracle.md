@@ -38,8 +38,9 @@ est exactement ce qui était à retirer.
 
 ## Examiné, sans modification
 
-- `POST /young|referent/signin-2fa` : le plafond est porté par le filtre de `consume2FAAttempt` ; le code, expiré,
-  faux ou au-delà du plafond, reçoit la même réponse.
+- `POST /young|referent/signin-2fa` : le plafond de 3 essais est porté par le filtre de `consume2FAAttempt`, sans
+  rapport avec le verrou de connexion ; au-delà du plafond, le bon comme le mauvais code reçoivent la même réponse et
+  aucune session n'est ouverte.
 - `POST /agent/signin` de `snupport-api` : pas de compteur ni de verrou par compte, donc pas de réponse qui dépende de
   l'état d'un verrou.
 - `POST /young|referent/check_password` et `reset_password` : routes authentifiées, le verrou y est annoncé à la
