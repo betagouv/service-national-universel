@@ -5,6 +5,7 @@
  *   - signin-2fa, validation d'email et validation du nouvel email répondent 400 de façon identique.
  */
 import request from "supertest";
+import mongoose from "mongoose";
 
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose, clearDatabase } from "./helpers/db";
@@ -65,6 +66,7 @@ describe("changement d'email : le code part à la nouvelle adresse", () => {
 
     const first = await request(app).post("/young/email").send({ email: NEW_EMAIL, password: PASSWORD });
     expect(first.status).toBe(200);
+    expect(recipients()).toEqual([NEW_EMAIL]);
     (sendTemplate as jest.Mock).mockClear();
 
     const res = await request(app).get("/young/email-validation/token");
@@ -111,8 +113,9 @@ describe("changement d'email : le code part à la nouvelle adresse", () => {
     });
     const app = getAppHelper(young as any, "young");
 
-    await Promise.all(Array.from({ length: 10 }, () => request(app).post("/young/email-validation/new-email").send({ token_email_validation: "000000" })));
+    const responses = await Promise.all(Array.from({ length: 10 }, () => request(app).post("/young/email-validation/new-email").send({ token_email_validation: "000000" })));
 
+    responses.forEach((res) => expect(res.status).toBe(400));
     const after = await YoungModel.findById(young._id);
     expect(after!.attemptsEmailValidation).toBe(MAX_EMAIL_VALIDATION_ATTEMPTS);
     expect(after!.email).toBe(young.email);
@@ -129,7 +132,7 @@ describe("POST /young/email : le mot de passe est compté", () => {
     for (let i = 0; i < MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1; i++) await requestChange(app, WRONG_PASSWORD);
 
     const after = await YoungModel.findById(young._id);
-    expect(after!.loginAttempts).toBeGreaterThan(1);
+    expect(after!.loginAttempts).toBe(MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1);
 
     const locked = await requestChange(app, PASSWORD);
     expect(locked.status).toBe(400);
@@ -155,6 +158,14 @@ describe("POST /young/email : le mot de passe est compté", () => {
     expect((await YoungModel.findById(young._id))!.loginAttempts).toBe(0);
   });
 
+  it("le 6e essai avec le bon mot de passe aboutit, comme sur reset_password", async () => {
+    const young = await createYoung({ loginAttempts: MAX_LOGIN_ATTEMPTS_BEFORE_DELAY, nextLoginAttemptIn: new Date() });
+    const res = await requestChange(getAppHelper(young as any, "young"), PASSWORD);
+
+    expect(res.status).toBe(200);
+    expect((await YoungModel.findById(young._id))!.loginAttempts).toBe(0);
+  });
+
   it("un compte verrouillé ne voit pas son verrou prolongé", async () => {
     const lockedUntil = new Date(Date.now() + 30 * 60 * 1000);
     const young = await createYoung({ loginAttempts: 12, nextLoginAttemptIn: lockedUntil });
@@ -170,9 +181,13 @@ describe("POST /young/email : le mot de passe est compté", () => {
 describe("réponse 400 identique pour un code expiré, un email inconnu et un plafond dépassé", () => {
   const outcome = (res: request.Response) => ({ status: res.status, body: res.body });
 
+  const countPatches = () => mongoose.connection.db!.collection("young_patches").countDocuments();
+
   async function expectUniform(cases: Array<() => Promise<request.Response>>) {
     const outcomes: Array<{ status: number; body: any }> = [];
+    const patchesBefore = await countPatches();
     for (const run of cases) outcomes.push(outcome(await run()));
+    expect(await countPatches()).toBe(patchesBefore);
     for (const result of outcomes) {
       expect(result.status).toBe(400);
       expect(result.body).toEqual({ ok: false, code: "PASSWORD_TOKEN_EXPIRED_OR_INVALID" });

@@ -168,18 +168,20 @@ export async function resetLoginAttempts(model: Model<any>, userId: any): Promis
  * sont évalués ensemble, donc au-delà du plafond plus aucune requête ne peut matcher, quelle que soit
  * la concurrence.
  *
- * L'update est faite SANS `new: true` : sur un résultat vide (plafond atteint, code expiré, compte
- * inconnu), le hook post-update de mongoose-patch-history lit le document rendu et lève, ce qui
- * répondait 500 au lieu de 400 et distinguait ces cas. Sans `new`, le hook sort proprement. Les
- * compteurs sont exclus de l'historique de patch, rien n'est perdu côté traçabilité. Le document est
+ * L'update passe par le driver natif : les hooks de mongoose-patch-history ne sont pas joués. Sur un
+ * résultat vide (plafond atteint, code expiré, compte inconnu) ils lèvent (500 au lieu de 400, ce qui
+ * distinguait ces cas), et sans `new` ils rattachent à un document quelconque un patch complet. Les
+ * compteurs sont exclus de l'historique de patch, rien n'est perdu côté traçabilité. Les filtres ne
+ * portent que des chaînes, nombres et dates : aucun cast mongoose n'est nécessaire. Le document est
  * relu après l'incrément pour que l'appelant travaille sur l'état courant.
  */
 async function consumeCodeAttempt(model: Model<any>, filter: Record<string, any>, attemptsField: string, max: number, expiresField: string, now: Date) {
-  const consumed = await model.findOneAndUpdate(
+  const result = await model.collection.findOneAndUpdate(
     { ...filter, [attemptsField]: { $lt: max }, [expiresField]: { $gt: now } },
     { $inc: { [attemptsField]: 1 } },
-    { new: false, projection: { _id: 1 } },
+    { projection: { _id: 1 }, includeResultMetadata: true },
   );
+  const consumed = result.value;
   if (!consumed) return null;
   return model.findById(consumed._id);
 }
