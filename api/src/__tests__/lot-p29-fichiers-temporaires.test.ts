@@ -45,8 +45,8 @@ function fileUploadTempFiles(): string[] {
   return fs.readdirSync("/tmp").filter((name) => /^tmp-\d+-\d+$/.test(name));
 }
 
-async function waitUntil(condition: () => boolean) {
-  for (let i = 0; i < 40 && !condition(); i++) await new Promise((resolve) => setTimeout(resolve, 25));
+async function waitUntil(condition: () => boolean, attempts = 40) {
+  for (let i = 0; i < attempts && !condition(); i++) await new Promise((resolve) => setTimeout(resolve, 25));
 }
 
 function attachFiles(req: request.Test, count: number, size = 1) {
@@ -128,7 +128,7 @@ describe("tempFileUpload", () => {
   });
 });
 
-describe("tempFileUpload : fichier trop gros suivi d'autres fichiers", () => {
+describe("tempFileUpload : fichier trop gros suivi d'autres fichiers (délai d'envoi court)", () => {
   let uploadDir: string;
   let app: express.Express;
   let handlerCalls: number;
@@ -136,7 +136,7 @@ describe("tempFileUpload : fichier trop gros suivi d'autres fichiers", () => {
     uploadDir = fs.mkdtempSync(path.join(workDir, "upload-"));
     handlerCalls = 0;
     app = express();
-    app.post("/upload", ...tempFileUpload({ tempFileDir: uploadDir }), (req, res) => {
+    app.post("/upload", ...tempFileUpload({ tempFileDir: uploadDir, uploadTimeout: 300 }), (req, res) => {
       handlerCalls++;
       res.send({ ok: true });
     });
@@ -158,7 +158,7 @@ describe("tempFileUpload : fichier trop gros suivi d'autres fichiers", () => {
     req.attach("gros", Buffer.alloc(MAX_FILE_SIZE + 1, "a"), "gros.txt").attach("moyen", Buffer.alloc(5 * 1024 * 1024, "a"), "moyen.txt");
     const res = await req;
     expect(res.status).toBe(413);
-    await waitUntil(() => fs.readdirSync(uploadDir).length === 0);
+    await waitUntil(() => fs.readdirSync(uploadDir).length === 0, 200);
     expect(fs.readdirSync(uploadDir)).toEqual([]);
     expect(handlerCalls).toBe(0);
   });
