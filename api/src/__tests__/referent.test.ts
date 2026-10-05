@@ -537,7 +537,7 @@ describe("Referent", () => {
     it("should return 200 if file is found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(await getAppHelperWithAcl())
-        .get("/referent/youngFile/" + young._id + "/key/test.pdf")
+        .get("/referent/youngFile/" + young._id + "/equivalenceFiles/test.pdf")
         .send();
       expect(res.statusCode).toEqual(200);
       expect(res.body.fileName).toEqual("test.pdf");

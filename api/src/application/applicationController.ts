@@ -42,6 +42,7 @@ import {
 import { decrypt, encrypt } from "../cryptoUtils";
 import { sendTemplate } from "../brevo";
 import { validateUpdateApplication, validateNewApplication, validateId, idSchema } from "../utils/validator";
+import { safePathSegment } from "../utils/pathSegment";
 import { config } from "../config";
 import { sanitizeEmailText } from "../email/emailInput";
 import { serializeApplication, serializeYoung, serializeContract } from "../utils/serializer";
@@ -1114,7 +1115,9 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       key: Joi.string().required(),
-      name: Joi.string().required(),
+      // `name` complète le chemin lu (`.../<clé>/<nom>`) : un seul niveau de l'arborescence, y compris pour
+      // un nom présent dans la liste de la candidature.
+      name: safePathSegment().required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });

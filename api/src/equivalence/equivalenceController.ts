@@ -24,6 +24,7 @@ import { getMimeFromBuffer } from "../utils/file";
 import { validateId } from "../utils/validator";
 import { createEquivalenceValidator, updateEquivalenceValidator } from "./equivalenceValidator";
 import { YoungPerimeterRequest } from "../controllers/young/youngPerimeterMiddleware";
+import { safePathSegment } from "../utils/pathSegment";
 
 const router = express.Router({ mergeParams: true });
 
@@ -63,7 +64,8 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
 
 router.get("/file/:name", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error, value } = Joi.object({ name: Joi.string().required() })
+    // `name` complète le chemin lu (`app/young/<id>/equivalenceFiles/<name>`) : un seul niveau de l'arborescence.
+    const { error, value } = Joi.object({ name: safePathSegment().required() })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
 

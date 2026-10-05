@@ -20,6 +20,7 @@ import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { setSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
 import { validateId, idSchema } from "../../utils/validator";
+import { safePathSegment } from "../../utils/pathSegment";
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
@@ -50,6 +51,8 @@ import {
   isReadAuthorized,
   PERMISSION_CODES,
   PERMISSION_ACTIONS,
+  FILE_KEYS,
+  MILITARY_FILE_KEYS,
 } from "snu-lib";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
@@ -767,10 +770,14 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
+    // `key` et `fileName` composent le chemin lu (`app/young/<id>/<key>/<fileName>`) : chacun désigne un seul
+    // niveau de l'arborescence (Express décode `%2F` en `/`) et `key` est une pièce connue.
     const { error, value } = Joi.object({
       youngId: Joi.string().required(),
-      key: Joi.string().required(),
-      fileName: Joi.string().required(),
+      key: Joi.string()
+        .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
+        .required(),
+      fileName: safePathSegment().required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });

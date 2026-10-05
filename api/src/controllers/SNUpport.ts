@@ -17,6 +17,7 @@ import { sanitizeEmailText } from "../email/emailInput";
 import { sendTemplate } from "../brevo";
 import { YoungModel, ClasseModel, ReferentModel } from "../models";
 import { validateId } from "../utils/validator";
+import { safePathSegment } from "../utils/pathSegment";
 import { encrypt, decrypt } from "../cryptoUtils";
 import { getUserAttributes } from "../services/support";
 import { normalizeFromPage, PUBLIC_FORM_ROLES, SCHEMA_SUPPORT_DEPARTMENT, SCHEMA_SUPPORT_REGION } from "../services/supportFormAttributes";
@@ -646,11 +647,8 @@ router.post(
 
 router.get("/s3file/:id", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
-    const { error, value: id } = Joi.string()
-      .pattern(/^[^/\\]+$/)
-      .max(255)
-      .required()
-      .validate(req.params.id);
+    // Un seul niveau de chemin : `message/<id>` ne doit désigner qu'une pièce jointe du support.
+    const { error, value: id } = safePathSegment().max(255).required().validate(req.params.id);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const path = `message/${id}`;
