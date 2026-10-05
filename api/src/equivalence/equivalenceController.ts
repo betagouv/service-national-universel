@@ -21,6 +21,7 @@ import { UserRequest } from "../controllers/request";
 import { notifyReferentsEquivalenceSubmitted, notifyYoungChangementStatutEquivalence, notifyYoungEquivalenceSubmitted } from "../application/applicationNotificationService";
 import { decrypt } from "../cryptoUtils";
 import { getMimeFromBuffer } from "../utils/file";
+import { validateId } from "../utils/validator";
 import { createEquivalenceValidator, updateEquivalenceValidator } from "./equivalenceValidator";
 import { YoungPerimeterRequest } from "../controllers/young/youngPerimeterMiddleware";
 
@@ -192,7 +193,13 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
       }
     }
 
-    const equivalence = await MissionEquivalenceModel.findById(req.params.idEquivalence);
+    const { error: idError, value: idEquivalence } = validateId(req.params.idEquivalence);
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const equivalence = await MissionEquivalenceModel.findById(idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     // L'équivalence doit bien appartenir au volontaire de l'URL : sinon un jeune écrasait le
     // `status_equivalence` d'un tiers depuis sa propre URL (constat H54).

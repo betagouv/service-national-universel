@@ -187,6 +187,20 @@ describe("Équivalences : l'identifiant vient de l'URL, jamais du corps", () => 
       expect(await snapshotEquivalence(foreign._id)).toEqual(foreignBefore);
     });
 
+    it("un identifiant d'équivalence mal formé dans l'URL est refusé en 400, sans rien modifier", async () => {
+      const { youngA } = await givenTwoYoungs();
+      const own = await seedEquivalence(youngA);
+      const ownBefore = await snapshotEquivalence(own._id);
+
+      const res = await request(getAppHelper(youngA))
+        .put(`/young/${youngA._id}/phase2/equivalence/pas-un-identifiant`)
+        .send({ address: "Adresse corrigée", idEquivalence: own._id.toString() });
+
+      expect(res.status).toEqual(400);
+      expect(res.body.ok).toBe(false);
+      expect(await snapshotEquivalence(own._id)).toEqual(ownBefore);
+    });
+
     it.each([[ROLES.REFERENT_DEPARTMENT], [ROLES.REFERENT_REGION]])(
       "un %s instruit l'équivalence de l'URL, pas celle d'un volontaire hors de son périmètre désignée dans le corps",
       async (role) => {
