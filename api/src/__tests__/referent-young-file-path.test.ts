@@ -10,11 +10,17 @@
  *
  * Le contrôle de périmètre est évalué APRÈS la validation : un refus de validation n'appelle jamais
  * le stockage, quel que soit l'acteur.
+ *
+ * Même invariant pour les noms de pièces STOCKÉS sur le dossier du volontaire : un nom relu en base
+ * n'est passé à la suppression que s'il désigne un seul niveau de l'arborescence.
+ *
+ * - POST /referent/young/:id/refuse-military-preparation-files
  */
 import request from "supertest";
 
 import { FILE_KEYS, MILITARY_FILE_KEYS, ROLES } from "snu-lib";
 
+import { logger } from "../logger";
 import { ApplicationModel, ReferentModel, StructureModel, YoungModel } from "../models";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
@@ -30,11 +36,13 @@ import { createApplication } from "./helpers/application";
 
 const mockGetFile = jest.fn();
 const mockUploadFile = jest.fn();
+const mockDeleteFile = jest.fn();
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
   getFile: (...args: unknown[]) => mockGetFile(...args),
   uploadFile: (...args: unknown[]) => mockUploadFile(...args),
+  deleteFile: (...args: unknown[]) => mockDeleteFile(...args),
 }));
 
 jest.mock("../cryptoUtils", () => ({
@@ -56,8 +64,13 @@ beforeEach(async () => {
   mockGetFile.mockResolvedValue({ Body: "" });
   mockUploadFile.mockReset();
   mockUploadFile.mockResolvedValue({});
+  mockDeleteFile.mockReset();
+  mockDeleteFile.mockResolvedValue({});
 });
-afterEach(resetAppAuth);
+afterEach(() => {
+  resetAppAuth();
+  jest.restoreAllMocks();
+});
 
 const YOUNG_FILE_KEYS: string[] = [...FILE_KEYS, ...MILITARY_FILE_KEYS];
 /** Pièces qu'un responsable de structure en périmètre n'obtient jamais (identité, santé, préparation militaire hors structure PM). */
@@ -412,5 +425,73 @@ describe("POST /referent/file/:key", () => {
       .send({ body: body(young._id.toString()) });
 
     expect(res.statusCode).toEqual(200);
+  });
+});
+
+describe("POST /referent/young/:id/refuse-military-preparation-files : noms stockés", () => {
+  const militaryPath = (youngId: unknown, key: string, name: string) => `app/young/${youngId}/military-preparation/${key}/${name}`;
+
+  /** Le même jeu de noms est stocké sous chacune des quatre listes de pièces de préparation militaire. */
+  const storedUnderEveryKey = (names: string[]) => Object.fromEntries(MILITARY_FILE_KEYS.map((key: string) => [key, names]));
+
+  const createYoungWithStoredNames = (names: string[]) =>
+    createYoungHelper(getNewYoungFixture({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION", ...storedUnderEveryKey(names) } as any));
+
+  it.each([
+    ["une remontée d'arborescence", "../../2/cniFiles/id"],
+    ["un sous-chemin", "sous-dossier/fichier.pdf"],
+    ["un antislash", "dossier\\fichier.pdf"],
+    ["un octet nul", "fichier\u0000.pdf"],
+    ["un retour à la ligne", "fichier\n.pdf"],
+    ["le segment « .. » seul", ".."],
+    ["le segment « . » seul", "."],
+    ["une chaîne vide", ""],
+  ])("ne supprime jamais un nom stocké contenant %s, mais supprime les noms légitimes voisins", async (_label, storedName) => {
+    const young = await createYoungWithStoredNames(["piece.pdf", storedName]);
+
+    const res = await request(await getAppHelperWithAcl()).post(`/referent/young/${young._id}/refuse-military-preparation-files`);
+
+    expect(res.statusCode).toEqual(200);
+    const deleted = mockDeleteFile.mock.calls.map(([path]) => path as string).sort();
+    expect(deleted).toEqual(MILITARY_FILE_KEYS.map((key: string) => militaryPath(young._id, key, "piece.pdf")).sort());
+    expect((await YoungModel.findById(young._id))?.statusMilitaryPreparationFiles).toEqual("REFUSED");
+  });
+
+  it("ne supprime rien lorsque tous les noms stockés sont non sûrs, et refuse tout de même le dossier", async () => {
+    const young = await createYoungWithStoredNames(["../../2/cniFiles/id", "a/b.pdf"]);
+
+    const res = await request(await getAppHelperWithAcl()).post(`/referent/young/${young._id}/refuse-military-preparation-files`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(mockDeleteFile).not.toHaveBeenCalled();
+    expect((await YoungModel.findById(young._id))?.statusMilitaryPreparationFiles).toEqual("REFUSED");
+  });
+
+  it("journalise l'abandon d'un nom non sûr sans en reproduire le contenu", async () => {
+    const warn = jest.spyOn(logger, "warn").mockImplementation(() => logger);
+    const young = await createYoungWithStoredNames(["piece.pdf", "../../2/cniFiles/MARQUEUR-DE-FUITE"]);
+
+    const res = await request(await getAppHelperWithAcl()).post(`/referent/young/${young._id}/refuse-military-preparation-files`);
+
+    expect(res.statusCode).toEqual(200);
+    expect(warn).toHaveBeenCalled();
+    expect(JSON.stringify(warn.mock.calls)).not.toContain("MARQUEUR-DE-FUITE");
+  });
+
+  it.each([
+    ["des espaces et des accents", "Pièce d'identité (1).pdf"],
+    ["des points successifs au milieu", "a..b.pdf"],
+    ["des points en tête", "..cache.pdf"],
+    ["un nom produit par l'interface", "justificatif-0.pdf"],
+  ])("supprime comme avant un nom stocké légitime avec %s, sans rien journaliser", async (_label, storedName) => {
+    const warn = jest.spyOn(logger, "warn").mockImplementation(() => logger);
+    const young = await createYoungWithStoredNames([storedName]);
+
+    const res = await request(await getAppHelperWithAcl()).post(`/referent/young/${young._id}/refuse-military-preparation-files`);
+
+    expect(res.statusCode).toEqual(200);
+    const deleted = mockDeleteFile.mock.calls.map(([path]) => path as string).sort();
+    expect(deleted).toEqual(MILITARY_FILE_KEYS.map((key: string) => militaryPath(young._id, key, storedName)).sort());
+    expect(warn).not.toHaveBeenCalled();
   });
 });

@@ -57,10 +57,6 @@ volontaire inexistant).
   nom du fichier envoyé. La bibliothèque de téléversement (express-fileupload, busboy 1.6) n'en conserve que le
   dernier niveau (vérifié sur les options des routes : `../a/b.pdf` devient `b.pdf`, un nom réduit à `..` reçoit un
   nom généré) ; ce garde-fou n'est pas dupliqué ici.
-- La branche « chef de centre » de `GET /referent/youngFile/:youngId/:key/:fileName` compare
-  `sessionPhase1.headCenterId` (chaîne) à `req.user._id` par `!==`. Avec un vrai document référent (`_id` de type
-  ObjectId) la comparaison est toujours vraie : le téléchargement est refusé (403). Comportement antérieur, non
-  modifié ici (décision produit à prendre).
 
 ## Tests
 

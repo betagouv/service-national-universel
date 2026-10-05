@@ -53,7 +53,7 @@ import {
   cancelPendingEquivalence,
 } from "../utils";
 import { validateId, idSchema, validateSelf, validateYoung, validateReferent, referentDepartmentSchema } from "../utils/validator";
-import { safePathSegment } from "../utils/pathSegment";
+import { isSafePathSegment, safePathSegment } from "../utils/pathSegment";
 import { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } from "../utils/serializer";
 import { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION, JWT_SESSION_ABSOLUTE_MAX_AGE_MS } from "../jwt-options";
 import { getToken } from "../passport";
@@ -910,7 +910,15 @@ router.post("/young/:id/refuse-military-preparation-files", passport.authenticat
     const newYoung = { statusMilitaryPreparationFiles: "REFUSED" };
 
     for (let key of MILITARY_FILE_KEYS) {
-      young[key].forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
+      // Les noms sont relus en base : ils composent le chemin supprimé (`military-preparation/<clé>/<nom>`)
+      // et ne doivent désigner qu'un seul niveau de l'arborescence. Un nom non sûr est ignoré, sans que sa
+      // valeur soit reprise dans le journal.
+      const names: string[] = young[key];
+      const safeNames = names.filter((file) => isSafePathSegment(file));
+      if (safeNames.length < names.length) {
+        logger.warn(`referent.refuse_military_preparation_files: ${names.length - safeNames.length} nom(s) de pièce non sûr(s) ignoré(s), volontaire ${young._id}, clé ${key}`);
+      }
+      safeNames.forEach((file) => deleteFile(`app/young/${young._id}/military-preparation/${key}/${file}`));
       delete young.files![key];
     }
 
