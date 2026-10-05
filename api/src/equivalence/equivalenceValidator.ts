@@ -1,8 +1,9 @@
 import Joi from "joi";
 import { ENGAGEMENT_LYCEEN_TYPES, ENGAGEMENT_TYPES, EQUIVALENCE_STATUS, UNSS_TYPE } from "snu-lib";
 
+// Ces schémas valident le CORPS de la requête uniquement : le volontaire et l'équivalence visés viennent
+// de l'URL (`req.params`, contrôlés par le périmètre de `/young/:id/phase2`) et n'ont pas leur place ici.
 export const createEquivalenceValidator = Joi.object({
-  id: Joi.string().required(),
   type: Joi.string()
     .trim()
     .valid(...ENGAGEMENT_TYPES)
@@ -24,8 +25,6 @@ export const createEquivalenceValidator = Joi.object({
 });
 
 export const updateEquivalenceValidator = Joi.object({
-  id: Joi.string().required(),
-  idEquivalence: Joi.string().required(),
   status: Joi.string().valid(EQUIVALENCE_STATUS.WAITING_VERIFICATION, EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.VALIDATED, EQUIVALENCE_STATUS.REFUSED),
   type: Joi.string()
     .trim()
