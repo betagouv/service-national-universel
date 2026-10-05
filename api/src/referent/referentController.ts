@@ -53,6 +53,7 @@ import {
   cancelPendingEquivalence,
 } from "../utils";
 import { validateId, idSchema, validateSelf, validateYoung, validateReferent, referentDepartmentSchema } from "../utils/validator";
+import { safePathSegment } from "../utils/pathSegment";
 import { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } from "../utils/serializer";
 import { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION, JWT_SESSION_ABSOLUTE_MAX_AGE_MS } from "../jwt-options";
 import { getToken } from "../passport";
@@ -77,6 +78,7 @@ import {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE2,
+  FILE_KEYS,
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
@@ -992,10 +994,17 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
 // get /young/:id/file/:key/:filename accessible only by ref or themself
 router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
+    // `key` et `fileName` composent le chemin lu (`app/young/<id>/<key>/<fileName>`) : chacun désigne un
+    // seul niveau (Express décode `%2F` en `/`), et `key` est une pièce connue — mêmes clés que
+    // `/young/:id/documents/:key`. Les contrôles par clé de `canAccessYoungFileKeyInScope` comparent
+    // à égalité stricte : ils ne valent que pour une clé connue (constat PH20). La validation précède
+    // la recherche du volontaire et le contrôle de périmètre.
     const { error, value } = Joi.object({
       youngId: Joi.string().required(),
-      key: Joi.string().required(),
-      fileName: Joi.string().required(),
+      key: Joi.string()
+        .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
+        .required(),
+      fileName: safePathSegment().required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
@@ -1073,10 +1082,14 @@ router.get(
   passport.authenticate("referent", { session: false, failWithError: true }),
   async (req: UserRequest, res: Response) => {
     try {
+      // Les pièces de préparation militaire sont rangées sous `military-preparation/<clé>/` : la clé est
+      // l'une des quatre connues et le nom un seul niveau, sinon le chemin sortirait de ce sous-arbre.
       const { error, value } = Joi.object({
         youngId: Joi.string().required(),
-        key: Joi.string().required(),
-        fileName: Joi.string().required(),
+        key: Joi.string()
+          .valid(...MILITARY_FILE_KEYS)
+          .required(),
+        fileName: safePathSegment().required(),
       })
         .unknown()
         .validate({ ...req.params }, { stripUnknown: true });
@@ -1126,8 +1139,12 @@ router.post(
   async (req: UserRequest, res: Response) => {
     try {
       const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
+      // `key` sert au chemin d'écriture ET au nom du champ du dossier mis à jour (`young.set({ [key]: names })`) :
+      // seules les pièces connues sont acceptées, pas un nom de champ ou un sous-chemin choisi par l'URL.
       const { error, value } = Joi.object({
-        key: Joi.string().required(),
+        key: Joi.string()
+          .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
+          .required(),
         body: Joi.string().required(),
       })
         .unknown()
