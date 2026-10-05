@@ -26,6 +26,7 @@ import { ROLES, ReferentType, UserDto } from "snu-lib";
 
 import { ApplicationModel, ClasseModel, EtablissementModel, ReferentModel, SessionPhase1Model, StructureModel, YoungModel } from "../models";
 import { isReferentReadableByUser } from "../referent/referentScope";
+import { NOT_A_PROPOSAL } from "../application/applicationProposal";
 
 const norm = (email: string) => email.trim().toLowerCase();
 
@@ -97,7 +98,7 @@ async function isYoungInScope(
   if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
     const structureIds = await getStructureIds(user);
     if (!structureIds.length) return false;
-    return !!(await ApplicationModel.exists({ youngId: young._id.toString(), structureId: { $in: structureIds } }));
+    return !!(await ApplicationModel.exists({ youngId: young._id.toString(), structureId: { $in: structureIds }, ...NOT_A_PROPOSAL }));
   }
 
   return false;

@@ -33,6 +33,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isContractInUserScope } from "../services/contractAccess";
+import { isStructureActor, isUnacceptedProposal } from "../application/applicationProposal";
 import { toErrorCode } from "../utils/errorCode";
 
 async function createContract(data: any, fromUser: UserDto): Promise<ContractType> {
@@ -293,6 +294,11 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       if (!(await isContractInUserScope(req.user, { structureId, applicationId: application._id.toString(), youngId: young._id.toString() }))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      // Pas de contrat sur une proposition que le volontaire n'a pas acceptée : il reprendrait l'identité du volontaire
+      // et de ses représentants légaux.
+      if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 

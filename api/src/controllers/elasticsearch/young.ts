@@ -13,6 +13,7 @@ import { buildNdJson, buildRequestBody, joiElasticSearch, getResponsibleCenterFi
 import { serializeYoungs } from "../../utils/es-serializer";
 import { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel, CohortModel } from "../../models";
 import { getCohortNamesEndAfter } from "../../utils/cohort";
+import { NOT_A_PROPOSAL } from "../../application/applicationProposal";
 import { populateYoungExport } from "./populate/populateYoung";
 import { UserRequest } from "../request";
 
@@ -122,7 +123,7 @@ interface YoungContextOptions {
   showAffectedToRegionOrDep?: boolean;
 }
 
-async function buildYoungContext(user: UserDto, options: YoungContextOptions = {}): Promise<any> {
+export async function buildYoungContext(user: UserDto, options: YoungContextOptions = {}): Promise<any> {
   const { showAffectedToRegionOrDep = false } = options;
   const contextFilters: any[] = [];
 
@@ -156,10 +157,10 @@ async function buildYoungContext(user: UserDto, options: YoungContextOptions = {
       return { youngContextError: { status: 404, body: { ok: true, code: "no cohort available" } } };
     }
   }
-  // A responsible can only see youngs in application of their structure.
+  // A responsible can only see youngs in application of their structure (une proposition non acceptée n'est pas une candidature).
   if (user.role === ROLES.RESPONSIBLE) {
     if (!user.structureId) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const applications = await ApplicationModel.find({ structureId: user.structureId });
+    const applications = await ApplicationModel.find({ structureId: user.structureId, ...NOT_A_PROPOSAL });
     contextFilters.push({ terms: { _id: applications.map((e) => e.youngId) } });
   }
 
@@ -167,7 +168,7 @@ async function buildYoungContext(user: UserDto, options: YoungContextOptions = {
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     const structures = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-    const applications = await ApplicationModel.find({ structureId: { $in: structures.map((e) => e._id.toString()) } });
+    const applications = await ApplicationModel.find({ structureId: { $in: structures.map((e) => e._id.toString()) }, ...NOT_A_PROPOSAL });
     contextFilters.push({ terms: { _id: applications.map((e) => e.youngId) } });
   }
 

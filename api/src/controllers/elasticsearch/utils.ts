@@ -320,6 +320,12 @@ interface ApplicationContextResult {
  */
 const APPLICATION_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
 
+/**
+ * Une proposition de mission que le volontaire n'a pas acceptée n'est pas une candidature pour la
+ * structure, même sortie en REFUSED ou CANCEL (marqueur `proposalNotAccepted`, cf. `NOT_A_PROPOSAL`).
+ */
+const UNACCEPTED_PROPOSALS_EXCLUDED = { bool: { must_not: [{ term: { proposalNotAccepted: true } }] } };
+
 async function buildApplicationContext(user: UserDto): Promise<ApplicationContextResult> {
   const contextFilters: ContextFilters = [];
 
@@ -347,6 +353,7 @@ async function buildApplicationContext(user: UserDto): Promise<ApplicationContex
     if (!user.structureId) return { applicationContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push({ terms: { "structureId.keyword": [user.structureId] } });
     contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
+    contextFilters.push(UNACCEPTED_PROPOSALS_EXCLUDED);
   }
 
   // A supervisor can only see their structures' applications.
@@ -355,6 +362,7 @@ async function buildApplicationContext(user: UserDto): Promise<ApplicationContex
     const data = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
     contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
     contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
+    contextFilters.push(UNACCEPTED_PROPOSALS_EXCLUDED);
   }
 
   return { applicationContextFilters: contextFilters };

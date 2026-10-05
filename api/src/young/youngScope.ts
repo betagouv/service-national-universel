@@ -1,6 +1,7 @@
-import { APPLICATION_STATUS, ROLES, UserDto, YoungType, canEditYoung, MILITARY_FILE_KEYS } from "snu-lib";
+import { ROLES, UserDto, YoungType, canEditYoung, MILITARY_FILE_KEYS } from "snu-lib";
 
 import { ApplicationModel, ClasseModel, SessionPhase1Model, StructureModel } from "../models";
+import { NOT_A_PROPOSAL } from "../application/applicationProposal";
 import { getResponsibleCenterField } from "../controllers/elasticsearch/utils";
 
 const HEAD_CENTER_ROLES: string[] = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
@@ -138,15 +139,12 @@ async function getActorStructureIds(user: UserDto): Promise<string[]> {
 }
 
 /**
- * Une proposition de mission (WAITING_ACCEPTATION) n'ouvre rien à la structure tant que le volontaire
- * ne l'a pas acceptée : ni son dossier, ni ses pièces, ni la candidature elle-même (PH11, PH1).
- */
-const NOT_A_PROPOSAL = { status: { $ne: APPLICATION_STATUS.WAITING_ACCEPTATION } };
-
-/**
  * Périmètre d'un responsable / superviseur de structure : le volontaire doit avoir candidaté à une
  * mission portée par la structure de l'utilisateur (ou, pour un superviseur, par une structure de
  * son réseau). C'est le contrôle que `canDownloadYoungDocuments` laissait en commentaire.
+ *
+ * Une proposition de mission que le volontaire n'a pas acceptée n'ouvre rien à la structure, qu'elle soit
+ * en attente, refusée ou annulée : ni son dossier, ni ses pièces, ni la candidature (PH11, PH1, `NOT_A_PROPOSAL`).
  */
 export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
   const structureIds = await getActorStructureIds(user);
@@ -164,7 +162,7 @@ export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungTy
  * voient le dossier au titre de leur territoire ou de leur rattachement : toutes les candidatures
  * du volontaire relèvent alors de leur périmètre.
  */
-export async function getApplicationScopeFilter(user: UserDto): Promise<{ structureId?: { $in: string[] }; status?: { $ne: string } }> {
+export async function getApplicationScopeFilter(user: UserDto): Promise<{ structureId?: { $in: string[] }; status?: { $ne: string }; proposalNotAccepted?: { $ne: boolean } }> {
   if (![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return {};
   return { structureId: { $in: await getActorStructureIds(user) }, ...NOT_A_PROPOSAL };
 }
