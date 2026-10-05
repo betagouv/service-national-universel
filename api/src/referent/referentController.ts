@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 import mime from "mime-types";
 import Joi from "joi";
 import fs from "fs";
-import fileUpload from "express-fileupload";
+import { tempFileUpload } from "../middlewares/tempUpload";
 
 import AuthObject from "../auth";
 import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../middlewares/rateLimit";
@@ -1143,7 +1143,7 @@ router.get(
 router.post(
   "/file/:key",
   passport.authenticate("referent", { session: false, failWithError: true }),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  ...tempFileUpload(),
   async (req: UserRequest, res: Response) => {
     try {
       const militaryKeys = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];

@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
 import fs from "fs";
-import fileUpload from "express-fileupload";
+import { tempFileUpload } from "../middlewares/tempUpload";
 import mime from "mime-types";
 
 import {
@@ -1000,7 +1000,7 @@ router.post(
 router.post(
   "/:id/file/:key",
   authMiddleware(["referent", "young"]),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  ...tempFileUpload(),
   async (req: UserRequest, res: Response) => {
     try {
       const application = await ApplicationModel.findById(req.params.id);

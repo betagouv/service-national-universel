@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import Joi from "joi";
 import mime from "mime-types";
 import fs from "fs";
-import fileUpload from "express-fileupload";
+import { tempFileUpload } from "../../middlewares/tempUpload";
 
 import { decrypt, encrypt } from "../../cryptoUtils";
 import { config } from "../../config";
@@ -186,7 +186,7 @@ router.post("/signup_invite", youngSigninLimiter, requireJsonBody, async (req: U
 router.post(
   "/file/:key",
   passport.authenticate("young", { session: false, failWithError: true }),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  ...tempFileUpload(),
   async (req: UserRequest, res) => {
     try {
       const rootKeys = [
