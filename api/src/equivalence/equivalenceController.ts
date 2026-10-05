@@ -21,6 +21,7 @@ import { UserRequest } from "../controllers/request";
 import { notifyReferentsEquivalenceSubmitted, notifyYoungChangementStatutEquivalence, notifyYoungEquivalenceSubmitted } from "../application/applicationNotificationService";
 import { decrypt } from "../cryptoUtils";
 import { getMimeFromBuffer } from "../utils/file";
+import { validateId } from "../utils/validator";
 import { createEquivalenceValidator, updateEquivalenceValidator } from "./equivalenceValidator";
 import { YoungPerimeterRequest } from "../controllers/young/youngPerimeterMiddleware";
 
@@ -110,7 +111,8 @@ router.get("/:idEquivalence", passport.authenticate("young", { session: false, f
 
 router.post("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: YoungPerimeterRequest, res) => {
   try {
-    const { error, value } = createEquivalenceValidator.validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    // Le corps ne porte aucun identifiant : le volontaire est celui de l'URL (`req.targetYoung`), seul contrôlé par le périmètre.
+    const { error, value } = createEquivalenceValidator.validate(req.body, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -133,11 +135,9 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
       }
     }
 
-    const youngId = value.id;
-    delete value.id;
     const data = await MissionEquivalenceModel.create({
       ...value,
-      youngId,
+      youngId: young._id.toString(),
       status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED",
       // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
       missionDuration: boundMissionDuration(value.missionDuration || PHASE2_TOTAL_HOURS, isYoung),
@@ -166,7 +166,8 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
 
 router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: YoungPerimeterRequest, res) => {
   try {
-    const { error, value } = updateEquivalenceValidator.validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    // Le corps ne porte aucun identifiant : le volontaire et l'équivalence sont ceux de l'URL.
+    const { error, value } = updateEquivalenceValidator.validate(req.body, { stripUnknown: true });
     if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(value.type)) {
       value.sousType = undefined;
     }
@@ -192,7 +193,13 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
       }
     }
 
-    const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+    const { error: idError, value: idEquivalence } = validateId(req.params.idEquivalence);
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const equivalence = await MissionEquivalenceModel.findById(idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     // L'équivalence doit bien appartenir au volontaire de l'URL : sinon un jeune écrasait le
     // `status_equivalence` d'un tiers depuis sa propre URL (constat H54).
@@ -214,8 +221,6 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
       missionDuration = PHASE2_TOTAL_HOURS;
     }
 
-    delete value.id;
-    delete value.idEquivalence;
     equivalence.set({
       ...value,
       missionDuration: boundMissionDuration(missionDuration, isYoung),
