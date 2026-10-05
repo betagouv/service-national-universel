@@ -8,7 +8,6 @@ import { maintenance } from "../../config";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
 import Header from "./components/header";
-import UnavailabilityBanner from "./components/unavailabilityBanner";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
 import { formatToActualTime, ERRORS, isInternalRedirectUrl, translate } from "snu-lib";
@@ -47,8 +46,6 @@ export default function Signin() {
             <h2 className="mb-8 text-base font-normal text-brand-grey">
               Plateforme à destination des modérateurs, des référents, des chefs de centre, des responsable de structure, des transporteurs et des superviseurs
             </h2>
-
-            <UnavailabilityBanner />
 
             {maintenance && !localStorage?.getItem("override_maintenance") ? (
               <div className="m-4 flex items-center">
