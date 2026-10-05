@@ -19,7 +19,7 @@
 import request from "supertest";
 import { Types } from "mongoose";
 
-import { ROLES, YOUNG_STATUS } from "snu-lib";
+import { ERRORS, ROLES, YOUNG_STATUS } from "snu-lib";
 
 import { ReferentModel, YoungModel } from "../models";
 import { deleteFile } from "../utils";
@@ -122,6 +122,7 @@ describe("H22/H23 — périmètre des demandes de correction", () => {
         .send([{ cohort: "Juillet 2023", field: "cniFile", reason: "UNREADABLE", message: "", status: "PENDING" }]);
 
       expect(res.statusCode).toEqual(403);
+      expect(deleteFile).not.toHaveBeenCalled();
       expect((await getYoungByIdHelper(young._id))?.status).toEqual(YOUNG_STATUS.WAITING_VALIDATION);
     });
 
@@ -211,6 +212,7 @@ describe("H22/H23 — périmètre des demandes de correction", () => {
           .send(corps(reason));
 
         expect(res.statusCode).toEqual(403);
+        expect(res.body.code).toEqual(ERRORS.OPERATION_UNAUTHORIZED);
         expect(deleteFile).not.toHaveBeenCalled();
         expect(mockSendTemplate).not.toHaveBeenCalled();
         const apres = await getYoungByIdHelper(young._id);
@@ -250,7 +252,10 @@ describe("H22/H23 — périmètre des demandes de correction", () => {
 
       expect(res.statusCode).toEqual(200);
       expect(deleteFile).toHaveBeenCalledTimes(2);
-      expect((await getYoungByIdHelper(young._id))?.files.cniFiles).toHaveLength(0);
+      const apres = await getYoungByIdHelper(young._id);
+      expect(apres?.files.cniFiles).toHaveLength(0);
+      expect(apres?.status).toEqual(YOUNG_STATUS.WAITING_CORRECTION);
+      expect(apres?.correctionRequests?.find((r) => r.field === "cniFile")).toEqual(expect.objectContaining({ reason: "UNREADABLE", status: "SENT" }));
     });
   });
 
