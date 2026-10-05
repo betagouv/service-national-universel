@@ -50,7 +50,7 @@ describe.each(ROLES_STRUCTURE)("transitions de candidature du rôle %s", (role) 
     );
   });
 
-  it("garde le refus suivi d'une nouvelle validation", () => {
+  it("garde le refus d'une candidature du volontaire (sans marqueur) suivi d'une nouvelle validation", () => {
     const apresRefus = atteignables(role, APPLICATION_STATUS.REFUSED);
     expect(apresRefus).toContain(APPLICATION_STATUS.VALIDATED);
     expect(apresRefus).toContain(APPLICATION_STATUS.DONE);

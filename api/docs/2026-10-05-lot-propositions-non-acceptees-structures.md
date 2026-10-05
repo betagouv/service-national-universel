@@ -38,6 +38,11 @@ mission) :
 - levé quand le volontaire accepte (`WAITING_VALIDATION`, `WAITING_VERIFICATION`) ou quand un
   administrateur ou un référent territorial engage la candidature (`VALIDATED`, `IN_PROGRESS`, `DONE`).
 
+Les candidatures déjà `REFUSED` ou `CANCEL` au déploiement n'ont jamais traversé le hook : la migration
+`api/migrations/20261005120000-rattrapage-propositions-non-acceptees.js` (section 6) leur pose le marqueur
+d'après l'historique de leurs statuts. La règle « une proposition non acceptée n'ouvre rien à la
+structure, quel que soit son statut courant » vaut donc aussi pour l'existant.
+
 Le filtre commun `NOT_A_PROPOSAL` (`status != WAITING_ACCEPTATION` et `proposalNotAccepted != true`) est
 appliqué à :
 
@@ -60,9 +65,13 @@ appliqué à :
   montée pour elles.
 - **Marqueur plutôt que statut seul** : sans lui, une proposition annulée par le cron ou par le
   volontaire redevient indiscernable d'une candidature refusée.
-- **Comportement visible, commit séparé** (`visible : …`) : une structure ne voit plus dans ses listes
-  la candidature « Annulée » ou « Refusée » née d'une proposition non acceptée. Les candidatures du
-  volontaire lui-même, même refusées ou annulées, restent visibles.
+- **Comportement visible, commits séparés** (`visible : …`) : une structure ne voit plus dans ses listes
+  la candidature « Annulée » ou « Refusée » née d'une proposition non acceptée, y compris celles qui
+  existaient avant le marqueur (migration, section 6). Les candidatures du volontaire lui-même, même
+  refusées ou annulées, restent visibles.
+- **Rattrapage par migration** plutôt que par un script à lancer : `runMigrations()` la joue au
+  démarrage de l'api, elle est rejouable, et le marqueur est ainsi posé avant que la structure ne
+  réécrive un statut.
 - `missionDuration` n'est pas borné pour les structures sur `PUT /application` : c'est la saisie des
   heures réalisées à `DONE`.
 
@@ -76,7 +85,8 @@ appliqué à :
 `api/src/anonymization/application.js`, `packages/lib/src/mongoSchema/application.ts`,
 `apiv2/src/admin/core/engagement/mission/ExportMission.service.ts`,
 `apiv2/src/admin/core/engagement/mission/ExporterMissionCanditatures.ts`,
-`apiv2/src/admin/infra/engagement/candidature/repository/mongo/CandidatureMongo.repository.ts`.
+`apiv2/src/admin/infra/engagement/candidature/repository/mongo/CandidatureMongo.repository.ts`,
+`api/migrations/20261005120000-rattrapage-propositions-non-acceptees.js` (nouveau).
 
 ## 5. Tests
 
@@ -93,15 +103,35 @@ appliqué à :
 - `contract.test.ts` : `POST /contract` sur une proposition non acceptée. `lot-p02-candidatures.test.ts`
   et `application-security.test.ts` : les cas qui attendaient qu'une structure crée une proposition
   attendent le refus.
+- `api/src/__tests__/application-proposition-pieces.test.ts` : périmètre des pièces de préparation
+  militaire (`isYoungInMilitaryPreparationStructureScope`, `GET /referent/youngFile/…`) et des pièces
+  jointes d'une candidature (`GET` et `POST /application/:id/file/…`) pour chaque statut de sortie d'une
+  proposition, chacun avec son témoin positif.
+- `api/src/__tests__/migrations/rattrapage-propositions-non-acceptees.test.ts` : la migration, sur des
+  lignes insérées sans hook avec leur historique de statuts (rattrapées, laissées en l'état, ordre des
+  patches, patch de création absent, lots, rejeu). Les invariants I1, I2 et I4 sont aussi vérifiés de
+  bout en bout sur ces lignes dans `application-proposition-non-acceptee.test.ts`.
 - apiv2 : `ExporterMissionCanditatures.propositions.spec.ts` et
   `test/admin/engagement/CandidatureMongo.repository.spec.ts` (base réelle).
 
 ## 6. Après déploiement
 
-- Déployer api, apiv2 et snu-lib ensemble (snu-lib est embarqué au build) ; aucune migration. Le champ
-  est mappé dynamiquement dans l'index ES `application` dès le premier document qui le porte.
-- Le marqueur est posé à partir du déploiement : une proposition encore en attente est marquée à sa
-  sortie (hook), mais les candidatures déjà `REFUSED` ou `CANCEL` ne sont pas reclassées. Pour les
-  repérer en lecture seule : candidatures `REFUSED` ou `CANCEL` dont l'historique de patches
-  (collection `application_patches`) montre un premier statut `WAITING_ACCEPTATION` et aucun passage par
-  `WAITING_VALIDATION` ni `WAITING_VERIFICATION`. Revue humaine avant de poser le marqueur.
+- Déployer api, apiv2 et snu-lib ensemble (snu-lib est embarqué au build). Le champ est mappé
+  dynamiquement dans l'index ES `application` dès le premier document qui le porte.
+- La migration `20261005120000-rattrapage-propositions-non-acceptees` tourne au démarrage de l'api
+  (`DO_MIGRATION`). Elle parcourt par `_id`, par lots, les candidatures `REFUSED` ou `CANCEL` non
+  marquées et pose `proposalNotAccepted` sur celles dont l'historique de statuts
+  (`application_patches`) :
+  - commence par `WAITING_ACCEPTATION` : la candidature est née d'une proposition ;
+  - ne passe par aucun de `WAITING_VALIDATION`, `WAITING_VERIFICATION`, `VALIDATED`, `IN_PROGRESS`,
+    `DONE` : le volontaire n'a jamais accepté, aucun référent n'a engagé la candidature ;
+  - aboutit au statut courant de la candidature.
+
+  Aucun statut n'est modifié. L'écriture passe par le pilote MongoDB (ni patch d'historique, ni hook) et
+  fait avancer `updatedAt` : le flux de modifications de Monstache répercute la ligne dans l'index
+  `application`. Le journal indique le nombre de candidatures examinées et marquées. Rejouable ; `down()`
+  ne retire rien.
+- Contrôle après déploiement : dans la collection `applications`, le nombre de lignes avec
+  `proposalNotAccepted: true` doit être égal au nombre marqué annoncé par le journal de la migration
+  (plus les propositions créées ou sorties depuis), et le même décompte doit se retrouver dans l'index
+  `application` une fois Monstache à jour.

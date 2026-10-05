@@ -8,7 +8,9 @@ import { APPLICATION_STATUS, ROLES } from "snu-lib";
  * du volontaire, ni sa candidature, ni aucun changement de statut. Le statut
  * seul ne suffit pas à la reconnaître : elle sort de WAITING_ACCEPTATION sans acceptation (annulation à
  * J+14, annulation de la mission, refus, décision du volontaire). Le marqueur `proposalNotAccepted` la
- * suit au-delà.
+ * suit au-delà. Les propositions déjà sorties de WAITING_ACCEPTATION avant l'introduction du marqueur
+ * le reçoivent de la migration `20261005120000-rattrapage-propositions-non-acceptees`, d'après
+ * l'historique de leurs statuts.
  */
 
 const { WAITING_ACCEPTATION, WAITING_VALIDATION, WAITING_VERIFICATION, VALIDATED, IN_PROGRESS, DONE, REFUSED, CANCEL } = APPLICATION_STATUS;
