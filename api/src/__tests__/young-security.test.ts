@@ -245,13 +245,26 @@ describe("Sécurité /young/:id/* — audit 2026-09-21 (lot 3)", () => {
   });
 
   describe("C17 — GET /young?email=", () => {
-    it("refuse un référent départemental hors de son département", async () => {
+    it("ne renvoie rien à un référent départemental hors de son département", async () => {
       const victim = await createYoungHelper(getNewYoungFixture({ ...youngSecrets, department: "Ain", region: "Auvergne-Rhône-Alpes" }));
       const attacker = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Nord"], region: "Hauts-de-France" }));
 
       const res = await request(await getAppHelperWithAcl(attacker, "referent")).get(`/young?email=${encodeURIComponent(victim.email!)}`);
 
-      expect(res.status).toBe(403);
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ ok: true, data: null });
+    });
+
+    it("PM21 — répond pareil pour un compte hors périmètre et une adresse inconnue (pas d'oracle d'existence)", async () => {
+      const victim = await createYoungHelper(getNewYoungFixture({ ...youngSecrets, department: "Ain", region: "Auvergne-Rhône-Alpes" }));
+      const attacker = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Nord"], region: "Hauts-de-France" }));
+      const app = await getAppHelperWithAcl(attacker, "referent");
+
+      const horsPerimetre = await request(app).get(`/young?email=${encodeURIComponent(victim.email!)}`);
+      const inconnu = await request(app).get(`/young?email=${encodeURIComponent("personne-pm21@example.org")}`);
+
+      expect(horsPerimetre.status).toBe(inconnu.status);
+      expect(horsPerimetre.body).toEqual(inconnu.body);
     });
 
     it("ne renvoie aucun secret au référent du bon département", async () => {

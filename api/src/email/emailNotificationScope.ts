@@ -10,8 +10,10 @@
  * pouvait lire l'historique — et le contenu — des mails de n'importe qui, y compris d'un ADMIN.
  *
  * Ce module rétablit le lien manquant entre l'adresse visée et le périmètre de l'appelant.
- * Les règles reprennent celles déjà appliquées aux annuaires correspondants :
- *   - référents : `buildReferentContext` (api/src/controllers/elasticsearch/referent.ts)
+ * Les règles reprennent celles déjà appliquées aux fiches et annuaires correspondants :
+ *   - référents : `isReferentReadableByUser` (api/src/referent/referentScope.ts), la règle de
+ *     lecture d'une fiche. Une table de rôles « visibles sans condition géographique » laissait
+ *     un référent départemental ou régional lire les mails des responsables de tout le pays (PM25).
  *   - jeunes    : `buildYoungContext` (api/src/controllers/elasticsearch/young.ts)
  * Une adresse ne peut donc pas donner accès à plus que la fiche de la personne elle-même.
  * Point clé : aucun de ces périmètres ne contient le rôle ADMIN, ce qui coupe la chaîne
@@ -20,39 +22,15 @@
  * Fail-closed : une adresse qui ne correspond à aucun jeune ni référent connu est refusée
  * (sinon la route resterait un oracle d'existence de compte).
  */
-import { ROLES, UserDto } from "snu-lib";
+import { ROLES, ReferentType, UserDto } from "snu-lib";
 
 import { ApplicationModel, ClasseModel, EtablissementModel, ReferentModel, SessionPhase1Model, StructureModel, YoungModel } from "../models";
+import { isReferentReadableByUser } from "../referent/referentScope";
 
 const norm = (email: string) => email.trim().toLowerCase();
 
 /** `UserDto.department` est typé `string | string[]` selon les comptes : on normalise. */
 const toDepartments = (value?: string | string[] | null): string[] => (Array.isArray(value) ? value : value ? [value] : []);
-
-/** Rôles que l'appelant peut voir sans condition géographique, à l'image de `buildReferentContext`. */
-const REFERENT_ROLES_VISIBLE_BY: Partial<Record<string, string[]>> = {
-  [ROLES.REFERENT_REGION]: [
-    ROLES.REFERENT_REGION,
-    ROLES.SUPERVISOR,
-    ROLES.RESPONSIBLE,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.ADMINISTRATEUR_CLE,
-    ROLES.REFERENT_CLASSE,
-  ],
-  [ROLES.REFERENT_DEPARTMENT]: [
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.REFERENT_REGION,
-    ROLES.SUPERVISOR,
-    ROLES.RESPONSIBLE,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.ADMINISTRATEUR_CLE,
-    ROLES.REFERENT_CLASSE,
-  ],
-};
 
 function shareDepartment(userDepartments: string[] = [], departments: (string | undefined | null)[] = []): boolean {
   const target = departments.filter(Boolean) as string[];
@@ -73,49 +51,11 @@ async function getStructureIds(user: UserDto): Promise<string[]> {
   return ids.length ? ids : [String(user.structureId)];
 }
 
-async function isReferentInScope(user: UserDto, target: { _id: any; role?: string | null; region?: string | null; department?: string[] | null; structureId?: string | null }) {
-  // Un ADMIN n'est dans le périmètre de personne d'autre qu'un ADMIN (cf. `buildReferentContext`).
+async function isReferentInScope(user: UserDto, target: ReferentType) {
+  // Un ADMIN n'est dans le périmètre de personne d'autre qu'un ADMIN : un compte admin peut porter une
+  // région ou un département, la règle géographique de la fiche ne suffit donc pas à l'exclure.
   if (!target.role || target.role === ROLES.ADMIN) return false;
-
-  const visibleRoles = REFERENT_ROLES_VISIBLE_BY[user.role];
-  if (visibleRoles) {
-    if (visibleRoles.includes(target.role)) return true;
-    // Pour un référent régional, les référents départementaux et les visiteurs sont limités à sa région.
-    if (user.role === ROLES.REFERENT_REGION && [ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR].includes(target.role)) {
-      return !!user.region && target.region === user.region;
-    }
-    return false;
-  }
-
-  if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) {
-    const etablissementIds = user.role === ROLES.ADMINISTRATEUR_CLE ? await getEtablissementIds(user) : [];
-    if (user.role === ROLES.REFERENT_CLASSE) {
-      const classes = await ClasseModel.find({ referentClasseIds: user._id }, { etablissementId: 1 }).lean();
-      etablissementIds.push(...classes.map((classe) => classe.etablissementId).filter(Boolean));
-    }
-    if (!etablissementIds.length) return false;
-
-    const etablissements = await EtablissementModel.find({ _id: { $in: etablissementIds } }, { department: 1, referentEtablissementIds: 1, coordinateurIds: 1 }).lean();
-    const classes = await ClasseModel.find({ etablissementId: { $in: etablissementIds } }, { referentClasseIds: 1 }).lean();
-
-    const referentIds = new Set<string>([
-      ...etablissements.flatMap((etablissement) => [...(etablissement.referentEtablissementIds || []), ...(etablissement.coordinateurIds || [])]),
-      ...classes.flatMap((classe) => classe.referentClasseIds || []),
-    ]);
-    if (referentIds.has(target._id.toString())) return true;
-
-    // Les référents départementaux du département de l'établissement restent joignables.
-    const departments = etablissements.map((etablissement) => etablissement.department);
-    return target.role === ROLES.REFERENT_DEPARTMENT && shareDepartment(target.department || [], departments);
-  }
-
-  if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
-    if (![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(target.role)) return false;
-    const structureIds = await getStructureIds(user);
-    return !!target.structureId && structureIds.includes(String(target.structureId));
-  }
-
-  return false;
+  return isReferentReadableByUser(user, target);
 }
 
 async function isYoungInScope(
@@ -174,9 +114,11 @@ export async function isEmailInUserScope(user: UserDto, email: string): Promise<
   const target = norm(email);
   if (user.email && norm(user.email) === target) return true;
 
-  const referents = await ReferentModel.find({ email: target }, { role: 1, region: 1, department: 1, structureId: 1 }).lean();
+  // Projection élargie aux champs dont `getReferentGeography` déduit le territoire d'un compte sans
+  // région ni département (centre de cohésion, session).
+  const referents = await ReferentModel.find({ email: target }, { role: 1, region: 1, department: 1, structureId: 1, cohesionCenterId: 1, sessionPhase1Id: 1 }).lean();
   for (const referent of referents) {
-    if (await isReferentInScope(user, referent)) return true;
+    if (await isReferentInScope(user, referent as ReferentType)) return true;
   }
 
   const youngs = await YoungModel.find(

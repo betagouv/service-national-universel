@@ -4,6 +4,8 @@ import { ROLES } from "snu-lib";
 import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { getNewReferentFixture } from "./fixtures/referent";
+import getNewStructureFixture from "./fixtures/structure";
+import { StructureModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES } from "snu-lib";
@@ -369,7 +371,7 @@ describe("H24/H25/H70 — index referent", () => {
 
   it("H24 — /referent/team/export ne renvoie aucun secret", async () => {
     const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Bretagne" } as any);
-    const res = await request(app).post("/elasticsearch/referent/team/export").send({ filters: {} });
+    const res = await request(app).post("/elasticsearch/referent/team/export?tab=region").send({ filters: {} });
     expect(res.status).toBe(200);
     expect(leakedSecrets(res.body, REFERENT_SECRETS)).toEqual([]);
   });
@@ -461,5 +463,148 @@ describe("PH9 — POST /elasticsearch/young/:action(search|export) refuse un fil
     // RESPONSIBLE n'a de toute façon aucun périmètre d'établissement sur cette route (C11) : 403,
     // pas 400 — le contrôle d'autorisation passe avant le contrôle de filtre masqué.
     expect(res.status).toBe(403);
+  });
+});
+
+describe("GOO-46 — annuaire « Utilisateurs » d'un référent départemental", () => {
+  /** Valeurs `structureId.keyword` du périmètre poussé à ES pour les responsables / superviseurs. */
+  const structureIdsInQuery = (query: any = lastMsearchQuery()): string[] => {
+    const found: string[] = [];
+    const walk = (node: any) => {
+      if (!node || typeof node !== "object") return;
+      if (Array.isArray(node)) return node.forEach(walk);
+      if (Array.isArray(node.terms?.["structureId.keyword"])) found.push(...node.terms["structureId.keyword"]);
+      Object.values(node).forEach(walk);
+    };
+    walk(query);
+    return found;
+  };
+
+  let structure92: string, structureParis: string, teteDeReseauParis: string, structureNantes: string;
+
+  beforeAll(async () => {
+    await StructureModel.deleteMany({});
+    const teteDeReseau = await StructureModel.create({ ...getNewStructureFixture(), name: "Réseau national", department: "Paris", region: "Île-de-France" });
+    teteDeReseauParis = teteDeReseau._id.toString();
+    structure92 = (
+      await StructureModel.create({ ...getNewStructureFixture(), department: "Hauts-de-Seine", region: "Île-de-France", networkId: teteDeReseauParis })
+    )._id.toString();
+    structureParis = (await StructureModel.create({ ...getNewStructureFixture(), department: "Paris", region: "Île-de-France" }))._id.toString();
+    structureNantes = (await StructureModel.create({ ...getNewStructureFixture(), department: "Loire-Atlantique", region: "Pays de la Loire" }))._id.toString();
+  });
+
+  afterAll(async () => {
+    await StructureModel.deleteMany({});
+  });
+
+  beforeEach(() => {
+    setEsDocs(referentDoc());
+  });
+
+  it.each(["search", "export"])("référent du 92 (%s) : seuls les responsables des structures du 92", async (action) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Hauts-de-Seine"], region: "Île-de-France" } as any))
+      .post(`/elasticsearch/referent/${action}`)
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const ids = structureIdsInQuery(action === "export" ? mockEsCalls.search[mockEsCalls.search.length - 1].body : undefined);
+    expect(ids).toContain(structure92);
+    expect(ids).not.toContain(structureParis);
+    expect(ids).not.toContain(teteDeReseauParis);
+    expect(ids).not.toContain(structureNantes);
+  });
+
+  it("référent régional d'Île-de-France : toutes les structures de sa région, et elles seules", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, department: [], region: "Île-de-France" } as any))
+      .post("/elasticsearch/referent/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const ids = structureIdsInQuery();
+    expect(ids).toEqual(expect.arrayContaining([structure92, structureParis, teteDeReseauParis]));
+    expect(ids).not.toContain(structureNantes);
+  });
+
+  it("référent régional sans région : aucune structure", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, department: [], region: undefined } as any))
+      .post("/elasticsearch/referent/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(structureIdsInQuery()).toEqual([]);
+  });
+});
+
+describe("P11 — annuaires des référents (audit production 2026-09-25)", () => {
+  beforeEach(() => {
+    setEsDocs(referentDoc());
+  });
+
+  const referentSarthe = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
+  const referentPaysDeLaLoire = { role: ROLES.REFERENT_REGION, department: [], region: "Pays de la Loire" };
+
+  /** Toutes les clauses `terms` de la requête ES, aplaties en `{ champ: valeurs }`. */
+  const termsInQuery = (query: any = lastMsearchQuery()): Record<string, any[]> => {
+    const found: Record<string, any[]> = {};
+    const walk = (node: any) => {
+      if (!node || typeof node !== "object") return;
+      if (Array.isArray(node)) return node.forEach(walk);
+      if (node.terms) for (const [field, values] of Object.entries(node.terms)) found[field] = [...(found[field] || []), ...(values as any[])];
+      Object.values(node).forEach(walk);
+    };
+    walk(query);
+    return found;
+  };
+
+  describe("PM11 — POST /elasticsearch/referent/team/:action", () => {
+    it.each([
+      ["départemental", referentSarthe],
+      ["régional", referentPaysDeLaLoire],
+    ])("refuse au référent %s un appel sans onglet (toute la région, tous rôles confondus)", async (_label, actor) => {
+      const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...actor } as any);
+      for (const action of ["search", "export"]) {
+        const res = await request(app).post(`/elasticsearch/referent/team/${action}`).send({ filters: {} });
+        expect(res.status).toBe(400);
+      }
+      expect(mockEsCalls.msearch).toHaveLength(0);
+      expect(mockEsCalls.search).toHaveLength(0);
+    });
+
+    it("garde l'onglet département d'un référent départemental à l'échelle de sa région, limité aux référents départementaux", async () => {
+      const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...referentSarthe } as any);
+      const res = await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {} });
+      expect(res.status).toBe(200);
+      const terms = termsInQuery();
+      expect(terms["role.keyword"]).toEqual([ROLES.REFERENT_DEPARTMENT]);
+      expect(terms["region.keyword"]).toEqual(["Pays de la Loire"]);
+      expect(terms["department.keyword"]).toBeUndefined();
+    });
+
+    it("ignore `syze` et applique la taille validée", async () => {
+      const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...referentSarthe } as any);
+
+      await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {}, syze: 100000 });
+      expect(lastMsearchQuery().size).toBe(10);
+
+      await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {}, size: 50 });
+      expect(lastMsearchQuery().size).toBe(50);
+    });
+
+    it("refuse une taille au-delà du plafond", async () => {
+      const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...referentSarthe } as any);
+      const res = await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {}, size: 100000 });
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe("PL10 — champs de session du référent", () => {
+    it("ne restitue ni lastLogoutAt ni metadata dans l'annuaire", async () => {
+      setEsDocs(referentDoc({ lastLogoutAt: "2026-09-20T18:00:00.000Z", metadata: { isFirstInvitationPending: true, invitationType: "inscription" } }));
+      const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+        .post("/elasticsearch/referent/search")
+        .send({ filters: {} });
+      expect(res.status).toBe(200);
+      const source = res.body.responses[0].hits.hits[0]._source;
+      expect(source.email).toBe("claire.martin@example.org");
+      expect(source.lastLogoutAt).toBeUndefined();
+      expect(source.metadata).toBeUndefined();
+    });
   });
 });

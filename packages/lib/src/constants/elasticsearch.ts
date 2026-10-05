@@ -38,7 +38,9 @@ export const ES_YOUNG_SENSITIVE_FIELDS = [
   "parent2Inscription2023TokenExpiresAt",
 ];
 
-export const ES_REFERENT_SENSITIVE_FIELDS = [...ES_SENSITIVE_FIELDS_SHARED];
+// `lastLogoutAt` entre dans la signature des sessions et `metadata` porte l'état d'invitation :
+// la sérialisation Mongo (`serializeReferent`) retirait déjà le premier, l'annuaire ES non (PL10).
+export const ES_REFERENT_SENSITIVE_FIELDS = [...ES_SENSITIVE_FIELDS_SHARED, "lastLogoutAt", "metadata"];
 
 /**
  * Indexé par nom d'index ES. Les index qui ne portent pas de secret sont absents :
