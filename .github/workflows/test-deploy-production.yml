@@ -13,6 +13,11 @@ concurrency:
 env:
   PROD_ENV_NAME: production
 
+# Jeton GitHub en lecture seule par défaut : seul deploy_production peut pousser, et
+# donc déclencher un déploiement de production via deploy-production.
+permissions:
+  contents: read
+
 jobs:
   prepare:
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
@@ -24,6 +29,7 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Get matrices configuration
         id: config
@@ -54,12 +60,13 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.ref_name }}
+          persist-credentials: false
 
       - name: Run tests
-        uses: jenseng/dynamic-uses@v1
+        uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
+          with: '{"branch_name": ${{ toJSON(github.ref_name) }}}'
 
   changelog:
     # Après les tests : annoncer le contenu d'une release qui ne partira pas
@@ -72,14 +79,17 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Changelog
         id: changelog
         env:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.event.after }}
         run: |
-          devops/scripts/generate_changelog.sh "${{ github.event.before }}...${{ github.event.after }}" > CHANGELOG.md
+          devops/scripts/generate_changelog.sh "$BEFORE...$AFTER" > CHANGELOG.md
           cat CHANGELOG.md
           {
             echo 'changelog<<EOF'
@@ -88,7 +98,7 @@ jobs:
           } >> "$GITHUB_OUTPUT"
 
       - name: Post Changelog on slack
-        uses: slackapi/slack-github-action@v1.25.0
+        uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001 # v1.25.0
         with:
           channel-id: "#dev-release,#mr-robot"
           slack-message: "${{ steps.changelog.outputs.changelog }}"
@@ -97,16 +107,26 @@ jobs:
 
   deploy_production:
     needs: [test, changelog]
+    # Seul job du dépôt autorisé à pousser vers deploy-production. L'environnement
+    # « production » porte les secrets Clever de production et exige une approbation.
+    permissions:
+      contents: write
+    environment: production
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - uses: actions/checkout@v4
 
-      - name: Merge production in deploy-production
-        run: git push --force origin HEAD:deploy-production
+      # clever-tools 5 exige Node 24+ : on ne dépend pas du Node (ou de son absence) du runner.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
 
       - name: Install clever-tools
-        run: npm install -g clever-tools
+        run: npm install --global --ignore-scripts clever-tools@5.0.2
+
+      - name: Merge production in deploy-production
+        run: git push --force origin HEAD:deploy-production
 
       - name: Watch deployments
         env:

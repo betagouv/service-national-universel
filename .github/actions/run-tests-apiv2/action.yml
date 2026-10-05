@@ -16,6 +16,9 @@ runs:
       uses: actions/checkout@v4
       with:
         ref: ${{ inputs.branch_name }}
+        # Le jeton Git ne reste pas dans .git/config : le code de la branche et ses
+        # dependances n'ont pas a pouvoir pousser sur le depot.
+        persist-credentials: false
 
     - name: Use Node.js
       uses: actions/setup-node@v4
@@ -58,10 +61,17 @@ runs:
         restore-keys: |
           ${{ runner.os }}-nodemodules-
 
+    # Les scripts d'installation des dependances ne s'executent pas : un paquet npm
+    # compromis ne peut rien lancer pendant `npm ci`. Seuls les scripts dont le depot
+    # a besoin sont rejoues, nommement : les patches (postinstall racine) et la copie
+    # du DSFR (postinstall de app et admin).
     - name: Install packages
       if: steps.nm.outputs.fresh != 'true' && steps.cache-npm.outputs.cache-hit != 'true'
       shell: bash
-      run: npm ci
+      run: |
+        npm ci --ignore-scripts
+        npx --no-install patch-package
+        npm run copy:dsfr --workspace app --workspace admin
 
     # Le temoin permet au prochain job de ce runner de sauter cache et installation.
     - name: Mark node_modules as matching package-lock
