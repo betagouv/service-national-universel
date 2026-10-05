@@ -168,12 +168,11 @@ export async function resetLoginAttempts(model: Model<any>, userId: any): Promis
  * sont évalués ensemble, donc au-delà du plafond plus aucune requête ne peut matcher, quelle que soit
  * la concurrence.
  *
- * L'update passe par le driver natif : les hooks de mongoose-patch-history ne sont pas joués. Sur un
- * résultat vide (plafond atteint, code expiré, compte inconnu) ils lèvent (500 au lieu de 400, ce qui
- * distinguait ces cas), et sans `new` ils rattachent à un document quelconque un patch complet. Les
- * compteurs sont exclus de l'historique de patch, rien n'est perdu côté traçabilité. Les filtres ne
- * portent que des chaînes, nombres et dates : aucun cast mongoose n'est nécessaire. Le document est
- * relu après l'incrément pour que l'appelant travaille sur l'état courant.
+ * L'update passe par le driver natif : les hooks de mongoose-patch-history ne sont pas joués, car un
+ * résultat vide les fait lever. Les compteurs sont exclus de l'historique de patch, rien n'est perdu.
+ * Ni cast ni setters du schéma (`lowercase`, `trim`, ObjectId) ne s'appliquent au filtre : les
+ * appelants doivent fournir des valeurs déjà normalisées. `updatedAt` n'est pas modifié. Le document
+ * est relu après l'incrément pour que l'appelant travaille sur l'état courant.
  */
 async function consumeCodeAttempt(model: Model<any>, filter: Record<string, any>, attemptsField: string, max: number, expiresField: string, now: Date) {
   const result = await model.collection.findOneAndUpdate(
