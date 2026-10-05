@@ -68,45 +68,8 @@ jobs:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
           with: '{"branch_name": ${{ toJSON(github.ref_name) }}}'
 
-  changelog:
-    # Après les tests : annoncer le contenu d'une release qui ne partira pas
-    # induit le canal en erreur.
-    needs: test
-    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
-          persist-credentials: false
-
-      - name: Changelog
-        id: changelog
-        env:
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-          NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
-          BEFORE: ${{ github.event.before }}
-          AFTER: ${{ github.event.after }}
-        run: |
-          devops/scripts/generate_changelog.sh "$BEFORE...$AFTER" > CHANGELOG.md
-          cat CHANGELOG.md
-          {
-            echo 'changelog<<EOF'
-            cat CHANGELOG.md
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Post Changelog on slack
-        uses: slackapi/slack-github-action@6c661ce58804a1a20f6dc5fbee7f0381b469e001 # v1.25.0
-        with:
-          channel-id: "#dev-release,#mr-robot"
-          slack-message: "${{ steps.changelog.outputs.changelog }}"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
-
   deploy_production:
-    needs: [test, changelog]
+    needs: test
     # Seul job du dépôt autorisé à pousser vers deploy-production. L'environnement
     # « production » porte les secrets Clever de production et exige une approbation.
     permissions:
