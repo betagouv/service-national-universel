@@ -13,9 +13,10 @@ import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { addPermissionHelper } from "./helpers/permissions";
 import { PermissionModel } from "../models/permissions/permission";
-import { EmailModel, ReferentModel, YoungModel } from "../models";
+import { EmailModel, ReferentModel, StructureModel, YoungModel } from "../models";
 import getNewReferentFixture from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
+import getNewStructureFixture from "./fixtures/structure";
 import { REDACTED } from "../email/emailContent";
 
 const RESET_TOKEN = "TOKEN-DE-REINITIALISATION-DE-L-ADMIN";
@@ -61,6 +62,7 @@ beforeAll(async () => {
   await EmailModel.deleteMany({});
   await ReferentModel.deleteMany({});
   await YoungModel.deleteMany({});
+  await StructureModel.deleteMany({});
 
   // Seed identique à la prod (migrations 20250624122150 + 20250801060707) : aucune policy.
   await addPermissionHelper(
@@ -158,6 +160,46 @@ describe("Notifications mail — périmètre", () => {
   it("un référent régional d'une autre région n'accède pas à ce référent départemental", async () => {
     const autreRegion = { role: ROLES.REFERENT_REGION, region: "Normandie", department: ["Calvados"] };
     const res = await request(await getAppHelperWithAcl(autreRegion as any)).get(`/email?email=${referentDuDepartement.email}`);
+    expect(res.status).toBe(403);
+  });
+
+  it("PM25 — un référent départemental ne lit pas les notifications d'un responsable d'une structure hors de son territoire", async () => {
+    const structure = await StructureModel.create({ ...getNewStructureFixture(), department: "Gironde", region: "Nouvelle-Aquitaine" });
+    const responsable = await ReferentModel.create(
+      getNewReferentFixture({ role: ROLES.RESPONSIBLE, email: "responsable-gironde@example.org", structureId: structure._id.toString(), department: [], region: undefined }),
+    );
+    const app = await getAppHelperWithAcl(referentDepartement as any);
+
+    expect((await request(app).get(`/email?email=${responsable.email}`)).status).toBe(403);
+    expect((await request(app).post(`/elasticsearch/email/${responsable.email}/search`).send({})).status).toBe(403);
+  });
+
+  it("PM25 — un référent régional ne lit pas les notifications d'un référent départemental d'une autre région", async () => {
+    const autreDepartemental = await ReferentModel.create(
+      getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, email: "ref-dep-gironde@example.org", region: "Nouvelle-Aquitaine", department: ["Gironde"] }),
+    );
+    const referentRegion = { role: ROLES.REFERENT_REGION, region: REGION, department: [] };
+
+    const res = await request(await getAppHelperWithAcl(referentRegion as any)).get(`/email?email=${autreDepartemental.email}`);
+    expect(res.status).toBe(403);
+  });
+
+  it("PM25 — un référent départemental lit les notifications d'un responsable d'une structure de son département", async () => {
+    const structure = await StructureModel.create({ ...getNewStructureFixture(), department: DEPARTEMENT, region: REGION });
+    const responsable = await ReferentModel.create(
+      getNewReferentFixture({ role: ROLES.RESPONSIBLE, email: "responsable-morbihan@example.org", structureId: structure._id.toString(), department: [], region: undefined }),
+    );
+
+    const res = await request(await getAppHelperWithAcl(referentDepartement as any)).get(`/email?email=${responsable.email}`);
+    expect(res.status).toBe(200);
+  });
+
+  it("PM25 — un référent départemental ne lit pas les notifications d'un ADMIN, même rattaché à son département", async () => {
+    const adminDuDepartement = await ReferentModel.create(
+      getNewReferentFixture({ role: ROLES.ADMIN, email: "admin-morbihan@snu.gouv.fr", region: REGION, department: [DEPARTEMENT] }),
+    );
+
+    const res = await request(await getAppHelperWithAcl(referentDepartement as any)).get(`/email?email=${adminDuDepartement.email}`);
     expect(res.status).toBe(403);
   });
 
