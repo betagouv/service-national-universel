@@ -4,9 +4,17 @@ on:
   schedule:
     - cron: "0 14 * * 5"
 
+permissions:
+  contents: read
+
 jobs:
   release:
     name: Release
+    # semantic-release publie tags, release GitHub et commentaires.
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     strategy:
       matrix:
@@ -19,7 +27,7 @@ jobs:
           persist-credentials: false
 
       - name: Semantic Release
-        uses: cycjimmy/semantic-release-action@v2
+        uses: cycjimmy/semantic-release-action@5982a02995853159735cb838992248c4f0f16166 # v2
         with:
           semantic_version: 17
           extra_plugins: |

@@ -4,14 +4,18 @@ on:
   push:
     branches: [production_state]
 
+permissions:
+  contents: read
+
 jobs:
   mirror:
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Fetch Git LFS objects
         run: git lfs fetch --all
@@ -20,7 +24,7 @@ jobs:
         run: rm -rf .github
 
       - name: Mirroring
-        uses: pixta-dev/repository-mirroring-action@v1
+        uses: pixta-dev/repository-mirroring-action@674e65a7d483ca28dafaacba0d07351bdcc8bd75 # v1
         with:
           ssh_private_key: ${{ secrets.MIROIR_SSH_KEY }}
           target_repo_url: "git@github.com:selego/snu-mirror.git"
