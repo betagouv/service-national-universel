@@ -22,6 +22,7 @@ import { Types } from "mongoose";
 import { ROLES, YOUNG_STATUS } from "snu-lib";
 
 import { ReferentModel, YoungModel } from "../models";
+import { deleteFile } from "../utils";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -38,6 +39,11 @@ jest.mock("../brevo", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
+jest.mock("../utils", () => ({
+  ...jest.requireActual("../utils"),
+  deleteFile: jest.fn().mockResolvedValue(undefined),
+}));
+
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
 });
@@ -46,6 +52,7 @@ beforeEach(async () => {
   await ReferentModel.deleteMany();
   await YoungModel.deleteMany();
   mockSendTemplate.mockClear();
+  (deleteFile as jest.Mock).mockClear();
 });
 afterEach(resetAppAuth);
 
@@ -167,6 +174,83 @@ describe("H22/H23 — périmètre des demandes de correction", () => {
 
       expect(res.statusCode).toEqual(200);
       expect((await getYoungByIdHelper(young._id))?.status).toEqual(YOUNG_STATUS.WAITING_CORRECTION);
+    });
+  });
+
+  describe("POST /correction-request/:youngId — le contrôle du statut précède la suppression des pièces", () => {
+    const RAISONS = ["UNREADABLE", "OTHER", "NOT_SUITABLE"];
+
+    async function jeuneAvecPiecesEtReferent(status: string, role = ROLES.REFERENT_DEPARTMENT) {
+      const young = await createYoungHelper(
+        getNewYoungFixture({
+          department: "Paris",
+          region: "Île-de-France",
+          status,
+          files: {
+            cniFiles: [
+              { _id: new Types.ObjectId(), name: "recto.pdf", mimetype: "application/pdf", size: 10, category: "cniNew" },
+              { _id: new Types.ObjectId(), name: "verso.pdf", mimetype: "application/pdf", size: 10, category: "cniNew" },
+            ],
+          },
+          correctionRequests: DEMANDE_EN_COURS,
+        } as any),
+      );
+      const referent = await createReferentHelper(getNewReferentFixture({ role, department: ["Paris"], region: "Île-de-France" }));
+      return { young, referent };
+    }
+
+    const corps = (reason: string) => [{ cohort: "Juillet 2023", field: "cniFile", reason, message: "", status: "PENDING" }];
+
+    describe.each([YOUNG_STATUS.VALIDATED, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN])("dossier %s", (status) => {
+      it.each(RAISONS)("refuse la demande (raison %s) sans supprimer aucune pièce", async (reason) => {
+        const { young, referent } = await jeuneAvecPiecesEtReferent(status);
+        const idsAvant = young.files.cniFiles.map((f: any) => String(f._id));
+
+        const res = await request(await getAppHelperWithAcl(referent))
+          .post(`/correction-request/${young._id}`)
+          .send(corps(reason));
+
+        expect(res.statusCode).toEqual(403);
+        expect(deleteFile).not.toHaveBeenCalled();
+        expect(mockSendTemplate).not.toHaveBeenCalled();
+        const apres = await getYoungByIdHelper(young._id);
+        expect(apres?.status).toEqual(status);
+        expect(apres?.files.cniFiles.map((f: any) => String(f._id))).toEqual(idsAvant);
+        expect(apres?.correctionRequests).toHaveLength(DEMANDE_EN_COURS.length);
+      });
+    });
+
+    describe.each([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION])("dossier %s", (status) => {
+      it.each(RAISONS)("supprime toujours les pièces et enregistre la demande (raison %s)", async (reason) => {
+        const { young, referent } = await jeuneAvecPiecesEtReferent(status);
+
+        const res = await request(await getAppHelperWithAcl(referent))
+          .post(`/correction-request/${young._id}`)
+          .send(corps(reason));
+
+        expect(res.statusCode).toEqual(200);
+        expect(deleteFile).toHaveBeenCalledTimes(2);
+        for (const file of young.files.cniFiles) {
+          expect(deleteFile).toHaveBeenCalledWith(`app/young/${young._id}/cniFiles/${(file as any)._id}`);
+        }
+        const apres = await getYoungByIdHelper(young._id);
+        expect(apres?.status).toEqual(YOUNG_STATUS.WAITING_CORRECTION);
+        expect(apres?.files.cniFiles).toHaveLength(0);
+        expect(apres?.correctionRequests?.find((r) => r.field === "cniFile")).toEqual(expect.objectContaining({ reason, status: "SENT" }));
+      });
+    });
+
+    it("l'ADMIN garde la main sur un dossier validé : pièces supprimées et demande enregistrée", async () => {
+      const { young } = await jeuneAvecPiecesEtReferent(YOUNG_STATUS.VALIDATED);
+      const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+      const res = await request(await getAppHelperWithAcl(admin))
+        .post(`/correction-request/${young._id}`)
+        .send(corps("UNREADABLE"));
+
+      expect(res.statusCode).toEqual(200);
+      expect(deleteFile).toHaveBeenCalledTimes(2);
+      expect((await getYoungByIdHelper(young._id))?.files.cniFiles).toHaveLength(0);
     });
   });
 
