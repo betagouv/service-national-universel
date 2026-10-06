@@ -131,6 +131,19 @@ describe("Young", () => {
       expect(res.status).toBe(403);
     });
 
+    it("devrait renvoyer 200 pour l'attestation SNU d'un volontaire EXEMPTED de la phase 1 dont la phase 2 est VALIDATED", async () => {
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        statusPhase1: "EXEMPTED",
+        statusPhase2: "VALIDATED",
+        statusPhase2ValidatedAt: new Date(),
+      });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/snu`);
+
+      expect(res.status).toBe(200);
+    });
+
     it("devrait renvoyer 403 à l'envoi par mail de l'attestation phase 2 si statusPhase2 n'est pas VALIDATED, sans lancer de tâche", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase2: "IN_PROGRESS" });
 

@@ -50,13 +50,20 @@ export function isPdfDocumentAvailable(type: string, template: string): boolean 
 }
 
 // Chaque attestation ne sanctionne que la phase réellement terminée : phase 1 (DONE), phase 2
-// (VALIDATED), phase 3 (VALIDATED), et l'attestation SNU qui résume les phases 1 et 2.
+// (VALIDATED), phase 3 (VALIDATED), et l'attestation SNU qui résume les phases 1 et 2. Pour le
+// SNU, une phase 1 EXEMPTED compte comme terminée, comme partout ailleurs dans le dépôt
+// (hasValidatedPhase1 dans packages/lib/src/roles.ts, getAuthorizationToApply dans
+// api/src/application/applicationService.ts, equivalenceController.ts) : sinon un volontaire
+// dispensé de phase 1 qui valide sa phase 2 perdrait l'accès à son attestation SNU.
 export function isCertificateStatusValid(template: string, young: Pick<YoungType, "statusPhase1" | "statusPhase2" | "statusPhase3">): boolean {
   if (template === "1") return young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE;
   if (template === "2") return young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
   if (template === "3") return young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
-  if (template === "snu") return young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
-  return true;
+  if (template === "snu") {
+    const hasValidatedOrExemptedPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED;
+    return hasValidatedOrExemptedPhase1 && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  }
+  return false;
 }
 
 export async function generatePdfIntoStream(outStream, { type, template, young, contract }: { type: string; template: string; young?: YoungType; contract?: ContractType }) {
