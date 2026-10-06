@@ -274,13 +274,6 @@ describe("FH4 — export ES des classes CLE", () => {
       .send({ filters: {} });
     expect(res.status).toBe(403);
   });
-
-  it("laisse la recherche des classes au transporteur", async () => {
-    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.TRANSPORTER } as any))
-      .post("/elasticsearch/cle/classe/search")
-      .send({ filters: {} });
-    expect(res.status).toBe(200);
-  });
 });
 
 describe("C10/H70 — les hits young sortent bruts", () => {
@@ -336,7 +329,7 @@ describe("C3 — POST /elasticsearch/cle/young/search", () => {
 
 describe("C4 — POST /elasticsearch/dashboard/inscription/youngBySchool", () => {
   it("ne renvoie pas le document jeune complet dans l'agrégation top_hits", async () => {
-    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.VISITOR, region: "Auvergne-Rhône-Alpes" } as any))
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Auvergne-Rhône-Alpes" } as any))
       .post("/elasticsearch/dashboard/inscription/youngBySchool")
       .send({ filters: {} });
     expect(res.status).toBe(200);

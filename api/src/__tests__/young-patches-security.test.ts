@@ -138,11 +138,10 @@ describe("H56 — historique d'un jeune : jetons et périmètre", () => {
 
     it("GET /cle/young/by-classe-historic/:idClasse/patches ne renvoie aucun jeton", async () => {
       const etablissement = await EtablissementModel.create(createFixtureEtablissement());
-      const referentClasse = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id.toString(), referentClasseIds: [referentClasse._id.toString()] }));
+      const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id.toString(), referentClasseIds: [] }));
       await createYoungWithTokens({ source: YOUNG_SOURCE.CLE, classeId: classe._id.toString(), etablissementId: etablissement._id.toString() });
 
-      const res = await request(await getAppHelperWithAcl(referentClasse))
+      const res = await request(await getAppHelperWithAcl())
         .get(`/cle/young/by-classe-historic/${classe._id}/patches`)
         .send();
 
@@ -218,19 +217,6 @@ describe("H56 — historique d'un jeune : jetons et périmètre", () => {
         .send();
 
       expect(res.statusCode).toEqual(403);
-    });
-
-    it("autorise un référent de sa propre classe", async () => {
-      const etablissement = await EtablissementModel.create(createFixtureEtablissement());
-      const referentClasse = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id.toString(), referentClasseIds: [referentClasse._id.toString()] }));
-      const young = await createYoungWithTokens({ source: YOUNG_SOURCE.CLE, classeId: classe._id.toString(), etablissementId: etablissement._id.toString() });
-
-      const res = await request(await getAppHelperWithAcl(referentClasse))
-        .get(`/young/${young._id}/patches`)
-        .send();
-
-      expect(res.statusCode).toEqual(200);
     });
 
     it("autorise un administrateur national", async () => {

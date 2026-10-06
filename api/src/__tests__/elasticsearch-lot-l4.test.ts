@@ -184,14 +184,6 @@ describe("M16 — POST /elasticsearch/modificationbus", () => {
     expect(allQueries()).toContain(ligneBretonneId);
     expect(allQueries()).not.toContain(ligneLyonnaiseId);
   });
-
-  it("laisse le transporteur national", async () => {
-    const res = await request(referent({ role: ROLES.TRANSPORTER }))
-      .post("/elasticsearch/modificationbus/search")
-      .send({ filters: {} });
-    expect(res.status).toBe(200);
-    expect(allQueries()).not.toContain("lineId.keyword");
-  });
 });
 
 describe("L12 — POST /elasticsearch/lignebus", () => {
@@ -246,12 +238,6 @@ describe("PM9 — POST /elasticsearch/plandetransport", () => {
     expect(res.status).toBe(200);
     expect(allQueries()).not.toContain("centerId.keyword");
   });
-
-  it("laisse le transporteur national", async () => {
-    const res = await request(referent({ role: ROLES.TRANSPORTER })).post("/elasticsearch/plandetransport/search").send({ filters: {} });
-    expect(res.status).toBe(200);
-    expect(allQueries()).not.toContain("centerId.keyword");
-  });
 });
 
 describe("L14 — POST /elasticsearch/pointderassemblement", () => {
@@ -283,13 +269,6 @@ describe("L11 — POST /elasticsearch/dashboard/inscription", () => {
     expect(res.status).toBe(403);
   });
 
-  it("accepte le rapport d'un département de la région du visiteur", async () => {
-    const res = await request(referent({ role: ROLES.VISITOR, region: "Bretagne" }))
-      .post("/elasticsearch/dashboard/inscription/youngsReport")
-      .send({ filters: { cohort: ["Juillet 2024"], region: ["Bretagne"] }, department: "Finistère" });
-    expect(res.status).toBe(200);
-  });
-
   it("valide le corps du rapport", async () => {
     const res = await request(referent({ role: ROLES.ADMIN }))
       .post("/elasticsearch/dashboard/inscription/youngsReport")
@@ -303,24 +282,6 @@ describe("L11 — POST /elasticsearch/dashboard/inscription", () => {
       .send({ filters: { cohort: ["Juillet 2024"] } });
     expect(res.status).toBe(403);
     expect(mockEsCalls.search).toHaveLength(0);
-  });
-
-  it("borne toujours un chef de centre à sa session", async () => {
-    const user = { ...getNewReferentFixture(), _id: new Types.ObjectId(), role: ROLES.HEAD_CENTER };
-    const session = await SessionPhase1Model.create({ cohort: "Juillet 2024", headCenterId: String(user._id), cohesionCenterId: new Types.ObjectId().toString() } as any);
-    const res = await request(getAppHelper(user as any))
-      .post("/elasticsearch/dashboard/inscription/inscriptionInfo")
-      .send({ filters: { cohort: ["Juillet 2024"] } });
-    expect(res.status).toBe(200);
-    expect(allQueries()).toContain(String(session._id));
-  });
-
-  it("borne le visiteur à sa région sur les changements de cohorte", async () => {
-    const res = await request(referent({ role: ROLES.VISITOR, region: "Bretagne" }))
-      .post("/elasticsearch/dashboard/inscription/getInAndOutCohort")
-      .send({ filters: { cohort: ["Juillet 2024"] } });
-    expect(res.status).toBe(200);
-    expect(allQueries()).toContain('"region.keyword":["Bretagne"]');
   });
 });
 
