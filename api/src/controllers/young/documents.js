@@ -14,7 +14,7 @@ const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
 const mime = require("mime-types");
 const { scanFile } = require("../../utils/virusScanner");
-const { generatePdfIntoStream, isPdfDocumentAvailable } = require("../../utils/pdf-renderer");
+const { generatePdfIntoStream, isPdfDocumentAvailable, isCertificateStatusValid } = require("../../utils/pdf-renderer");
 const { getMimeFromFile, getMimeFromBuffer } = require("../../utils/file");
 
 const ALLOWED_DOCUMENT_MIME_TYPES = ["image/jpeg", "image/png", "application/pdf"];
@@ -38,6 +38,9 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
 
     await generatePdfIntoStream(res, { type, template, young });
   } catch (e) {
+    if (e.message === ERRORS.OPERATION_UNAUTHORIZED) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
@@ -63,7 +66,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     // Seuls les attestations et le contrat de mission s'envoient par mail (cf. youngSendDocumentEmailService).
     if (!isDocumentEmailAvailable(type, template)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const young = await YoungModel.findById(id).select({ region: 1, department: 1 }); // used by canSendFileByMailToYoung
+    const young = await YoungModel.findById(id).select({ region: 1, department: 1, statusPhase1: 1, statusPhase2: 1, statusPhase3: 1 }); // used by canSendFileByMailToYoung et isCertificateStatusValid
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // A young can only send to them their own documents.
@@ -72,6 +75,9 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     }
     if (isReferent(req.user) && !canSendFileByMailToYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+    if (type === "certificate" && !isCertificateStatusValid(template, young)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     let contract;
