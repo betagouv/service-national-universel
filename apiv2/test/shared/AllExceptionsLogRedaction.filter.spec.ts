@@ -77,6 +77,13 @@ describe("AllExceptionsFilter - URL journalisée sans jeton", () => {
         expect(JSON.stringify(captureMessage.mock.calls)).not.toContain(JETON_FACTICE);
     });
 
+    it("n'écrit pas le jeton de l'URL quand aucune route ne correspond (404)", async () => {
+        await request(app.getHttpServer()).post(`/plan-marketing/inexistant?token=${JETON_FACTICE}`).expect(404);
+
+        expect(JSON.stringify(loggerError.mock.calls)).not.toContain(JETON_FACTICE);
+        expect(JSON.stringify(captureMessage.mock.calls)).not.toContain(JETON_FACTICE);
+    });
+
     it("garde la route dans le journal pour le diagnostic", async () => {
         await request(app.getHttpServer()).post(`/plan-marketing/import/webhook?token=${JETON_FACTICE}`).expect(422);
 

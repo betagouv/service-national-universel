@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logge
 import { HttpArgumentsHost } from "@nestjs/common/interfaces";
 import { HttpAdapterHost } from "@nestjs/core";
 import * as Sentry from "@sentry/nestjs";
-import { redactUrl, redactValue } from "@snu/log-redaction";
+import { redactString, redactUrl, redactValue } from "@snu/log-redaction";
 import { HttpError } from "snu-lib";
 import { FunctionalException } from "../core/FunctionalException";
 import { CustomRequest } from "./CustomRequest";
@@ -91,11 +91,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
                 exception.description || ""
             } - ${stack}`;
         }
-        this.logger.error(log, caller);
+        this.logger.error(redactString(log), caller);
     }
 
     private getCurrentRoute(request: CustomRequest): string {
-        return request.route?.path ?? redactUrl(request.originalUrl, request.params);
+        const routePath = request.route?.path;
+        return routePath !== undefined ? String(routePath) : redactUrl(request.originalUrl ?? "", request.params);
     }
 
     private getCallerClassMethod = (error: Error) => {
