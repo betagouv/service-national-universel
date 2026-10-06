@@ -274,6 +274,14 @@ describe("FH4 — export ES des classes CLE", () => {
       .send({ filters: {} });
     expect(res.status).toBe(403);
   });
+
+  it("refuse la recherche des classes au transporteur, rôle décommissionné", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.TRANSPORTER } as any))
+      .post("/elasticsearch/cle/classe/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+    expect(mockEsCalls.search).toHaveLength(0);
+  });
 });
 
 describe("C10/H70 — les hits young sortent bruts", () => {
