@@ -99,6 +99,11 @@ function serializeReferents(body) {
   return serializeHits(body, omit([...ES_REFERENT_SENSITIVE_FIELDS, "__v"]));
 }
 
+/** Référents cités dans une fiche de consultation : identité et état du compte, aucune coordonnée. */
+function serializeReferentNames(docs) {
+  return serializeHits(docs, ({ _id, firstName, lastName, state }) => ({ _id, firstName, lastName, ...(state ? { state } : {}) }));
+}
+
 function serializeApplications(body) {
   return serializeHits(body, (hit) => hit);
 }
@@ -110,6 +115,7 @@ module.exports = {
   serializeYoungs,
   serializeStructures,
   serializeReferents,
+  serializeReferentNames,
   serializeApplications,
   serializeHits,
 };

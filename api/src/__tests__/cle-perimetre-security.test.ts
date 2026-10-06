@@ -129,14 +129,12 @@ describe("Périmètre CLE — audit 2026-09-21", () => {
       expect(observes).toEqual(tousRefuses(attaquants));
     }, 60000);
 
-    it("autorise le chef d'établissement sur son établissement", async () => {
+    it("refuse le chef d'établissement sur son établissement, rôle décommissionné", async () => {
       const { etablissement, chef } = await createEtablissementComplet();
 
       const res = await request(await getAppHelperWithAcl(chef)).get(`/cle/etablissement/${etablissement._id}`);
 
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.data.referents).toHaveLength(1);
-      expect(res.body.data.coordinateurs).toHaveLength(1);
+      expect(res.statusCode).toEqual(403);
     }, 30000);
 
     it("autorise le référent départemental du département de l'établissement", async () => {
@@ -148,12 +146,12 @@ describe("Périmètre CLE — audit 2026-09-21", () => {
       expect(res.statusCode).toEqual(200);
     }, 30000);
 
-    it("autorise le référent de classe sur l'établissement de sa classe", async () => {
+    it("refuse le référent de classe sur l'établissement de sa classe, rôle décommissionné", async () => {
       const { etablissement, referentClasse } = await createEtablissementComplet();
 
       const res = await request(await getAppHelperWithAcl(referentClasse)).get(`/cle/etablissement/${etablissement._id}`);
 
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(403);
     }, 30000);
 
     it("autorise l'admin sur n'importe quel établissement, sans secret", async () => {
@@ -339,14 +337,20 @@ describe("Périmètre CLE — audit 2026-09-21", () => {
       expect(observes).toEqual(tousRefuses(attaquants));
     }, 60000);
 
-    it("autorise le référent de la classe, le chef d'établissement et le référent départemental du territoire", async () => {
+    it("autorise le référent départemental du territoire et l'admin, refuse le référent de classe et le chef d'établissement (rôles décommissionnés)", async () => {
       const { classe, chef, referentClasse } = await createEtablissementComplet();
       await YoungModel.create(getNewYoungFixture({ classeId: classe._id.toString() }));
       const referentDep = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));
+      const admin = await ReferentModel.create(getNewReferentFixture({ role: ROLES.ADMIN }));
 
-      for (const user of [referentClasse, chef, referentDep]) {
+      for (const [user, attendu] of [
+        [referentDep, 200],
+        [admin, 200],
+        [referentClasse, 403],
+        [chef, 403],
+      ] as const) {
         const res = await request(await getAppHelperWithAcl(user)).get(`/cle/young/by-classe-stats/${classe._id}`);
-        expect([user.role, res.statusCode]).toEqual([user.role, 200]);
+        expect([user.role, res.statusCode]).toEqual([user.role, attendu]);
       }
     }, 30000);
   });

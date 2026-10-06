@@ -20,7 +20,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
             filter: [
               { terms: { "schoolId.keyword": schoolsIds } },
               req.user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "department.keyword": req.user.department } } : null,
-              [ROLES.REFERENT_REGION, ROLES.VISITOR].includes(req.user.role) ? { term: { "region.keyword": req.user.region } } : null,
+              req.user.role === ROLES.REFERENT_REGION ? { term: { "region.keyword": req.user.region } } : null,
               queryFilters.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
               queryFilters.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             ].filter(Boolean),
@@ -72,7 +72,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // Context filters
     let contextFilters = [];
-    if ([ROLES.REFERENT_REGION, ROLES.VISITOR].includes(req.user.role)) contextFilters.push({ term: { "region.keyword": req.user.region } });
+    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
     if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "departmentName.keyword": req.user.department } });
 
     // Build request body

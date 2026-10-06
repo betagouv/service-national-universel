@@ -7,6 +7,7 @@ const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
+const { serializeReferentNames } = require("../../utils/es-serializer");
 const { canViewSejourHistory, getGeoScopeEsFilter } = require("../../services/sejourAccess");
 
 /**
@@ -187,7 +188,7 @@ const populateWithHeadCenter = async (sessionphase1) => {
   const headCenterIds = [...new Set(sessionphase1.map((item) => item._source.headCenterId).filter((e) => e))];
   if (headCenterIds.length > 0) {
     // --- fill headCenter
-    const headCenters = await allRecords("referent", { ids: { values: headCenterIds } });
+    const headCenters = serializeReferentNames(await allRecords("referent", { ids: { values: headCenterIds } }, esClient, ["_id", "firstName", "lastName"]));
     sessionphase1 = sessionphase1.map((item) => ({ ...item, _source: { ...item._source, headCenter: headCenters.find((e) => e._id === item._source.headCenterId) } }));
   }
   return sessionphase1;
