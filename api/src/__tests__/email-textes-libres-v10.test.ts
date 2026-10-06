@@ -172,6 +172,8 @@ describe.each([
       const application: any = await ApplicationModel.create({
         ...getNewApplicationFixture(),
         missionName: name,
+        youngFirstName: name,
+        youngLastName: name,
         tutorId: referent._id.toString(),
         status: APPLICATION_STATUS.WAITING_VALIDATION,
       });
@@ -187,6 +189,8 @@ describe.each([
 
       const params = paramsOf(SENDINBLUE_TEMPLATES.referent.APPLICATION_REMINDER);
       check(params.missionName);
+      check(params.youngFirstName);
+      check(params.youngLastName);
       expect(params.cta).toMatch(/\/volontaire\//);
     });
   });
@@ -220,7 +224,14 @@ describe.each([
       const referent = await tutor();
       const mission = await MissionModel.create({ ...getNewMissionFixture(), name, tutorId: referent._id.toString() } as any);
       const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED } as any));
-      const application = await ApplicationModel.create({ ...getNewApplicationFixture(), missionId: mission._id.toString(), youngId: young._id.toString(), status });
+      const application = await ApplicationModel.create({
+        ...getNewApplicationFixture(),
+        missionId: mission._id.toString(),
+        youngId: young._id.toString(),
+        youngFirstName: name,
+        youngLastName: name,
+        status,
+      });
 
       await sendNotificationsByStatus(application as any, young as any, status);
 
@@ -232,6 +243,8 @@ describe.each([
             : SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION;
       const params = paramsOf(templateId);
       check(params.missionName);
+      check(params.youngFirstName);
+      check(params.youngLastName);
     });
   });
 
