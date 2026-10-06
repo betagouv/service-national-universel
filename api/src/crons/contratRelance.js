@@ -4,6 +4,7 @@ const { ContractModel } = require("../models");
 const { SENDINBLUE_TEMPLATES } = require("snu-lib");
 const { config } = require("../config");
 const { sendTemplate } = require("../brevo");
+const { sanitizeEmailParams } = require("../email/emailInput");
 const { getReferentManagerPhase2 } = require("../utils");
 
 const trigger = async () => {
@@ -23,12 +24,15 @@ const trigger = async () => {
       countContractNotified++;
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.CONTRACT_DRAFT, {
         emailTo: emailTo,
-        params: {
-          youngFirstName: contract?.youngFirstName,
-          youngLastName: contract?.youngLastName,
-          missionName: contract?.missionName,
-          cta: `${config.ADMIN_URL}/volontaire/${contract.youngId}/phase2/application/${contract.applicationId}/contrat`,
-        },
+        params: sanitizeEmailParams(
+          {
+            youngFirstName: contract?.youngFirstName,
+            youngLastName: contract?.youngLastName,
+            missionName: contract?.missionName,
+            cta: `${config.ADMIN_URL}/volontaire/${contract.youngId}/phase2/application/${contract.applicationId}/contrat`,
+          },
+          ["youngFirstName", "youngLastName", "missionName"],
+        ),
       });
     }
   });

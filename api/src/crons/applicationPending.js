@@ -1,6 +1,7 @@
 const { capture } = require("../sentry");
 const { ApplicationModel, ReferentModel } = require("../models");
 const { sendTemplate } = require("../brevo");
+const { sanitizeEmailText } = require("../email/emailInput");
 const slack = require("../slack");
 const { SENDINBLUE_TEMPLATES, ReferentStatus } = require("snu-lib");
 const { config } = require("../config");
@@ -37,7 +38,7 @@ exports.handler = async () => {
             cta: `${config.ADMIN_URL}/volontaire/${application.youngId}`,
             youngFirstName: application.youngFirstName,
             youngLastName: application.youngLastName,
-            missionName: application.missionName,
+            missionName: sanitizeEmailText(application.missionName),
           },
         });
       }
