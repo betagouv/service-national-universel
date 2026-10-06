@@ -18,7 +18,10 @@ export class EmailConsumer extends WorkerHost {
 
     @SentryExceptionCaptured()
     async process(job: Job<EmailParams, any, EmailTemplate>): Promise<ConsumerResponse> {
-        this.logger.log(`Sending email template "${job.name}" to ${JSON.stringify(job.data?.to)}`, EmailConsumer.name);
+        this.logger.log(
+            `Sending email template "${job.name}" to ${job.data?.to?.length ?? 0} recipient(s)`,
+            EmailConsumer.name,
+        );
         return this.emailProvider
             .send(job.name, job.data)
             .then(() => {

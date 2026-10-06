@@ -3,7 +3,6 @@ import { HttpArgumentsHost } from "@nestjs/common/interfaces";
 import { HttpAdapterHost } from "@nestjs/core";
 import * as Sentry from "@sentry/nestjs";
 import { redactUrl, redactValue } from "@snu/log-redaction";
-import { Router } from "express";
 import { HttpError } from "snu-lib";
 import { FunctionalException } from "../core/FunctionalException";
 import { CustomRequest } from "./CustomRequest";
@@ -95,24 +94,8 @@ export class AllExceptionsFilter implements ExceptionFilter {
         this.logger.error(log, caller);
     }
 
-    private getCurrentRoute(request: CustomRequest) {
-        try {
-            const router = request.app._router as Router;
-            const currentRoute = router.stack
-                .filter((layer) => {
-                    if (layer.route) {
-                        const path = layer.route?.path;
-                        const method = layer.route?.stack[0].method;
-                        const isMatchingPath = !!request.originalUrl.match(layer.regexp);
-                        return method === request.method && isMatchingPath;
-                    }
-                    return false;
-                })
-                .map((layer) => layer.route?.path)?.[0];
-            return currentRoute || request.originalUrl;
-        } catch (error) {
-            return request.originalUrl;
-        }
+    private getCurrentRoute(request: CustomRequest): string {
+        return request.route?.path ?? redactUrl(request.originalUrl, request.params);
     }
 
     private getCallerClassMethod = (error: Error) => {
