@@ -93,6 +93,8 @@ jobs:
     # Seul job à pousser : il force la branche deploy-ci.
     permissions:
       contents: write
+    # Porte les secrets Clever de l'environnement GitHub « ci ».
+    environment: ci
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
 
     steps:
