@@ -1,6 +1,5 @@
 import request from "supertest";
-import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
-import { sendTemplate } from "../brevo";
+import { ROLES, COHORTS, YOUNG_SOURCE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import * as fileUtils from "../utils/file";
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -17,8 +16,6 @@ import { createReferentHelper } from "./helpers/referent";
 import { getNewReferentFixture } from "./fixtures/referent";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
-import { createEtablissement } from "./helpers/etablissement";
-import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { ClasseModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
@@ -623,39 +620,6 @@ describe("Young", () => {
         .post("/young/" + young._id + "/email/" + validTemplate)
         .send({ message: "hello" });
       expect(res.statusCode).toEqual(200);
-    });
-    it("should return 200 when VALIDATED", async () => {
-      // @ts-ignore
-      sendTemplate.mockClear();
-      const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
-      // le jeune doit être rattaché à l'établissement de l'administrateur CLE : le périmètre est
-      // désormais vérifié en base (canEditYoungInScope), plus seulement par le rôle
-      const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [tutor._id.toString()] }));
-      const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id.toString() }));
-      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id.toString(), etablissementId: etablissement._id.toString() }));
-      const res = await request(await getAppHelperWithAcl(tutor))
-        .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`)
-        .send({ status: "VALIDATED" });
-      expect(res.statusCode).toEqual(200);
-      expect(sendTemplate).toHaveBeenCalledTimes(1);
-      expect(sendTemplate).toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, {
-        cc: [
-          { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
-          { name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email },
-        ],
-        emailTo: [{ email: young.email, name: `${young.firstName} ${young.lastName}` }],
-        params: {
-          cta: "http://localhost:8081",
-          firstName: young.firstName,
-          lastName: young.lastName,
-          link: undefined,
-          message: undefined,
-          missionName: undefined,
-          object: undefined,
-          structureName: undefined,
-          type_document: undefined,
-        },
-      });
     });
   });
 

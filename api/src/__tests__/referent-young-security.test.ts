@@ -2,13 +2,15 @@
  * Reproduction des constats de l'audit sécurité du 21/09/2026 — lot A1
  * « Dossier volontaire côté référent ».
  *
- * H63 PUT /referent/youngs                                     : validation/refus en masse sans contrôle de classe
  * H64 POST /referent/young/:id/refuse-military-preparation-files : tout RESPONSIBLE et tout REFERENT_REGION,
  *     sans lien avec le volontaire, peuvent refuser (et supprimer) ses pièces de préparation militaire
  * H67 GET /referent/young/:id                                  : périmètre limité au rôle, document brut (tokens)
  * L23 PUT /young/update_phase3/:young                          : `canEditYoung` seul, sans rattachement réel
  * FM13 PUT /referent/young/:id                                 : historique des statuts accepté tel quel du client (GOO-12)
  *      puis statuts, cohorte et affectation écrits sans borne de rôle (GOO-12 : FM13, FL2)
+ *
+ * H63 (PUT /referent/youngs) n'est plus testé ici : la route n'admet que les rôles CLE, décommissionnés
+ * (GOO-56). L23 se vérifie désormais sur le périmètre d'un référent départemental.
  */
 import request from "supertest";
 import { Types } from "mongoose";
@@ -322,32 +324,6 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
     }, 30000);
   });
 
-  describe("H63 — PUT /referent/youngs", () => {
-    it("refuse à un référent de classe le refus en masse de volontaires d'une autre classe", async () => {
-      const { young: victime } = await createYoungInClasse([new ObjectId().toString()]);
-      const attaquant = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-
-      const res = await request(await getAppHelperWithAcl(attaquant, "referent"))
-        .put("/referent/youngs")
-        .send({ youngIds: [victime._id.toString()], status: YOUNG_STATUS.REFUSED });
-
-      expect(res.status).toBe(403);
-      expect((await YoungModel.findById(victime._id))?.status).toBe(YOUNG_STATUS.WAITING_VALIDATION);
-    }, 30000);
-
-    it("autorise le référent de la classe du volontaire", async () => {
-      const attaquant = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      const { young } = await createYoungInClasse([attaquant._id.toString()]);
-
-      const res = await request(await getAppHelperWithAcl(attaquant, "referent"))
-        .put("/referent/youngs")
-        .send({ youngIds: [young._id.toString()], status: YOUNG_STATUS.REFUSED });
-
-      expect(res.status).toBe(200);
-      expect((await YoungModel.findById(young._id))?.status).toBe(YOUNG_STATUS.REFUSED);
-    }, 30000);
-  });
-
   describe("L23 — PUT /young/update_phase3/:young", () => {
     const payload = {
       phase3StructureName: "Structure",
@@ -358,9 +334,11 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
       phase3TutorPhone: "0102030405",
     };
 
-    it("refuse à un référent de classe la mise à jour de la phase 3 d'un volontaire d'une autre classe", async () => {
-      const { young: victime } = await createYoungInClasse([new ObjectId().toString()]);
-      const attaquant = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
+    it("refuse à un référent départemental la mise à jour de la phase 3 d'un volontaire hors de son territoire", async () => {
+      const victime = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE } as any));
+      const attaquant = await createReferentHelper(
+        getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: [AUTRE_TERRITOIRE.department], region: AUTRE_TERRITOIRE.region }),
+      );
 
       const res = await request(await getAppHelperWithAcl(attaquant, "referent"))
         .put(`/young/update_phase3/${victime._id}`)
@@ -370,9 +348,9 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
       expect((await YoungModel.findById(victime._id))?.phase3TutorEmail).not.toBe(payload.phase3TutorEmail);
     }, 30000);
 
-    it("autorise le référent de la classe du volontaire", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      const { young } = await createYoungInClasse([referent._id.toString()]);
+    it("autorise le référent départemental du territoire du volontaire", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE } as any));
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: [TERRITOIRE.department], region: TERRITOIRE.region }));
 
       const res = await request(await getAppHelperWithAcl(referent, "referent"))
         .put(`/young/update_phase3/${young._id}`)
