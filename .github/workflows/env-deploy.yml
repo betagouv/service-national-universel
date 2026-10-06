@@ -1,12 +1,22 @@
 name: Test Environment - Deploy
 
+# Les secrets Clever de l'environnement « recette » ne sont servis qu'aux runs de
+# `main` (règle de branche de l'environnement). Le workflow est donc toujours lu sur
+# `main` : `pull_request_target` plutôt que `pull_request` (dont la ref est
+# `refs/pull/N/merge` et dont le fichier de workflow vient de la PR), et un
+# déclenchement manuel lancé depuis `main` qui nomme la branche à déployer.
 on:
   workflow_dispatch:
-  pull_request:
+    inputs:
+      branch:
+        description: "Branche à déployer en recette"
+        required: true
+        type: string
+  pull_request_target:
     types: [ labeled, synchronize ]
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
+  group: ${{ github.workflow }}-${{ github.event.pull_request.head.ref || inputs.branch }}
   cancel-in-progress: true
 
 # Jeton GitHub en lecture seule par défaut ; chaque job déclare ce qu'il lui faut en plus.
@@ -16,8 +26,9 @@ permissions:
 env:
   # Noms de branche et SHA transmis au shell par variable d'environnement, jamais
   # interpolés dans un `run:` : un nom de branche peut contenir `$(...)`.
-  BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
-  SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+  BRANCH_NAME: ${{ github.event.pull_request.head.ref || inputs.branch }}
+  # Vide en déclenchement manuel : résolu plus bas sur la tête de la branche.
+  SHA: ${{ github.event.pull_request.head.sha }}
 
 jobs:
   deploy:
@@ -28,9 +39,12 @@ jobs:
     # Porte les secrets Clever de l'environnement GitHub « recette ».
     environment: recette
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    # PR d'un fork exclues : `pull_request_target` leur servirait les secrets, et Clever
+    # construit la branche du même nom sur ce dépôt, pas celle du fork.
     if: |
-      (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
-      (github.event_name=='workflow_dispatch' && github.ref_name != 'production' && github.ref_name != 'main')
+      (github.event_name=='pull_request_target' && contains(github.event.pull_request.labels.*.name, 'deploy') &&
+        github.event.pull_request.head.repo.full_name == github.repository) ||
+      (github.event_name=='workflow_dispatch' && inputs.branch != 'production' && inputs.branch != 'main')
 
     steps:
       # Les scripts qui reçoivent CLEVER_TOKEN/CLEVER_SECRET viennent de la branche par
@@ -49,6 +63,14 @@ jobs:
       - name: Install clever-tools
         run: npm install --global --ignore-scripts clever-tools@5.0.2
 
+      # Correspondance exacte sur la ref : `git ls-remote` filtre par suffixe.
+      - name: Resolve branch head
+        if: github.event_name=='workflow_dispatch'
+        run: |
+          sha=$(git ls-remote --heads origin | awk -v ref="refs/heads/$BRANCH_NAME" '$2 == ref { print $1 }')
+          [ -n "$sha" ] || { echo "Branche introuvable : $BRANCH_NAME" >&2; exit 1; }
+          echo "SHA=$sha" >> "$GITHUB_ENV"
+
       - name: Create and Start application
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
@@ -60,7 +82,7 @@ jobs:
       - name: Find Comment
         uses: peter-evans/find-comment@3eae4d37986fb5a8592848f6a574fdf654e61f9e # v3
         id: fc
-        if: github.event_name=='pull_request'
+        if: github.event_name=='pull_request_target'
         with:
           issue-number: ${{ github.event.pull_request.number }}
           comment-author: 'github-actions[bot]'
@@ -68,14 +90,14 @@ jobs:
 
       - name: Get environment name
         id: env
-        if: steps.fc.outputs.comment-id == ''
+        if: github.event_name=='pull_request_target' && steps.fc.outputs.comment-id == ''
         run: |
           name=$(./devops/scripts/cc-environment-name.sh "$BRANCH_NAME")
           echo "name: $name"
           echo "name=$name" >> "$GITHUB_OUTPUT"
 
       - name: Create comment
-        if: steps.fc.outputs.comment-id == ''
+        if: github.event_name=='pull_request_target' && steps.fc.outputs.comment-id == ''
         uses: peter-evans/create-or-update-comment@71345be0265236311c031f5c7866368bd1eff043 # v4
         with:
           issue-number: ${{ github.event.pull_request.number }}
