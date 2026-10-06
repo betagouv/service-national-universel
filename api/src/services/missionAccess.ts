@@ -203,12 +203,23 @@ const MISSION_MODERATED_FIELDS = [
   "city",
   "department",
   "region",
+  "country",
+  "location",
   "isMilitaryPreparation",
   "hebergement",
+  "hebergementPayant",
+  "format",
+  "period",
+  "subPeriod",
+  "domains",
+  "mainDomain",
+  "remote",
 ] as const;
 
 const BOOLEAN_STRING_FIELDS: readonly string[] = ["isMilitaryPreparation", "hebergement"];
 const DATE_FIELDS: readonly string[] = ["startAt", "endAt"];
+const ARRAY_FIELDS: readonly string[] = ["period", "subPeriod", "domains"];
+const OBJECT_FIELDS: readonly string[] = ["location"];
 
 /** Valeur comparable : une date en millisecondes, un drapeau absent vaut « false », un texte absent vaut "". */
 function normalizeModeratedValue(field: string, value: unknown): string {
@@ -218,6 +229,13 @@ function normalizeModeratedValue(field: string, value: unknown): string {
     return Number.isNaN(time) ? String(value) : String(time);
   }
   if (BOOLEAN_STRING_FIELDS.includes(field)) return String(value) === "true" ? "true" : "false";
+  // Un `String(tableau)` ou `String(objet)` ignore l'ordre ou le contenu (ex. deux tableaux
+  // distincts rendent la même chaîne "a,b") : ces champs se comparent via une sérialisation stable.
+  if (ARRAY_FIELDS.includes(field)) return JSON.stringify(Array.isArray(value) ? [...value].sort() : []);
+  if (OBJECT_FIELDS.includes(field)) {
+    const object = value as { lat?: unknown; lon?: unknown } | null | undefined;
+    return JSON.stringify({ lat: object?.lat ?? null, lon: object?.lon ?? null });
+  }
   return value === undefined || value === null ? "" : String(value);
 }
 
