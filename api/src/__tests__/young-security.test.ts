@@ -340,6 +340,7 @@ describe("Sécurité /young/:id/* — audit 2026-09-21 (lot 3)", () => {
         .send({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
 
       expect(res.status).toBe(403);
+      expect(res.body.code).toBe("OPERATION_UNAUTHORIZED");
       const untouched = await YoungModel.findById(young._id);
       expect(untouched?.statusMilitaryPreparationFiles).toBe(status);
     });
