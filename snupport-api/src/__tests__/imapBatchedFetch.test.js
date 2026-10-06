@@ -186,6 +186,18 @@ describe("Module.fetch — un email sans expéditeur ne bloque plus la boîte (E
   });
 });
 
+describe("Module.fetch — destinataire absent", () => {
+  it("ne met aucune adresse indéfinie dans copyRecipient quand l'en-tête To est absent", async () => {
+    FakeImap.reset([entry(1, "sansto", new Date(2026, 0, 2), { to: undefined })]);
+    makeOrganisation();
+
+    await moduleFetch();
+
+    expect(ingestedIds()).toEqual(["<sansto@ext.tld>"]);
+    expect(mockDb.messages[0].copyRecipient ?? []).not.toContain(undefined);
+  });
+});
+
 describe("Module.fetch — un lot normal est traité comme avant", () => {
   it("crée un ticket et un message par email, avec les mêmes champs, et avance lastFetch", async () => {
     FakeImap.reset([entry(1, "un", new Date(2026, 0, 2)), entry(2, "deux", new Date(2026, 0, 2), { to: { value: [{ address: "inscription@mail-support.snu.gouv.fr" }] } })]);
@@ -227,46 +239,30 @@ describe("Module.fetch — mémoire bornée en agrégat (E-5)", () => {
     expect(FakeImap.events.slice(0, secondFetch).filter((e) => e === "create")).toHaveLength(10);
   });
 
-  it("diffère sans les perdre les emails qui dépasseraient le budget d'octets d'un groupe, et lastFetch ne dépasse pas le dernier traité", async () => {
+  it("reprend dans le même cycle les emails qui dépasseraient le budget d'octets d'un groupe, même reçus le même jour", async () => {
     const MB = 1024 * 1024;
-    FakeImap.reset([bigEntry(1, "BIG1", new Date(2026, 0, 3, 9), 20 * MB), bigEntry(2, "BIG2", new Date(2026, 0, 4, 9), 20 * MB), bigEntry(3, "BIG3", new Date(2026, 0, 5, 9), 20 * MB)]);
+    const sameDay = new Date(2026, 0, 3, 9);
+    FakeImap.reset([bigEntry(1, "BIG1", sameDay, 20 * MB), bigEntry(2, "BIG2", sameDay, 20 * MB), bigEntry(3, "BIG3", sameDay, 20 * MB)]);
     const { imapConfig } = makeOrganisation();
 
     await moduleFetch();
 
-    expect(ingestedIds()).toEqual(["<BIG1@ext.tld>", "<BIG2@ext.tld>"]);
-    expect(imapConfig.lastFetch).toEqual(new Date(2026, 0, 4, 9));
-    expect(mockCaptured).toEqual([]);
-
-    // Cycle suivant : la recherche repart du jour du dernier traité et le message différé est ingéré.
-    FakeImap.reset([bigEntry(2, "BIG2", new Date(2026, 0, 4, 9), 1024), bigEntry(3, "BIG3", new Date(2026, 0, 5, 9), 20 * MB)]);
-    await moduleFetch();
-
-    expect(FakeImap.searchCalls[0]).toEqual(["ALL", ["SINCE", "JANUARY 04, 2026"]]);
+    expect(FakeImap.fetchCalls).toEqual([[1, 2, 3], [3]]);
     expect(ingestedIds()).toEqual(["<BIG1@ext.tld>", "<BIG2@ext.tld>", "<BIG3@ext.tld>"]);
     expect(imapConfig.lastFetch.getTime()).toBeGreaterThan(Date.now() - 60_000);
-  }, 30000);
-
-  it("plafonne le nombre d'emails par cycle : le reste est repris au cycle suivant, lastFetch s'arrête au dernier traité", async () => {
-    FakeImap.reset(Array.from({ length: 205 }, (_, i) => entry(i + 1, `m${i + 1}`, new Date(2026, 0, 2 + i, 10))));
-    const { imapConfig } = makeOrganisation();
-
-    await moduleFetch();
-
-    expect(ingestedIds()).toHaveLength(200);
-    expect(ingestedIds()).not.toContain("<m201@ext.tld>");
-    expect(imapConfig.lastFetch).toEqual(new Date(2026, 0, 2 + 199, 10));
     expect(mockCaptured).toEqual([]);
   }, 30000);
 
-  it("ne fait pas avancer lastFetch et alerte quand le plafond est atteint sans progrès de date possible", async () => {
+  it("ingère tous les emails d'un même jour au-delà de 200, sans bloquer la boîte", async () => {
     FakeImap.reset(Array.from({ length: 205 }, (_, i) => entry(i + 1, `m${i + 1}`, new Date(2026, 0, 1, 1, i % 60))));
     const { imapConfig } = makeOrganisation();
 
     await moduleFetch();
 
-    expect(imapConfig.lastFetch).toEqual(INITIAL_LAST_FETCH);
-    expect(mockCaptured).toHaveLength(1);
-    expect(mockCaptured[0]).toBeInstanceOf(Error);
+    expect(ingestedIds()).toHaveLength(205);
+    expect(ingestedIds()[204]).toBe("<m205@ext.tld>");
+    expect(Math.max(...FakeImap.fetchCalls.map((ids) => ids.length))).toBe(10);
+    expect(imapConfig.lastFetch.getTime()).toBeGreaterThan(Date.now() - 60_000);
+    expect(mockCaptured).toEqual([]);
   }, 30000);
 });

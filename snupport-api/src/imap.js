@@ -29,12 +29,10 @@ const regex = /\[#(\w+)\]/i;
 // de message forgé (PM50, audit du 25/09/2026).
 const MAX_MESSAGE_SIZE = 25 * 1024 * 1024;
 // Bornes de la relève : un groupe de messages téléchargés ensemble, leur budget d'octets cumulé
-// (>= MAX_MESSAGE_SIZE : un message acceptable tient toujours seul), les analyses simultanées et le
-// nombre de messages traités par cycle de 30 minutes (le reste est repris au cycle suivant).
+// (>= MAX_MESSAGE_SIZE : un message acceptable tient toujours seul) et les analyses simultanées.
 const MAX_BATCH_MESSAGES = 10;
 const MAX_BATCH_BYTES = 50 * 1024 * 1024;
 const PARSE_CONCURRENCY = 3;
-const MAX_MESSAGES_PER_CYCLE = 200;
 
 cron.schedule("*/30 * * * *", () => {
   try {
@@ -198,8 +196,8 @@ const Module = {
         try {
           const search = ["ALL", ["SINCE", formatMailDate(imapArray[i].lastFetch)]];
           const lastFetch = imapArray[i].lastFetch;
-          const { complete, lastDate } = await readMailsInBatches(imapArray[i], "INBOX", search, async (batch) => {
-            for (const { mail } of batch) {
+          await readMailsInBatches(imapArray[i], "INBOX", search, async (batch) => {
+            for (const mail of batch) {
               // Un email mal formé ne doit jamais arrêter la relève ni empêcher lastFetch d'avancer :
               // seul messageId (sans PII) est journalisé.
               try {
@@ -217,15 +215,7 @@ const Module = {
             }
           });
 
-          if (complete) {
-            imapArray[i].lastFetch = new Date();
-          } else if (lastDate && startOfDay(lastDate) > startOfDay(lastFetch)) {
-            // Cycle interrompu (plafond ou budget mémoire) : la recherche IMAP SINCE n'a qu'une
-            // granularité de jour, et addMessage dédoublonne par messageId.
-            imapArray[i].lastFetch = lastDate;
-          } else {
-            capture(new Error("relève IMAP interrompue sans progrès possible de lastFetch (trop de messages le même jour)"));
-          }
+          imapArray[i].lastFetch = new Date();
         } catch (e) {
           console.log("error fetching mail for imap config", imapArray[i]?.user);
           capture(e);
@@ -239,10 +229,6 @@ const Module = {
     }
   },
 };
-
-function startOfDay(date) {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
-}
 
 function formatMailDate(date = new Date()) {
   date = new Date(date.getTime());
@@ -276,7 +262,7 @@ function extractMailData(message) {
   data.date = message.date;
   data.copyRecipient = message.cc?.value?.map((recipient) => recipient.address);
   if (data.copyRecipient === undefined) data.copyRecipient = [];
-  data.copyRecipient = data.copyRecipient.concat(message.to?.value?.map((recipient) => recipient.address).filter((recipient) => recipient !== "contact@mail-support.snu.gouv.fr"));
+  data.copyRecipient = data.copyRecipient.concat((message.to?.value ?? []).map((recipient) => recipient.address).filter((recipient) => recipient !== "contact@mail-support.snu.gouv.fr"));
   return data;
 }
 
@@ -335,15 +321,13 @@ function readMailsInBatches(imapConfig, box, searchs = [], onBatch = async () =>
 
         imap.search(searchs, (err, results) => {
           if (err) return settleReject(err);
-          if (!results || !results.length) return settleResolve({ complete: true, lastDate: null });
+          if (!results || !results.length) return settleResolve();
 
-          const ids = results.slice(0, MAX_MESSAGES_PER_CYCLE);
-          let complete = ids.length === results.length;
-          let lastDate = null;
+          const ids = results;
 
           const finish = () => {
             imap.closeBox(() => imap.end());
-            settleResolve({ complete, lastDate });
+            settleResolve();
           };
 
           const fetchGroup = (start) => {
@@ -351,7 +335,7 @@ function readMailsInBatches(imapConfig, box, searchs = [], onBatch = async () =>
             const fetchResults = imap.fetch(ids.slice(start, start + MAX_BATCH_MESSAGES), { bodies: "", struct: true });
 
             fetchResults.on("message", (message) => {
-              const entry = { body: "", bytes: 0, oversized: false, deferred: group.deferring, date: null, mail: null };
+              const entry = { body: "", bytes: 0, oversized: false, deferred: group.deferring, mail: null };
               message.on("body", (stream) => {
                 stream.on("data", (chunk) => {
                   if (entry.oversized || entry.deferred) return;
@@ -372,9 +356,6 @@ function readMailsInBatches(imapConfig, box, searchs = [], onBatch = async () =>
                   group.bytes += chunk.length;
                   entry.body += chunk.toString("utf8");
                 });
-              });
-              message.once("attributes", (attrs) => {
-                entry.date = attrs?.date || null;
               });
               message.once("end", () => {
                 group.entries.push(entry);
@@ -404,17 +385,13 @@ function readMailsInBatches(imapConfig, box, searchs = [], onBatch = async () =>
                   });
                 }
 
-                await onBatch(treated.filter((entry) => entry.mail).map((entry) => ({ mail: entry.mail, date: entry.date })));
+                await onBatch(treated.filter((entry) => entry.mail).map((entry) => entry.mail));
 
-                const dated = treated.filter((entry) => entry.date);
-                if (dated.length) lastDate = dated[dated.length - 1].date;
-
-                if (treated.length < group.entries.length) {
-                  complete = false;
-                  console.log("relève IMAP : emails différés au prochain cycle (budget mémoire du groupe atteint) :", group.entries.length - treated.length);
-                  return finish();
-                }
-                if (start + MAX_BATCH_MESSAGES < ids.length) return fetchGroup(start + MAX_BATCH_MESSAGES);
+                // Les messages différés (budget d'octets du groupe atteint) sont repris dans le même
+                // cycle, en tête du groupe suivant : un message acceptable tient toujours seul.
+                const consumed = treated.length < group.entries.length ? treated.length : MAX_BATCH_MESSAGES;
+                if (consumed === 0) throw new Error("readMails: aucun message du groupe n'a pu être téléchargé dans le budget d'octets");
+                if (start + consumed < ids.length) return fetchGroup(start + consumed);
                 finish();
               } catch (e) {
                 settleReject(e);
@@ -440,7 +417,7 @@ function readMailsInBatches(imapConfig, box, searchs = [], onBatch = async () =>
 async function readMails(imapConfig, box, searchs = []) {
   const mails = [];
   await readMailsInBatches(imapConfig, box, searchs, async (batch) => {
-    for (const { mail } of batch) mails.push(mail);
+    mails.push(...batch);
   });
   return mails;
 }
