@@ -115,6 +115,17 @@ describe("Structure", () => {
         expect(await findByName(name)).toHaveLength(0);
       });
 
+      it("RESPONSIBLE crée une structure avec le drapeau « false » : créée sans le drapeau", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false" });
+        const name = uniqueName("Responsable formulaire");
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+          .post("/structure")
+          .send({ ...getNewStructureFixture(), name, isMilitaryPreparation: "false" });
+        expect(res.status).toBe(200);
+        const [created] = await findByName(name);
+        expect(created.isMilitaryPreparation).toBeUndefined();
+      });
+
       it("SUPERVISOR crée une antenne sans le champ : inchangé, rattachée à son réseau", async () => {
         const network = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "true" });
         const name = uniqueName("Antenne");
