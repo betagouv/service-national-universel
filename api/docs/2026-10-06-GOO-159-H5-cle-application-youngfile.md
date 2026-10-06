@@ -6,7 +6,7 @@ Date : 2026-10-06 · Lot V14 (GOO-159), constat H5 · Base `origin/main` (`5f47d
 
 | Constat | Où | Avant | Après |
 |---|---|---|---|
-| H5 | `api` `GET /referent/youngFile/:youngId/:key/:fileName` | un responsable/superviseur pouvait viser une pièce de candidature (`application/<id>/<clé>/<nom>`) via cette route, hors du périmètre de la route dédiée | déjà corrigé par le lot PH20/H65 (`#5460`) : `key` est borné à `FILE_KEYS` + `MILITARY_FILE_KEYS` (`api/src/referent/referentController.ts:1012-1014`) et `fileName` à un seul niveau de chemin (`safePathSegment()`) ; aucune des deux valeurs n'accepte la variante `application` |
+| H5 | `api` `GET /referent/youngFile/:youngId/:key/:fileName` | un responsable/superviseur pouvait viser une pièce de candidature via cette route, hors du périmètre de la route dédiée | déjà corrigé par le lot PH20/H65 (`#5460`) : `key` est borné à `FILE_KEYS` + `MILITARY_FILE_KEYS` (`api/src/referent/referentController.ts:1012-1014`) et `fileName` à un seul niveau de chemin (`safePathSegment()`) ; aucune des deux valeurs n'accepte la variante visant une candidature |
 
 Pas de code applicatif modifié : ce lot ajoute la non-régression manquante pour cette variante précise,
 absente des tests du lot PH20/H65 (`referent-young-file-path.test.ts`).
@@ -15,8 +15,8 @@ absente des tests du lot PH20/H65 (`referent-young-file-path.test.ts`).
 
 - `BAD_KEYS` : nouvelle entrée `"application"` → hérite des deux tests paramétrés existants
   (responsable en périmètre, administrateur).
-- Test dédié : clé `application` + nom composite (`<id candidature>%2FcontractAvenantFiles%2Fpiece.pdf`)
-  visant une candidature d'une **autre structure** que celle du responsable → 400, stockage non appelé.
+- Test dédié : clé `application` suivie d'un nom de fichier à plusieurs niveaux visant une candidature
+  d'une **autre structure** que celle du responsable → 400, stockage non appelé.
 
 ## Mutation (rule 13)
 
