@@ -4,17 +4,20 @@ Ticket Linear GOO-159. Chaque constat est corrigé par sa propre PR, un dossier 
 
 ## 1. Correctifs
 
-| Constat | Route / fichier | PR | Correctif |
-| --- | --- | --- | --- |
-| PH13 | `POST /structure` | [#5475](https://github.com/betagouv/service-national-universel/pull/5475) | le drapeau `isMilitaryPreparation` n'est plus modifiable par un responsable ou un superviseur à la création d'une structure (seul `PUT /structure/:id` l'était déjà) |
-| PM17 | uploads (dépôts de fichiers) | [#5466](https://github.com/betagouv/service-national-universel/pull/5466) | plafond de fichiers par dépôt et purge des fichiers temporaires jamais nettoyés |
-| C1-4 / H22 | `PUT /correction-request/:id`, suppression de pièce | [#5467](https://github.com/betagouv/service-national-universel/pull/5467) | le contrôle du statut de la demande de correction précède désormais la suppression S3 de la pièce (CNI), plus de suppression sans contrôle |
-| PM16 | attestations officielles (phase 1, phase 2, SNU) | [#5481](https://github.com/betagouv/service-national-universel/pull/5481) | une attestation n'est plus générée sans vérifier le statut réel du volontaire |
-| FM1 | dossier PM (mobilité) | [#5485](https://github.com/betagouv/service-national-universel/pull/5485) | contrôle du statut source avant tout accès au dossier |
-| M43 | `POST /young/signup_verify` | [#5486](https://github.com/betagouv/service-national-universel/pull/5486) | route retirée (aucun appelant front, dossier jeune complet exposé à tout porteur d'un `invitationToken`) |
-| M26 | `POST`/`PUT /program` | [#5487](https://github.com/betagouv/service-national-universel/pull/5487) | cloisonnement croisé département/région : un référent départemental ou régional ne pose plus de territoire hors du sien |
-| H5 | `GET /referent/youngFile/:youngId/:key/:fileName` | [#5488](https://github.com/betagouv/service-national-universel/pull/5488) | non-régression sur la clé `application` (le lot PH20/H65, #5460, fermait déjà ce constat en code ; tests ajoutés) |
-| PM13 | `PUT /mission/:id` | *(cette PR)* | la revalidation d'une mission validée couvre maintenant aussi `hebergementPayant`, `format`, `period`, `subPeriod`, `domains`, `mainDomain`, `remote`, `country`, `location` — champs qu'un responsable ou un superviseur pouvait jusqu'ici reposer sans repasser la mission en modération |
+Statut au moment de l'écriture de cette note : les PR marquées *mergée* sont sur `main` ; les
+autres sont ouvertes et en attente de revue/fusion.
+
+| Constat | Route / fichier | PR | État | Correctif |
+| --- | --- | --- | --- | --- |
+| PH13 | `POST /structure` | [#5475](https://github.com/betagouv/service-national-universel/pull/5475) | mergée | le drapeau `isMilitaryPreparation` n'est plus modifiable par un responsable ou un superviseur à la création d'une structure (seul `PUT /structure/:id` l'était déjà) |
+| PM17 | uploads (dépôts de fichiers) | [#5466](https://github.com/betagouv/service-national-universel/pull/5466) | mergée | plafond de fichiers par dépôt et purge des fichiers temporaires jamais nettoyés |
+| C1-4 / H22 | `PUT /correction-request/:id`, suppression de pièce | [#5467](https://github.com/betagouv/service-national-universel/pull/5467) | mergée | le contrôle du statut de la demande de correction précède désormais la suppression S3 de la pièce (CNI), plus de suppression sans contrôle |
+| PM16 | attestations officielles (phase 1, phase 2, SNU) | [#5481](https://github.com/betagouv/service-national-universel/pull/5481) | mergée | une attestation n'est plus générée sans vérifier le statut réel du volontaire |
+| FM1 | dossier PM (mobilité) | [#5485](https://github.com/betagouv/service-national-universel/pull/5485) | mergée | contrôle du statut source avant tout accès au dossier |
+| M43 | `POST /young/signup_verify` | [#5486](https://github.com/betagouv/service-national-universel/pull/5486) | ouverte | route retirée (aucun appelant front) |
+| M26 | `POST`/`PUT /program` | [#5487](https://github.com/betagouv/service-national-universel/pull/5487) | ouverte | cloisonnement croisé département/région : un référent départemental ou régional ne pose plus de territoire hors du sien |
+| H5 | `GET /referent/youngFile/:youngId/:key/:fileName` | [#5488](https://github.com/betagouv/service-national-universel/pull/5488) | ouverte | non-régression sur la clé `application` (le lot PH20/H65, #5460, fermait déjà ce constat en code ; tests ajoutés) |
+| PM13 | `PUT /mission/:id` | *(cette PR)* | ouverte | la revalidation d'une mission validée couvre maintenant aussi `hebergementPayant`, `format`, `period`, `subPeriod`, `domains`, `mainDomain`, `remote`, `country`, `location` — champs qu'un responsable ou un superviseur pouvait jusqu'ici reposer sans repasser la mission en modération |
 
 ## 2. Hors de ce lot
 
