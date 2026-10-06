@@ -125,7 +125,7 @@ describe("Structure", () => {
         expect(res.status).toBe(200);
         const [created] = await findByName(name);
         expect(created.networkId).toBe(network._id.toString());
-        expect(created.isMilitaryPreparation).not.toBe("true");
+        expect(created.isMilitaryPreparation).toBeUndefined();
       });
 
       it("SUPERVISOR crée une antenne avec le corps du formulaire admin (drapeau « false ») : créée sans le drapeau", async () => {
@@ -136,7 +136,7 @@ describe("Structure", () => {
           .send({ ...getNewStructureFixture(), name, isMilitaryPreparation: "false" });
         expect(res.status).toBe(200);
         const [created] = await findByName(name);
-        expect(created.isMilitaryPreparation).not.toBe("true");
+        expect(created.isMilitaryPreparation).toBeUndefined();
       });
 
       it("ADMIN crée une structure préparation militaire", async () => {
