@@ -323,8 +323,8 @@ function getEmailTemplatesForStatus(status: string): EmailTemplate[] {
 
 function getEmailParamsForStatus(status: string, application: ApplicationType, mission: MissionType): EmailParams {
   const baseParams: EmailParams = {
-    youngFirstName: application.youngFirstName || "",
-    youngLastName: application.youngLastName || "",
+    youngFirstName: sanitizeEmailText(application.youngFirstName) || "",
+    youngLastName: sanitizeEmailText(application.youngLastName) || "",
     missionName: sanitizeEmailText(mission.name),
   };
 
