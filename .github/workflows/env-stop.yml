@@ -25,7 +25,7 @@ jobs:
       (github.event_name=='workflow_dispatch' && inputs.branch != 'production' && inputs.branch != 'main')
     # Porte les secrets Clever de l'environnement GitHub « recette ».
     environment: recette
-    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       # Scripts lus sur la branche par défaut : voir env-deploy.yml.
       - uses: actions/checkout@v4
