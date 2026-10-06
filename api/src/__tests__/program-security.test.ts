@@ -163,6 +163,49 @@ describe("Sécurité des programmes", () => {
 
       expect(res.statusCode).toEqual(200);
     });
+
+    it("laisse un référent régional poser un département réel de sa région à la création", async () => {
+      const referent = await createReferent({ role: ROLES.REFERENT_REGION, region: REGION_CIBLE });
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post("/program")
+        .send({ ...getNewProgramFixture(), department: DEPARTEMENT_CIBLE, region: REGION_CIBLE, visibility: "DEPARTMENT" });
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("laisse un référent régional faire glisser son programme vers un département réel de sa région", async () => {
+      const referent = await createReferent({ role: ROLES.REFERENT_REGION, region: REGION_CIBLE });
+      const programme = await createProgram({ department: "", region: REGION_CIBLE, visibility: "REGION" });
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .put(`/program/${programme._id}`)
+        .send({ department: DEPARTEMENT_CIBLE, visibility: "DEPARTMENT" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getProgramByIdHelper(programme._id);
+      expect(apres!.department).toEqual(DEPARTEMENT_CIBLE);
+    });
+
+    it("laisse un référent départemental supprimer un programme de son département", async () => {
+      const referent = await createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: [DEPARTEMENT_ATTAQUANT], region: REGION_ATTAQUANT });
+      const programme = await createProgram({ department: DEPARTEMENT_ATTAQUANT, region: REGION_ATTAQUANT, visibility: "DEPARTMENT" });
+
+      const res = await request(await getAppHelperWithAcl(referent)).delete(`/program/${programme._id}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(await getProgramByIdHelper(programme._id)).toBeNull();
+    });
+
+    it("laisse un référent régional supprimer un programme de sa région", async () => {
+      const referent = await createReferent({ role: ROLES.REFERENT_REGION, region: REGION_ATTAQUANT });
+      const programme = await createProgram({ department: "", region: REGION_ATTAQUANT, visibility: "REGION" });
+
+      const res = await request(await getAppHelperWithAcl(referent)).delete(`/program/${programme._id}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(await getProgramByIdHelper(programme._id)).toBeNull();
+    });
   });
 
   describe("M26 — visibilité d'un programme", () => {
