@@ -1,12 +1,12 @@
 const { allRecords } = require("../../../es/utils");
-const { serializeReferents } = require("../../../utils/es-serializer");
+const { serializeReferentNames } = require("../../../utils/es-serializer");
 const esClient = require("../../../es");
 const { ES_NO_LIMIT } = require("snu-lib");
 
 const populateWithReferentInfo = async ({ etablissements, isExport }) => {
   const refIds = [...new Set(etablissements.map((item) => (isExport ? item.referentEtablissementIds : item._source.referentEtablissementIds)).filter(Boolean))];
-  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
-  const referentsData = serializeReferents(referents);
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName"]);
+  const referentsData = serializeReferentNames(referents);
   return etablissements.map((item) => {
     if (isExport) item.referentEtablissement = referentsData?.filter((e) => item.referentEtablissementIds.includes(e._id.toString()));
     else item._source.referentEtablissement = referentsData?.filter((e) => item._source.referentEtablissementIds.includes(e._id.toString()));
@@ -16,8 +16,8 @@ const populateWithReferentInfo = async ({ etablissements, isExport }) => {
 
 const populateWithCoordinatorInfo = async ({ etablissements, isExport }) => {
   const refIds = [...new Set(etablissements.map((item) => (isExport ? item.coordinateurIds : item._source.coordinateurIds)).filter(Boolean))];
-  const referents = await allRecords("referent", { ids: { values: refIds.flat() } });
-  const referentsData = serializeReferents(referents);
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName"]);
+  const referentsData = serializeReferentNames(referents);
   return etablissements.map((item) => {
     if (isExport) item.coordinateurs = referentsData?.filter((e) => item.coordinateurIds.includes(e._id.toString()));
     else item._source.coordinateurs = referentsData?.filter((e) => item._source.coordinateurIds.includes(e._id.toString()));

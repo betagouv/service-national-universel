@@ -153,14 +153,14 @@ export async function getCenterIdsInUserScope(user: UserDto): Promise<string[] |
  * OU l'un de ses points de rassemblement y est. Ces index ne portent que des
  * métadonnées de transport (aucun jeune).
  *
- * - `{ national: true }` : administrateur et transporteur, acteurs nationaux ;
+ * - `{ national: true }` : administrateur, acteur national ;
  * - `{ national: false, … }` : référents, bornés à leur région / département ;
  * - `null` : aucun accès (fail-closed).
  */
 export type LigneBusScope = { national: true } | { national: false; centerIds: string[]; meetingPointIds: string[] };
 
 export async function getLigneBusScope(user: UserDto): Promise<LigneBusScope | null> {
-  if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user?.role as any)) return { national: true };
+  if (user?.role === ROLES.ADMIN) return { national: true };
   const geoFilter = getGeoScopeFilter(user);
   if (!geoFilter) return null;
   const [centers, meetingPoints] = await Promise.all([

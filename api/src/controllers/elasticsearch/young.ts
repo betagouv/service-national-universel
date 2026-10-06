@@ -1,6 +1,5 @@
 import passport from "passport";
 import express, { Response } from "express";
-import { addMonths } from "date-fns";
 import Joi from "joi";
 import { Router } from "express";
 import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto, COHORT_STATUS, getYoungFieldsHiddenFrom } from "snu-lib";
@@ -8,11 +7,10 @@ import { capture } from "../../sentry";
 import esClient from "../../es";
 import { ERRORS } from "../../utils";
 import { allRecords } from "../../es/utils";
-import { buildNdJson, buildRequestBody, joiElasticSearch, getResponsibleCenterField } from "./utils";
+import { buildNdJson, buildRequestBody, joiElasticSearch } from "./utils";
 
 import { serializeYoungs } from "../../utils/es-serializer";
 import { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel, CohortModel } from "../../models";
-import { getCohortNamesEndAfter } from "../../utils/cohort";
 import { NOT_A_PROPOSAL } from "../../application/applicationProposal";
 import { populateYoungExport } from "./populate/populateYoung";
 import { UserRequest } from "../request";
@@ -110,7 +108,7 @@ function hasMaskedFilter(body: any, allowedFields: string[]): boolean {
  * Volontairement absents : `transporter`, `administrateur_cle`, `referent_classe`,
  * `head_center`, `head_center_adjoint` et `referent_sanitaire`, qui n'existent
  * plus sur la plateforme. Des comptes résiduels peuvent encore porter ces rôles
- * en base : ils doivent être refusés, pas tolérés.
+ * en base : ils sont refusés.
  *
  * `visitor` est aussi absent : l'admin ne lui ouvre que le tableau de bord et
  * l'annuaire des établissements, et le modèle de permissions (`canSearchInElasticSearch`)
@@ -139,24 +137,6 @@ export async function buildYoungContext(user: UserDto, options: YoungContextOpti
   // Open in progress inscription to referent
   if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) contextFilters[0].terms["status.keyword"].push("IN_PROGRESS");
 
-  // A head center can only see youngs of their session.
-  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-    const field = getResponsibleCenterField(user.role);
-    // @ts-ignore
-    const sessionPhase1 = await SessionPhase1Model.find({ [field]: user._id });
-    if (!sessionPhase1.length) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push(
-      { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } },
-      { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
-    );
-    const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
-    if (visibleCohorts.length > 0) {
-      contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
-    } else {
-      // Tried that to specify when there's just no data or when the head center has no longer access
-      return { youngContextError: { status: 404, body: { ok: true, code: "no cohort available" } } };
-    }
-  }
   // A responsible can only see youngs in application of their structure (une proposition non acceptée n'est pas une candidature).
   if (user.role === ROLES.RESPONSIBLE) {
     if (!user.structureId) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
@@ -219,7 +199,7 @@ export async function buildYoungContext(user: UserDto, options: YoungContextOpti
  * Rôles dont l'appartenance à la session est vérifiée dans la route
  * `/by-session/:sessionId/:action`. ADMIN est national par conception.
  */
-const BY_SESSION_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
+const BY_SESSION_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
 
 const router: Router = express.Router();
 
@@ -447,23 +427,6 @@ router.post(
         req.params.action === "exportBus" ? { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } } : null,
       ].filter(Boolean);
 
-      if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-        const field = getResponsibleCenterField(user.role);
-        // @ts-ignore
-        const sessionsPhase1 = await SessionPhase1Model.find({ [field]: user._id });
-        if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
-        if (visibleCohorts.length > 0) {
-          // @ts-ignore
-          contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
-        } else {
-          // Tried that to specify when there's just no data or when the head center has no longer access
-          return res.status(200).send({ ok: true, data: "no cohort available" });
-        }
-        if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        }
-      }
       if (user.role === ROLES.REFERENT_REGION) {
         const centers = await CohesionCenterModel.find({ region: user.region, deletedAt: { $exists: false } });
         const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
@@ -777,18 +740,6 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     // Context filters
     const contextFilters: any[] = [];
 
-    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-      const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
-      if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
-      if (visibleCohorts.length > 0) {
-        contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
-      } else {
-        // Tried that to specify when there's just no data or when the head center has no longer access
-        return res.status(200).send({ ok: true, data: "no cohort available" });
-      }
-      contextFilters.push({ terms: { "sessionPhase1Id.keyword": [sessionsPhase1.map((e) => e._id.toString())] } });
-    }
     if (user.role === ROLES.REFERENT_REGION) {
       contextFilters.push({ terms: { "region.keyword": [user.region] } });
     }

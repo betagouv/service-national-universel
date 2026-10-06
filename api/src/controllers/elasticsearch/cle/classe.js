@@ -1,7 +1,7 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch, SUB_ROLES, YOUNG_STATUS_PHASE1 } = require("snu-lib");
+const { ROLES, YOUNG_STATUS, FeatureFlagName, canSearchInElasticSearch, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
@@ -9,7 +9,7 @@ const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
 const { EtablissementModel } = require("../../../models");
-const { serializeReferents } = require("../../../utils/es-serializer");
+const { serializeReferentNames } = require("../../../utils/es-serializer");
 const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
 
 const CLASSE_EXPORT_ROLES = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
@@ -109,16 +109,6 @@ async function buildClasseContext(user) {
     }
   }
 
-  if (user.role === ROLES.ADMINISTRATEUR_CLE) {
-    const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
-    if (!etablissement) return { classeContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push({ term: { "etablissementId.keyword": etablissement._id.toString() } });
-  }
-
-  if (user.role === ROLES.REFERENT_CLASSE) {
-    contextFilters.push({ term: { "referentClasseIds.keyword": user._id.toString() } });
-  }
-
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     const etablissements = await EtablissementModel.find({ department: user.department });
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
@@ -128,19 +118,15 @@ async function buildClasseContext(user) {
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
   }
 
-  if (user.role === ROLES.TRANSPORTER) {
-    contextFilters.push({ bool: { must_not: { term: { "status.keyword": STATUS_CLASSE.WITHDRAWN } } } });
-  }
-
   return { classeContextFilters: contextFilters };
 }
 
 const populateWithReferentClasseInfo = async (classes) => {
   const refIds = [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))];
 
-  const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName"]);
 
-  const referentsData = serializeReferents(referents);
+  const referentsData = serializeReferentNames(referents);
 
   return classes.map((item) => {
     item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
@@ -222,14 +208,14 @@ const populateWithAllReferentsInfo = async (classes) => {
 
   const allReferentIds = [...new Set([...referentEtablissementIds, ...referentClasseIds, ...coordinateurIds].flat())];
 
-  const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+  const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, ["_id", "firstName", "lastName", "invitationToken"]);
 
   const extendedReferents = referents.map((referent) => ({
     ...referent,
     state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
   }));
 
-  const referentsData = serializeReferents(extendedReferents);
+  const referentsData = serializeReferentNames(extendedReferents);
 
   return classes.map((item) => {
     const referentEtablissementFiltered = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds?.includes(e._id.toString()));

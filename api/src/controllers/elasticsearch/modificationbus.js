@@ -26,7 +26,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // Context filters
     // Les demandes de modification ne portent que `lineId` : un référent ne voit que
-    // celles des lignes de son territoire (M16). Admin et transporteur restent nationaux.
+    // celles des lignes de son territoire (M16). L'admin reste national.
     const scope = await getLigneBusScope(user);
     if (!scope) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let contextFilters = [];

@@ -6,9 +6,8 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody, joiElasticSearch, getResponsibleCenterField } = require("./utils");
+const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 const { ROLES } = require("snu-lib");
-const { LigneBusModel, SessionPhase1Model } = require("../../models");
 const { getLigneBusScope } = require("../../services/sejourAccess");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -47,18 +46,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // Context filters
     let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
-
-    // A head center can only see bus line rattached to his center.
-    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-      const cohort = queryFilters.cohort?.[0];
-      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const field = getResponsibleCenterField(user.role);
-      const centers = await SessionPhase1Model.find({ [field]: user._id, cohort });
-      if (!centers.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort });
-      if (!lignebus.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
-    }
 
     // PM9 (25/09/2026) : le plan de transport national et les demandes de modification étaient
     // lisibles par tout référent départemental ou régional, sans aucun filtre géographique (à la
