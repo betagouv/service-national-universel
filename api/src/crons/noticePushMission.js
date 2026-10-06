@@ -23,7 +23,7 @@ const toMailMission = (mission) => ({
   startAt: formatStringDate(mission._source.startAt),
   endAt: formatStringDate(mission._source.endAt),
   address: sanitizeEmailText(`${mission._source.city}, ${mission._source.zip}`),
-  domains: mission._source.domains?.map(translate)?.join(", "),
+  domains: mission._source.domains?.map((domain) => sanitizeEmailText(translate(domain)))?.join(", "),
   cta: `${config.APP_URL}/mission/${mission._id}`,
 });
 exports.toMailMission = toMailMission;

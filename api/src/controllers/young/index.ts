@@ -18,6 +18,7 @@ import { requireJsonBody } from "../../middlewares/requireJsonBody";
 import { uploadFile, validatePassword, ERRORS, isYoung, isReferent, getCcOfYoung, getFile } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
+import { sanitizeEmailText } from "../../email/emailInput";
 import { setSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
 import { validateId, idSchema } from "../../utils/validator";
 import { safePathSegment } from "../../utils/pathSegment";
@@ -473,9 +474,9 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     young.set({ ...values, statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION, statusPhase3UpdatedAt: Date.now() });
     await young.save({ fromUser: req.user });
 
-    const youngName = `${young.firstName} ${young.lastName}`;
-    const toName = `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`;
-    const structureName = young.phase3StructureName;
+    const youngName = sanitizeEmailText(`${young.firstName} ${young.lastName}`);
+    const toName = sanitizeEmailText(`${young.phase3TutorFirstName} ${young.phase3TutorLastName}`);
+    const structureName = sanitizeEmailText(young.phase3StructureName);
     const startAt = young.phase3MissionStartAt?.toLocaleDateString("fr");
     const endAt = young.phase3MissionEndAt?.toLocaleDateString("fr");
     const cta = `${config.ADMIN_URL}/validate?token=${young.phase3Token}&young_id=${young._id}`;

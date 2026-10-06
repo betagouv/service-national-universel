@@ -21,6 +21,9 @@ export function sanitizeAll(text) {
   return sanitizeHtml(text || "", { allowedTags: ["li", "br", "b"], allowedAttributes: {} });
 }
 
+// Même contrat que sanitizeEmailText (email/emailInput) : importer ce module ici ferait un cycle utils <-> emailInput.
+const sanitizeEmailText = (value) => (value ? sanitizeAll(value) : value);
+
 export function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
   return http.get(url, cb);
@@ -482,9 +485,9 @@ export async function sendNotificationApplicationClosedBecausePhase2Validated(ap
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION_PHASE_2_VALIDATED, {
         emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
         params: {
-          missionName: application.missionName,
-          youngFirstName: application.youngFirstName,
-          youngLastName: application.youngLastName,
+          missionName: sanitizeEmailText(application.missionName),
+          youngFirstName: sanitizeEmailText(application.youngFirstName),
+          youngLastName: sanitizeEmailText(application.youngLastName),
         },
       });
   }

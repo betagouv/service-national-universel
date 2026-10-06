@@ -28,6 +28,7 @@ import { serializeMission, serializeApplication } from "../utils/serializer";
 import { checkMissionPayload, getReferentDepartments, isMissionInUserScope, isTutorAllowedForMission, missionRequiresRevalidation } from "../services/missionAccess";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { config } from "../config";
 import { getNearestLocation } from "../services/gouv.fr/api-adresse";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
@@ -133,7 +134,7 @@ router.post(
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
             emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
             params: {
-              missionName: checkedMission.name,
+              missionName: sanitizeEmailText(checkedMission.name),
             },
           });
       }
@@ -281,7 +282,7 @@ router.put(
             await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
               emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
               params: {
-                missionName: mission.name,
+                missionName: sanitizeEmailText(mission.name),
               },
             });
         }
@@ -292,7 +293,7 @@ router.put(
               emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
               params: {
                 cta: `${config.ADMIN_URL}/dashboard`,
-                missionName: mission.name,
+                missionName: sanitizeEmailText(mission.name),
               },
             });
         }

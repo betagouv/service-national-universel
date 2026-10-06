@@ -58,3 +58,18 @@ export function isTrustedEmailLink(value?: string | null): boolean {
 export function sanitizeEmailText<T extends string | null | undefined>(value: T): T {
   return (value === undefined || value === null || value === "" ? value : sanitizeAll(value)) as T;
 }
+
+/**
+ * Copie des paramètres d'un gabarit dont les clés listées (texte, ou tableau de textes) sont
+ * assainies par `sanitizeEmailText`. Les valeurs absentes, nulles, vides ou non textuelles sont
+ * laissées telles quelles.
+ */
+export function sanitizeEmailParams<T extends Record<string, unknown>>(params: T, keys: string[]): T {
+  const result: Record<string, unknown> = { ...params };
+  for (const key of keys) {
+    const value = result[key];
+    if (typeof value === "string") result[key] = sanitizeEmailText(value);
+    else if (Array.isArray(value)) result[key] = value.map((item) => (typeof item === "string" ? sanitizeEmailText(item) : item));
+  }
+  return result as T;
+}

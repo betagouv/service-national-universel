@@ -120,7 +120,7 @@ import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { canContactTutorInScope, isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser, isReferentUpdateInUserScope } from "./referentScope";
-import { sanitizeEmailText } from "../email/emailInput";
+import { sanitizeEmailParams, sanitizeEmailText } from "../email/emailInput";
 import {
   canEditYoungInScope,
   canViewYoungFileInScope,
@@ -476,8 +476,8 @@ router.post(
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
         params: {
           cta,
-          cohesionCenterName,
-          structureName: structureNameFromDb,
+          cohesionCenterName: sanitizeEmailText(cohesionCenterName),
+          structureName: sanitizeEmailText(structureNameFromDb),
           // `department` est déjà borné à la liste officielle des départements par le schéma Joi
           // (referentDepartmentSchema) : ce n'est pas du texte libre, contrairement à `region`.
           region: sanitizeEmailText(region),
@@ -538,7 +538,7 @@ async function sendNewInvitation(referent: ReferentDocument, { fromName, fromUse
   // (route anonyme, réponse 200 immédiate quand `shouldResendInvitation` est faux).
   sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
+    params: sanitizeEmailParams({ cta, cohesionCenterName, structureName, region, department, fromName, toName }, ["cohesionCenterName", "structureName", "region", "toName"]),
   }).catch(capture);
 }
 
