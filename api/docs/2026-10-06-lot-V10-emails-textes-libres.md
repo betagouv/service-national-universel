@@ -17,7 +17,7 @@ prénoms et noms), transmettaient la valeur brute au fournisseur d'emails. Ils p
 | Envoi | Champs |
 | --- | --- |
 | `crons/missionOutdated.js` : `MISSION_ARCHIVED_AUTO`, `MISSION_ARCHIVED`, `MISSION_ARCHIVED_1_WEEK_NOTICE` | nom de mission, message de statut |
-| `application/applicationService.ts` `getEmailParamsForStatus` (route en lot `change-status`) | nom de mission |
+| `application/applicationService.ts` `getEmailParamsForStatus` (route en lot `change-status`) | nom de mission, prénom et nom du volontaire |
 | `crons/applicationWaitingAcceptationOutdated.ts` (relances J+7 et J+13) | nom de mission, nom de structure |
 | `crons/applicationPending.js`, `crons/contratRelance.js` | nom de mission, prénom et nom du volontaire |
 | `crons/noticePushMission.js` | domaines (après traduction) |
@@ -33,12 +33,20 @@ prénoms et noms), transmettaient la valeur brute au fournisseur d'emails. Ils p
 - `PUT /young/account/parents`, renommage de structure sans modération, changement d'email d'un volontaire par un
   référent, garde « tuteur ≠ soi-même » de la phase 3 : hors périmètre du lot.
 - Écritures en base de `application.missionName` (`applicationController.ts`, `mission.ts`) et import `JVAService.ts` : pas des envois.
+- Même type de champ (prénom et nom du volontaire, nom de centre, nom de classe ou d'établissement), non touché par ce lot
+  et à traiter dans un lot suivant : `applicationController.ts` (route notify), `applicationNotificationService.ts`,
+  `utils/index.ts` (changement de département), `controllers/session-phase1.ts` (rappel de session, nom du centre),
+  `emails/cle/*` et `services/cle/*` (noms de classe et d'établissement), `young/youngService.ts` (désistement),
+  `young/youngSendDocumentEmailService.ts` (prénom dans l'objet des attestations), `planDeTransport/ligneDeBus` (identifiant de ligne),
+  `emails/young/changeCohortEmail.js` (aucun émetteur trouvé), script ponctuel `scripts/invalidateExposedTokens.effect.ts`.
+- `JVAService.cancelOldMissions` (MISSION_CANCEL) est assaini mais son appel est commenté dans `crons/missionsJVA/JeVeuxAiderDaily.ts`.
 - Aucun site du lot ne recopie un lien saisi par un tiers (les liens sont construits par le serveur) : `isTrustedEmailLink` n'est pas utilisé.
 
-### Limite connue
+### Limites connues
 
 `sanitizeEmailText` retire le balisage mais garde le texte brut : une adresse en clair dans un champ saisi reste
-transmise telle quelle. Non modifié ici.
+transmise telle quelle. Il conserve aussi les balises de mise en forme `<b>`, `<br>` et `<li>` (comportement de `sanitizeAll`).
+Non modifié ici.
 
 ## Comportements modifiés
 
