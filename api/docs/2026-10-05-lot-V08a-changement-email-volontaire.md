@@ -16,8 +16,9 @@ changement d'email en libre-service d'un volontaire, et réponses des routes de 
 - **Statut HTTP du verrou sur `POST /young/email`** : 400, comme la réponse `PASSWORD_INVALID` déjà
   renvoyée par cette route, et non 401 comme `reset_password`. Les clients traitent un 401 comme une
   session expirée ; le code applicatif et le corps (`TOO_MANY_REQUESTS`, `nextLoginAttemptIn`) sont
-  ceux de `reset_password`, seul le statut HTTP diffère. Côté front, ce code n'est pas encore géré
-  sur cette route (message générique) : à traiter dans le lot front.
+  ceux de `reset_password`, seul le statut HTTP diffère. Côté front, ce code est traduit par
+  `translate` (message d'attente existant) et l'appel est précédé de `POST /young/check_password`,
+  déjà verrouillé : rien à changer.
 - **Réponses uniformes** : la cause de l'erreur 500 était le hook post-update de
   `mongoose-patch-history`, qui lit le document rendu par `findOneAndUpdate` et lève quand il est
   vide. La consommation d'un essai passe désormais par le driver natif (les hooks de l'historique de
