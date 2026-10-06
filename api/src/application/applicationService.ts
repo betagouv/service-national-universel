@@ -325,7 +325,7 @@ function getEmailParamsForStatus(status: string, application: ApplicationType, m
   const baseParams: EmailParams = {
     youngFirstName: application.youngFirstName || "",
     youngLastName: application.youngLastName || "",
-    missionName: mission.name,
+    missionName: sanitizeEmailText(mission.name),
   };
 
   switch (status) {

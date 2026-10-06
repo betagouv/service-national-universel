@@ -19,6 +19,7 @@ import { capture } from "../sentry";
 import { ContractModel, ContractDocument, YoungModel, ApplicationModel, ReferentModel } from "../models";
 import { ERRORS, isYoung } from "../utils";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { config } from "../config";
 import { logger } from "../logger";
 import { validateId, validateContract, validateOptionalId, idSchema } from "../utils/validator";
@@ -223,9 +224,9 @@ async function sendContractEmail(
       template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
     }
     const params = {
-      toName: options.name,
-      youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
-      missionName: contract.missionName,
+      toName: sanitizeEmailText(options.name),
+      youngName: sanitizeEmailText(`${contract.youngFirstName} ${contract.youngLastName}`),
+      missionName: sanitizeEmailText(contract.missionName),
       cta: `${config.APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
     };
     const emailTo = [{ name: options.name, email: options.email! }];
@@ -513,7 +514,7 @@ router.post("/token/:token", async (req: UserRequest, res: Response) => {
       await sendTemplate(SENDINBLUE_TEMPLATES.young.CONTRACT_VALIDATED, {
         emailTo,
         params: {
-          missionName: data.missionName,
+          missionName: sanitizeEmailText(data.missionName),
           cta: `${config.APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
         },
       });

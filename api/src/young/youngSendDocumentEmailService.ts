@@ -4,6 +4,7 @@ import { ContractDto } from "snu-lib";
 
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { ERRORS, getCcOfYoung } from "../utils";
 import { YoungModel, ContractModel } from "../models";
 
@@ -41,8 +42,8 @@ function getMailParams(type: string, template: string, young: YoungDto, contract
     };
   if (type === "contract" && template === "2" && contract)
     return {
-      object: `Contrat de la mission ${contract.missionName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${contract.missionName}.`,
+      object: `Contrat de la mission ${sanitizeEmailText(contract.missionName)}`,
+      message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${sanitizeEmailText(contract.missionName)}.`,
     };
   throw new Error(ERRORS.NOT_FOUND);
 }
