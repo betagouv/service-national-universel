@@ -72,13 +72,18 @@ jobs:
     needs: test
     # Seul job du dépôt autorisé à pousser vers deploy-production. L'environnement
     # « production » porte les secrets Clever de production et exige une approbation.
+    # La poussée passe par la clé de déploiement DEPLOY_PRODUCTION_SSH_KEY, secret de
+    # cet environnement et seule exception au ruleset restrict-deploy-production : le
+    # jeton GitHub reste en lecture, et personne d'autre ne peut écrire sur la branche.
     permissions:
-      contents: write
+      contents: read
     environment: production
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_PRODUCTION_SSH_KEY }}
 
       # clever-tools 5 exige Node 24+ : on ne dépend pas du Node (ou de son absence) du runner.
       - uses: actions/setup-node@v4
