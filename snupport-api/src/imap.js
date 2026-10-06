@@ -262,7 +262,9 @@ function extractMailData(message) {
   data.date = message.date;
   data.copyRecipient = message.cc?.value?.map((recipient) => recipient.address);
   if (data.copyRecipient === undefined) data.copyRecipient = [];
-  data.copyRecipient = data.copyRecipient.concat((message.to?.value ?? []).map((recipient) => recipient.address).filter((recipient) => recipient !== "contact@mail-support.snu.gouv.fr"));
+  data.copyRecipient = data.copyRecipient.concat(
+    (message.to?.value ?? []).map((recipient) => recipient.address).filter((recipient) => recipient !== "contact@mail-support.snu.gouv.fr")
+  );
   return data;
 }
 
