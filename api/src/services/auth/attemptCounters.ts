@@ -164,24 +164,40 @@ export async function resetLoginAttempts(model: Model<any>, userId: any): Promis
 }
 
 /**
- * Consomme un essai de code 2FA. Le filtre `attempts2FA < MAX` et l'incrément
- * sont dans la même opération : au-delà du plafond, plus aucune requête ne peut
- * matcher, quelle que soit la concurrence.
+ * Consomme un essai de code dans une opération unique : le filtre `< plafond`, l'échéance et l'incrément
+ * sont évalués ensemble, donc au-delà du plafond plus aucune requête ne peut matcher, quelle que soit
+ * la concurrence.
+ *
+ * L'update passe par le driver natif : les hooks de mongoose-patch-history ne sont pas joués, car un
+ * résultat vide les fait lever. Les compteurs sont exclus de l'historique de patch, rien n'est perdu.
+ * Ni cast ni setters du schéma (`lowercase`, `trim`, ObjectId) ne s'appliquent au filtre : les
+ * appelants doivent fournir des valeurs déjà normalisées. `updatedAt` n'est pas modifié. Le document
+ * est relu après l'incrément pour que l'appelant travaille sur l'état courant.
+ */
+async function consumeCodeAttempt(model: Model<any>, filter: Record<string, any>, attemptsField: string, max: number, expiresField: string, now: Date) {
+  const result = await model.collection.findOneAndUpdate(
+    { ...filter, [attemptsField]: { $lt: max }, [expiresField]: { $gt: now } },
+    { $inc: { [attemptsField]: 1 } },
+    { projection: { _id: 1 }, includeResultMetadata: true },
+  );
+  const consumed = result.value;
+  if (!consumed) return null;
+  return model.findById(consumed._id);
+}
+
+/**
+ * Consomme un essai de code 2FA.
  *
  * @returns le document si un essai a pu être consommé, `null` si le plafond est
  *          atteint, le code expiré ou le compte inconnu.
  */
 export async function consume2FAAttempt(model: Model<any>, email: string, now: Date = new Date()) {
-  return model.findOneAndUpdate({ email, attempts2FA: { $lt: MAX_2FA_ATTEMPTS }, token2FAExpires: { $gt: now } }, { $inc: { attempts2FA: 1 } }, { new: true });
+  return consumeCodeAttempt(model, { email }, "attempts2FA", MAX_2FA_ATTEMPTS, "token2FAExpires", now);
 }
 
 /** Consomme un essai de code de validation d'email. Même garantie que `consume2FAAttempt`. */
 export async function consumeEmailValidationAttempt(model: Model<any>, filter: Record<string, any>, now: Date = new Date()) {
-  return model.findOneAndUpdate(
-    { ...filter, attemptsEmailValidation: { $lt: MAX_EMAIL_VALIDATION_ATTEMPTS }, tokenEmailValidationExpires: { $gt: now } },
-    { $inc: { attemptsEmailValidation: 1 } },
-    { new: true },
-  );
+  return consumeCodeAttempt(model, filter, "attemptsEmailValidation", MAX_EMAIL_VALIDATION_ATTEMPTS, "tokenEmailValidationExpires", now);
 }
 
 /**
