@@ -28,6 +28,13 @@ const regex = /\[#(\w+)\]/i;
 // protégeait auparavant la mémoire du processus HTTP (partagé avec l'API agents) contre un corps
 // de message forgé (PM50, audit du 25/09/2026).
 const MAX_MESSAGE_SIZE = 25 * 1024 * 1024;
+// Bornes de la relève : un groupe de messages téléchargés ensemble, leur budget d'octets cumulé
+// (>= MAX_MESSAGE_SIZE : un message acceptable tient toujours seul), les analyses simultanées et le
+// nombre de messages traités par cycle de 30 minutes (le reste est repris au cycle suivant).
+const MAX_BATCH_MESSAGES = 10;
+const MAX_BATCH_BYTES = 50 * 1024 * 1024;
+const PARSE_CONCURRENCY = 3;
+const MAX_MESSAGES_PER_CYCLE = 200;
 
 cron.schedule("*/30 * * * *", () => {
   try {
@@ -191,15 +198,34 @@ const Module = {
         try {
           const search = ["ALL", ["SINCE", formatMailDate(imapArray[i].lastFetch)]];
           const lastFetch = imapArray[i].lastFetch;
-          const messages = await readMails(imapArray[i], "INBOX", search);
-          for (let message of messages) {
-            if (message.subject) {
-              const messageData = extractMailData(message);
-              if (!organisation.spamEmails.includes(messageData.fromAddress)) await addMessage(messageData, lastFetch);
+          const { complete, lastDate } = await readMailsInBatches(imapArray[i], "INBOX", search, async (batch) => {
+            for (const { mail } of batch) {
+              // Un email mal formé ne doit jamais arrêter la relève ni empêcher lastFetch d'avancer :
+              // seul messageId (sans PII) est journalisé.
+              try {
+                if (!mail.subject) continue;
+                const messageData = extractMailData(mail);
+                if (!messageData) {
+                  console.log("mail ignoré (expéditeur absent ou invalide) : ", mail.messageId);
+                  continue;
+                }
+                if (!organisation.spamEmails.includes(messageData.fromAddress)) await addMessage(messageData, lastFetch);
+              } catch (e) {
+                console.log("error processing mail : ", mail?.messageId);
+                capture(e);
+              }
             }
-          }
+          });
 
-          imapArray[i].lastFetch = new Date();
+          if (complete) {
+            imapArray[i].lastFetch = new Date();
+          } else if (lastDate && startOfDay(lastDate) > startOfDay(lastFetch)) {
+            // Cycle interrompu (plafond ou budget mémoire) : la recherche IMAP SINCE n'a qu'une
+            // granularité de jour, et addMessage dédoublonne par messageId.
+            imapArray[i].lastFetch = lastDate;
+          } else {
+            capture(new Error("relève IMAP interrompue sans progrès possible de lastFetch (trop de messages le même jour)"));
+          }
         } catch (e) {
           console.log("error fetching mail for imap config", imapArray[i]?.user);
           capture(e);
@@ -214,6 +240,10 @@ const Module = {
   },
 };
 
+function startOfDay(date) {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate()).getTime();
+}
+
 function formatMailDate(date = new Date()) {
   date = new Date(date.getTime());
   const monthNames = ["JANUARY", "FEBRUARY", "MARCH", "APRIL", "MAY", "JUNE", "JULY", "AUGUST", "SEPTEMBER", "OCTOBER", "NOVEMBER", "DECEMBER"];
@@ -221,6 +251,9 @@ function formatMailDate(date = new Date()) {
 }
 
 function extractMailData(message) {
+  const fromAddress = message.from?.value?.[0]?.address;
+  if (!fromAddress) return null;
+
   const data = {};
   if (message.subject.match(regex)) data.ticketNumber = message.subject.match(regex)[1];
   data.subject = message.subject;
@@ -230,16 +263,16 @@ function extractMailData(message) {
   data.textHtml = message.textHtml;
   data.text = message.text;
   data.references = message.references || [];
-  data.fromName = message.from.value[0]?.name;
-  data.fromAddress = message.from.value[0].address;
+  data.fromName = message.from.value[0].name;
+  data.fromAddress = fromAddress;
 
   data.messageId = message.messageId;
   data.inReplyTo = message.inReplyTo;
 
   data.attachments = message.attachments;
 
-  data.toName = message.to?.value[0]?.name;
-  data.toAdress = message.to?.value[0].address;
+  data.toName = message.to?.value?.[0]?.name;
+  data.toAdress = message.to?.value?.[0]?.address;
   data.date = message.date;
   data.copyRecipient = message.cc?.value?.map((recipient) => recipient.address);
   if (data.copyRecipient === undefined) data.copyRecipient = [];
@@ -268,7 +301,11 @@ function extractMailData(message) {
 //   return result;
 // }
 
-function readMails(imapConfig, box, searchs = []) {
+// Relève par groupes : au plus MAX_BATCH_MESSAGES messages et MAX_BATCH_BYTES octets de corps en
+// mémoire à la fois, analyse à concurrence limitée, et chaque groupe est remis à onBatch (et traité)
+// avant de télécharger le suivant. Avant, tous les corps du cycle étaient empilés puis analysés
+// ensemble : la mémoire du processus HTTP (partagé avec l'API agents) n'était bornée que par message.
+function readMailsInBatches(imapConfig, box, searchs = [], onBatch = async () => {}) {
   return new Promise((resolve, reject) => {
     // openBox/search passaient une erreur en argument sans jamais résoudre ni rejeter la promesse
     // (une recherche en échec résolvait même silencieusement []) : fetch() restait bloqué à vie sur
@@ -298,51 +335,94 @@ function readMails(imapConfig, box, searchs = []) {
 
         imap.search(searchs, (err, results) => {
           if (err) return settleReject(err);
-          if (!results || !results.length) return settleResolve([]);
+          if (!results || !results.length) return settleResolve({ complete: true, lastDate: null });
 
-          const fetchResults = imap.fetch(results, { bodies: "", struct: true });
-          const messages = [];
+          const ids = results.slice(0, MAX_MESSAGES_PER_CYCLE);
+          let complete = ids.length === results.length;
+          let lastDate = null;
 
-          fetchResults.on("message", (message) => {
-            const messageObj = { oversized: false, body: "" };
-            message.on("body", (stream) => {
-              stream.on("data", (chunk) => {
-                if (messageObj.oversized) return;
-                if (messageObj.body.length + chunk.length > MAX_MESSAGE_SIZE) {
-                  messageObj.oversized = true;
-                  messageObj.body = "";
-                  return;
-                }
-                messageObj.body += chunk.toString("utf8");
+          const finish = () => {
+            imap.closeBox(() => imap.end());
+            settleResolve({ complete, lastDate });
+          };
+
+          const fetchGroup = (start) => {
+            const group = { entries: [], bytes: 0, deferring: false };
+            const fetchResults = imap.fetch(ids.slice(start, start + MAX_BATCH_MESSAGES), { bodies: "", struct: true });
+
+            fetchResults.on("message", (message) => {
+              const entry = { body: "", bytes: 0, oversized: false, deferred: group.deferring, date: null, mail: null };
+              message.on("body", (stream) => {
+                stream.on("data", (chunk) => {
+                  if (entry.oversized || entry.deferred) return;
+                  if (entry.bytes + chunk.length > MAX_MESSAGE_SIZE) {
+                    entry.oversized = true;
+                    group.bytes -= entry.bytes;
+                    entry.body = "";
+                    return;
+                  }
+                  if (group.bytes + chunk.length > MAX_BATCH_BYTES) {
+                    entry.deferred = true;
+                    group.deferring = true;
+                    group.bytes -= entry.bytes;
+                    entry.body = "";
+                    return;
+                  }
+                  entry.bytes += chunk.length;
+                  group.bytes += chunk.length;
+                  entry.body += chunk.toString("utf8");
+                });
+              });
+              message.once("attributes", (attrs) => {
+                entry.date = attrs?.date || null;
+              });
+              message.once("end", () => {
+                group.entries.push(entry);
               });
             });
-            message.once("end", () => {
-              messages.push(messageObj);
+
+            fetchResults.once("error", (err) => settleReject(err));
+
+            fetchResults.once("end", async () => {
+              try {
+                const treated = group.entries.filter((entry) => !entry.deferred);
+                const parsable = treated.filter((entry) => {
+                  if (entry.oversized) capture(new Error(`readMails: message IMAP ignoré, corps > ${MAX_MESSAGE_SIZE} octets`));
+                  return !entry.oversized;
+                });
+
+                // Chaque mail est analysé indépendamment (allSettled) : avant, un seul email forgé
+                // faisant rejeter simpleParser perdait tout le lot via Promise.all, y compris les
+                // messages sains reçus au même cycle (PM51).
+                for (let i = 0; i < parsable.length; i += PARSE_CONCURRENCY) {
+                  const slice = parsable.slice(i, i + PARSE_CONCURRENCY);
+                  const parsed = await Promise.allSettled(slice.map((entry) => simpleParser(entry.body, { skipTextToHtml: true })));
+                  parsed.forEach((result, j) => {
+                    slice[j].body = "";
+                    if (result.status === "fulfilled") slice[j].mail = result.value;
+                    else capture(result.reason);
+                  });
+                }
+
+                await onBatch(treated.filter((entry) => entry.mail).map((entry) => ({ mail: entry.mail, date: entry.date })));
+
+                const dated = treated.filter((entry) => entry.date);
+                if (dated.length) lastDate = dated[dated.length - 1].date;
+
+                if (treated.length < group.entries.length) {
+                  complete = false;
+                  console.log("relève IMAP : emails différés au prochain cycle (budget mémoire du groupe atteint) :", group.entries.length - treated.length);
+                  return finish();
+                }
+                if (start + MAX_BATCH_MESSAGES < ids.length) return fetchGroup(start + MAX_BATCH_MESSAGES);
+                finish();
+              } catch (e) {
+                settleReject(e);
+              }
             });
-          });
+          };
 
-          fetchResults.once("error", (err) => settleReject(err));
-
-          fetchResults.once("end", async () => {
-            const oversizedCount = messages.filter((message) => message.oversized).length;
-            for (let i = 0; i < oversizedCount; i++) {
-              capture(new Error(`readMails: message IMAP ignoré, corps > ${MAX_MESSAGE_SIZE} octets`));
-            }
-
-            // Chaque mail est analysé indépendamment (allSettled) : avant, un seul email forgé
-            // faisant rejeter simpleParser perdait tout le lot via Promise.all, y compris les
-            // messages sains reçus au même cycle (PM51).
-            const settledParses = await Promise.allSettled(messages.filter((message) => !message.oversized).map((message) => simpleParser(message.body, { skipTextToHtml: true })));
-
-            const mails = [];
-            for (const result of settledParses) {
-              if (result.status === "fulfilled") mails.push(result.value);
-              else capture(result.reason);
-            }
-
-            imap.closeBox(() => imap.end());
-            settleResolve(mails);
-          });
+          fetchGroup(0);
         });
       });
     });
@@ -355,6 +435,14 @@ function readMails(imapConfig, box, searchs = []) {
 
     imap.connect();
   });
+}
+
+async function readMails(imapConfig, box, searchs = []) {
+  const mails = [];
+  await readMailsInBatches(imapConfig, box, searchs, async (batch) => {
+    for (const { mail } of batch) mails.push(mail);
+  });
+  return mails;
 }
 module.exports = Module;
 // Exporté pour les tests : addMessage porte la logique de rattachement d'un mail entrant à un ticket.
