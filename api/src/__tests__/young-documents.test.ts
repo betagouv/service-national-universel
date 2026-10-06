@@ -13,6 +13,7 @@ import getNewContractFixture from "./fixtures/contract";
 import { createContractHelper } from "./helpers/contract";
 import { sendDocumentEmailTask } from "../queues/sendMailQueue";
 import { getAllPdfTemplates } from "../utils/pdf-renderer";
+import { sendDocumentEmail } from "../young/youngSendDocumentEmailService";
 
 // We mock node-fetch for PDF generation.
 jest.mock("node-fetch", () =>
@@ -71,13 +72,117 @@ describe("Young", () => {
     it("should return the certificate", async () => {
       const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
       const sessionPhase1 = await createSessionPhase1({ ...getNewSessionPhase1Fixture(), cohesionCenterId: cohesionCenter._id });
-      const young = await createYoungHelper({ ...getNewYoungFixture(), sessionPhase1Id: sessionPhase1._id });
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        sessionPhase1Id: sessionPhase1._id,
+        statusPhase1: "DONE",
+        statusPhase2: "VALIDATED",
+        statusPhase3: "VALIDATED",
+      });
       await createCohortHelper({ ...getNewCohortFixture(), name: young.cohort });
       const certificates = ["1", "2", "3", "snu"];
       for (const certificate of certificates) {
         const res = await request(getAppHelper()).post("/young/" + young._id + "/documents/certificate/" + certificate);
         expect(res.status).toBe(200);
       }
+    });
+  });
+
+  // Chaque attestation ne doit sanctionner que la phase réellement terminée : avant GOO-159 (PM16),
+  // le serveur ne contrôlait aucun statut et générait l'attestation quel que soit l'avancement réel
+  // du volontaire.
+  describe("Statut requis pour générer une attestation (GOO-159 : PM16)", () => {
+    it("devrait renvoyer 403 pour l'attestation phase 1 si statusPhase1 n'est pas DONE", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase1: "AFFECTED" });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/1`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 403 pour l'attestation phase 2 si statusPhase2 n'est pas VALIDATED", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase2: "IN_PROGRESS" });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/2`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 403 pour l'attestation phase 3 si statusPhase3 n'est pas VALIDATED", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase3: "WAITING_VALIDATION" });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/3`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 403 pour l'attestation SNU si statusPhase1 n'est pas DONE, même phase 2 validée", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase1: "AFFECTED", statusPhase2: "VALIDATED" });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/snu`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 403 pour l'attestation SNU si statusPhase2 n'est pas VALIDATED, même phase 1 terminée", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2: "IN_PROGRESS" });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/snu`);
+
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 200 pour l'attestation SNU d'un volontaire EXEMPTED de la phase 1 dont la phase 2 est VALIDATED", async () => {
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        statusPhase1: "EXEMPTED",
+        statusPhase2: "VALIDATED",
+        statusPhase2ValidatedAt: new Date(),
+      });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/snu`);
+
+      expect(res.status).toBe(200);
+    });
+
+    it("devrait renvoyer 403 à l'envoi par mail de l'attestation phase 2 si statusPhase2 n'est pas VALIDATED, sans lancer de tâche", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase2: "IN_PROGRESS" });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/2/send-email`).send({ fileName: "attestation.pdf" });
+
+      expect(res.status).toBe(403);
+      expect(sendDocumentEmailTask).not.toHaveBeenCalled();
+    });
+
+    it("devrait renvoyer 200 à l'envoi par mail de l'attestation phase 3 si statusPhase3 est VALIDATED", async () => {
+      const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase3: "VALIDATED", statusPhase3ValidatedAt: new Date() });
+
+      const res = await request(getAppHelper()).post(`/young/${young._id}/documents/certificate/3/send-email`).send({ fileName: "attestation.pdf" });
+
+      expect(res.status).toBe(200);
+      expect(sendDocumentEmailTask).toHaveBeenCalled();
+    });
+
+    // La route POST .../send-email ne fait qu'enfiler sendDocumentEmailTask (mocké ci-dessus) : la
+    // garde de generatePdfIntoStream, elle, est rejouée par le worker réel (sendMailQueue ->
+    // youngSendDocumentEmailService.sendDocumentEmail -> generatePdfIntoBuffer), hors de ce
+    // processus de requête. On exerce donc ce chemin directement, sans mock de pdf-renderer.
+    describe("Garde rejouée par le worker réel (sendDocumentEmail)", () => {
+      it("devrait rejeter l'envoi si le statut n'est plus valide au moment où le worker s'exécute", async () => {
+        const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase3: "WAITING_VALIDATION" });
+
+        await expect(
+          sendDocumentEmail({ young_id: young._id.toString(), type: "certificate", template: "3", fileName: "attestation.pdf", switchToCle: false }),
+        ).rejects.toThrow();
+      });
+
+      it("devrait générer et envoyer l'attestation quand le statut est valide au moment où le worker s'exécute", async () => {
+        const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase3: "VALIDATED", statusPhase3ValidatedAt: new Date() });
+
+        await expect(
+          sendDocumentEmail({ young_id: young._id.toString(), type: "certificate", template: "3", fileName: "attestation.pdf", switchToCle: false }),
+        ).resolves.not.toThrow();
+      });
     });
   });
   // Todo
