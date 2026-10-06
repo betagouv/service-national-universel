@@ -29,17 +29,23 @@ n'arrive sur un filtre vide.
 
 - `canActOnLigneBus`, `canUpdateLigneBus`, `canCreateMeetingPoint`, `canUpdateMeetingPoint` pour le
   transporteur : P25b.
-- `GET /cle/classe/from-etablissement/:id` (contrôleur hors Elasticsearch) renvoie encore l'email du
-  référent de classe à ADMIN et aux référents.
-- `GET /referent/:id/session-phase1` ne renvoie des sessions que pour une cible chef de centre,
-  adjoint ou référent sanitaire : branche sans effet après la migration, conservée.
+- Routes de consultation hors Elasticsearch qui renvoient encore email et téléphone des référents de
+  classe, chefs d'établissement, coordinateurs et chefs de centre à ADMIN et aux référents :
+  `GET /session-phase1/:id`, `GET /cle/classe` et `GET /cle/classe/:id`, `GET /cle/classe/from-etablissement/:id`,
+  export des classes, `GET /cle/etablissement/:id`, `GET /cle/referent?ids=`, et l'annuaire
+  `POST /elasticsearch/referent/search`. La décision « noms seulement » est appliquée ici aux index
+  Elasticsearch ; son extension à ces routes reste à décider.
+- `GET /referent/:id/session-phase1` ne renvoie des sessions que pour un compte cible chef de centre,
+  adjoint ou référent sanitaire : sans objet une fois les comptes migrés (P25d), conservée.
+- Admin, pour GOO-88 : l'écran `/mes-eleves` appelle la route supprimée `cle/young` ;
+  `GET /cle/etablissement/from-user` n'a plus d'appelant possible.
 
 ## 4. Tests
 
 - `packages/lib/src/roles.spec.ts` : chaque helper × chaque rôle retiré refusé, ADMIN et référents
   acceptés, index `youngCle` refusé.
 - `api/src/__tests__/elasticsearch-decommissionnement-p25a.test.ts` : 16 routes Elasticsearch ×
-  7 rôles retirés (403 sans appel Elasticsearch), routes retirées (404), ADMIN et référents (200).
+  7 rôles retirés (403 sans appel Elasticsearch ; ces comptes sont déjà refusés à l'authentification, ces 403 sont une défense en profondeur), routes retirées (404), ADMIN et référents (200).
 - `api/src/__tests__/consultation-decommissionnement-p25a.test.ts` : routes de consultation hors
   Elasticsearch (session, point de rassemblement, service départemental, demande de modification,
   export convoyeur, fiches classe, établissement, élèves par classe).
