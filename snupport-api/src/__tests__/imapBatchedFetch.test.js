@@ -225,7 +225,7 @@ describe("Module.fetch — mémoire bornée en agrégat (E-5)", () => {
     expect(FakeImap.fetchCalls.map((ids) => ids.length)).toEqual([10, 10, 5]);
     expect(maxInFlightParses).toBeGreaterThan(0);
     expect(maxInFlightParses).toBeLessThanOrEqual(3);
-    expect(ingestedIds()).toHaveLength(25);
+    expect(ingestedIds()).toEqual(Array.from({ length: 25 }, (_, i) => `<m${i + 1}@ext.tld>`));
     expect(imapConfig.lastFetch.getTime()).toBeGreaterThan(Date.now() - 60_000);
   });
 
@@ -251,6 +251,18 @@ describe("Module.fetch — mémoire bornée en agrégat (E-5)", () => {
     expect(ingestedIds()).toEqual(["<BIG1@ext.tld>", "<BIG2@ext.tld>", "<BIG3@ext.tld>"]);
     expect(imapConfig.lastFetch.getTime()).toBeGreaterThan(Date.now() - 60_000);
     expect(mockCaptured).toEqual([]);
+  }, 30000);
+
+  it("écarte un email de plus de 25 Mo sans bloquer la boîte : l'email sain du même jour est ingéré et lastFetch avance", async () => {
+    const sameDay = new Date(2026, 0, 3, 9);
+    FakeImap.reset([bigEntry(1, "ENORME", sameDay, 26 * 1024 * 1024), entry(2, "sain", sameDay)]);
+    const { imapConfig } = makeOrganisation();
+
+    await moduleFetch();
+
+    expect(ingestedIds()).toEqual(["<sain@ext.tld>"]);
+    expect(mockCaptured).toHaveLength(1);
+    expect(imapConfig.lastFetch.getTime()).toBeGreaterThan(Date.now() - 60_000);
   }, 30000);
 
   it("ingère tous les emails d'un même jour au-delà de 200, sans bloquer la boîte", async () => {
