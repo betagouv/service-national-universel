@@ -377,7 +377,7 @@ function buildDashboardUserRoleContext(user: UserDto): DashboardUserRoleContextR
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
-  if (user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR) {
+  if (user.role === ROLES.REFERENT_REGION) {
     contextFilters.push({ terms: { "region.keyword": [user.region] } });
   }
   return { dashboardUserRoleContextFilters: contextFilters };

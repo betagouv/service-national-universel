@@ -31,7 +31,7 @@ router.post("/:action(search|export)", authMiddleware(["referent"]), async (req:
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
-    // Référents : points de leur région / département ; admin et transporteur : national.
+    // Référents : points de leur région / département ; admin : national.
     const contextFilters: any[] = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }, { exists: { field: "matricule" } }, getGeoScopeEsFilter(user)].filter(Boolean);
 
     // Build request body

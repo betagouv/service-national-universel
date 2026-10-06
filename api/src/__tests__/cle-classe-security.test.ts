@@ -109,6 +109,23 @@ describe("Sécurité classe CLE — audit 2026-09-21", () => {
       });
     }, 30000);
 
+    it("refuse l'administrateur CLE de l'établissement, rôle décommissionné", async () => {
+      const chef = await ReferentModel.create(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
+      const { etablissement } = await createEtablissementWithClasse({ referentEtablissementIds: [chef._id.toString()] });
+
+      const res = await request(await getAppHelperWithAcl(chef)).get(`/cle/classe/from-etablissement/${etablissement._id}`);
+
+      expect(res.statusCode).toEqual(403);
+    }, 30000);
+
+    it("refuse le référent de classe sur son propre établissement, rôle décommissionné", async () => {
+      const { etablissement, referentClasse } = await createEtablissementWithClasse();
+
+      const res = await request(await getAppHelperWithAcl(referentClasse)).get(`/cle/classe/from-etablissement/${etablissement._id}`);
+
+      expect(res.statusCode).toEqual(403);
+    }, 30000);
+
     it("autorise le référent départemental sur un établissement de son département", async () => {
       const { etablissement } = await createEtablissementWithClasse({ department: "Sarthe", region: "Pays de la Loire" });
       const referent = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));

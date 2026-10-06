@@ -10,7 +10,7 @@ import esClient from "../../es";
 import { ERRORS } from "../../utils";
 import { allRecords } from "../../es/utils";
 import { buildNdJson, buildRequestBody, joiElasticSearch } from "./utils";
-import { StructureModel, EtablissementModel, ClasseModel } from "../../models";
+import { StructureModel } from "../../models";
 import { serializeReferents } from "../../utils/es-serializer";
 import { UserRequest } from "../request";
 import { authMiddleware } from "../../middlewares/authMiddleware";
@@ -131,56 +131,6 @@ async function buildReferentContext(user: UserDto): Promise<ReferentContext> {
     });
   }
 
-  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-    contextFilters.push({
-      bool: {
-        must: [{ terms: { "role.keyword": [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.REFERENT_DEPARTMENT] } }],
-      },
-    });
-  }
-
-  if (user.role === ROLES.ADMINISTRATEUR_CLE) {
-    /*
-      Can see:
-      - all referents dep of the department of his etablissement
-      - all ref ADMIN CLE of his etablissement
-      - all ref Classe of his etablissement
-    */
-    const refIds: string[] = [];
-    const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
-    if (!etablissement) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const classes = await ClasseModel.find({ etablissementId: etablissement._id });
-    refIds.push(...classes.flatMap((c) => c.referentClasseIds), ...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds);
-    contextFilters.push({
-      bool: {
-        should: [
-          { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "department.keyword": etablissement.department } }] } },
-          { bool: { must: { ids: { values: refIds } } } },
-        ],
-      },
-    });
-  }
-
-  if (user.role === ROLES.REFERENT_CLASSE) {
-    /*
-      Can see:
-      - all referents dep of the department of his etablissement
-      - all ref ADMIN CLE of his etablissement
-      - all ref Classe of his etablissement and all ref of hiis departement
-    */
-    const classes = await ClasseModel.findOne({ referentClasseIds: user._id });
-    if (!classes) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const etablissement = await EtablissementModel.findOne({ _id: classes.etablissementId });
-    const refIds = [...(etablissement?.referentEtablissementIds || []), ...(etablissement?.coordinateurIds || [])];
-    contextFilters.push({
-      bool: {
-        should: [
-          { bool: { must: [{ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE] } }, { term: { "department.keyword": etablissement?.department } }] } },
-          { bool: { must: { ids: { values: refIds } } } },
-        ],
-      },
-    });
-  }
   return { referentContextFilters: contextFilters };
 }
 
@@ -259,9 +209,8 @@ router.post(
       ].filter(Boolean);
 
       // Les deux bornes ci-dessus ne couvrent que les référents départementaux et régionaux.
-      // Tous les autres rôles admis par `canSearchInElasticSearch` (responsable, superviseur, chef
-      // de centre, administrateur CLE, référent de classe) interrogeaient l'index sans aucune borne :
-      // l'onglet Équipe leur restituait l'annuaire national des référents. L'administrateur, lui,
+      // Les autres rôles admis par `canSearchInElasticSearch` (responsable, superviseur) interrogeaient
+      // l'index sans aucune borne : l'onglet Équipe leur restituait l'annuaire national des référents. L'administrateur, lui,
       // ne reçoit aucune clause : `buildReferentContext` n'en produit pas pour ce rôle.
       if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
         const { referentContextFilters, referentContextError } = await buildReferentContext(user);

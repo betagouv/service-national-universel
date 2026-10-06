@@ -264,11 +264,11 @@ const prepareSharedData = async (ligneBus) => {
 
 /**
  * Rôles autorisés à voir les jeunes d'une ligne, et périmètre appliqué :
- * national pour l'admin et le transporteur, points de rassemblement de leur
- * territoire pour les référents. Tout autre rôle repart sans aucun jeune —
+ * national pour l'admin, points de rassemblement de leur territoire pour les
+ * référents. Tout autre rôle repart sans aucun jeune —
  * défense en profondeur si canExportLigneBus s'élargit un jour (cf. C5).
  */
-const LIGNEBUS_YOUNG_SCOPED_ROLES = [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
+const LIGNEBUS_YOUNG_SCOPED_ROLES = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
 
 const populateWithYoungInfo = async (ligneBus, user, sharedData) => {
   try {

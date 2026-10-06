@@ -180,6 +180,7 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
     const requests = young.correctionRequests ? young.correctionRequests : [];
 
     for (const request of requests) {
+      if (request.status !== "SENT" && request.status !== "REMINDED") continue;
       found = true;
       // @ts-expect-error moderatorId is a string
       request.moderatorId = req.user._id;

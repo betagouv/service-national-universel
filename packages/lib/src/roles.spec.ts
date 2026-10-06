@@ -161,3 +161,87 @@ describe("getYoungFieldsHiddenFrom / omitYoungFields", () => {
     expect(files.cniFiles).toHaveLength(1);
   });
 });
+
+describe("décommissionnement P25a : helpers de recherche et de consultation", () => {
+  const { ADMIN, REFERENT_REGION: REG, REFERENT_DEPARTMENT: DEP, RESPONSIBLE, SUPERVISOR } = ROLES;
+  const ADMIN_REFS = [ADMIN, REG, DEP];
+  const actorOf = (role: string) => ({ _id: "actor", role }) as unknown as UserDto;
+
+  const helperExpectations: Array<[string, string[]]> = [
+    ["canSearchSessionPhase1", ADMIN_REFS],
+    ["canViewSessionPhase1", ADMIN_REFS],
+    ["canSendImageRightsForSessionPhase1", ADMIN_REFS],
+    ["canViewCohesionCenter", ADMIN_REFS],
+    ["canViewMeetingPoints", ADMIN_REFS],
+    ["canSearchMeetingPoints", ADMIN_REFS],
+    ["canViewDepartmentService", [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR]],
+    ["canShareSessionPhase1", [...ADMIN_REFS, RESPONSIBLE]],
+    ["canSearchLigneBus", ADMIN_REFS],
+    ["canExportLigneBus", ADMIN_REFS],
+    ["canExportConvoyeur", [ADMIN]],
+    ["ligneBusCanViewDemandeDeModification", ADMIN_REFS],
+    ["canSeeDashboardInscriptionInfo", ADMIN_REFS],
+    ["canSeeDashboardInscriptionDetail", ADMIN_REFS],
+    ["canViewClasse", ADMIN_REFS],
+    ["canViewEtablissement", ADMIN_REFS],
+    ["canSearchStudent", ADMIN_REFS],
+  ];
+
+  it.each(helperExpectations)("%s : ne garde que les rôles attendus, aucun rôle décommissionné", async (name, allowed) => {
+    const roles: any = await import("./roles");
+    for (const role of ROLES_LIST) {
+      expect({ role, ok: !!roles[name](actorOf(role)) }).toEqual({ role, ok: allowed.includes(role as any) });
+    }
+  });
+
+  it("canCreateOrUpdateSessionPhase1 : admin et référents seulement, même propriétaire de la session", async () => {
+    const roles: any = await import("./roles");
+    const target = { headCenterId: "actor", adjointsIds: ["actor"] };
+    for (const role of ROLES_LIST) {
+      expect({ role, ok: !!roles.canCreateOrUpdateSessionPhase1(actorOf(role), target) }).toEqual({ role, ok: ADMIN_REFS.includes(role as any) });
+    }
+  });
+
+  it("canSeeDashboardSejourHeadCenter n'est plus exportée (route retirée, aucun appelant admin/app)", async () => {
+    const roles = await import("./roles");
+    expect(roles).not.toHaveProperty("canSeeDashboardSejourHeadCenter");
+  });
+
+  it("canSeeDashboardSejourInfo reste réservée à admin et référents", async () => {
+    const roles: any = await import("./roles");
+    for (const role of ROLES_LIST) {
+      expect({ role, ok: !!roles.canSeeDashboardSejourInfo(actorOf(role)) }).toEqual({ role, ok: ADMIN_REFS.includes(role as any) });
+    }
+  });
+
+  const indexExpectations: Record<string, string[]> = {
+    mission: [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR],
+    school: [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR],
+    schoolramses: [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR],
+    "young-having-school-in-department": [ADMIN, DEP],
+    "young-having-school-in-region": [ADMIN, REG],
+    cohesionyoung: ADMIN_REFS,
+    sessionphase1young: ADMIN_REFS,
+    sessionphase1: ADMIN_REFS,
+    structure: [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR],
+    referent: [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR],
+    application: [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR],
+    cohesioncenter: ADMIN_REFS,
+    team: [REG, DEP],
+    modificationbus: ADMIN_REFS,
+    "young-by-school": ADMIN_REFS,
+    young: ADMIN_REFS,
+    "aggregate-status": ADMIN_REFS,
+    lignebus: ADMIN_REFS,
+    classe: ADMIN_REFS,
+    etablissement: ADMIN_REFS,
+    youngCle: [],
+  };
+
+  it.each(Object.entries(indexExpectations))("canSearchInElasticSearch(%s) : seuls les rôles attendus", async (index, allowed) => {
+    const roles: any = await import("./roles");
+    for (const role of ROLES_LIST) {
+      expect({ role, ok: roles.canSearchInElasticSearch(actorOf(role), index) }).toEqual({ role, ok: allowed.includes(role as any) });
+    }
+  });
+});
