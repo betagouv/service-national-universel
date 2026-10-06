@@ -456,8 +456,9 @@ describe("Young", () => {
         .send({ invitationToken });
 
       expect(res.statusCode).toEqual(404);
-      // Le 404 par défaut d'Express n'a pas de corps applicatif : un gestionnaire encore monté qui
-      // ne trouverait pas la ressource répondrait { ok: false, code: "INVITATION_TOKEN_EXPIRED_OR_INVALID" }.
+      // Le 404 par défaut d'Express n'a pas de corps applicatif : un gestionnaire encore monté
+      // répondrait avec un corps { ok: ..., code: ... } — ici 200 avec le dossier puisque le jeton
+      // est valide, ou { ok: false, code: "INVITATION_TOKEN_EXPIRED_OR_INVALID" } sinon.
       expect(res.body?.ok).toBeUndefined();
       expect(res.body?.code).toBeUndefined();
     });
