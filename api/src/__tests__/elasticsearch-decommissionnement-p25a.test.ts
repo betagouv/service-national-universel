@@ -46,25 +46,9 @@ jest.mock("../es", () => {
 
 jest.mock("../sentry", () => ({ capture: jest.fn(), captureMessage: jest.fn(), initSentry: jest.fn(), capture404: jest.fn() }));
 
-/** Corps (hits) des requêtes msearch émises, dans l'ordre. */
-function msearchHitsBodies(): any[] {
-  return mockEsCalls.msearch.map((call) => {
-    const lines = String(call.body)
-      .trim()
-      .split("\n")
-      .map((line) => JSON.parse(line));
-    return lines[1];
-  });
-}
-
-function allQueries(): string {
-  return [...mockEsCalls.msearch.map((call) => String(call.body)), ...mockEsCalls.search.map((call) => JSON.stringify(call.body))].join("\n");
-}
-
 const referent = (overrides: any) => getAppHelper({ ...getNewReferentFixture(), _id: new Types.ObjectId(), ...overrides } as any);
 const referentRegion = () => referent({ role: ROLES.REFERENT_REGION, region: "Bretagne", department: [] });
 const referentDepartement = () => referent({ role: ROLES.REFERENT_DEPARTMENT, region: "Bretagne", department: ["Finistère"] });
-
 
 const admin = () => referent({ role: ROLES.ADMIN });
 
