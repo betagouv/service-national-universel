@@ -42,9 +42,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     // Authorization
     if (!canSearchInElasticSearch(user, "classe")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (req.params.action === "export") {
-      // L'export porte les coordonnées des référents de classe, chefs d'établissement et
-      // coordinateurs : seuls les rôles à qui l'admin propose le bouton y ont accès. Le
-      // transporteur, qui n'a que la recherche, obtenait l'export national (cf. FH4).
+      // L'export est réservé aux rôles à qui l'admin propose le bouton (cf. FH4).
       if (!CLASSE_EXPORT_ROLES.includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       if (req.query?.type === "schema-de-repartition" && ![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
