@@ -47,6 +47,15 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
       if (isYoung(req.user) || !canViewYoungMilitaryPreparationFile(req.user, young)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
+    } else if (isYoung(req.user)) {
+      // Le volontaire ne peut déposer/redéposer son dossier que depuis un statut légitime pour lui
+      // (dépôt initial ou renvoi après correction demandée). Depuis REFUSED ou VALIDATED, repasser
+      // en WAITING_VERIFICATION lèverait la décision du référent sans son accord (cf. FM1 : le
+      // blocage de candidature PM d'applicationService.ts se base sur REFUSED).
+      const legitimateSourceStatuses: Array<string | undefined> = [undefined, MILITARY_PREPARATION_FILES_STATUS.WAITING_CORRECTION];
+      if (!legitimateSourceStatuses.includes(young.statusMilitaryPreparationFiles)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
     }
 
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
