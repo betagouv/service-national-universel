@@ -13,6 +13,7 @@ import getNewContractFixture from "./fixtures/contract";
 import { createContractHelper } from "./helpers/contract";
 import { sendDocumentEmailTask } from "../queues/sendMailQueue";
 import { getAllPdfTemplates } from "../utils/pdf-renderer";
+import { sendDocumentEmail } from "../young/youngSendDocumentEmailService";
 
 // We mock node-fetch for PDF generation.
 jest.mock("node-fetch", () =>
@@ -160,6 +161,28 @@ describe("Young", () => {
 
       expect(res.status).toBe(200);
       expect(sendDocumentEmailTask).toHaveBeenCalled();
+    });
+
+    // La route POST .../send-email ne fait qu'enfiler sendDocumentEmailTask (mocké ci-dessus) : la
+    // garde de generatePdfIntoStream, elle, est rejouée par le worker réel (sendMailQueue ->
+    // youngSendDocumentEmailService.sendDocumentEmail -> generatePdfIntoBuffer), hors de ce
+    // processus de requête. On exerce donc ce chemin directement, sans mock de pdf-renderer.
+    describe("Garde rejouée par le worker réel (sendDocumentEmail)", () => {
+      it("devrait rejeter l'envoi si le statut n'est plus valide au moment où le worker s'exécute", async () => {
+        const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase3: "WAITING_VALIDATION" });
+
+        await expect(
+          sendDocumentEmail({ young_id: young._id.toString(), type: "certificate", template: "3", fileName: "attestation.pdf", switchToCle: false }),
+        ).rejects.toThrow();
+      });
+
+      it("devrait générer et envoyer l'attestation quand le statut est valide au moment où le worker s'exécute", async () => {
+        const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase3: "VALIDATED", statusPhase3ValidatedAt: new Date() });
+
+        await expect(
+          sendDocumentEmail({ young_id: young._id.toString(), type: "certificate", template: "3", fileName: "attestation.pdf", switchToCle: false }),
+        ).resolves.not.toThrow();
+      });
     });
   });
   // Todo
