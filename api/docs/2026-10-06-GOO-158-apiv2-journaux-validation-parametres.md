@@ -11,7 +11,8 @@ Déploiement : apiv2 seul. Aucun contrat de front modifié, aucune migration, au
 
 - Le filtre d'exceptions n'écrit plus l'URL brute de la requête : il journalise le chemin de la route (ou, à défaut,
   l'URL passée par la fonction de redaction partagée `@snu/log-redaction`). Le message envoyé à Sentry suit la même
-  règle. Le code qui lisait l'ancienne structure interne du routeur, absente d'Express 5, est supprimé.
+  règle. Le texte complet du journal d'erreur (message d'exception et pile, y compris pour une route inexistante) passe
+  par la redaction. Le code qui lisait l'ancienne structure interne du routeur, absente d'Express 5, est supprimé.
 - Le fournisseur Brevo du plan marketing ne journalise plus l'URL de notification transmise à l'import de contacts :
   seul le nom de la liste est écrit. L'URL complète reste transmise à Brevo.
 
