@@ -38,4 +38,17 @@ describe("noticePushMission — toMailMission", () => {
     expect(mission.address).toEqual("Lyon, 69001");
     expect(mission.cta).toMatch(/\/mission\/0123456789abcdef01234567$/);
   });
+
+  it("retire le balisage des domaines (valeur inconnue renvoyée telle quelle par translate)", () => {
+    const mission = toMailMission(hit({ name: "Aide", structureName: "Asso", city: "Lyon", zip: "69001", domains: ['<a href="https://sosie.example">Sport</a>', "SPORT"] }));
+
+    expect(mission.domains).not.toMatch(/[<>]/);
+    expect(mission.domains).toContain("Sport");
+  });
+
+  it("conserve les domaines connus, traduits", () => {
+    const mission = toMailMission(hit({ name: "Aide", structureName: "Asso", city: "Lyon", zip: "69001", domains: ["SPORT"] }));
+
+    expect(mission.domains).toEqual("Sport");
+  });
 });

@@ -6,7 +6,7 @@
  * parcours existant.
  */
 import { config } from "../config";
-import { isTrustedEmailLink, sanitizeEmailText } from "../email/emailInput";
+import { isTrustedEmailLink, sanitizeEmailParams, sanitizeEmailText } from "../email/emailInput";
 
 describe("isTrustedEmailLink", () => {
   it("accepte le document servi depuis le stockage objet du service", () => {
@@ -64,5 +64,32 @@ describe("sanitizeEmailText", () => {
   it("ne transforme pas une valeur absente en chaîne vide", () => {
     expect(sanitizeEmailText(undefined)).toBeUndefined();
     expect(sanitizeEmailText(null)).toBeNull();
+  });
+});
+
+describe("sanitizeEmailParams", () => {
+  const html = '<a href="https://snu-gouv.example.org">Nom</a>';
+
+  it("assainit uniquement les clés listées, sans modifier l'objet d'origine", () => {
+    const params = { missionName: html, cta: "https://app.example/phase2", other: html };
+
+    const result = sanitizeEmailParams(params, ["missionName"]);
+
+    expect(result).toEqual({ missionName: "Nom", cta: "https://app.example/phase2", other: html });
+    expect(params.missionName).toEqual(html);
+  });
+
+  it("assainit chaque élément d'un tableau de chaînes", () => {
+    expect(sanitizeEmailParams({ domains: [html, "Sport"] }, ["domains"])).toEqual({ domains: ["Nom", "Sport"] });
+  });
+
+  it("laisse intactes les valeurs absentes, nulles, vides ou non textuelles", () => {
+    const params = { a: undefined, b: null, c: "", d: 3 } as Record<string, unknown>;
+
+    expect(sanitizeEmailParams(params, ["a", "b", "c", "d", "absente"])).toEqual(params);
+  });
+
+  it("conserve un texte sans balise", () => {
+    expect(sanitizeEmailParams({ missionName: "Aide aux devoirs" }, ["missionName"])).toEqual({ missionName: "Aide aux devoirs" });
   });
 });
