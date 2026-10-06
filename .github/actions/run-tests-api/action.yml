@@ -4,10 +4,6 @@ inputs:
   branch_name:
     description: "Branch name"
     required: true
-  CC_TEST_REPORTER_ID:
-    description: "CC_TEST_REPORTER_ID"
-    required: false
-    default: ""
 
 runs:
   using: "composite"
@@ -126,13 +122,3 @@ runs:
       env:
         NODE_OPTIONS: --max-old-space-size=4096
       run: npm run test
-
-    # TODO: Uncomment this when we can use Code Climate again
-    # - name: Test and Send coverage
-    #   uses: paambaati/codeclimate-action@v9.0.0
-    #   env:
-    #     CC_TEST_REPORTER_ID: ${{ inputs.CC_TEST_REPORTER_ID }}
-    #     CI: true
-    #   with:
-    #     workingDirectory: api
-    #     coverageCommand: npm run coverage

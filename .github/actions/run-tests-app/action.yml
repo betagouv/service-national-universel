@@ -4,10 +4,6 @@ inputs:
   branch_name:
     description: "Branch name"
     required: true
-  CC_TEST_REPORTER_ID:
-    description: "CC_TEST_REPORTER_ID"
-    required: false
-    default: ""
 
 runs:
   using: "composite"
@@ -91,12 +87,10 @@ runs:
 
     - name: Check types
       working-directory: app
-      continue-on-error: false
       shell: bash
       run: npm run check-types
 
     - name: Lint code
       working-directory: app
-      continue-on-error: false
       shell: bash
       run: npm run lint

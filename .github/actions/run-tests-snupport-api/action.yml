@@ -4,10 +4,6 @@ inputs:
   branch_name:
     description: "Branch name"
     required: true
-  CC_TEST_REPORTER_ID:
-    description: "CC_TEST_REPORTER_ID"
-    required: false
-    default: ""
 
 runs:
   using: "composite"
