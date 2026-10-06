@@ -71,7 +71,8 @@ const acteur = (role: string) => ({
   lastName: role,
 });
 const AUTORISES = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
-const get = async (role: string, url: string) => request(await getAppHelperWithAcl(acteur(role) as any)).get(url);
+// Document Referent (comme en production) : certaines gardes testent `isReferent(req.user)`.
+const get = async (role: string, url: string) => request(await getAppHelperWithAcl(new ReferentModel(acteur(role)) as any)).get(url);
 
 async function verdicts(url: string, roles: readonly string[]) {
   const observes: string[] = [];
