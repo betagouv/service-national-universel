@@ -9,8 +9,12 @@ import { getNewReferentFixture } from "./fixtures/referent";
 import { createReferentHelper, getReferentByIdHelper } from "./helpers/referent";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 import { addPermissionHelper } from "./helpers/permissions";
+import { Types } from "mongoose";
+import { StructureModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { getAcl } from "../services/iam/Permission.service";
+
+const { ObjectId } = Types;
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -77,6 +81,104 @@ describe("Structure", () => {
         .post("/structure")
         .send(structure);
       expect(res.status).toBe(403);
+    });
+
+    describe("PH13 — drapeau « préparation militaire » à la création", () => {
+      const uniqueName = (prefix: string) => `${prefix} ${new ObjectId().toString()}`;
+      const findByName = (name: string) => StructureModel.find({ name });
+
+      // STRUCTURE_CREATE n'est pas seedée pour le superviseur et le responsable dans ce fichier (voir les tests ci-dessus) : seed local.
+      beforeAll(async () => {
+        await addPermissionHelper([ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.CREATE);
+      });
+      afterAll(async () => {
+        await PermissionModel.deleteMany({ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.CREATE });
+      });
+
+      it("SUPERVISOR ne crée pas une structure préparation militaire", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "true" });
+        const name = uniqueName("PM superviseur");
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() }))
+          .post("/structure")
+          .send({ ...getNewStructureFixture(), name, isMilitaryPreparation: "true" });
+        expect(res.status).toBe(403);
+        expect(await findByName(name)).toHaveLength(0);
+      });
+
+      it("RESPONSIBLE ne crée pas une structure préparation militaire", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false" });
+        const name = uniqueName("PM responsable");
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+          .post("/structure")
+          .send({ ...getNewStructureFixture(), name, isMilitaryPreparation: "true" });
+        expect(res.status).toBe(403);
+        expect(await findByName(name)).toHaveLength(0);
+      });
+
+      it("RESPONSIBLE crée une structure avec le drapeau « false » : créée sans le drapeau", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "false" });
+        const name = uniqueName("Responsable formulaire");
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+          .post("/structure")
+          .send({ ...getNewStructureFixture(), name, isMilitaryPreparation: "false" });
+        expect(res.status).toBe(200);
+        const [created] = await findByName(name);
+        expect(created.isMilitaryPreparation).toBeUndefined();
+      });
+
+      it("SUPERVISOR crée une antenne sans le champ : inchangé, rattachée à son réseau", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "true" });
+        const name = uniqueName("Antenne");
+        const { isMilitaryPreparation, ...fixture } = getNewStructureFixture();
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() }))
+          .post("/structure")
+          .send({ ...fixture, name });
+        expect(res.status).toBe(200);
+        const [created] = await findByName(name);
+        expect(created.networkId).toBe(network._id.toString());
+        expect(created.isMilitaryPreparation).toBeUndefined();
+      });
+
+      it("SUPERVISOR crée une antenne avec le corps du formulaire admin (drapeau « false ») : créée sans le drapeau", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), isNetwork: "true" });
+        const name = uniqueName("Antenne formulaire");
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() }))
+          .post("/structure")
+          .send({ ...getNewStructureFixture(), name, isMilitaryPreparation: "false" });
+        expect(res.status).toBe(200);
+        const [created] = await findByName(name);
+        expect(created.isMilitaryPreparation).toBeUndefined();
+      });
+
+      it("ADMIN crée une structure préparation militaire", async () => {
+        const name = uniqueName("PM admin");
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+          .post("/structure")
+          .send({ ...getNewStructureFixture(), name, isMilitaryPreparation: "true" });
+        expect(res.status).toBe(200);
+        const [created] = await findByName(name);
+        expect(created.isMilitaryPreparation).toBe("true");
+      });
+
+      it("REFERENT_DEPARTMENT crée une structure préparation militaire", async () => {
+        const name = uniqueName("PM référent départemental");
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Loire-Atlantique"] }))
+          .post("/structure")
+          .send({ ...getNewStructureFixture(), name, department: "Loire-Atlantique", isMilitaryPreparation: "true" });
+        expect(res.status).toBe(200);
+        const [created] = await findByName(name);
+        expect(created.isMilitaryPreparation).toBe("true");
+      });
+
+      it("REFERENT_REGION crée une structure préparation militaire", async () => {
+        const name = uniqueName("PM référent régional");
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, region: "Bretagne" }))
+          .post("/structure")
+          .send({ ...getNewStructureFixture(), name, region: "Bretagne", isMilitaryPreparation: "true" });
+        expect(res.status).toBe(200);
+        const [created] = await findByName(name);
+        expect(created.isMilitaryPreparation).toBe("true");
+      });
     });
   });
 
