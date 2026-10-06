@@ -194,8 +194,8 @@ describe("décommissionnement P25a : helpers de recherche et de consultation", (
     }
   });
 
-  it("canCreateOrUpdateSessionPhase1 : admin et référents seulement, même propriétaire de la session", () => {
-    const roles: any = require("./roles");
+  it("canCreateOrUpdateSessionPhase1 : admin et référents seulement, même propriétaire de la session", async () => {
+    const roles: any = await import("./roles");
     const target = { headCenterId: "actor", adjointsIds: ["actor"] };
     for (const role of ROLES_LIST) {
       expect({ role, ok: !!roles.canCreateOrUpdateSessionPhase1(actorOf(role), target) }).toEqual({ role, ok: ADMIN_REFS.includes(role as any) });
@@ -207,8 +207,8 @@ describe("décommissionnement P25a : helpers de recherche et de consultation", (
     expect(roles).not.toHaveProperty("canSeeDashboardSejourHeadCenter");
   });
 
-  it("canSeeDashboardSejourInfo reste réservée à admin et référents", () => {
-    const roles: any = require("./roles");
+  it("canSeeDashboardSejourInfo reste réservée à admin et référents", async () => {
+    const roles: any = await import("./roles");
     for (const role of ROLES_LIST) {
       expect({ role, ok: !!roles.canSeeDashboardSejourInfo(actorOf(role)) }).toEqual({ role, ok: ADMIN_REFS.includes(role as any) });
     }
