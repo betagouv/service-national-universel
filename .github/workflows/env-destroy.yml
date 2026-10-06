@@ -1,21 +1,28 @@
 name: Test Environment - Destroy
 
+# `delete` s'exécute sur la branche par défaut ; le déclenchement manuel se lance
+# depuis `main` et nomme la branche, comme env-deploy.yml (voir son en-tête).
 on:
   workflow_dispatch:
+    inputs:
+      branch:
+        description: "Branche dont supprimer la recette"
+        required: true
+        type: string
   delete:
 
 permissions:
   contents: read
 
 env:
-  # `delete` porte le nom court de la branche supprimée ; `workflow_dispatch`, la ref choisie.
-  BRANCH_NAME: ${{ github.event_name == 'delete' && github.event.ref || github.ref_name }}
+  # `delete` porte le nom court de la branche supprimée ; `workflow_dispatch`, la branche saisie.
+  BRANCH_NAME: ${{ github.event_name == 'delete' && github.event.ref || inputs.branch }}
 
 jobs:
   destroy:
     if: |
       (github.event_name == 'delete' && github.event.ref_type == 'branch' && github.event.ref != 'production' && github.event.ref != 'main') ||
-      (github.event_name == 'workflow_dispatch' && github.ref_name != 'production' && github.ref_name != 'main')
+      (github.event_name == 'workflow_dispatch' && inputs.branch != 'production' && inputs.branch != 'main')
     # Porte les secrets Clever de l'environnement GitHub « recette ».
     environment: recette
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
