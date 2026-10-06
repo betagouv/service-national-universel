@@ -717,7 +717,7 @@ describe("Sécurité des missions", () => {
 
       const res = await request(await getAppHelperWithAcl(referent))
         .put(`/mission/${mission._id}`)
-        .send({ ...corpsInchange(mission), name: "Nom corrigé par le référent", duration: "12" });
+        .send({ ...corpsInchange(mission), name: "Nom corrigé par le référent", duration: "12", location: { lat: 45.75, lon: 4.85 } });
 
       expect(res.statusCode).toEqual(200);
       const apres = await getMissionByIdHelper(mission._id);
