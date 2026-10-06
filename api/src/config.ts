@@ -66,6 +66,11 @@ export const config = {
   SMTP_HOST: _env(envStr, "SMTP_HOST", "localhost"),
   SMTP_PORT: _env(envInt, "SMTP_PORT", 1025),
   ENABLE_ANTIVIRUS: _env(envBool, "ENABLE_ANTIVIRUS", false),
+  // PM23 (06/10/2026) : bascule progressive du chiffrement des pièces S3 vers un format versionné
+  // AES-256-GCM (authentifié) — voir api/src/cryptoUtils.ts. À false, `encrypt` continue d'écrire
+  // l'ancien format AES-256-CTR (non authentifié) ; `decrypt` lit toujours les deux formats, quel
+  // que soit l'état du flag, pour ne jamais casser la lecture des objets déjà stockés.
+  ENABLE_FILE_ENCRYPTION_V1: _env(envBool, "ENABLE_FILE_ENCRYPTION_V1", false),
   ENABLE_FLATTEN_ERROR_LOGS: _env(envBool, "ENABLE_FLATTEN_ERROR_LOGS", false), // Print error stack without newlines on stderr
   API_URL: _env(envStr, "API_URL", "http://localhost:8080"),
   APIV2_URL: _env(envStr, "APIV2_URL", "http://localhost:8086"),
