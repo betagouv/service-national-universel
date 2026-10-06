@@ -49,7 +49,14 @@ describe("CampagneController - PUT /:id avec un identifiant de corps invalide (G
                 {
                     provide: CampagneService,
                     useFactory: () =>
-                        new CampagneService(campagneGateway as any, {} as any, {} as any, {} as any, {} as any, {} as any),
+                        new CampagneService(
+                            campagneGateway as any,
+                            {} as any,
+                            {} as any,
+                            {} as any,
+                            {} as any,
+                            {} as any,
+                        ),
                 },
                 {
                     provide: MettreAJourCampagne,

@@ -7,14 +7,19 @@ import { ContactConsumer } from "./Contact.consumer";
 import { ContactProvider } from "./Contact.provider";
 
 describe("ContactConsumer - journaux (GOO-158, PL14)", () => {
-    const referent = { id: "referent-1", email: "referent@example.org", operation: "UPDATE" } as unknown as ReferentSyncDto;
+    const referent = {
+        id: "referent-1",
+        email: "referent@example.org",
+        operation: "UPDATE",
+    } as unknown as ReferentSyncDto;
     let logger: Logger;
     let provider: jest.Mocked<ContactProvider>;
     let consumer: ContactConsumer;
     let logSpy: jest.SpyInstance;
     let errorSpy: jest.SpyInstance;
 
-    const job = () => ({ name: ContactType.REFERENT, data: [referent] }) as unknown as Job<ReferentSyncDto[], any, ContactType>;
+    const job = () =>
+        ({ name: ContactType.REFERENT, data: [referent] }) as unknown as Job<ReferentSyncDto[], any, ContactType>;
 
     beforeEach(() => {
         logger = new Logger();
