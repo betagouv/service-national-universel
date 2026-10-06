@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 import Joi from "joi";
 import mime from "mime-types";
 import fs from "fs";
-import fileUpload from "express-fileupload";
+import { tempFileUpload } from "../../middlewares/tempUpload";
 
 import { decrypt, encrypt } from "../../cryptoUtils";
 import { config } from "../../config";
@@ -18,8 +18,10 @@ import { requireJsonBody } from "../../middlewares/requireJsonBody";
 import { uploadFile, validatePassword, ERRORS, isYoung, isReferent, getCcOfYoung, getFile } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
+import { sanitizeEmailText } from "../../email/emailInput";
 import { setSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
 import { validateId, idSchema } from "../../utils/validator";
+import { safePathSegment } from "../../utils/pathSegment";
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
@@ -50,6 +52,8 @@ import {
   isReadAuthorized,
   PERMISSION_CODES,
   PERMISSION_ACTIONS,
+  FILE_KEYS,
+  MILITARY_FILE_KEYS,
 } from "snu-lib";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
@@ -57,7 +61,6 @@ import { keepOnlyUnsharedEmails } from "../../services/rgpdEmailGuard";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import { scanFile } from "../../utils/virusScanner";
 import { UserRequest } from "../request";
-import { FileTypeResult } from "file-type";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
@@ -184,7 +187,7 @@ router.post("/signup_invite", youngSigninLimiter, requireJsonBody, async (req: U
 router.post(
   "/file/:key",
   passport.authenticate("young", { session: false, failWithError: true }),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  ...tempFileUpload(),
   async (req: UserRequest, res) => {
     try {
       const rootKeys = [
@@ -471,9 +474,9 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     young.set({ ...values, statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION, statusPhase3UpdatedAt: Date.now() });
     await young.save({ fromUser: req.user });
 
-    const youngName = `${young.firstName} ${young.lastName}`;
-    const toName = `${young.phase3TutorFirstName} ${young.phase3TutorLastName}`;
-    const structureName = young.phase3StructureName;
+    const youngName = sanitizeEmailText(`${young.firstName} ${young.lastName}`);
+    const toName = sanitizeEmailText(`${young.phase3TutorFirstName} ${young.phase3TutorLastName}`);
+    const structureName = sanitizeEmailText(young.phase3StructureName);
     const startAt = young.phase3MissionStartAt?.toLocaleDateString("fr");
     const endAt = young.phase3MissionEndAt?.toLocaleDateString("fr");
     const cta = `${config.ADMIN_URL}/validate?token=${young.phase3Token}&young_id=${young._id}`;
@@ -767,10 +770,14 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
+    // `key` et `fileName` composent le chemin lu (`app/young/<id>/<key>/<fileName>`) : chacun désigne un seul
+    // niveau de l'arborescence (Express décode `%2F` en `/`) et `key` est une pièce connue.
     const { error, value } = Joi.object({
       youngId: Joi.string().required(),
-      key: Joi.string().required(),
-      fileName: Joi.string().required(),
+      key: Joi.string()
+        .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
+        .required(),
+      fileName: safePathSegment().required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
@@ -789,7 +796,7 @@ router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { ses
     const downloaded = await getFile(`app/young/${youngId}/${key}/${fileName}`);
     const decryptedBuffer = decrypt(downloaded.Body);
 
-    let mimeFromFile: FileTypeResult["mime"] | null = null;
+    let mimeFromFile: string | null = null;
     try {
       mimeFromFile = await getMimeFromBuffer(decryptedBuffer);
     } catch (e) {

@@ -128,8 +128,8 @@ function forgedFields() {
   };
 }
 
-describe("PH1 — POST /application : une structure ne crée qu'une proposition", () => {
-  it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])("impose WAITING_ACCEPTATION et la durée de la mission au rôle %s", async (role) => {
+describe("PH1 — POST /application : une structure ne crée pas de candidature", () => {
+  it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])("refuse le rôle %s, sans candidature créée ni phase 2 validée", async (role) => {
     const { structure, mission } = await createStructureScenario({ duration: "12" });
     const young = await createYoungWithCohort();
     const acteur = await createReferentHelper(getNewReferentFixture({ role, structureId: structure._id.toString() }));
@@ -138,9 +138,8 @@ describe("PH1 — POST /application : une structure ne crée qu'une proposition"
       .post("/application")
       .send({ youngId: young._id.toString(), missionId: mission._id.toString(), status: APPLICATION_STATUS.DONE, missionDuration: "84" });
 
-    expect(res.status).toBe(200);
-    expect(res.body.data.status).toBe(APPLICATION_STATUS.WAITING_ACCEPTATION);
-    expect(res.body.data.missionDuration).toBe("12");
+    expect(res.status).toBe(403);
+    expect(await ApplicationModel.countDocuments({ youngId: young._id.toString() })).toBe(0);
     const updatedYoung = await getYoungByIdHelper(young._id);
     expect(updatedYoung!.statusPhase2).not.toBe(YOUNG_STATUS_PHASE2.VALIDATED);
   });
@@ -390,6 +389,9 @@ describe("PH11 — une proposition n'ouvre rien à la structure", () => {
 });
 
 describe("PM3 — pièces de candidature rangées par candidature", () => {
+  // Une réponse mise en file pour un appel de lecture qui n'a pas lieu (refus de validation) ne doit pas fuir sur le cas suivant.
+  afterEach(() => (getFile as jest.Mock).mockReset());
+
   async function createApplicationWithFiles() {
     const { mission, structure, responsable } = await createStructureScenario();
     const young = await createYoungWithCohort();
@@ -419,6 +421,38 @@ describe("PM3 — pièces de candidature rangées par candidature", () => {
 
     expect(res.status).toBe(403);
     expect(getFile).not.toHaveBeenCalled();
+  });
+
+  // Un nom relu en base compose le chemin lu : il ne doit désigner qu'un seul niveau de l'arborescence.
+  it.each([
+    ["une remontée d'arborescence", "../../2/cniFiles/id"],
+    ["un sous-chemin", "sous-dossier/cv.pdf"],
+    ["un antislash", "dossier\\cv.pdf"],
+    ["un octet nul", "cv\u0000.pdf"],
+    ["un retour à la ligne", "cv\n.pdf"],
+  ])("refuse (400) un nom stocké contenant %s, sans lire le stockage", async (_label, storedName) => {
+    const { application, responsable } = await createApplicationWithFiles();
+    await ApplicationModel.updateOne({ _id: application._id }, { $push: { justificatifsFiles: storedName } });
+    (getFile as jest.Mock).mockResolvedValueOnce({ Body: PNG_1x1 });
+
+    const res = await request(await getAppHelperWithAcl(responsable)).get(`/application/${application._id}/file/justificatifsFiles/${encodeURIComponent(storedName)}`);
+
+    expect(res.status).toBe(400);
+    expect(getFile).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ["des espaces et des accents", "Pièce d'identité (1).pdf"],
+    ["des points successifs au milieu", "a..b.pdf"],
+  ])("lit comme avant un nom stocké légitime avec %s", async (_label, storedName) => {
+    const { young, application, responsable } = await createApplicationWithFiles();
+    await ApplicationModel.updateOne({ _id: application._id }, { $push: { justificatifsFiles: storedName } });
+    (getFile as jest.Mock).mockResolvedValueOnce({ Body: PNG_1x1 });
+
+    const res = await request(await getAppHelperWithAcl(responsable)).get(`/application/${application._id}/file/justificatifsFiles/${encodeURIComponent(storedName)}`);
+
+    expect(res.status).toBe(200);
+    expect((getFile as jest.Mock).mock.calls.map(([path]) => path)).toEqual([`app/young/${young._id}/application/${application._id}/justificatifsFiles/${storedName}`]);
   });
 
   it("lit d'abord le rangement par candidature, puis l'ancien rangement par volontaire", async () => {

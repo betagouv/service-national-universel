@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
 import fs from "fs";
-import fileUpload from "express-fileupload";
+import { tempFileUpload } from "../middlewares/tempUpload";
 import mime from "mime-types";
 
 import {
@@ -42,6 +42,7 @@ import {
 import { decrypt, encrypt } from "../cryptoUtils";
 import { sendTemplate } from "../brevo";
 import { validateUpdateApplication, validateNewApplication, validateId, idSchema } from "../utils/validator";
+import { safePathSegment } from "../utils/pathSegment";
 import { config } from "../config";
 import { sanitizeEmailText } from "../email/emailInput";
 import { serializeApplication, serializeYoung, serializeContract } from "../utils/serializer";
@@ -78,6 +79,7 @@ import { permissionAccessControlMiddleware } from "../middlewares/permissionAcce
 import { isApplicationInUserScope, isContractInUserScope } from "../services/contractAccess";
 import { toErrorCode } from "../utils/errorCode";
 import { canReferentChangeApplicationStatus } from "../young/youngStatusTransitions";
+import { isStructureActor, isUnacceptedProposal } from "./applicationProposal";
 import { userRateLimiter } from "../middlewares/rateLimit";
 
 const { ObjectId } = require("mongoose").Types;
@@ -150,6 +152,13 @@ router.post(
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.APPLICATION, action: PERMISSION_ACTIONS.CREATE, ignorePolicy: true }]),
   async (req: UserRequest, res: Response) => {
     try {
+      // Une structure ne crée pas de candidature : elle suit celles que les volontaires lui adressent. Les
+      // propositions de mission relèvent de l'administrateur et des référents territoriaux, et la structure
+      // n'a pas d'accès à l'écran qui les crée.
+      if (isStructureActor(req.user)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       const { value, error } = validateNewApplication(req.body, req.user);
       if (error) {
         capture(error);
@@ -214,7 +223,7 @@ router.post(
       }
       // - admin can create all applications
       // - referent can create applications of their department/region
-      // - responsible and supervisor can create applications of their structures
+      // - responsible and supervisor ne créent pas de candidature (refus en tête de route)
       if (isReferent(req.user)) {
         // Le périmètre se juge sur la structure de la mission, pas sur le `structureId` fourni par l'appelant.
         if (req.user.role === ROLES.RESPONSIBLE) {
@@ -408,6 +417,11 @@ router.post(
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
+        // Une proposition que le volontaire n'a pas acceptée (en attente, refusée ou annulée) ne relève pas de
+        // la structure : aucun changement de statut, quelle qu'en soit la cible.
+        if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
         // Mêmes transitions par rôle que PUT /application (GOO-12 : FL2) : sans ce contrôle, le lot
         // permettait à une structure de passer une candidature WAITING_ACCEPTATION à DONE.
         if (application.status !== valueKey.key) {
@@ -415,7 +429,7 @@ router.post(
           if (!cohorts.has(cohortKey)) {
             cohorts.set(cohortKey, young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort }));
           }
-          if (!canReferentChangeApplicationStatus(req.user, application.status, valueKey.key, cohorts.get(cohortKey))) {
+          if (!canReferentChangeApplicationStatus(req.user, application.status, valueKey.key, cohorts.get(cohortKey), application)) {
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
@@ -512,6 +526,11 @@ router.put(
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
+        // Une proposition que le volontaire n'a pas acceptée (en attente, refusée ou annulée) ne relève pas de
+        // la structure : ni son statut, ni sa durée, ni ses commentaires.
+        if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
       }
 
       const originalStatus = application.status;
@@ -519,7 +538,7 @@ router.put(
       // Transitions de statut par rôle, appliquées jusqu'ici seulement dans l'admin (GOO-12 : FL2).
       if (isReferent(req.user) && value.status && value.status !== originalStatus) {
         const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
-        if (!canReferentChangeApplicationStatus(req.user, originalStatus, value.status, cohort)) {
+        if (!canReferentChangeApplicationStatus(req.user, originalStatus, value.status, cohort, application)) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
@@ -792,6 +811,10 @@ router.post(
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
+        // Une structure n'écrit pas au volontaire (ni à ses représentants) au sujet d'une proposition qu'il n'a pas acceptée.
+        if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
       }
 
       let template = defaultTemplate;
@@ -977,7 +1000,7 @@ router.post(
 router.post(
   "/:id/file/:key",
   authMiddleware(["referent", "young"]),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  ...tempFileUpload(),
   async (req: UserRequest, res: Response) => {
     try {
       const application = await ApplicationModel.findById(req.params.id);
@@ -1092,7 +1115,9 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       key: Joi.string().required(),
-      name: Joi.string().required(),
+      // `name` complète le chemin lu (`.../<clé>/<nom>`) : un seul niveau de l'arborescence, y compris pour
+      // un nom présent dans la liste de la candidature.
+      name: safePathSegment().required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });

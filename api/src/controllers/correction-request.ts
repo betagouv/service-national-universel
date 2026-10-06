@@ -57,6 +57,13 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
+    // PH5 : une demande de correction ne rouvre que les dossiers en attente de validation (le dossier
+    // reste éligible s'il y est déjà) ; l'ADMIN garde toute latitude via canReferentChangeYoungStatus.
+    // Ce contrôle précède la boucle ci-dessous : une requête refusée ne supprime aucune pièce.
+    if (young.status !== YOUNG_STATUS.WAITING_CORRECTION && !canReferentChangeYoungStatus(req.user, young.status, YOUNG_STATUS.WAITING_CORRECTION)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const requests = young.correctionRequests ? young.correctionRequests : ([] as NonNullable<typeof young.correctionRequests>);
 
     const sentAt = Date.now();
@@ -79,12 +86,6 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       } else {
         requests.push(request);
       }
-    }
-
-    // PH5 : une demande de correction ne rouvre que les dossiers en attente de validation (le dossier
-    // reste éligible s'il y est déjà) ; l'ADMIN garde toute latitude via canReferentChangeYoungStatus.
-    if (young.status !== YOUNG_STATUS.WAITING_CORRECTION && !canReferentChangeYoungStatus(req.user, young.status, YOUNG_STATUS.WAITING_CORRECTION)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     young.set({ correctionRequests: requests, status: YOUNG_STATUS.WAITING_CORRECTION });

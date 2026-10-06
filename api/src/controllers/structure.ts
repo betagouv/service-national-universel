@@ -43,6 +43,19 @@ const STRUCTURE_LIGHT_PROJECTION = "_id name networkName isNetwork region depart
 /** Normalise le drapeau « tête de réseau » (absent en base sur d'anciennes structures) pour comparer deux états. */
 const isNetworkFlag = (value?: string | null): "true" | "false" => (value === "true" ? "true" : "false");
 
+/**
+ * Le drapeau « préparation militaire » ouvre aux responsables les pièces PM de leurs candidats
+ * (isYoungInMilitaryPreparationStructureScope) : un responsable ou un superviseur ne le pose ni ne le retire.
+ * Renvoie false (refus) si la valeur reçue change le drapeau, sinon retire le champ du corps.
+ * `currentFlag` vaut la valeur en base ; absent à la création (une structure naît « non PM »).
+ */
+function applyMilitaryPreparationRule(user: UserDto, checkedStructure: Record<string, any>, currentFlag?: string | null): boolean {
+  if (!isResponsibleOrSupervisor(user)) return true;
+  if (checkedStructure.isMilitaryPreparation !== undefined && (checkedStructure.isMilitaryPreparation === "true") !== (currentFlag === "true")) return false;
+  delete checkedStructure.isMilitaryPreparation;
+  return true;
+}
+
 /** Applique la policy STRUCTURE (lecture ou écriture) de l'utilisateur à une structure chargée. */
 function isStructureAuthorized(user: UserDto, structure: { toJSON: () => any }, action: typeof PERMISSION_ACTIONS.READ | typeof PERMISSION_ACTIONS.WRITE): boolean {
   const check = action === PERMISSION_ACTIONS.WRITE ? isWriteAuthorized : isReadAuthorized;
@@ -118,6 +131,10 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
 
+      if (!applyMilitaryPreparationRule(req.user, checkedStructure)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       if (isSupervisor(req.user)) {
         checkedStructure.networkId = req.user.structureId;
       }
@@ -162,14 +179,9 @@ router.put(
         delete checkedStructure.networkId;
       }
 
-      // Le drapeau « préparation militaire » ouvre aux responsables les pièces PM de leurs candidats
-      // (isYoungInMilitaryPreparationStructureScope) : comme à la création, seuls l'administrateur et
-      // les référents du territoire le posent ou le retirent (GOO-59, PH13).
-      if (isResponsibleOrSupervisor(req.user)) {
-        if (checkedStructure.isMilitaryPreparation !== undefined && (checkedStructure.isMilitaryPreparation === "true") !== (structure.isMilitaryPreparation === "true")) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        }
-        delete checkedStructure.isMilitaryPreparation;
+      // Seuls l'administrateur et les référents du territoire posent ou retirent le drapeau PM (GOO-59, PH13), à la création comme à la modification.
+      if (!applyMilitaryPreparationRule(req.user, checkedStructure, structure.isMilitaryPreparation)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       // La géographie de la structure fixe le périmètre des référents qui l'instruisent (GOO-5) : un

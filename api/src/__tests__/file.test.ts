@@ -1,60 +1,52 @@
+import { spawnSync } from "child_process";
 import fs from "fs";
 import os from "os";
 import path from "path";
 
-import FileType from "file-type";
-
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 
-jest.mock("file-type");
-
-// PM33 : un fichier ASF forgé fait boucler indéfiniment FileType.fromBuffer/fromFile (strtok3,
-// file-type 16.5.4) — un timeout applicatif ne rendrait pas la main. On mocke file-type pour ces
-// tests : ce qui est vérifié est que le garde-fou de snu-lib intercepte AVANT tout appel, jamais
-// le comportement de la bibliothèque vulnérable elle-même.
-const FORGED_ASF = Buffer.concat([Buffer.from([0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9]), Buffer.alloc(70)]);
+const ASF_SIGNATURE = Buffer.from([0x30, 0x26, 0xb2, 0x75, 0x8e, 0x66, 0xcf, 0x11, 0xa6, 0xd9]);
+// ASF_Header_Object dont le champ de taille est forgé : 80 octets suffisaient à figer file-type 16.5.4.
+const FORGED_ASF = Buffer.concat([ASF_SIGNATURE, Buffer.alloc(70)]);
+// Tag ID3v2.3 vide (10 octets) : file-type l'ignore puis relance la détection sur la suite, ce qui
+// contournait la garde par signature, qui ne regarde que le début du fichier.
+const EMPTY_ID3_TAG = Buffer.from([0x49, 0x44, 0x33, 0x03, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00]);
 const PDF = Buffer.from("%PDF-1.4\n1 0 obj\n<<>>\nendobj\ntrailer\n%%EOF\n", "binary");
 
 describe("getMimeFromBuffer", () => {
-  afterEach(() => jest.clearAllMocks());
-
-  it("écarte un buffer ASF forgé sans jamais appeler FileType.fromBuffer", async () => {
-    expect(await getMimeFromBuffer(FORGED_ASF)).toBeNull();
-    expect(FileType.fromBuffer).not.toHaveBeenCalled();
+  it("détecte le type d'un contenu légitime", async () => {
+    expect(await getMimeFromBuffer(PDF)).toBe("application/pdf");
   });
 
-  it("délègue à FileType.fromBuffer pour un contenu non-ASF", async () => {
-    (FileType.fromBuffer as jest.Mock).mockResolvedValue({ mime: "application/pdf" });
-    expect(await getMimeFromBuffer(PDF)).toBe("application/pdf");
-    expect(FileType.fromBuffer).toHaveBeenCalledWith(PDF);
+  it("écarte un buffer ASF forgé", async () => {
+    expect(await getMimeFromBuffer(FORGED_ASF)).toBeNull();
+  });
+
+  it("renvoie null pour un contenu sans signature connue", async () => {
+    expect(await getMimeFromBuffer(Buffer.from("texte brut sans magic number"))).toBeNull();
   });
 });
 
 describe("getMimeFromFile", () => {
-  afterEach(() => jest.clearAllMocks());
-
   const writeTempFile = (buffer: Buffer): string => {
     const filePath = path.join(os.tmpdir(), `file-test-${Date.now()}-${Math.random()}`);
     fs.writeFileSync(filePath, buffer);
     return filePath;
   };
 
-  it("écarte un fichier ASF forgé sans jamais appeler FileType.fromFile", async () => {
-    const filePath = writeTempFile(FORGED_ASF);
+  it("détecte le type d'un fichier légitime", async () => {
+    const filePath = writeTempFile(PDF);
     try {
-      expect(await getMimeFromFile(filePath)).toBeNull();
-      expect(FileType.fromFile).not.toHaveBeenCalled();
+      expect(await getMimeFromFile(filePath)).toBe("application/pdf");
     } finally {
       fs.rmSync(filePath, { force: true });
     }
   });
 
-  it("délègue à FileType.fromFile pour un contenu non-ASF", async () => {
-    const filePath = writeTempFile(PDF);
+  it("écarte un fichier ASF forgé", async () => {
+    const filePath = writeTempFile(FORGED_ASF);
     try {
-      (FileType.fromFile as jest.Mock).mockResolvedValue({ mime: "application/pdf" });
-      expect(await getMimeFromFile(filePath)).toBe("application/pdf");
-      expect(FileType.fromFile).toHaveBeenCalledWith(filePath);
+      expect(await getMimeFromFile(filePath)).toBeNull();
     } finally {
       fs.rmSync(filePath, { force: true });
     }
@@ -63,10 +55,42 @@ describe("getMimeFromFile", () => {
   it("écarte un fichier trop court sans planter", async () => {
     const filePath = writeTempFile(Buffer.from([0x01, 0x02]));
     try {
-      (FileType.fromFile as jest.Mock).mockResolvedValue(undefined);
       expect(await getMimeFromFile(filePath)).toBeNull();
     } finally {
       fs.rmSync(filePath, { force: true });
     }
   });
+});
+
+// La détection d'un ASF forgé derrière un tag ID3 n'est pas interceptée par hasAsfSignature : seule
+// la version de file-type l'empêche de boucler. file-type 16.5.4 y figeait le process entier, et un
+// timeout jest ne rend pas la main (la boucle n'enchaîne que des promesses déjà résolues). On lance
+// donc la vraie bibliothèque dans un processus enfant tué au bout de 15 s : une régression de
+// version fait échouer ce test au lieu de bloquer toute la suite.
+describe("file-type : ASF forgé derrière un tag ID3 (GHSA-5v7r-6r5c-r473)", () => {
+  const CHILD_TIMEOUT_MS = 15_000;
+  const SCRIPT = `
+    import { fileTypeFromBuffer } from "file-type";
+    await fileTypeFromBuffer(Buffer.from(process.argv[1], "hex"));
+    process.stdout.write("TERMINE");
+  `;
+
+  const detectInChild = (buffer: Buffer) =>
+    spawnSync(process.execPath, ["--input-type=module", "-e", SCRIPT, buffer.toString("hex")], {
+      cwd: __dirname,
+      timeout: CHILD_TIMEOUT_MS,
+      encoding: "utf8",
+    });
+
+  it.each([
+    ["ASF forgé", FORGED_ASF],
+    ["ASF forgé derrière un tag ID3", Buffer.concat([EMPTY_ID3_TAG, FORGED_ASF])],
+  ])(
+    "la détection d'un %s termine",
+    (_label, buffer) => {
+      const result = detectInChild(buffer);
+      expect({ signal: result.signal, status: result.status, stdout: result.stdout }).toEqual({ signal: null, status: 0, stdout: "TERMINE" });
+    },
+    30_000,
+  );
 });

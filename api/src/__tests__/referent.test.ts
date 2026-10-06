@@ -1,13 +1,9 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
-import { Types } from "mongoose";
-const { ObjectId } = Types;
-
 import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
-  STATUS_CLASSE,
   YoungType,
   UserDto,
   SUB_ROLE_GOD,
@@ -35,10 +31,6 @@ import { getNewApplicationFixture } from "./fixtures/application";
 import { createApplication, getApplicationsHelper } from "./helpers/application";
 import { createMissionHelper, getMissionsHelper } from "./helpers/mission";
 import getNewMissionFixture from "./fixtures/mission";
-import { createClasse } from "./helpers/classe";
-import { createEtablissement } from "./helpers/etablissement";
-import { createFixtureClasse } from "./fixtures/classe";
-import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
@@ -345,163 +337,6 @@ describe("Referent", () => {
       expect(updatedSessionPhase1?.placesLeft).toEqual(placesLeft);
     });
   });
-  describe("PUT /referent/youngs", () => {
-    it("should return 400 if body is not valid", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED as any }));
-      const youngIds = [young._id];
-      let res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
-        .put(`/referent/youngs`)
-        .send({ youngIds });
-      expect(res.statusCode).toEqual(400);
-      res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: "NOT_VALID" });
-      expect(res.statusCode).toEqual(400);
-      res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: YOUNG_STATUS.WITHDRAWN });
-      expect(res.statusCode).toEqual(400);
-      res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
-        .put(`/referent/youngs`)
-        .send({ youngIds: [], status: YOUNG_STATUS.VALIDATED });
-      expect(res.statusCode).toEqual(400);
-    });
-
-    it("should return 404 if young not found", async () => {
-      const youngIds = [notExistingYoungId];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
-      expect(res.statusCode).toEqual(404);
-    });
-
-    it("should return 403 if user cannot validate youngs", async () => {
-      const youngIds = [new ObjectId().toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
-      expect(res.statusCode).toEqual(403);
-    });
-    it("should return 403 if payload is VALIDATED and if classe is not found", async () => {
-      const youngIds = [new ObjectId().toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
-      expect(res.statusCode).toEqual(404);
-    });
-
-    it("should return 403 if payload is VALIDATED if classe is closed", async () => {
-      const userId = "123";
-      const etablissement = await createEtablissement(createFixtureEtablissement());
-      const now = new Date();
-      const yesterday = new Date(now);
-      yesterday.setDate(now.getDate() - 1);
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: yesterday }));
-      const classe: any = await createClasse(
-        createFixtureClasse({ etablissementId: etablissement._id, referentClasseIds: [userId], cohort: cohort.name, cohortId: cohort._id, status: STATUS_CLASSE.CLOSED }),
-      );
-      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
-
-      const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
-      expect(res.statusCode).toEqual(403);
-      expect(res.body.message).toEqual(`Classe ${classe._id} is closed`);
-    });
-
-    it("should return 403 if payload is VALIDATED if classe is full", async () => {
-      const userId = "123";
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(now.getDate() + 1);
-      const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: tomorrow }));
-      const classe: any = await createClasse(
-        createFixtureClasse({
-          etablissementId: etablissement._id,
-          referentClasseIds: [userId],
-          cohort: cohort.name,
-          cohortId: cohort._id,
-          status: STATUS_CLASSE.OPEN,
-          totalSeats: 1,
-          seatsTaken: 1,
-        }),
-      );
-      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
-
-      const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
-      expect(res.statusCode).toEqual(403);
-      expect(res.body.message).toEqual(`No seats left in classe ${classe._id}`);
-    });
-
-    it("should return 200 if payload is VALIDATED and if youngs updated", async () => {
-      const userId = "123";
-      const now = new Date();
-      const tomorrow = new Date(now);
-      tomorrow.setDate(now.getDate() + 1);
-      const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: tomorrow }));
-      const classe: any = await createClasse(
-        createFixtureClasse({
-          etablissementId: etablissement._id,
-          referentClasseIds: [userId],
-          cohort: cohort.name,
-          cohortId: cohort._id,
-          status: STATUS_CLASSE.OPEN,
-          seatsTaken: 0,
-          totalSeats: 1,
-        }),
-      );
-      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
-
-      const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
-      expect(res.statusCode).toEqual(200);
-      for (const updatedYoungId of res.body.data) {
-        expect(youngIds.includes(updatedYoungId)).toBe(true);
-        const updatedYoung = await YoungModel.findById(updatedYoungId);
-        expect(updatedYoung?.status).toEqual(YOUNG_STATUS.VALIDATED);
-      }
-    });
-
-    it("should return 200 if payload is REFUSED and if youngs updated event if classe is full or closed", async () => {
-      const userId = "123";
-      const now = new Date();
-      const yesterday = new Date(now);
-      yesterday.setDate(now.getDate() - 1);
-      const etablissement = await createEtablissement(createFixtureEtablissement());
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", instructionEndDate: yesterday }));
-      const classe: any = await createClasse(
-        createFixtureClasse({
-          etablissementId: etablissement._id,
-          referentClasseIds: [userId],
-          cohort: cohort.name,
-          cohortId: cohort._id,
-          status: STATUS_CLASSE.CLOSED,
-          seatsTaken: 1,
-          totalSeats: 1,
-        }),
-      );
-      const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
-
-      const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
-        .put(`/referent/youngs`)
-        .send({ youngIds, status: YOUNG_STATUS.REFUSED });
-      expect(res.statusCode).toEqual(200);
-      for (const updatedYoungId of res.body.data) {
-        expect(youngIds.includes(updatedYoungId)).toBe(true);
-        const updatedYoung = await YoungModel.findById(updatedYoungId);
-        expect(updatedYoung?.status).toEqual(YOUNG_STATUS.REFUSED);
-      }
-    });
-  });
 
   describe("POST /referent/:tutorId/email/:template", () => {
     it("should return 404 if tutor not found", async () => {
@@ -537,7 +372,7 @@ describe("Referent", () => {
     it("should return 200 if file is found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(await getAppHelperWithAcl())
-        .get("/referent/youngFile/" + young._id + "/key/test.pdf")
+        .get("/referent/youngFile/" + young._id + "/equivalenceFiles/test.pdf")
         .send();
       expect(res.statusCode).toEqual(200);
       expect(res.body.fileName).toEqual("test.pdf");

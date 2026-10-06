@@ -8,7 +8,7 @@ const { ERRORS, isYoung, isReferent, uploadFile, deleteFile, getFile } = require
 const { FILE_KEYS, MILITARY_FILE_KEYS, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung, getSafeDownloadFileName } = require("snu-lib");
 const { canAccessYoungFileKeyInScope } = require("../../young/youngScope");
 const fs = require("fs");
-const fileUpload = require("express-fileupload");
+const { tempFileUpload } = require("../../middlewares/tempUpload");
 const mongoose = require("mongoose");
 const { decrypt, encrypt } = require("../../cryptoUtils");
 const { serializeYoung } = require("../../utils/serializer");
@@ -97,7 +97,7 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
 router.post(
   "/:key",
   passport.authenticate(["young", "referent"], { session: false, failWithError: true }),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  ...tempFileUpload(),
   async (req, res) => {
     try {
       // Validate

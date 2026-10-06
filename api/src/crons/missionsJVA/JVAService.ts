@@ -17,6 +17,7 @@ import { getTutorName } from "../../services/mission";
 import { ApplicationModel, MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../../models";
 import { updateApplicationStatus, updateApplicationTutor } from "../../application/applicationService";
 import { sendTemplate } from "../../brevo";
+import { sanitizeEmailText } from "../../email/emailInput";
 import { fetchMissions, fetchStructureById, JeVeuxAiderMission } from "./JVARepository";
 import { logger } from "../../logger";
 import { capture } from "../../sentry";
@@ -351,7 +352,7 @@ async function notifyReferentsNewMission(mission: MissionDocument, referentMissi
     await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
       emailTo: [{ name: `${referentMission.firstName} ${referentMission.lastName}`, email: referentMission.email }],
       params: {
-        missionName: mission.name,
+        missionName: sanitizeEmailText(mission.name),
       },
     });
   }
@@ -380,6 +381,6 @@ async function notifyReferentCancelMission(mission: MissionDocument) {
   if (!referent || referent.status === ReferentStatus.INACTIVE) return;
   await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_CANCEL, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-    params: { missionName: mission.name },
+    params: { missionName: sanitizeEmailText(mission.name) },
   });
 }

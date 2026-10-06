@@ -464,6 +464,16 @@ describe("GET /SNUpport/s3file/:id (M39)", () => {
     const res = await request(getAppHelper(owner)).get(`/SNUpport/s3file/${OWN_ATTACHMENT_ID}`);
     expect(res.status).toBe(200);
   });
+
+  it.each([
+    ["a NUL byte", `${OWN_ATTACHMENT_ID.replace(".pdf", "")}%00.pdf`],
+    ["a control character", `${OWN_ATTACHMENT_ID.replace(".pdf", "")}%0A.pdf`],
+  ])("should refuse an id carrying %s without reading the bucket", async (_label, id) => {
+    const res = await request(getAppHelper(owner)).get(`/SNUpport/s3file/${id}`);
+    expect(res.status).toBe(400);
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    expect(require("../utils").getFile).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /SNUpport/knowledgeBase/feedback (L22)", () => {

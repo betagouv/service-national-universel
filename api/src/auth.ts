@@ -451,28 +451,22 @@ class Auth {
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
 
-      // Pré-filtrage : un compte déjà verrouillé ne fait pas consommer de nouvelle tentative, pour
-      // qu'un attaquant qui persiste ne repousse pas lui-même indéfiniment la date de déblocage du
-      // compte visé (inchangé). Mais le mot de passe soumis est quand même comparé avant de répondre :
-      // seul son titulaire, qui le connaît, apprend qu'il est temporairement bloqué (TOO_MANY_REQUESTS) ;
-      // un mot de passe faux reste EMAIL_OR_PASSWORD_INVALID, qu'il y ait verrou ou non (PM5).
-      const preLocked = isLoginLocked(user, now);
-      const attempt = preLocked ? null : await consumeLoginAttempt(this.model, user._id, now);
-      // La tentative est consommée AVANT bcrypt : sinon N requêtes concurrentes
-      // franchissent toutes le contrôle de plafond pendant le hachage (M4).
-      const rateLimited = preLocked || Boolean(attempt?.blocked) || Boolean(attempt?.delayed);
-      const nextLoginAttemptIn = preLocked ? user.nextLoginAttemptIn : attempt?.nextLoginAttemptIn;
-
-      const match = await user.comparePassword(password);
-
-      if (!match) {
-        // Mot de passe faux : jamais de TOO_MANY_REQUESTS (PM5), même verrouillé ou différé — cette
-        // réponse ne dépend plus que de l'exactitude du mot de passe, jamais de l'état du compteur.
+      // La tentative est consommée AVANT bcrypt, et le verrou est décidé par cette même opération
+      // atomique : N requêtes concurrentes ne franchissent pas toutes le plafond pendant le hachage (M4),
+      // et un verrou posé par une requête sœur après la lecture du compte refuse les suivantes. Un
+      // compte verrouillé ne consomme rien et son verrou n'est pas prolongé.
+      const attempt = await consumeLoginAttempt(this.model, user._id, now);
+      if (attempt.blocked) {
+        // Refus décidé sans consulter le mot de passe soumis : la réponse est celle d'un mot de passe
+        // faux ou d'un email inconnu (PM5), elle ne dépend ni de l'exactitude du mot de passe ni de
+        // l'état du verrou. Une comparaison bcrypt factice occupe le temps d'une vraie.
+        await compareAgainstDummyHash(password);
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
-      if (rateLimited) {
-        return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn } });
-      }
+
+      // Un délai posé par cette tentative vaut pour la SUIVANTE : celle-ci reste évaluée.
+      const match = await user.comparePassword(password);
+      if (!match) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
       // Mot de passe bon : le compteur est purgé tout de suite, y compris quand
       // le parcours se poursuit en 2FA, pour qu'un utilisateur qui relance
@@ -662,8 +656,23 @@ class Auth {
       // Le mot de passe est vérifié AVANT toute recherche sur l'email visé :
       // sinon la route sert d'oracle d'existence de compte à tout jeune
       // authentifié, sans qu'il ait à connaître son propre mot de passe (M6).
+      // Même verrou que `resetPassword` : l'essai est consommé atomiquement avant la comparaison.
+      const now = new Date();
+      const lockedUser = await this.model.findById(req.user._id);
+      if (!lockedUser) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
+      if (isLoginLocked(lockedUser, now)) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: lockedUser.nextLoginAttemptIn } });
+
+      const attempt = await consumeLoginAttempt(this.model, lockedUser._id, now);
+      if (attempt.blocked) {
+        return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+      }
+
       const match = await req.user.comparePassword(password);
-      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      if (!match) {
+        if (attempt.delayed) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+        return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+      }
+      await resetLoginAttempts(this.model, lockedUser._id);
 
       // is new email already used?
       const existingUser = await this.model.findOne({
@@ -793,7 +802,7 @@ class Auth {
       await user.save();
 
       await sendTemplate(user.newEmail ? SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION : SENDINBLUE_TEMPLATES.SIGNUP_EMAIL_VALIDATION, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: req.user.email }],
+        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.newEmail || user.email }],
         params: {
           registration_code: tokenEmailValidation,
           cta: user.newEmail

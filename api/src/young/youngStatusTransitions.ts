@@ -1,5 +1,7 @@
 import { APPLICATION_STATUS, CohortType, ROLES, UserDto, YOUNG_STATUS, YoungType, canReferentUpdateApplicationStatus, canReferentUpdatePhase2Status } from "snu-lib";
 
+import { isUnacceptedProposal } from "../application/applicationProposal";
+
 /**
  * Règles d'écriture du dossier volontaire et des candidatures, appliquées côté API (GOO-12 : FM13, FL2).
  *
@@ -73,9 +75,13 @@ export function canReferentApplyYoungUpdate(
   return true;
 }
 
-/** Transitions de candidature d'un responsable / superviseur de structure (union des deux sélecteurs de l'admin). */
+/**
+ * Transitions de candidature d'un responsable / superviseur de structure (union des deux sélecteurs de l'admin).
+ *
+ * Une proposition (WAITING_ACCEPTATION) n'y figure pas : tant que le volontaire ne l'a pas acceptée, elle
+ * ne relève pas de la structure.
+ */
 const STRUCTURE_APPLICATION_TRANSITIONS: Partial<Record<string, string[]>> = {
-  [APPLICATION_STATUS.WAITING_ACCEPTATION]: [APPLICATION_STATUS.REFUSED],
   [APPLICATION_STATUS.WAITING_VALIDATION]: [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED],
   [APPLICATION_STATUS.WAITING_VERIFICATION]: [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.REFUSED],
   [APPLICATION_STATUS.VALIDATED]: [APPLICATION_STATUS.IN_PROGRESS, APPLICATION_STATUS.DONE, APPLICATION_STATUS.ABANDON, APPLICATION_STATUS.REFUSED],
@@ -89,11 +95,23 @@ const STRUCTURE_APPLICATION_TRANSITIONS: Partial<Record<string, string[]>> = {
  *
  * Sans cette règle, un responsable passait une candidature WAITING_ACCEPTATION (non acceptée par le
  * volontaire) à DONE, ce qui validait sa phase 2 via `updateYoungPhase2StatusAndHours`.
+ *
+ * Une structure ne change jamais le statut d'une proposition que le volontaire n'a pas acceptée, que
+ * celle-ci soit encore en attente ou sortie en REFUSED / CANCEL (`application.proposalNotAccepted`).
  */
-export function canReferentChangeApplicationStatus(user: Pick<UserDto, "role">, from: string | undefined, to: string, cohort?: CohortType | null): boolean {
+export function canReferentChangeApplicationStatus(
+  user: Pick<UserDto, "role">,
+  from: string | undefined,
+  to: string,
+  cohort?: CohortType | null,
+  application?: { proposalNotAccepted?: boolean | null },
+): boolean {
   if (from === to) return true;
   if (user.role === ROLES.ADMIN) return true;
   if (GEO_ROLES.includes(user.role)) return !!cohort && canReferentUpdateApplicationStatus(cohort);
-  if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) return !!from && (STRUCTURE_APPLICATION_TRANSITIONS[from] || []).includes(to);
+  if (user.role === ROLES.RESPONSIBLE || user.role === ROLES.SUPERVISOR) {
+    if (isUnacceptedProposal({ status: from, proposalNotAccepted: application?.proposalNotAccepted })) return false;
+    return !!from && (STRUCTURE_APPLICATION_TRANSITIONS[from] || []).includes(to);
+  }
   return false;
 }

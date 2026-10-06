@@ -54,11 +54,11 @@ jobs:
           }
 
           echo "[]" \
-          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(touched api packages/lib package-lock.json .github/actions/run-tests-api)" \
-          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(touched apiv2 packages/lib package-lock.json .github/actions/run-tests-apiv2)" \
-          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(touched app packages package-lock.json .github/actions/run-tests-app)" \
-          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(touched admin packages package-lock.json .github/actions/run-tests-admin)" \
-          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(touched packages package-lock.json .github/actions/run-tests-lib)" \
+          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(touched api packages/lib package-lock.json .github/actions/run-tests-api .github/actions/setup-workspace)" \
+          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(touched apiv2 packages/lib package-lock.json .github/actions/run-tests-apiv2 .github/actions/setup-workspace)" \
+          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(touched app packages package-lock.json .github/actions/run-tests-app .github/actions/setup-workspace)" \
+          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(touched admin packages package-lock.json .github/actions/run-tests-admin .github/actions/setup-workspace)" \
+          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(touched packages package-lock.json .github/actions/run-tests-lib .github/actions/setup-workspace)" \
           | jq  '[.[] | select(.run_test != "")]' > test.json
 
           echo "Test matrix"
@@ -93,6 +93,8 @@ jobs:
     # Seul job à pousser : il force la branche deploy-ci.
     permissions:
       contents: write
+    # Porte les secrets Clever de l'environnement GitHub « ci ».
+    environment: ci
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
 
     steps:

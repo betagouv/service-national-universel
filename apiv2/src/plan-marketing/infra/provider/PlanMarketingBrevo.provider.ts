@@ -46,7 +46,7 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
     }
 
     async importerContacts(nomListe: string, contacts: string, folderId: number, notifyUrl: string): Promise<number> {
-        this.logger.log(`importerContacts() - nomListe: ${nomListe}, notifyUrl: ${notifyUrl}`);
+        this.logger.log(`importerContacts() - nomListe: ${nomListe}`);
         const requestContactImport = new brevo.RequestContactImport();
         requestContactImport.fileBody = contacts;
         requestContactImport.newList = { listName: nomListe, folderId: folderId };

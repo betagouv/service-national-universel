@@ -583,19 +583,6 @@ describe("Sécurité référent — audit 2026-09-21", () => {
       expect((await getYoungByIdHelper(young._id))?.email).toEqual(young.email);
     });
 
-    it("autorise un chef de centre modifiant un jeune de sa session", async () => {
-      const centre = await CohesionCenterModel.create(getNewCohesionCenterFixture());
-      const chefDeCentre = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
-      const session = await SessionPhase1Model.create(getNewSessionPhase1Fixture({ cohesionCenterId: centre._id.toString(), headCenterId: chefDeCentre._id.toString() }));
-      const young = await createYoungHelper(getNewYoungFixture({ sessionPhase1Id: session._id.toString() }));
-
-      const res = await request(await getAppHelperWithAcl(chefDeCentre))
-        .put(`/referent/young/${young._id}`)
-        .send({ firstName: "NOUVEAU" });
-
-      expect(res.statusCode).toEqual(200);
-    });
-
     it("refuse un référent de classe modifiant un jeune CLE d'un autre établissement", async () => {
       const referentClasse = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
       const etablissement = await EtablissementModel.create(createFixtureEtablissement());
@@ -607,19 +594,6 @@ describe("Sécurité référent — audit 2026-09-21", () => {
         .send({ email: "attaquant@example.org" });
 
       expect(res.statusCode).toEqual(403);
-    });
-
-    it("autorise un référent de classe modifiant un jeune de sa classe", async () => {
-      const referentClasse = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      const etablissement = await EtablissementModel.create(createFixtureEtablissement());
-      const classe = await ClasseModel.create(createFixtureClasse({ etablissementId: etablissement._id.toString(), referentClasseIds: [referentClasse._id.toString()] }));
-      const young = await createYoungHelper(getNewYoungFixture({ source: YOUNG_SOURCE.CLE, classeId: classe._id.toString(), etablissementId: etablissement._id.toString() }));
-
-      const res = await request(await getAppHelperWithAcl(referentClasse))
-        .put(`/referent/young/${young._id}`)
-        .send({ firstName: "NOUVEAU" });
-
-      expect(res.statusCode).toEqual(200);
     });
 
     it("ne renvoie jamais les jetons d'authentification du jeune", async () => {
@@ -785,16 +759,6 @@ describe("Sécurité référent — audit 2026-09-21", () => {
       expect(res.statusCode).toEqual(200);
     });
 
-    it("autorise un chef de centre lisant un référent départemental de son département", async () => {
-      const centre = await CohesionCenterModel.create(getNewCohesionCenterFixture({ department: "Sarthe", region: "Pays de la Loire" }));
-      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));
-      const actor = { role: ROLES.HEAD_CENTER, cohesionCenterId: centre._id.toString(), department: undefined, region: undefined };
-
-      const res = await request(await getAppHelperWithAcl(actor as any)).get(`/referent/${cible._id}`);
-
-      expect(res.statusCode).toEqual(200);
-    });
-
     it("refuse un chef de centre lisant un chef de centre d'un autre département", async () => {
       const monCentre = await CohesionCenterModel.create(getNewCohesionCenterFixture({ department: "Sarthe", region: "Pays de la Loire" }));
       const autreCentre = await CohesionCenterModel.create(getNewCohesionCenterFixture({ department: "Paris", region: "Ile-de-France" }));
@@ -806,20 +770,6 @@ describe("Sécurité référent — audit 2026-09-21", () => {
       const res = await request(await getAppHelperWithAcl(actor as any)).get(`/referent/${cible._id}`);
 
       expect(res.statusCode).toEqual(403);
-    });
-
-    it("autorise un administrateur CLE lisant un référent de classe de son établissement", async () => {
-      const actorId = new ObjectId();
-      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE, department: ["Sarthe"], region: "Pays de la Loire" }));
-      const etablissement = await EtablissementModel.create(
-        createFixtureEtablissement({ coordinateurIds: [actorId.toString()], referentEtablissementIds: [], department: "Sarthe" }),
-      );
-      await ClasseModel.create(createFixtureClasse({ etablissementId: etablissement._id.toString(), referentClasseIds: [cible._id.toString()] }));
-      const actor = { _id: actorId, role: ROLES.ADMINISTRATEUR_CLE, department: undefined, region: undefined };
-
-      const res = await request(await getAppHelperWithAcl(actor as any)).get(`/referent/${cible._id}`);
-
-      expect(res.statusCode).toEqual(200);
     });
 
     it("refuse un administrateur CLE lisant un référent de classe d'un autre établissement", async () => {

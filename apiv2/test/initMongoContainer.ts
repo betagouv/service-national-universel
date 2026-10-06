@@ -1,5 +1,7 @@
 import { MongoDBContainer } from "@testcontainers/mongodb";
 
+import { resolveMongoSource } from "./resolveMongoSource";
+
 const testConfig = {
     mongodb: {
         image: "mongo:6.0.1",
@@ -10,10 +12,17 @@ const testConfig = {
 };
 
 const startSharedMongodbTestContainer = async () => {
+    if (resolveMongoSource(process.env).kind === "external") {
+        return;
+    }
     global.mongodbContainer = await startMongodbTestContainer();
 };
 
 export const getSharedConnectionString = () => {
+    const source = resolveMongoSource(process.env);
+    if (source.kind === "external") {
+        return source.uri;
+    }
     return global.mongodbContainer.getConnectionString();
 };
 

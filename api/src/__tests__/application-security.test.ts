@@ -157,7 +157,7 @@ describe("H1 - POST /application : la structure vient de la mission, pas du body
     expect(res.status).toBe(403);
   });
 
-  it("devrait accepter le responsable de la structure de la mission et ignorer le structureId du body", async () => {
+  it("devrait refuser le responsable de la structure de la mission : une structure ne crée pas de candidature (PH1)", async () => {
     const maStructure = await createStructureHelper({ name: "Ma structure" });
     const young = await createYoungWithCohort({ department: DEP_CIBLE, region: REGION_CIBLE });
     const mission = await createMissionHelper({ ...getNewMissionFixture(), structureId: maStructure._id.toString() });
@@ -166,16 +166,30 @@ describe("H1 - POST /application : la structure vient de la mission, pas du body
 
     const res = await request(await getAppHelperWithAcl(responsable))
       .post("/application")
+      .send({ ...getNewApplicationFixture(), youngId: young._id.toString(), missionId: mission._id.toString() });
+
+    expect(res.status).toBe(403);
+  });
+
+  it("devrait rattacher la candidature à la structure de la mission et ignorer le structureId du body", async () => {
+    const maStructure = await createStructureHelper({ name: "Ma structure" });
+    const young = await createYoungWithCohort({ department: DEP_CIBLE, region: REGION_CIBLE });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), structureId: maStructure._id.toString() });
+
+    const admin = await createReferent({ role: ROLES.ADMIN });
+
+    const res = await request(await getAppHelperWithAcl(admin))
+      .post("/application")
       .send({
         ...getNewApplicationFixture(),
         youngId: young._id.toString(),
         missionId: mission._id.toString(),
         structureId: new ObjectId().toString(),
+        status: APPLICATION_STATUS.WAITING_ACCEPTATION,
       });
 
     expect(res.status).toBe(200);
     expect(res.body.data.structureId).toBe(maStructure._id.toString());
-    // Une structure ne crée qu'une proposition, que le volontaire doit accepter (PH1).
     expect(res.body.data.status).toBe(APPLICATION_STATUS.WAITING_ACCEPTATION);
   });
 });

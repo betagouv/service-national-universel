@@ -19,6 +19,7 @@ import { capture } from "../sentry";
 import { ContractModel, ContractDocument, YoungModel, ApplicationModel, ReferentModel } from "../models";
 import { ERRORS, isYoung } from "../utils";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { config } from "../config";
 import { logger } from "../logger";
 import { validateId, validateContract, validateOptionalId, idSchema } from "../utils/validator";
@@ -33,6 +34,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isContractInUserScope } from "../services/contractAccess";
+import { isStructureActor, isUnacceptedProposal } from "../application/applicationProposal";
 import { toErrorCode } from "../utils/errorCode";
 
 async function createContract(data: any, fromUser: UserDto): Promise<ContractType> {
@@ -222,9 +224,9 @@ async function sendContractEmail(
       template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
     }
     const params = {
-      toName: options.name,
-      youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
-      missionName: contract.missionName,
+      toName: sanitizeEmailText(options.name),
+      youngName: sanitizeEmailText(`${contract.youngFirstName} ${contract.youngLastName}`),
+      missionName: sanitizeEmailText(contract.missionName),
       cta: `${config.APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
     };
     const emailTo = [{ name: options.name, email: options.email! }];
@@ -293,6 +295,11 @@ router.post(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
       if (!(await isContractInUserScope(req.user, { structureId, applicationId: application._id.toString(), youngId: young._id.toString() }))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      // Pas de contrat sur une proposition que le volontaire n'a pas acceptée : il reprendrait l'identité du volontaire
+      // et de ses représentants légaux.
+      if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
@@ -507,7 +514,7 @@ router.post("/token/:token", async (req: UserRequest, res: Response) => {
       await sendTemplate(SENDINBLUE_TEMPLATES.young.CONTRACT_VALIDATED, {
         emailTo,
         params: {
-          missionName: data.missionName,
+          missionName: sanitizeEmailText(data.missionName),
           cta: `${config.APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
         },
       });

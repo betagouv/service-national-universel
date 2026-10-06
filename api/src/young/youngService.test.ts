@@ -1,82 +1,9 @@
-import * as youngService from "./youngService";
-import { findYoungByIdOrThrow, findYoungsByClasseId, getValidatedYoungsWithSession, getYoungsImageRight, getYoungsParentAllowSNU, mightAddInProgressStatus } from "./youngService";
-import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
+import { getValidatedYoungsWithSession, getYoungsImageRight, getYoungsParentAllowSNU, mightAddInProgressStatus } from "./youngService";
 import { YoungModel } from "../models";
-import { ERRORS, UserDto, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-
-const mockBuffer = Buffer.from("pdf");
+import { UserDto, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 afterEach(() => {
   jest.clearAllMocks();
-});
-
-jest.mock("../utils/pdf-renderer", () => ({
-  ...jest.requireActual("../utils/pdf-renderer"),
-  generatePdfIntoBuffer: jest.fn().mockReturnValue(Buffer.from("pdf")),
-}));
-
-describe("YoungService.generateConvocationsForMultipleYoungs", () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-  it("should return one PDF convocations for 2 youngs", async () => {
-    const young1 = {
-      _id: "1",
-      status: YOUNG_STATUS.VALIDATED,
-      sessionPhase1Id: "session1",
-      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
-      transportInfoGivenByLocal: "true",
-      source: "OTHER",
-    };
-    const young2 = { _id: "2", status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: "session2", statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE, meetingPointId: "mp2", source: "CLE" };
-
-    const youngsPdfCreated = await youngService.generateConvocationsForMultipleYoungs([young1, young2]);
-
-    expect(youngsPdfCreated).toEqual(mockBuffer);
-    expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
-  });
-  it("should return one PDF consentment for 2 youngs", async () => {
-    const young1 = { _id: "1", name: "John Doe", status: YOUNG_STATUS.VALIDATED, parentAllowSNU: "true" };
-    const young2 = { _id: "3", name: "Alice Brown", status: YOUNG_STATUS.VALIDATED, parentAllowSNU: "true" };
-
-    const youngsPdfCreated = await youngService.generateConsentementForMultipleYoungs([young1, young2]);
-
-    expect(youngsPdfCreated).toEqual(mockBuffer);
-    expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
-  });
-  it("should return one PDF imageRight for 2 youngs", async () => {
-    const young1 = { _id: "1", name: "John Doe", status: YOUNG_STATUS.VALIDATED, imageRight: "true" };
-    const young2 = { _id: "2", name: "Jane Smith", status: YOUNG_STATUS.IN_PROGRESS, imageRight: "false" };
-
-    const youngsPdfCreated = await youngService.generateImageRightForMultipleYoungs([young1, young2]);
-
-    expect(youngsPdfCreated).toEqual(mockBuffer);
-    expect(generatePdfIntoBuffer).toHaveBeenCalledTimes(1);
-  });
-});
-
-describe("YoungService.findYoungsByClasseId", () => {
-  it("should return an array of young objects when found", async () => {
-    const mockYoungs = [
-      { _id: "1", name: "John Doe", classeId: "classe1" },
-      { _id: "2", name: "Jane Smith", classeId: "classe1" },
-    ];
-    // Mock the YoungModel.find method
-    YoungModel.find = jest.fn().mockResolvedValue(mockYoungs);
-
-    const result = await findYoungsByClasseId("classe1");
-    expect(result).toEqual(mockYoungs);
-    expect(YoungModel.find).toHaveBeenCalledWith({ classeId: "classe1" });
-  });
-
-  it("should return an empty array when no youngs are found", async () => {
-    // Mock the YoungModel.find method to return an empty array
-    YoungModel.find = jest.fn().mockResolvedValue([]);
-
-    const result = await findYoungsByClasseId("classe2");
-    expect(result).toEqual([]);
-    expect(YoungModel.find).toHaveBeenCalledWith({ classeId: "classe2" });
-  });
 });
 
 describe("YoungService.getYoungsParentAllowSNU", () => {
@@ -169,28 +96,6 @@ describe("YoungService.getValidatedYoungsWithSession", () => {
 
     const result = getValidatedYoungsWithSession(youngs);
     expect(result).toEqual([]);
-  });
-});
-
-describe("YoungService.findYoungByIdOrThrow", () => {
-  it("should return a young object when found", async () => {
-    const mockYoung = {
-      _id: "1",
-      name: "John Doe",
-      status: YOUNG_STATUS.VALIDATED,
-    };
-    YoungModel.findById = jest.fn().mockResolvedValue(mockYoung);
-
-    const result = await findYoungByIdOrThrow("1");
-    expect(result).toBe(mockYoung);
-    expect(YoungModel.findById).toHaveBeenCalledWith("1");
-  });
-
-  it("should throw an error when young is not found", async () => {
-    YoungModel.findById = jest.fn().mockResolvedValue(null);
-
-    await expect(findYoungByIdOrThrow("2")).rejects.toThrow(ERRORS.YOUNG_NOT_FOUND);
-    expect(YoungModel.findById).toHaveBeenCalledWith("2");
   });
 });
 

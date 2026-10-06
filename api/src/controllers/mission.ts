@@ -6,6 +6,7 @@ import { logger } from "../logger";
 import { MissionModel, ApplicationModel, StructureModel, ReferentModel, CohortModel, StructureDocument } from "../models";
 import { ERRORS, isYoung } from "../utils/index";
 import { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } from "../application/applicationService";
+import { NOT_A_PROPOSAL } from "../application/applicationProposal";
 import { getTutorName } from "../services/mission";
 import { validateId, validateMission, idSchema } from "../utils/validator";
 import {
@@ -27,6 +28,7 @@ import { serializeMission, serializeApplication } from "../utils/serializer";
 import { checkMissionPayload, getReferentDepartments, isMissionInUserScope, isTutorAllowedForMission, missionRequiresRevalidation } from "../services/missionAccess";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { config } from "../config";
 import { getNearestLocation } from "../services/gouv.fr/api-adresse";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
@@ -132,7 +134,7 @@ router.post(
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
             emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
             params: {
-              missionName: checkedMission.name,
+              missionName: sanitizeEmailText(checkedMission.name),
             },
           });
       }
@@ -280,7 +282,7 @@ router.put(
             await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
               emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
               params: {
-                missionName: mission.name,
+                missionName: sanitizeEmailText(mission.name),
               },
             });
         }
@@ -291,7 +293,7 @@ router.put(
               emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
               params: {
                 cta: `${config.ADMIN_URL}/dashboard`,
-                missionName: mission.name,
+                missionName: sanitizeEmailText(mission.name),
               },
             });
         }
@@ -482,9 +484,9 @@ router.get(
       }
       if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
         // Une proposition n'est pas une candidature : la structure ne voit le volontaire qu'une fois la
-        // proposition acceptée (même règle que l'index `application`). Le littéral portait une espace
-        // finale et ne filtrait rien (PH11).
-        where.status = { $ne: APPLICATION_STATUS.WAITING_ACCEPTATION };
+        // proposition acceptée (même règle que l'index `application`), qu'elle soit en attente, refusée
+        // ou annulée. Le littéral portait une espace finale et ne filtrait rien (PH11).
+        Object.assign(where, NOT_A_PROPOSAL);
       }
       const applications = await ApplicationModel.find(where).populate({ path: "mission" });
       const data = applications.map((application) => ({

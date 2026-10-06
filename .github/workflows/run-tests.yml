@@ -33,13 +33,13 @@ jobs:
           git switch main
 
           echo "[]" \
-          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- api packages/lib packages/log-redaction package-lock.json .github/actions/run-tests-api | cut -d " " -f 1)" \
-          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- apiv2 packages/lib packages/log-redaction package-lock.json .github/actions/run-tests-apiv2 | cut -d " " -f 1)" \
-          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- app packages package-lock.json .github/actions/run-tests-app | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- admin packages package-lock.json .github/actions/run-tests-admin | cut -d " " -f 1)" \
-          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- packages package-lock.json .github/actions/run-tests-lib | cut -d " " -f 1)" \
-          | jq  '. + [{name:"snupport-api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- snupport-api packages/log-redaction package-lock.json .github/actions/run-tests-snupport-api | cut -d " " -f 1)" \
-          | jq  '. + [{name:"snupport-app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- snupport-app packages/log-redaction package-lock.json .github/actions/run-tests-snupport-app | cut -d " " -f 1)" > test.json
+          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- api packages/lib packages/log-redaction package-lock.json .github/actions/run-tests-api .github/actions/setup-workspace | cut -d " " -f 1)" \
+          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- apiv2 packages/lib packages/log-redaction package-lock.json .github/actions/run-tests-apiv2 .github/actions/setup-workspace | cut -d " " -f 1)" \
+          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- app packages package-lock.json .github/actions/run-tests-app .github/actions/setup-workspace | cut -d " " -f 1)" \
+          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- admin packages package-lock.json .github/actions/run-tests-admin .github/actions/setup-workspace | cut -d " " -f 1)" \
+          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- packages package-lock.json .github/actions/run-tests-lib .github/actions/setup-workspace | cut -d " " -f 1)" \
+          | jq  '. + [{name:"snupport-api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- snupport-api packages/log-redaction package-lock.json .github/actions/run-tests-snupport-api .github/actions/setup-workspace | cut -d " " -f 1)" \
+          | jq  '. + [{name:"snupport-app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline "main..$REF" -- snupport-app packages/log-redaction package-lock.json .github/actions/run-tests-snupport-app .github/actions/setup-workspace | cut -d " " -f 1)" > test.json
 
           echo "Test matrix"
           cat test.json

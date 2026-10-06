@@ -16,6 +16,8 @@ jobs:
     if: |
       (github.event_name == 'delete' && github.event.ref_type == 'branch' && github.event.ref != 'production' && github.event.ref != 'main') ||
       (github.event_name == 'workflow_dispatch' && github.ref_name != 'production' && github.ref_name != 'main')
+    # Porte les secrets Clever de l'environnement GitHub « recette ».
+    environment: recette
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     steps:
       # Scripts lus sur la branche par défaut : voir env-deploy.yml.

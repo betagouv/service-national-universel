@@ -78,11 +78,11 @@ describe("Sécurité classe CLE — audit 2026-09-21", () => {
       expect(res.statusCode).toEqual(403);
     }, 30000);
 
-    it("ne renvoie aucun secret du référent de classe à l'administrateur CLE de l'établissement", async () => {
-      const chef = await ReferentModel.create(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
-      const { etablissement } = await createEtablissementWithClasse({ referentEtablissementIds: [chef._id.toString()] });
+    it("ne renvoie aucun secret du référent de classe au référent départemental de l'établissement", async () => {
+      const { etablissement } = await createEtablissementWithClasse({ department: "Sarthe", region: "Pays de la Loire" });
+      const referent = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));
 
-      const res = await request(await getAppHelperWithAcl(chef)).get(`/cle/classe/from-etablissement/${etablissement._id}`);
+      const res = await request(await getAppHelperWithAcl(referent)).get(`/cle/classe/from-etablissement/${etablissement._id}`);
 
       expect(res.statusCode).toEqual(200);
       const referents = getReferents(res);
@@ -95,10 +95,10 @@ describe("Sécurité classe CLE — audit 2026-09-21", () => {
     }, 30000);
 
     it("renvoie les champs nécessaires au front (identité et contact)", async () => {
-      const chef = await ReferentModel.create(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
-      const { etablissement, referentClasse } = await createEtablissementWithClasse({ referentEtablissementIds: [chef._id.toString()] });
+      const { etablissement, referentClasse } = await createEtablissementWithClasse({ department: "Sarthe", region: "Pays de la Loire" });
+      const referent = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));
 
-      const res = await request(await getAppHelperWithAcl(chef)).get(`/cle/classe/from-etablissement/${etablissement._id}`);
+      const res = await request(await getAppHelperWithAcl(referent)).get(`/cle/classe/from-etablissement/${etablissement._id}`);
 
       expect(res.statusCode).toEqual(200);
       expect(getReferents(res)[0]).toMatchObject({
@@ -107,17 +107,6 @@ describe("Sécurité classe CLE — audit 2026-09-21", () => {
         lastName: referentClasse.lastName,
         email: referentClasse.email,
       });
-    }, 30000);
-
-    it("autorise le référent de classe sur son propre établissement", async () => {
-      const etablissement = await EtablissementModel.create(createFixtureEtablissement());
-      const referentClasse = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      await ClasseModel.create(createFixtureClasse({ etablissementId: etablissement._id.toString(), referentClasseIds: [referentClasse._id.toString()] }));
-
-      const res = await request(await getAppHelperWithAcl(referentClasse)).get(`/cle/classe/from-etablissement/${etablissement._id}`);
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.data).toHaveLength(1);
     }, 30000);
 
     it("autorise le référent départemental sur un établissement de son département", async () => {

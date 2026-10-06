@@ -3,7 +3,7 @@ import { SearchReferentGateway } from "@analytics/core/SearchReferent.gateway";
 import { SearchStructureGateway } from "@analytics/core/SearchStructure.gateway";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { MissionType, ReferentType, region2department, ROLES, StructureType } from "snu-lib";
+import { APPLICATION_STATUS, MissionType, ReferentType, region2department, ROLES, StructureType } from "snu-lib";
 import { StructureGateway } from "../structure/Structure.gateway";
 import { SearchMissionGateway } from "@analytics/core/SearchMission.gateway";
 
@@ -174,6 +174,25 @@ export class ExportMissionService {
             return { youngDepartment: departements };
         }
         return {};
+    }
+
+    /**
+     * Une proposition de mission que le volontaire n'a pas acceptée (en attente, refusée ou annulée) n'est pas une
+     * candidature pour une structure : elle n'apparaît pas dans son export, qui porte l'identité du volontaire et
+     * de ses représentants légaux. Les autres rôles exportent toutes les candidatures de leur périmètre.
+     */
+    ecarterPropositions<T extends { status?: string; proposalNotAccepted?: boolean | null }>(
+        auteur: { role?: string },
+        candidatures: T[],
+    ): T[] {
+        if (auteur.role !== ROLES.RESPONSIBLE && auteur.role !== ROLES.SUPERVISOR) {
+            return candidatures;
+        }
+        return candidatures.filter(
+            (candidature) =>
+                candidature.status !== APPLICATION_STATUS.WAITING_ACCEPTATION &&
+                candidature.proposalNotAccepted !== true,
+        );
     }
 
     async retrieveTutors(missions: MissionType[]) {
