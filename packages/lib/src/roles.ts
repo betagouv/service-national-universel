@@ -1099,8 +1099,6 @@ function canSeeDashboardSejourInfo(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-
-
 function canSeeDashboardInscriptionInfo(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
@@ -1395,7 +1393,7 @@ export {
   canSeeDashboardInscriptionDetail,
   canSeeDashboardEngagementInfo,
   canSeeDashboardEngagementStatus,
-    canUpdateMyself,
+  canUpdateMyself,
   canCreateClasse,
   canViewClasse,
   canViewEtablissement,
