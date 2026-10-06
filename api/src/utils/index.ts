@@ -6,7 +6,6 @@ import sanitizeHtml from "sanitize-html";
 import { YoungModel, ReferentModel, ContractModel, ApplicationModel, MissionEquivalenceModel } from "../models";
 
 import { sendTemplate } from "../brevo";
-import { sanitizeEmailText } from "../email/emailInput";
 import { config } from "../config";
 import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS, ReferentStatus } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
@@ -21,6 +20,9 @@ export const timeout = (prom, time) => {
 export function sanitizeAll(text) {
   return sanitizeHtml(text || "", { allowedTags: ["li", "br", "b"], allowedAttributes: {} });
 }
+
+// Même contrat que sanitizeEmailText (email/emailInput) : importer ce module ici ferait un cycle utils <-> emailInput.
+const sanitizeEmailText = (value) => (value ? sanitizeAll(value) : value);
 
 export function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
