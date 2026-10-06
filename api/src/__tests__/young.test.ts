@@ -1,7 +1,7 @@
 import request from "supertest";
 import { ROLES, COHORTS, YOUNG_SOURCE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import * as fileUtils from "../utils/file";
-import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
+import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { closeRedisClient } from "../redis";
 import { getNewApplicationFixture } from "./fixtures/application";
@@ -451,7 +451,7 @@ describe("Young", () => {
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
 
-      const res = await request(await getAppHelperWithAcl())
+      const res = await request(getAppHelper())
         .post("/young/signup_verify")
         .send({ invitationToken });
 
