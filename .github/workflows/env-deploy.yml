@@ -38,7 +38,7 @@ jobs:
       pull-requests: write
     # Porte les secrets Clever de l'environnement GitHub « recette ».
     environment: recette
-    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     # PR d'un fork exclues : `pull_request_target` leur servirait les secrets, et Clever
     # construit la branche du même nom sur ce dépôt, pas celle du fork.
     if: |

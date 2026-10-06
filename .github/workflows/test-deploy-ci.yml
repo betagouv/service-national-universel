@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   prepare:
-    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     outputs:
       test_matrix: ${{ steps.config.outputs.test }}
       has_tests: ${{ steps.config.outputs.has_tests }}
@@ -71,7 +71,7 @@ jobs:
     # Une matrice vide fait échouer le job : quand le merge ne touche aucune app
     # (documentation, devops, workflows), on saute le job entier.
     if: needs.prepare.outputs.has_tests == 'true'
-    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
@@ -95,7 +95,7 @@ jobs:
       contents: write
     # Porte les secrets Clever de l'environnement GitHub « ci ».
     environment: ci
-    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
