@@ -25,6 +25,8 @@ jobs:
       contents: read
       issues: write
       pull-requests: write
+    # Porte les secrets Clever de l'environnement GitHub « recette ».
+    environment: recette
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     if: |
       (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
