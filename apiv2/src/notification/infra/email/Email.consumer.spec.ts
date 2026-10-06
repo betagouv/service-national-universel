@@ -33,7 +33,7 @@ describe("EmailConsumer - journaux (GOO-158, PL14)", () => {
         expect(journal).not.toContain("autre@example.org");
         expect(journal).not.toContain("Jean Dupont");
         expect(journal).toContain("template-test");
-        expect(journal).toContain("2");
+        expect(journal).toContain("2 recipient(s)");
     });
 
     it("ne journalise pas non plus les destinataires en cas d'échec d'envoi", async () => {
