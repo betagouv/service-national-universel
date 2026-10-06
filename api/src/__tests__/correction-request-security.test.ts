@@ -283,5 +283,119 @@ describe("H22/H23 — périmètre des demandes de correction", () => {
       expect(res.body.data).toBeUndefined();
       expect(mockSendTemplate).not.toHaveBeenCalled();
     });
+
+    describe("relance des demandes ouvertes uniquement", () => {
+      const ANCIEN_MODERATEUR = new Types.ObjectId().toString();
+      const ANCIENNE_DATE = new Date("2026-01-15T10:00:00.000Z");
+
+      const demande = (field: string, status: string, extra: Record<string, unknown> = {}) => ({
+        cohort: "Juillet 2023",
+        field,
+        reason: "MISSING",
+        message: "",
+        status,
+        moderatorId: ANCIEN_MODERATEUR,
+        sentAt: ANCIENNE_DATE,
+        ...extra,
+      });
+
+      async function jeuneAvecDemandes(correctionRequests: any[]) {
+        const young = await createYoungHelper(
+          getNewYoungFixture({
+            department: "Paris",
+            region: "Île-de-France",
+            status: YOUNG_STATUS.WAITING_CORRECTION,
+            correctionRequests,
+          } as any),
+        );
+        const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Paris"], region: "Île-de-France" }));
+        return { young, referent };
+      }
+
+      const relancer = async (young: any, referent: any) =>
+        request(await getAppHelperWithAcl(referent))
+          .post(`/correction-request/${young._id}/remind`)
+          .send({});
+
+      const parChamp = (young: any, field: string) => young?.correctionRequests?.find((r: any) => r.field === field);
+
+      it("relance la demande SENT, laisse la demande CORRECTED inchangée et envoie un email", async () => {
+        const { young, referent } = await jeuneAvecDemandes([demande("firstName", "SENT"), demande("lastName", "CORRECTED", { correctedAt: ANCIENNE_DATE })]);
+
+        const res = await relancer(young, referent);
+
+        expect(res.statusCode).toEqual(200);
+        const apres = await getYoungByIdHelper(young._id);
+        const relancee = parChamp(apres, "firstName");
+        expect(relancee.status).toEqual("REMINDED");
+        expect(String(relancee.moderatorId)).toEqual(referent._id.toString());
+        expect(relancee.remindedAt).toBeInstanceOf(Date);
+        const corrigee = parChamp(apres, "lastName");
+        expect(corrigee.status).toEqual("CORRECTED");
+        expect(corrigee.remindedAt).toBeUndefined();
+        expect(String(corrigee.moderatorId)).toEqual(ANCIEN_MODERATEUR);
+        expect(mockSendTemplate).toHaveBeenCalledTimes(1);
+      });
+
+      it("laisse les demandes CANCELED et PENDING inchangées quand une demande SENT est relancée", async () => {
+        const { young, referent } = await jeuneAvecDemandes([demande("firstName", "SENT"), demande("lastName", "CANCELED"), demande("birthdateAt", "PENDING")]);
+
+        const res = await relancer(young, referent);
+
+        expect(res.statusCode).toEqual(200);
+        const apres = await getYoungByIdHelper(young._id);
+        expect(parChamp(apres, "firstName").status).toEqual("REMINDED");
+        for (const [field, status] of [
+          ["lastName", "CANCELED"],
+          ["birthdateAt", "PENDING"],
+        ]) {
+          const inchangee = parChamp(apres, field);
+          expect(inchangee.status).toEqual(status);
+          expect(inchangee.remindedAt).toBeUndefined();
+          expect(String(inchangee.moderatorId)).toEqual(ANCIEN_MODERATEUR);
+        }
+        expect(mockSendTemplate).toHaveBeenCalledTimes(1);
+      });
+
+      it("répond 400 NOT_FOUND, sans écriture ni email, quand il ne reste que des demandes CORRECTED, CANCELED ou PENDING", async () => {
+        const { young, referent } = await jeuneAvecDemandes([demande("firstName", "CORRECTED"), demande("lastName", "CANCELED"), demande("birthdateAt", "PENDING")]);
+        const avant = await getYoungByIdHelper(young._id);
+
+        const res = await relancer(young, referent);
+
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.code).toEqual(ERRORS.NOT_FOUND);
+        const apres = await getYoungByIdHelper(young._id);
+        expect(apres?.correctionRequests?.map((r: any) => [r.field, r.status, r.remindedAt, r.moderatorId])).toEqual(
+          avant?.correctionRequests?.map((r: any) => [r.field, r.status, r.remindedAt, r.moderatorId]),
+        );
+        expect(apres?.updatedAt).toEqual(avant?.updatedAt);
+        expect(mockSendTemplate).not.toHaveBeenCalled();
+      });
+
+      it("relance à nouveau une demande déjà REMINDED, avec une date mise à jour, et envoie un email", async () => {
+        const { young, referent } = await jeuneAvecDemandes([demande("firstName", "REMINDED", { remindedAt: ANCIENNE_DATE })]);
+
+        const res = await relancer(young, referent);
+
+        expect(res.statusCode).toEqual(200);
+        const apres = await getYoungByIdHelper(young._id);
+        const relancee = parChamp(apres, "firstName");
+        expect(relancee.status).toEqual("REMINDED");
+        expect(relancee.remindedAt.getTime()).toBeGreaterThan(ANCIENNE_DATE.getTime());
+        expect(String(relancee.moderatorId)).toEqual(referent._id.toString());
+        expect(mockSendTemplate).toHaveBeenCalledTimes(1);
+      });
+
+      it("répond 400 NOT_FOUND quand le dossier n'a aucune demande", async () => {
+        const { young, referent } = await jeuneAvecDemandes([]);
+
+        const res = await relancer(young, referent);
+
+        expect(res.statusCode).toEqual(400);
+        expect(res.body.code).toEqual(ERRORS.NOT_FOUND);
+        expect(mockSendTemplate).not.toHaveBeenCalled();
+      });
+    });
   });
 });
