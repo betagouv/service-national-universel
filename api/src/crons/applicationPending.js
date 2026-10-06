@@ -36,8 +36,8 @@ exports.handler = async () => {
           emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
           params: {
             cta: `${config.ADMIN_URL}/volontaire/${application.youngId}`,
-            youngFirstName: application.youngFirstName,
-            youngLastName: application.youngLastName,
+            youngFirstName: sanitizeEmailText(application.youngFirstName),
+            youngLastName: sanitizeEmailText(application.youngLastName),
             missionName: sanitizeEmailText(application.missionName),
           },
         });
