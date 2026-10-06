@@ -1,4 +1,4 @@
-import { ContractType, YoungType, MINISTRES } from "snu-lib";
+import { ContractType, YoungType, MINISTRES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import path from "path";
 import { logger } from "../logger";
 import { Writable } from "node:stream";
@@ -49,11 +49,24 @@ export function isPdfDocumentAvailable(type: string, template: string): boolean 
   return Object.hasOwn(PDF_DOCUMENTS, type) && PDF_DOCUMENTS[type].includes(template);
 }
 
+// Chaque attestation ne sanctionne que la phase réellement terminée : phase 1 (DONE), phase 2
+// (VALIDATED), phase 3 (VALIDATED), et l'attestation SNU qui résume les phases 1 et 2.
+export function isCertificateStatusValid(template: string, young: Pick<YoungType, "statusPhase1" | "statusPhase2" | "statusPhase3">): boolean {
+  if (template === "1") return young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE;
+  if (template === "2") return young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  if (template === "3") return young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
+  if (template === "snu") return young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  return true;
+}
+
 export async function generatePdfIntoStream(outStream, { type, template, young, contract }: { type: string; template: string; young?: YoungType; contract?: ContractType }) {
   // Un jeune anonymisé (RGPD) ne doit plus pouvoir générer/télécharger ses documents
   // (attestations phase 1/2/3, droit à l'image…). Garde central : couvre toutes les
   // variantes ci-dessous. Les flux batch (tableau d'youngs) sont déjà filtrés par statut.
   if (young && !Array.isArray(young) && (young as any).anonymized) {
+    throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+  }
+  if (type === "certificate" && young && !isCertificateStatusValid(template, young)) {
     throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
   }
   if (type === "certificate" && template === "1" && young) {
