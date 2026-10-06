@@ -6,6 +6,7 @@ import sanitizeHtml from "sanitize-html";
 import { YoungModel, ReferentModel, ContractModel, ApplicationModel, MissionEquivalenceModel } from "../models";
 
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { config } from "../config";
 import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS, ReferentStatus } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
@@ -482,9 +483,9 @@ export async function sendNotificationApplicationClosedBecausePhase2Validated(ap
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION_PHASE_2_VALIDATED, {
         emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
         params: {
-          missionName: application.missionName,
-          youngFirstName: application.youngFirstName,
-          youngLastName: application.youngLastName,
+          missionName: sanitizeEmailText(application.missionName),
+          youngFirstName: sanitizeEmailText(application.youngFirstName),
+          youngLastName: sanitizeEmailText(application.youngLastName),
         },
       });
   }
