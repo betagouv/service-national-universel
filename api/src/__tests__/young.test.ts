@@ -441,28 +441,8 @@ describe("Young", () => {
     });
   });
 
-  describe("POST /young/signup_verify", () => {
-    it("should return 400 when missing invitationToken", async () => {
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_verify")
-        .send({});
-      expect(res.statusCode).toEqual(400);
-    });
-    it("should return 404 when invitation is expired", async () => {
-      await deleteYoungByEmailHelper("foo@example.org");
-      const invitationToken = Date.now().toString();
-      await createYoungHelper({
-        ...getNewYoungFixture(),
-        invitationToken,
-        invitationExpires: new Date(Date.now() - 1000 * 60 * 60 * 24 * 70),
-      });
-      // expect(new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)).toEqual([]);
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_verify")
-        .send({ invitationToken });
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 404 when invitation token is wrong", async () => {
+  describe("M43 — POST /young/signup_verify supprimée", () => {
+    it("n'est plus montée : répond 404 même avec un invitationToken valide", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
       const invitationToken = Date.now().toString();
       await createYoungHelper({
@@ -470,23 +450,16 @@ describe("Young", () => {
         invitationToken,
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_verify")
-        .send({ invitationToken: "bar" });
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 200 when invitation token is wrong", async () => {
-      await deleteYoungByEmailHelper("foo@example.org");
-      const invitationToken = Date.now().toString();
-      await createYoungHelper({
-        ...getNewYoungFixture(),
-        invitationToken,
-        invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-      });
+
       const res = await request(await getAppHelperWithAcl())
         .post("/young/signup_verify")
         .send({ invitationToken });
-      expect(res.statusCode).toEqual(200);
+
+      expect(res.statusCode).toEqual(404);
+      // Le 404 par défaut d'Express n'a pas de corps applicatif : un gestionnaire encore monté qui
+      // ne trouverait pas la ressource répondrait { ok: false, code: "INVITATION_TOKEN_EXPIRED_OR_INVALID" }.
+      expect(res.body?.ok).toBeUndefined();
+      expect(res.body?.code).toBeUndefined();
     });
   });
 
