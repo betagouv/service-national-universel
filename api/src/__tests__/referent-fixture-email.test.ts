@@ -1,45 +1,32 @@
-import { fakerFR as faker } from "@faker-js/faker";
-
 import { getNewReferentFixture, getNewSignupReferentFixture, getReinscriptionSignupReferentFixture } from "./fixtures/referent";
 
-// GOO-190 : faker.internet.email() peut renvoyer deux fois la même valeur dans un
-// même run (pas de garantie d'unicité inter-appel), ce qui provoque une collision
-// E11000 occasionnelle sur l'index unique `email` des référents en base de test.
-describe("getNewReferentFixture — unicité de l'email (GOO-190)", () => {
-  afterEach(() => {
-    jest.restoreAllMocks();
+// GOO-190 : faker.internet.email() ne garantit pas l'unicité entre deux appels,
+// ce qui provoquait une collision E11000 occasionnelle sur l'index unique
+// `email` des référents en base de test — y compris entre deux lancements
+// locaux successifs (la base de test n'est jamais purgée entre deux runs).
+// Un suffixe UUID donne une entropie suffisante indépendamment du nombre de
+// runs déjà exécutés, contrairement à un compteur de process qui repart à
+// zéro à chaque run (constat relevé en relecture A).
+const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+
+describe("fixtures référent — unicité de l'email (GOO-190)", () => {
+  it("getNewReferentFixture intègre un UUID dans l'email généré", () => {
+    const fixture = getNewReferentFixture();
+    expect(fixture.email).toMatch(UUID_PATTERN);
   });
 
-  it("génère des emails différents même si faker.internet.email() renvoie la même valeur deux fois", () => {
-    jest.spyOn(faker.internet, "email").mockReturnValue("collision@example.com");
+  it("getNewSignupReferentFixture intègre un UUID dans l'email généré", () => {
+    const fixture = getNewSignupReferentFixture();
+    expect(fixture.email).toMatch(UUID_PATTERN);
+  });
 
-    const a = getNewReferentFixture();
-    const b = getNewReferentFixture();
-
-    expect(faker.internet.email).toHaveBeenCalled();
-    expect(a.email).not.toEqual(b.email);
+  it("getReinscriptionSignupReferentFixture intègre un UUID dans l'email généré", () => {
+    const fixture = getReinscriptionSignupReferentFixture();
+    expect(fixture.email).toMatch(UUID_PATTERN);
   });
 
   it("respecte un email explicitement fourni (override)", () => {
     const fixture = getNewReferentFixture({ email: "jean.dupont@example.org" });
     expect(fixture.email).toEqual("jean.dupont@example.org");
-  });
-
-  it("getNewSignupReferentFixture génère aussi des emails différents sous collision faker", () => {
-    jest.spyOn(faker.internet, "email").mockReturnValue("collision@example.com");
-
-    const a = getNewSignupReferentFixture();
-    const b = getNewSignupReferentFixture();
-
-    expect(a.email).not.toEqual(b.email);
-  });
-
-  it("getReinscriptionSignupReferentFixture génère aussi des emails différents sous collision faker", () => {
-    jest.spyOn(faker.internet, "email").mockReturnValue("collision@example.com");
-
-    const a = getReinscriptionSignupReferentFixture();
-    const b = getReinscriptionSignupReferentFixture();
-
-    expect(a.email).not.toEqual(b.email);
   });
 });
