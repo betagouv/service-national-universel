@@ -9,7 +9,6 @@
     "start": "vite",
     "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode \"$VITE_ENVIRONMENT\"",
     "preview": "vite preview",
-    "test": "vitest run",
     "postinstall": "npm run copy:dsfr",
     "copy:dsfr": "copy-dsfr-to-public",
     "check-types": "tsc -p tsconfig.ci.json --emitDeclarationOnly",
@@ -20,8 +19,6 @@
   },
   "devDependencies": {
     "@swc/plugin-styled-components": "1.5.111",
-    "@testing-library/dom": "^10.4.2",
-    "@testing-library/react": "^16.3.3",
     "@types/react-redux-toastr": "^7.0.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "eslint": "^8.56.0",
@@ -29,12 +26,10 @@
     "eslint-plugin-prettier": "^5.0.1",
     "eslint-plugin-react": "^7.33.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "jsdom": "^27.4.0",
     "prettier": "^3.1.1",
     "tailwindcss": "^3.2.2",
     "typescript": "^5.4.5",
-    "vite": "^5.4.11",
-    "vitest": "^3.2.4"
+    "vite": "^5.4.11"
   },
   "dependencies": {
     "@codegouvfr/react-dsfr": "^1.9.2",
