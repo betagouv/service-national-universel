@@ -559,6 +559,14 @@ describe("Sécurité des missions", () => {
         isMilitaryPreparation: "false",
         department: "Ain",
         region: "Auvergne-Rhône-Alpes",
+        format: "CONTINUOUS",
+        period: ["WHENEVER"],
+        subPeriod: ["toussaint"],
+        domains: ["CITIZENSHIP"],
+        mainDomain: "CITIZENSHIP",
+        country: "France",
+        location: { lat: 48.85, lon: 2.35 },
+        remote: "false",
         ...overrides,
       });
     }
@@ -583,6 +591,14 @@ describe("Sécurité des missions", () => {
         isMilitaryPreparation: mission.isMilitaryPreparation,
         hebergement: mission.hebergement,
         placesTotal: mission.placesTotal,
+        format: mission.format,
+        period: mission.period,
+        subPeriod: mission.subPeriod,
+        domains: mission.domains,
+        mainDomain: mission.mainDomain,
+        country: mission.country,
+        location: mission.location,
+        remote: mission.remote,
       };
     }
 
@@ -600,6 +616,12 @@ describe("Sécurité des missions", () => {
       ["department", "Rhône"],
       ["isMilitaryPreparation", "true"],
       ["hebergement", "true"],
+      ["format", "DISCONTINUOUS"],
+      ["period", ["DURING_HOLIDAYS"]],
+      ["subPeriod", ["printemps"]],
+      ["domains", ["SPORT"]],
+      ["country", "Belgique"],
+      ["remote", "true"],
     ])("repasse en modération une mission validée dont le responsable change « %s »", async (field, value) => {
       const structure = await createStructure();
       const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
@@ -608,6 +630,69 @@ describe("Sécurité des missions", () => {
       const res = await request(await getAppHelperWithAcl(responsable))
         .put(`/mission/${mission._id}`)
         .send({ ...corpsInchange(mission), [field]: value });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.WAITING_VALIDATION);
+    });
+
+    it("repasse en modération une mission validée dont le responsable change « mainDomain » sans changer domains", async () => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      // Le contrôleur pousse mainDomain dans domains s'il n'y est pas déjà (mission.ts:189-194),
+      // AVANT la comparaison : si mainDomain n'était pas déjà présent dans domains, domains
+      // changerait aussi et ce test resterait vert même sans comparer mainDomain lui-même. En
+      // gardant mainDomain dans domains des deux côtés, seul mainDomain varie.
+      const mission = await missionValidee(structure, { domains: ["CITIZENSHIP", "CULTURE"], mainDomain: "CITIZENSHIP" });
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), mainDomain: "CULTURE" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.WAITING_VALIDATION);
+      expect(apres!.domains).toEqual(expect.arrayContaining(["CITIZENSHIP", "CULTURE"]));
+    });
+
+    it("laisse validée une mission dont seul l'ordre d'un tableau modéré change (domains)", async () => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await missionValidee(structure, { domains: ["CITIZENSHIP", "CULTURE"], mainDomain: "CITIZENSHIP" });
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), domains: ["CULTURE", "CITIZENSHIP"] });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.VALIDATED);
+    });
+
+    it("repasse en modération une mission validée dont le responsable change les coordonnées (location)", async () => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await missionValidee(structure);
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), location: { lat: 45.75, lon: 4.85 } });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.WAITING_VALIDATION);
+    });
+
+    it("repasse en modération une mission validée dont le responsable change « hebergementPayant »", async () => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      // hebergement doit rester « true » : le contrôleur retire hebergementPayant du corps quand
+      // hebergement vaut « false », ce qui empêcherait d'isoler ce champ dans ce test.
+      const mission = await missionValidee(structure, { hebergement: "true", hebergementPayant: "false" });
+
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...corpsInchange(mission), hebergement: "true", hebergementPayant: "true" });
 
       expect(res.statusCode).toEqual(200);
       const apres = await getMissionByIdHelper(mission._id);
@@ -664,7 +749,7 @@ describe("Sécurité des missions", () => {
 
       const res = await request(await getAppHelperWithAcl(referent))
         .put(`/mission/${mission._id}`)
-        .send({ ...corpsInchange(mission), name: "Nom corrigé par le référent", duration: "12" });
+        .send({ ...corpsInchange(mission), name: "Nom corrigé par le référent", duration: "12", location: { lat: 45.75, lon: 4.85 } });
 
       expect(res.statusCode).toEqual(200);
       const apres = await getMissionByIdHelper(mission._id);
