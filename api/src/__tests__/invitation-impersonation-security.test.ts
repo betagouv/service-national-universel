@@ -1,8 +1,9 @@
 /**
  * Lot B de l'audit du 21 septembre 2026 — non-régression.
  *
- * H62 / M43 : `signup_verify` (référent et jeune) échangeait un `invitationToken` contre un JWT de
- *             session complet, sans mot de passe ni 2FA.
+ * H62       : `/referent/signup_verify` échangeait un `invitationToken` contre un JWT de session
+ *             complet, sans mot de passe ni 2FA. (M43, l'équivalent côté jeune, est désormais
+ *             traité par la suppression de la route — voir young.test.ts.)
  * M66       : `signup_retry` répondait 404 sur une adresse inconnue (oracle d'existence) et
  *             régénérait l'invitation de n'importe quel compte, y compris déjà activé.
  * H61       : sous impersonation, `PUT /referent/` acceptait email et mot de passe.
@@ -22,9 +23,8 @@ import { ROLES, ReferentStatus } from "snu-lib";
 
 import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
-import { ReferentModel, YoungModel } from "../models";
+import { ReferentModel } from "../models";
 import { getNewReferentFixture } from "./fixtures/referent";
-import getNewYoungFixture from "./fixtures/young";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -80,19 +80,6 @@ describe("H62 — POST /referent/signup_verify", () => {
     const res = await request(getAppHelper()).post("/referent/signup_verify").send({ invitationToken });
 
     expect(res.status).toBe(404);
-  });
-});
-
-describe("M43 — POST /young/signup_verify", () => {
-  it("n'émet aucun jeton de session en échange du seul invitationToken", async () => {
-    const { invitationToken, invitationExpires } = invitationEnCours();
-    await YoungModel.create(getNewYoungFixture({ invitationToken, invitationExpires } as any));
-
-    const res = await request(getAppHelper()).post("/young/signup_verify").send({ invitationToken });
-
-    expect(res.status).toBe(200);
-    expect(res.body.token).toBeUndefined();
-    expect(res.headers["set-cookie"]).toBeUndefined();
   });
 });
 

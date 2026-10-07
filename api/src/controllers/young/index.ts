@@ -118,28 +118,10 @@ router.post("/forgot_password_reset", youngSigninLimiter, async (req: UserReques
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.resetPassword(req, res));
 router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.checkPassword(req, res));
 
-// PL3 (25/09/2026) : par parité avec referentSigninLimiter, déjà posé côté référent sur la route
-// équivalente.
-router.post("/signup_verify", youngSigninLimiter, async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const young = await YoungModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
-    // Pré-remplissage du formulaire d'activation uniquement : aucune session n'est ouverte ici.
-    // Cette route délivrait un JWT de session complet contre le seul jeton d'invitation, sans mot de
-    // passe (audit 2026-09-21, M43) ; c'est `signup_invite` qui authentifie, à partir du couple
-    // (email, invitationToken) et sans lire de JWT.
-    return res.status(200).send({ ok: true, data: serializeYoung(young, young) });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+// M43 (audit du 05/10/2026) : cette route renvoyait le dossier jeune complet (serializeYoung) à
+// tout porteur anonyme d'un invitationToken, sans aucun appelant front (seul `/referent/
+// signup_verify`, route distincte, est appelé — depuis admin/src/scenes/auth/signupInvite.jsx).
+// Supprimée plutôt que corrigée, en l'absence d'appelant à préserver.
 
 // PL3 (rate limiter) + PM31 (requireJsonBody, déjà posé sur /signin) : cette route ouvre une session
 // complète contre email + mot de passe + jeton d'invitation, comme /signin.
