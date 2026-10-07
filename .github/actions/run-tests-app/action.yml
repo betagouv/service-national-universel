@@ -11,7 +11,9 @@ runs:
     - uses: ./.github/actions/setup-workspace
       with:
         branch_name: ${{ inputs.branch_name }}
-        build: lib ds
+        # log-redaction : app/src/sentry.js l'importe (redactFrontBreadcrumb/Event), nécessaire
+        # dès que "npm run test" charge ce module (GOO-185).
+        build: lib ds log-redaction
 
     - name: Check types
       working-directory: app
