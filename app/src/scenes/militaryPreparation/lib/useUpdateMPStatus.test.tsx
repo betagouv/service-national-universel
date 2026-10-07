@@ -1,5 +1,5 @@
 import React from "react";
-import { act, renderHook, waitFor } from "@testing-library/react";
+import { act, cleanup, renderHook, waitFor } from "@testing-library/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
 import { applyMiddleware, combineReducers, createStore } from "redux";
@@ -27,7 +27,7 @@ function renderWithProviders(young: any) {
 
 describe("useUpdateMPStatus", () => {
   afterEach(() => {
-    vi.clearAllMocks();
+    cleanup();
   });
 
   it("met à jour le young dans le store et affiche un succès quand la mutation réussit", async () => {

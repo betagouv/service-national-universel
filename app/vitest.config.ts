@@ -12,5 +12,10 @@ export default defineConfig({
     // un paquet ESM-only que Node 20 ne peut pas require() depuis vitest en CJS (GOO-194).
     environment: "happy-dom",
     globals: false,
+    // globals: false désactive le cleanup() automatique de @testing-library/react (il ne
+    // détecte afterEach que sur le global, pas sur l'import explicite) : chaque fichier de
+    // test doit l'appeler lui-même. restoreMocks couvre aussi vi.spyOn, que clearAllMocks
+    // ne restaure pas (relecture A, GOO-194).
+    restoreMocks: true,
   },
 });
