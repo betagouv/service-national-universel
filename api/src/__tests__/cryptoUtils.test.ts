@@ -27,6 +27,8 @@ describe("cryptoUtils (GOO-159 : PM23)", () => {
     config.ENABLE_FILE_ENCRYPTION_V1 = true;
     const plaintext = Buffer.from("contenu de pièce jointe sensible");
     const encrypted = encrypt(plaintext, SECRET);
+    // Prouve que ce test exerce bien le format versionné, pas seulement un aller-retour générique.
+    expect(encrypted.subarray(0, 4).toString("utf-8")).toEqual("SNU1");
     expect(decrypt(encrypted, SECRET)).toEqual(plaintext);
   });
 
@@ -57,7 +59,7 @@ describe("cryptoUtils (GOO-159 : PM23)", () => {
     expect(decrypt(encrypted, otherSecret)).toEqual(plaintext);
   });
 
-  it("garde le format legacy pour FILE_ENCRYPTION_SECRET_SUPPORT même flag activé — snupport-api ne sait lire que le CTR (relecture A)", () => {
+  it("garde le format legacy pour FILE_ENCRYPTION_SECRET_SUPPORT même flag activé — snupport-api ne sait lire que le CTR", () => {
     const originalSupportSecret = config.FILE_ENCRYPTION_SECRET_SUPPORT;
     config.FILE_ENCRYPTION_SECRET_SUPPORT = "secret-support-0123456789abcdef";
     config.ENABLE_FILE_ENCRYPTION_V1 = true;
@@ -70,5 +72,38 @@ describe("cryptoUtils (GOO-159 : PM23)", () => {
     } finally {
       config.FILE_ENCRYPTION_SECRET_SUPPORT = originalSupportSecret;
     }
+  });
+
+  describe("ENABLE_FILE_ENCRYPTION_LEGACY_READ (coupe-circuit de lecture du format legacy)", () => {
+    const originalLegacyRead = config.ENABLE_FILE_ENCRYPTION_LEGACY_READ;
+    afterEach(() => {
+      config.ENABLE_FILE_ENCRYPTION_LEGACY_READ = originalLegacyRead;
+    });
+
+    it("refuse un objet non versionné quand le coupe-circuit est désactivé", () => {
+      config.ENABLE_FILE_ENCRYPTION_V1 = false;
+      const legacyEncrypted = encrypt(Buffer.from("objet jamais migré"), SECRET);
+      config.ENABLE_FILE_ENCRYPTION_LEGACY_READ = false;
+      expect(() => decrypt(legacyEncrypted, SECRET)).toThrow();
+    });
+
+    it("continue de lire un objet V1 même coupe-circuit désactivé (seul le format non versionné est rejeté)", () => {
+      config.ENABLE_FILE_ENCRYPTION_V1 = true;
+      const plaintext = Buffer.from("objet déjà migré en GCM");
+      const v1Encrypted = encrypt(plaintext, SECRET);
+      config.ENABLE_FILE_ENCRYPTION_LEGACY_READ = false;
+      expect(decrypt(v1Encrypted, SECRET)).toEqual(plaintext);
+    });
+
+    it("sans le coupe-circuit, un objet V1 dont l'en-tête a été retiré (simulation d'une substitution complète de l'objet S3) se déchiffre sans authentification — résidu documenté du constat PM23", () => {
+      config.ENABLE_FILE_ENCRYPTION_V1 = true;
+      config.ENABLE_FILE_ENCRYPTION_LEGACY_READ = true;
+      const plaintext = Buffer.from("objet migré, en-tête ensuite retiré par l'attaquant");
+      const v1Encrypted = encrypt(plaintext, SECRET);
+      const withoutHeader = v1Encrypted.subarray(5); // retire les 4 octets "SNU1" + 1 octet de version
+      // Ne lève pas : relu comme un objet legacy, sans détecter l'altération. C'est précisément le
+      // résidu que ENABLE_FILE_ENCRYPTION_LEGACY_READ=false permet de fermer (test précédent).
+      expect(() => decrypt(withoutHeader, SECRET)).not.toThrow();
+    });
   });
 });

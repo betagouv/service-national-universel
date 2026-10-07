@@ -25,6 +25,9 @@ const getV1Key = (secret) => {
   return Buffer.from(crypto.hkdfSync("sha256", SECRET, Buffer.alloc(0), V1_KDF_INFO, 32));
 };
 
+// Risque accepté : un objet legacy (IV aléatoire) dont les 5 premiers octets coïncideraient par
+// hasard avec cet en-tête serait pris pour un objet V1 et échouerait à l'authentification au lieu
+// de se déchiffrer — probabilité ~2^-40 par objet, négligeable face à un discriminant plus fort.
 const isV1Format = (encrypted) => encrypted.length >= V1_HEADER_LENGTH && encrypted.subarray(0, V1_MAGIC.length).equals(V1_MAGIC) && encrypted[V1_MAGIC.length] === V1_VERSION;
 
 const encryptLegacy = (buffer, secret?: string) => {
@@ -61,9 +64,10 @@ const decryptV1 = (encrypted, secret?: string) => {
 };
 
 // `snupport-api` partage le même bucket S3 (préfixe `message/`) pour les pièces jointes du support
-// et ne sait lire que l'ancien format (CTR, snupport-api/src/utils/crypto.js) — tant qu'il ne lit pas
-// le format versionné, les objets chiffrés avec FILE_ENCRYPTION_SECRET_SUPPORT doivent rester en
-// legacy, même quand ENABLE_FILE_ENCRYPTION_V1 est actif pour le reste de l'application (relecture A).
+// et ne sait lire que l'ancien format (CTR, snupport-api/src/utils/crypto.js, aussi utilisé par
+// snupport-api/src/utils/index.js pour l'envoi par mail de l'historique) — tant qu'il ne lit pas le
+// format versionné, les objets chiffrés avec FILE_ENCRYPTION_SECRET_SUPPORT doivent rester en
+// legacy, même quand ENABLE_FILE_ENCRYPTION_V1 est actif pour le reste de l'application.
 const isSupportSecret = (secret?: string) => !!secret && secret === config.FILE_ENCRYPTION_SECRET_SUPPORT;
 
 export const encrypt = (buffer, secret?: string) => {
@@ -72,5 +76,12 @@ export const encrypt = (buffer, secret?: string) => {
 
 export const decrypt = (encrypted, secret?: string): any => {
   // FIXME: retrun type
-  return isV1Format(encrypted) ? decryptV1(encrypted, secret) : decryptLegacy(encrypted, secret);
+  if (isV1Format(encrypted)) return decryptV1(encrypted, secret);
+  // Tant que ENABLE_FILE_ENCRYPTION_LEGACY_READ est actif (défaut), un objet non versionné — y
+  // compris un objet altéré dont l'en-tête "SNU1" a été retiré ou remplacé — se déchiffre sans
+  // authentification : la protection apportée par le format V1 ne couvre alors que les objets dont
+  // l'en-tête survit à l'altération. Désactiver ce flag (après avoir rechiffré tous les objets
+  // existants) ferme ce résidu en refusant toute lecture non versionnée.
+  if (!config.ENABLE_FILE_ENCRYPTION_LEGACY_READ) throw new Error("FILE_ENCRYPTION_LEGACY_FORMAT_REJECTED");
+  return decryptLegacy(encrypted, secret);
 };
