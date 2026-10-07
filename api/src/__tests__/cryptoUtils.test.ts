@@ -56,4 +56,19 @@ describe("cryptoUtils (GOO-159 : PM23)", () => {
     const encrypted = encrypt(plaintext, otherSecret);
     expect(decrypt(encrypted, otherSecret)).toEqual(plaintext);
   });
+
+  it("garde le format legacy pour FILE_ENCRYPTION_SECRET_SUPPORT même flag activé — snupport-api ne sait lire que le CTR (relecture A)", () => {
+    const originalSupportSecret = config.FILE_ENCRYPTION_SECRET_SUPPORT;
+    config.FILE_ENCRYPTION_SECRET_SUPPORT = "secret-support-0123456789abcdef";
+    config.ENABLE_FILE_ENCRYPTION_V1 = true;
+    try {
+      const plaintext = Buffer.from("pièce jointe support");
+      const encrypted = encrypt(plaintext, config.FILE_ENCRYPTION_SECRET_SUPPORT);
+      // Format legacy : 16 octets d'IV puis directement le texte chiffré (même longueur que le clair, AES-CTR).
+      expect(encrypted.length).toEqual(16 + plaintext.length);
+      expect(decrypt(encrypted, config.FILE_ENCRYPTION_SECRET_SUPPORT)).toEqual(plaintext);
+    } finally {
+      config.FILE_ENCRYPTION_SECRET_SUPPORT = originalSupportSecret;
+    }
+  });
 });

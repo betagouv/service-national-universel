@@ -55,13 +55,19 @@ const decryptV1 = (encrypted, secret?: string) => {
   const authTag = encrypted.subarray(offset, offset + V1_AUTH_TAG_LENGTH);
   offset += V1_AUTH_TAG_LENGTH;
   const ciphertext = encrypted.subarray(offset);
-  const decipher = crypto.createDecipheriv(V1_ALGO, getV1Key(secret), iv);
+  const decipher = crypto.createDecipheriv(V1_ALGO, getV1Key(secret), iv, { authTagLength: V1_AUTH_TAG_LENGTH });
   decipher.setAuthTag(authTag);
   return Buffer.concat([decipher.update(ciphertext), decipher.final()]);
 };
 
+// `snupport-api` partage le même bucket S3 (préfixe `message/`) pour les pièces jointes du support
+// et ne sait lire que l'ancien format (CTR, snupport-api/src/utils/crypto.js) — tant qu'il ne lit pas
+// le format versionné, les objets chiffrés avec FILE_ENCRYPTION_SECRET_SUPPORT doivent rester en
+// legacy, même quand ENABLE_FILE_ENCRYPTION_V1 est actif pour le reste de l'application (relecture A).
+const isSupportSecret = (secret?: string) => !!secret && secret === config.FILE_ENCRYPTION_SECRET_SUPPORT;
+
 export const encrypt = (buffer, secret?: string) => {
-  return config.ENABLE_FILE_ENCRYPTION_V1 ? encryptV1(buffer, secret) : encryptLegacy(buffer, secret);
+  return config.ENABLE_FILE_ENCRYPTION_V1 && !isSupportSecret(secret) ? encryptV1(buffer, secret) : encryptLegacy(buffer, secret);
 };
 
 export const decrypt = (encrypted, secret?: string): any => {
