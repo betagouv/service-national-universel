@@ -103,7 +103,7 @@ beforeEach(() => {
   for (const key of Object.keys(mockRedisStore)) delete mockRedisStore[key];
   // Ni FILE_ENCRYPTION_SECRET_SUPPORT ni FILE_ENCRYPTION_SECRET ne sont définis dans l'environnement
   // de test (c'est d'ailleurs pourquoi toutes les autres suites touchant ce contrôleur mockent
-  // `cryptoUtils` plutôt que d'appeler le vrai `encrypt`/`decrypt` — cf. incident consigné, rule 7).
+  // `cryptoUtils` plutôt que d'appeler le vrai `encrypt`/`decrypt`).
   config.FILE_ENCRYPTION_SECRET_SUPPORT = "secret-support-de-test-0123456789";
 });
 afterAll(() => {
