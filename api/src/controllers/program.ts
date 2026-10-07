@@ -153,7 +153,10 @@ router.get("/public/engagement/:id", async (req: Request, res: Response) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const data = await ProgramModel.findById(checkedId);
+    // Route publique, sans authentification : même filtre que /public/engagements (visibility
+    // NATIONAL uniquement), sinon n'importe qui pouvait lire un programme DEPARTMENT/REGION/
+    // HEAD_CENTER par id sans même un jeton (relecture A, GOO-188).
+    const data = await ProgramModel.findOne({ _id: checkedId, visibility: "NATIONAL" });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {

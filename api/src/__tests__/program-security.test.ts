@@ -2,7 +2,7 @@ import request from "supertest";
 
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLE_JEUNE, ROLES } from "snu-lib";
 
-import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
+import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { addPermissionHelper } from "./helpers/permissions";
 import { createProgramHelper, getProgramByIdHelper } from "./helpers/program";
@@ -362,6 +362,24 @@ describe("Sécurité des programmes", () => {
       const res = await request(await getAppHelperWithAcl(referent)).get(`/program/${programme._id}`);
 
       expect(res.statusCode).toEqual(404);
+    });
+  });
+
+  describe("GOO-188 — visibilité de GET /program/public/engagement/:id (route publique, sans authentification)", () => {
+    it("refuse (404), sans authentification, de lire par id un programme non NATIONAL", async () => {
+      const programme = await createProgram({ department: DEPARTEMENT_CIBLE, region: REGION_CIBLE, visibility: "DEPARTMENT" });
+
+      const res = await request(getAppHelper()).get(`/program/public/engagement/${programme._id}`);
+
+      expect(res.statusCode).toEqual(404);
+    });
+
+    it("laisse n'importe qui lire par id, sans authentification, un programme NATIONAL", async () => {
+      const programme = await createProgram({ department: "", region: "", visibility: "NATIONAL" });
+
+      const res = await request(getAppHelper()).get(`/program/public/engagement/${programme._id}`);
+
+      expect(res.statusCode).toEqual(200);
     });
   });
 });
