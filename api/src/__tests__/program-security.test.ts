@@ -351,5 +351,17 @@ describe("Sécurité des programmes", () => {
 
       expect(res.statusCode).toEqual(200);
     });
+
+    it("refuse (404) à un référent départemental sans région renseignée de lire par id un programme à région elle aussi vide (relecture A)", async () => {
+      // `GET /program` (liste) rejette ce profil en 400 : `validateString("")` échoue (Joi.string()
+      // sans `.allow("")`), donc `errorRegion` est vrai. `isProgramVisibleToUser` doit refuser de la
+      // même façon, pas comparer silencieusement "" === "" et laisser passer un programme HEAD_CENTER.
+      const referent = await createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: [DEPARTEMENT_ATTAQUANT], region: "" });
+      const programme = await createProgram({ department: "", region: "", visibility: "HEAD_CENTER" });
+
+      const res = await request(await getAppHelperWithAcl(referent)).get(`/program/${programme._id}`);
+
+      expect(res.statusCode).toEqual(404);
+    });
   });
 });

@@ -25,13 +25,17 @@ function isProgramVisibleToUser(user: { role?: string; department?: unknown; reg
   if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role as string)) return program.visibility === "HEAD_CENTER";
   if (program.visibility === "NATIONAL") return true;
 
-  let checkedDepartement;
+  let errorDepartement, checkedDepartement;
   if (isYoung(user)) {
-    ({ value: checkedDepartement } = validateString(user.department));
+    ({ error: errorDepartement, value: checkedDepartement } = validateString(user.department));
   } else {
-    ({ value: checkedDepartement } = validateArray(user.department));
+    ({ error: errorDepartement, value: checkedDepartement } = validateArray(user.department));
   }
-  const { value: checkedRegion } = validateString(user.region);
+  const { error: errorRegion, value: checkedRegion } = validateString(user.region);
+  // Même garde que GET /program (liste), qui renvoie 400 dans ce cas : Joi.string() refuse la
+  // chaîne vide sans .allow(""), donc un acteur à région/département non renseigné ne doit jamais
+  // matcher un programme à région/département vide par une comparaison "" === "" (relecture A, GOO-188).
+  if (errorDepartement || errorRegion) return false;
 
   const departmentMatches = Array.isArray(checkedDepartement) ? checkedDepartement.includes(program.department) : checkedDepartement === program.department;
   return departmentMatches || program.region === checkedRegion;
