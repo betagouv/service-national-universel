@@ -6,7 +6,7 @@ import { getNewReferentFixture, getNewSignupReferentFixture, getReinscriptionSig
 // locaux successifs (la base de test n'est jamais purgée entre deux runs).
 // Un suffixe UUID donne une entropie suffisante indépendamment du nombre de
 // runs déjà exécutés, contrairement à un compteur de process qui repart à
-// zéro à chaque run (constat relevé en relecture A).
+// zéro à chaque run.
 const UUID_PATTERN = /[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
 
 describe("fixtures référent — unicité de l'email (GOO-190)", () => {
