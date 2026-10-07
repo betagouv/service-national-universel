@@ -331,6 +331,31 @@ describe("Sécurité /young/:id/* — audit 2026-09-21 (lot 3)", () => {
       const updated = await YoungModel.findById(young._id);
       expect(updated?.statusMilitaryPreparationFiles).toBe("VALIDATED");
     });
+
+    it.each(["REFUSED", "VALIDATED"])("refuse au volontaire de lever un dossier %s en le renvoyant en WAITING_VERIFICATION", async (status) => {
+      const young = await createYoungHelper(getNewYoungFixture({ statusMilitaryPreparationFiles: status } as any));
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put(`/young/${young._id}/phase2/militaryPreparation/status`)
+        .send({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
+
+      expect(res.status).toBe(403);
+      expect(res.body.code).toBe("OPERATION_UNAUTHORIZED");
+      const untouched = await YoungModel.findById(young._id);
+      expect(untouched?.statusMilitaryPreparationFiles).toBe(status);
+    });
+
+    it("laisse le volontaire renvoyer son dossier en WAITING_VERIFICATION depuis WAITING_CORRECTION", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ statusMilitaryPreparationFiles: "WAITING_CORRECTION" } as any));
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put(`/young/${young._id}/phase2/militaryPreparation/status`)
+        .send({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
+
+      expect(res.status).toBe(200);
+      const updated = await YoungModel.findById(young._id);
+      expect(updated?.statusMilitaryPreparationFiles).toBe("WAITING_VERIFICATION");
+    });
   });
 
   describe("H44 — POST /young/note/:youngId", () => {

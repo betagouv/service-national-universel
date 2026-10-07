@@ -1,5 +1,5 @@
 import { CohortDto, ReferentDto, UserDto } from "./dto";
-import { region2department } from "./region-and-departments";
+import { department2region, region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import {
   APPLICATION_STATUS,
@@ -676,8 +676,14 @@ const PROGRAM_VISIBILITY_BY_ROLE: Record<string, string[]> = {
 function canCreateOrUpdateProgram(user, program) {
   if (user.role === ROLES.ADMIN) return true;
   if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) return false;
-  if (user.role === ROLES.REFERENT_DEPARTMENT && !user.department?.includes(program.department)) return false;
-  if (user.role === ROLES.REFERENT_REGION && user.region !== program.region) return false;
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    if (!user.department?.includes(program.department)) return false;
+    if (program.region && program.region !== department2region[program.department]) return false;
+  }
+  if (user.role === ROLES.REFERENT_REGION) {
+    if (user.region !== program.region) return false;
+    if (program.department && !region2department[program.region]?.includes(program.department)) return false;
+  }
   // Une visibilité vide (programme historique) reste dans le périmètre géographique déjà vérifié.
   if (program.visibility && !PROGRAM_VISIBILITY_BY_ROLE[user.role].includes(program.visibility)) return false;
   return true;

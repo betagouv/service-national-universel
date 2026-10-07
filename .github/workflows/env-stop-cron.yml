@@ -17,7 +17,7 @@ jobs:
       pull-requests: write
     # Porte les secrets Clever de l'environnement GitHub « recette ».
     environment: recette
-    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Unlabel open PRs with deploy label
         env:

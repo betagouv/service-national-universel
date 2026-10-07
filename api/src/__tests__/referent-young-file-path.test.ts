@@ -88,6 +88,7 @@ const BAD_KEYS = [
   ["un caractère de contrôle", "cniFiles%0A"],
   ["une clé inconnue", "key"],
   ["un nom de champ du dossier qui n'est pas une pièce", "status"],
+  ["une clé « application », qui désigne une pièce de candidature, non une pièce de volontaire", "application"],
 ];
 
 const BAD_FILE_NAMES = [
@@ -143,6 +144,19 @@ describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
 
       const res = await request(await getAppHelperWithAcl(actor))
         .get(`/referent/youngFile/${young._id}/military-preparation%2FmilitaryPreparationFilesIdentity/abc`)
+        .send();
+
+      expect(res.statusCode).toEqual(400);
+      expect(mockGetFile).not.toHaveBeenCalled();
+    });
+
+    it("refuse (400) une clé « application » visant une pièce de candidature d'une autre structure, sans toucher au stockage (H5)", async () => {
+      const { actor, young } = await createResponsibleInScope();
+      const otherStructure = await createStructureHelper({ ...getNewStructureFixture(), region: "Île-de-France", department: "Paris" });
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id.toString(), structureId: otherStructure._id.toString() });
+
+      const res = await request(await getAppHelperWithAcl(actor))
+        .get(`/referent/youngFile/${young._id}/application/${application._id}%2FcontractAvenantFiles%2Fpiece.pdf`)
         .send();
 
       expect(res.statusCode).toEqual(400);
