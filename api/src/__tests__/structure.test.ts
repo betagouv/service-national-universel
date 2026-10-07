@@ -416,6 +416,20 @@ describe("Structure", () => {
         expect(res.status).toBe(403);
         expect(await getStructureByIdHelper(structure._id)).not.toBe(null);
       });
+
+      it("laisse un référent régional supprimer, via region2department, une structure de sa région dont le champ région n'est pas renseigné", async () => {
+        // Structure sans `region` renseigné (différent de celui de l'acteur) : seule la branche
+        // region2department[actor.region]?.includes(structure.department) peut faire passer ce test,
+        // pas l'opérande gauche actor.region === target.region (chemin déjà couvert par
+        // roles.spec.ts, mais jamais exercé via la vraie route dans ce fichier).
+        const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Auvergne-Rhône-Alpes" });
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), department: "Rhône", region: "" });
+
+        const res = await request(await getAppHelperWithAcl(referent)).delete("/structure/" + structure._id);
+
+        expect(res.status).toBe(200);
+        expect(await getStructureByIdHelper(structure._id)).toBe(null);
+      });
     });
   });
 
