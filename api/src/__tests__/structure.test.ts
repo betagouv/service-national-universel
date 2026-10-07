@@ -388,6 +388,35 @@ describe("Structure", () => {
       const structure2 = await getStructureByIdHelper(structure._id);
       expect(structure2).toBe(null);
     });
+
+    describe("GOO-188 — sameGeography ne doit plus lever d'exception sur une région inconnue", () => {
+      beforeAll(async () => {
+        // DELETE est monté avec ignorePolicy:true (cf. api/src/controllers/structure.ts) : il faut
+        // seulement que le rôle ait une permission DELETE sur STRUCTURE pour atteindre
+        // canDeleteStructure, qui porte seul le cloisonnement géographique.
+        await addPermissionHelper([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.DELETE);
+      });
+
+      it("refuse (403, pas 500) à un référent départemental dont la région ne correspond à aucune clé de region2department, sur une structure hors de son département", async () => {
+        const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Loire-Atlantique"], region: "Région inconnue" });
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), department: "Rhône", region: "Auvergne-Rhône-Alpes" });
+
+        const res = await request(await getAppHelperWithAcl(referent)).delete("/structure/" + structure._id);
+
+        expect(res.status).toBe(403);
+        expect(await getStructureByIdHelper(structure._id)).not.toBe(null);
+      });
+
+      it("refuse (403, pas 500) à un référent régional dont la région est inconnue, sur une structure d'une autre région", async () => {
+        const referent = await createReferentHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Région inconnue" });
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), department: "Rhône", region: "Auvergne-Rhône-Alpes" });
+
+        const res = await request(await getAppHelperWithAcl(referent)).delete("/structure/" + structure._id);
+
+        expect(res.status).toBe(403);
+        expect(await getStructureByIdHelper(structure._id)).not.toBe(null);
+      });
+    });
   });
 
   describe("GET /structure/:id", () => {
