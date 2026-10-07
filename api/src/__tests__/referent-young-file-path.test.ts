@@ -22,6 +22,7 @@ import { FILE_KEYS, MILITARY_FILE_KEYS, ROLES } from "snu-lib";
 
 import { logger } from "../logger";
 import { ApplicationModel, ReferentModel, StructureModel, YoungModel } from "../models";
+import * as fileUtils from "../utils/file";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -37,6 +38,8 @@ import { createApplication } from "./helpers/application";
 const mockGetFile = jest.fn();
 const mockUploadFile = jest.fn();
 const mockDeleteFile = jest.fn();
+// `afterEach` restaure tous les spies (`jest.restoreAllMocks`) : celui-ci est recréé à chaque test.
+let getMimeFromFileSpy: jest.SpyInstance;
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -66,6 +69,7 @@ beforeEach(async () => {
   mockUploadFile.mockResolvedValue({});
   mockDeleteFile.mockReset();
   mockDeleteFile.mockResolvedValue({});
+  getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 });
 afterEach(() => {
   resetAppAuth();
@@ -98,6 +102,14 @@ const BAD_FILE_NAMES = [
   ["un octet nul", "fichier%00.pdf"],
   ["un retour à la ligne", "fichier%0A.pdf"],
   ["un caractère de contrôle", "fichier%1F.pdf"],
+];
+
+/** Valeurs de youngId qui passent `Joi.string()` mais doivent échouer `Joi.string().alphanum().length(24)` (GOO-189). */
+const BAD_YOUNG_IDS = [
+  ["trop court", "abc"],
+  ["trop long", "a".repeat(30)],
+  ["un caractère non alphanumérique", "12345678901234567890123!"],
+  ["une remontée d'arborescence encodée", "..%2Fetc"],
 ];
 
 async function createResponsibleInScope(options: { isMilitaryPreparation?: boolean } = {}) {
@@ -157,6 +169,17 @@ describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
 
       const res = await request(await getAppHelperWithAcl(actor))
         .get(`/referent/youngFile/${young._id}/application/${application._id}%2FcontractAvenantFiles%2Fpiece.pdf`)
+        .send();
+
+      expect(res.statusCode).toEqual(400);
+      expect(mockGetFile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("youngId borné (GOO-189)", () => {
+    it.each(BAD_YOUNG_IDS)("refuse (400) pour un administrateur un youngId contenant %s, sans toucher au stockage", async (_label, youngId) => {
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/referent/youngFile/${youngId}/equivalenceFiles/piece.pdf`)
         .send();
 
       expect(res.statusCode).toEqual(400);
@@ -316,6 +339,17 @@ describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
 });
 
 describe("GET /referent/youngFile/:youngId/military-preparation/:key/:fileName", () => {
+  describe("youngId borné (GOO-189)", () => {
+    it.each(BAD_YOUNG_IDS)("refuse (400) pour un administrateur un youngId contenant %s, sans toucher au stockage", async (_label, youngId) => {
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/referent/youngFile/${youngId}/military-preparation/militaryPreparationFilesIdentity/piece.pdf`)
+        .send();
+
+      expect(res.statusCode).toEqual(400);
+      expect(mockGetFile).not.toHaveBeenCalled();
+    });
+  });
+
   it.each([
     ["une pièce hors préparation militaire", "cniFiles"],
     ["une clé inconnue", "key"],
@@ -439,6 +473,30 @@ describe("POST /referent/file/:key", () => {
       .send({ body: body(young._id.toString()) });
 
     expect(res.statusCode).toEqual(200);
+  });
+
+  /**
+   * `busboy` ne transmet au handler que le nom de base du champ `filename` du multipart : un
+   * sous-chemin (`sous-dossier/x.pdf`), un antislash, ou le segment `.`/`..` seul arrivent déjà réduits
+   * à une chaîne vide ou au nom de base avant toute validation applicative (vérifié directement contre
+   * `busboy`, en dehors de la route). Aucune charge malveillante ne peut donc atteindre la validation
+   * Joi de `name` par une vraie requête HTTP : son renforcement (`safePathSegment()`, aligné sur
+   * `fileName` déjà protégé par la même fonction sur les routes de lecture sœurs) est de la défense en
+   * profondeur, prouvée par mutation ci-dessous plutôt que par un contournement réel.
+   */
+  describe("nom du fichier déposé (multipart) (GOO-189)", () => {
+    it("dépose un fichier avec un nom légitime", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      getMimeFromFileSpy.mockResolvedValueOnce("application/pdf");
+
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/referent/file/equivalenceFiles`)
+        .field("body", body(young._id.toString()))
+        .attach("file", Buffer.from("contenu"), { filename: "justificatif-0.pdf", contentType: "application/pdf" });
+
+      expect(res.statusCode).toEqual(200);
+      expect(mockUploadFile).toHaveBeenCalledWith(`app/young/${young._id}/equivalenceFiles/justificatif-0.pdf`, expect.anything());
+    });
   });
 });
 
