@@ -476,13 +476,17 @@ describe("POST /referent/file/:key", () => {
   });
 
   /**
-   * `busboy` ne transmet au handler que le nom de base du champ `filename` du multipart : un
-   * sous-chemin (`sous-dossier/x.pdf`), un antislash, ou le segment `.`/`..` seul arrivent déjà réduits
-   * à une chaîne vide ou au nom de base avant toute validation applicative (vérifié directement contre
-   * `busboy`, en dehors de la route). Aucune charge malveillante ne peut donc atteindre la validation
-   * Joi de `name` par une vraie requête HTTP : son renforcement (`safePathSegment()`, aligné sur
-   * `fileName` déjà protégé par la même fonction sur les routes de lecture sœurs) est de la défense en
-   * profondeur, prouvée par mutation ci-dessous plutôt que par un contournement réel.
+   * `busboy` ne transmet au handler que le nom de base du champ `filename` du multipart quand il est
+   * fourni via le paramètre `filename=` classique : un sous-chemin (`sous-dossier/x.pdf`), un
+   * antislash, ou le segment `.`/`..` seul arrivent déjà réduits à une chaîne vide ou au nom de base
+   * avant toute validation applicative (vérifié directement contre `busboy`, en dehors de la route).
+   *
+   * En revanche, un nom transmis via le paramètre étendu `filename*=` (RFC 2231/5987, que les
+   * navigateurs n'émettent pas mais qu'un client HTTP arbitraire peut construire) n'est pas réduit à
+   * son nom de base par `busboy` : un caractère de contrôle (octet nul, retour à la ligne...) à
+   * l'intérieur du nom, sans `/` ni `\`, survit tel quel jusqu'à la route — `Joi.string()` seul
+   * l'acceptait. `safePathSegment()` le refuse (voir `isSafePathSegment`), et le test ci-dessous le
+   * prouve par une vraie requête HTTP, pas seulement par mutation.
    */
   describe("nom du fichier déposé (multipart) (GOO-189)", () => {
     it("dépose un fichier avec un nom légitime", async () => {
@@ -496,6 +500,28 @@ describe("POST /referent/file/:key", () => {
 
       expect(res.statusCode).toEqual(200);
       expect(mockUploadFile).toHaveBeenCalledWith(`app/young/${young._id}/equivalenceFiles/justificatif-0.pdf`, expect.anything());
+    });
+
+    it("refuse (400) un nom de fichier déposé via filename* (RFC 2231) contenant un octet nul, sans écrire", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      // Si la validation du nom était contournée, le fichier devrait quand même franchir le contrôle de type
+      // pour que l'assertion ci-dessous échoue pour la bonne raison (upload effectué) plutôt que par un 500 UNSUPPORTED_TYPE.
+      getMimeFromFileSpy.mockResolvedValueOnce("application/pdf");
+      const boundary = "GOO189BOUNDARY";
+      const payload = Buffer.concat([
+        Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="body"\r\n\r\n${body(young._id.toString())}\r\n`),
+        Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename*=UTF-8''x%00.pdf\r\nContent-Type: application/pdf\r\n\r\n`),
+        Buffer.from("contenu"),
+        Buffer.from(`\r\n--${boundary}--\r\n`),
+      ]);
+
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/referent/file/equivalenceFiles`)
+        .set("Content-Type", `multipart/form-data; boundary=${boundary}`)
+        .send(payload);
+
+      expect(res.statusCode).toEqual(400);
+      expect(mockUploadFile).not.toHaveBeenCalled();
     });
   });
 });
