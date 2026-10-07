@@ -70,4 +70,24 @@ describe("useUpdateMPStatus", () => {
     expect(errorSpy).toHaveBeenCalledTimes(1);
     expect(successSpy).not.toHaveBeenCalled();
   });
+
+  it("n'affiche pas de succès et ne vide pas le young du store sur une erreur réseau (promesse rejetée)", async () => {
+    const young = { _id: "young-1", statusMilitaryPreparationFiles: "WAITING_VERIFICATION" };
+    vi.mocked(API.put).mockRejectedValueOnce(new Error("NETWORK_ERROR"));
+    const successSpy = vi.spyOn(toastr, "success");
+    const errorSpy = vi.spyOn(toastr, "error");
+
+    const { store, wrapper } = renderWithProviders(young);
+    const { result } = renderHook(() => useUpdateMPStatus(), { wrapper });
+
+    act(() => {
+      result.current.mutate("VALIDATED");
+    });
+
+    await waitFor(() => expect(result.current.isError).toBe(true));
+
+    expect(store.getState().Auth.young).toEqual(young);
+    expect(errorSpy).toHaveBeenCalledTimes(1);
+    expect(successSpy).not.toHaveBeenCalled();
+  });
 });

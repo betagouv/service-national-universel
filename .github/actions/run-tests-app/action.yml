@@ -22,3 +22,8 @@ runs:
       working-directory: app
       shell: bash
       run: npm run lint
+
+    - name: Run tests
+      working-directory: app
+      shell: bash
+      run: npm run test
