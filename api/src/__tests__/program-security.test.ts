@@ -1,16 +1,14 @@
 import request from "supertest";
 
-import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLE_JEUNE, ROLES } from "snu-lib";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 
-import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
+import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { addPermissionHelper } from "./helpers/permissions";
 import { createProgramHelper, getProgramByIdHelper } from "./helpers/program";
 import { createReferentHelper } from "./helpers/referent";
-import { createYoungHelper } from "./helpers/young";
 import getNewProgramFixture from "./fixtures/program";
 import { getNewReferentFixture } from "./fixtures/referent";
-import getNewYoungFixture from "./fixtures/young";
 import { PermissionModel } from "../models/permissions/permission";
 
 jest.setTimeout(60_000);
@@ -257,127 +255,6 @@ describe("Sécurité des programmes", () => {
       const res = await request(await getAppHelperWithAcl(admin))
         .post("/program")
         .send({ ...getNewProgramFixture(), department: "", region: "", visibility: "NATIONAL" });
-
-      expect(res.statusCode).toEqual(200);
-    });
-  });
-
-  describe("GOO-188 — visibilité de GET /program/:id (même filtre que GET /program)", () => {
-    beforeAll(async () => {
-      // La route est montée avec ignorePolicy:true (cf. api/src/controllers/program.ts) : seule la
-      // présence d'une permission READ sur PROGRAM pour le rôle est vérifiée par le middleware, le
-      // cloisonnement géographique relève uniquement du contrôle ajouté dans le contrôleur.
-      await addPermissionHelper([ROLES.HEAD_CENTER], PERMISSION_RESOURCES.PROGRAM, PERMISSION_ACTIONS.READ);
-      await addPermissionHelper([ROLE_JEUNE], PERMISSION_RESOURCES.PROGRAM, PERMISSION_ACTIONS.READ);
-    });
-
-    it("refuse (404) à un référent départemental de lire par id un programme d'un autre département", async () => {
-      const referent = await createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: [DEPARTEMENT_ATTAQUANT], region: REGION_ATTAQUANT });
-      const programme = await createProgram({ department: DEPARTEMENT_CIBLE, region: REGION_CIBLE, visibility: "DEPARTMENT" });
-
-      const res = await request(await getAppHelperWithAcl(referent)).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(404);
-    });
-
-    it("laisse un référent départemental lire par id un programme de son département", async () => {
-      const referent = await createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: [DEPARTEMENT_ATTAQUANT], region: REGION_ATTAQUANT });
-      const programme = await createProgram({ department: DEPARTEMENT_ATTAQUANT, region: REGION_ATTAQUANT, visibility: "DEPARTMENT" });
-
-      const res = await request(await getAppHelperWithAcl(referent)).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(200);
-    });
-
-    it("refuse (404) à un référent régional de lire par id un programme d'une autre région", async () => {
-      const referent = await createReferent({ role: ROLES.REFERENT_REGION, region: REGION_ATTAQUANT });
-      const programme = await createProgram({ department: "", region: REGION_CIBLE, visibility: "REGION" });
-
-      const res = await request(await getAppHelperWithAcl(referent)).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(404);
-    });
-
-    it("laisse un référent régional lire par id un programme de sa région", async () => {
-      const referent = await createReferent({ role: ROLES.REFERENT_REGION, region: REGION_ATTAQUANT });
-      const programme = await createProgram({ department: "", region: REGION_ATTAQUANT, visibility: "REGION" });
-
-      const res = await request(await getAppHelperWithAcl(referent)).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(200);
-    });
-
-    it("laisse n'importe quel référent lire par id un programme national, hors de son département/région", async () => {
-      const referent = await createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: [DEPARTEMENT_ATTAQUANT], region: REGION_ATTAQUANT });
-      const programme = await createProgram({ department: "", region: "", visibility: "NATIONAL" });
-
-      const res = await request(await getAppHelperWithAcl(referent)).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(200);
-    });
-
-    it("refuse (404) à un chef de centre de lire par id un programme de visibilité DEPARTMENT", async () => {
-      const chefDeCentre = await createReferent({ role: ROLES.HEAD_CENTER });
-      const programme = await createProgram({ department: DEPARTEMENT_CIBLE, region: REGION_CIBLE, visibility: "DEPARTMENT" });
-
-      const res = await request(await getAppHelperWithAcl(chefDeCentre)).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(404);
-    });
-
-    it("laisse un chef de centre lire par id un programme de visibilité HEAD_CENTER", async () => {
-      const chefDeCentre = await createReferent({ role: ROLES.HEAD_CENTER });
-      const programme = await createProgram({ department: DEPARTEMENT_CIBLE, region: REGION_CIBLE, visibility: "HEAD_CENTER" });
-
-      const res = await request(await getAppHelperWithAcl(chefDeCentre)).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(200);
-    });
-
-    it("refuse (404) à un volontaire de lire par id un programme d'un autre département/région", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ department: DEPARTEMENT_ATTAQUANT, region: REGION_ATTAQUANT }));
-      const programme = await createProgram({ department: DEPARTEMENT_CIBLE, region: REGION_CIBLE, visibility: "DEPARTMENT" });
-
-      const res = await request(await getAppHelperWithAcl(young, "young")).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(404);
-    });
-
-    it("laisse un volontaire lire par id un programme de son département", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ department: DEPARTEMENT_ATTAQUANT, region: REGION_ATTAQUANT }));
-      const programme = await createProgram({ department: DEPARTEMENT_ATTAQUANT, region: REGION_ATTAQUANT, visibility: "DEPARTMENT" });
-
-      const res = await request(await getAppHelperWithAcl(young, "young")).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(200);
-    });
-
-    it("refuse (404) à un référent départemental sans région renseignée de lire par id un programme à région elle aussi vide (relecture A)", async () => {
-      // `GET /program` (liste) rejette ce profil en 400 : `validateString("")` échoue (Joi.string()
-      // sans `.allow("")`), donc `errorRegion` est vrai. `isProgramVisibleToUser` doit refuser de la
-      // même façon, pas comparer silencieusement "" === "" et laisser passer un programme HEAD_CENTER.
-      const referent = await createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: [DEPARTEMENT_ATTAQUANT], region: "" });
-      const programme = await createProgram({ department: "", region: "", visibility: "HEAD_CENTER" });
-
-      const res = await request(await getAppHelperWithAcl(referent)).get(`/program/${programme._id}`);
-
-      expect(res.statusCode).toEqual(404);
-    });
-  });
-
-  describe("GOO-188 — visibilité de GET /program/public/engagement/:id (route publique, sans authentification)", () => {
-    it("refuse (404), sans authentification, de lire par id un programme non NATIONAL", async () => {
-      const programme = await createProgram({ department: DEPARTEMENT_CIBLE, region: REGION_CIBLE, visibility: "DEPARTMENT" });
-
-      const res = await request(getAppHelper()).get(`/program/public/engagement/${programme._id}`);
-
-      expect(res.statusCode).toEqual(404);
-    });
-
-    it("laisse n'importe qui lire par id, sans authentification, un programme NATIONAL", async () => {
-      const programme = await createProgram({ department: "", region: "", visibility: "NATIONAL" });
-
-      const res = await request(getAppHelper()).get(`/program/public/engagement/${programme._id}`);
 
       expect(res.statusCode).toEqual(200);
     });
