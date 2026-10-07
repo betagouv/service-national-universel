@@ -16,6 +16,27 @@ import { permissionAccessControlMiddleware } from "../middlewares/permissionAcce
 
 const router = express.Router();
 
+// Même cloisonnement géographique que la requête $or de GET /program (ci-dessous), mais évalué
+// contre un document déjà chargé : GET /program/:id est monté avec ignorePolicy:true (aucun filtre
+// de territoire par le middleware de permission), donc sans ce contrôle n'importe quel référent ou
+// volontaire authentifié pouvait lire par id un programme hors de son département/région (GOO-188).
+function isProgramVisibleToUser(user: { role?: string; department?: unknown; region?: unknown }, program: { department?: string; region?: string; visibility?: string }) {
+  if (user.role === ROLES.ADMIN) return true;
+  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role as string)) return program.visibility === "HEAD_CENTER";
+  if (program.visibility === "NATIONAL") return true;
+
+  let checkedDepartement;
+  if (isYoung(user)) {
+    ({ value: checkedDepartement } = validateString(user.department));
+  } else {
+    ({ value: checkedDepartement } = validateArray(user.department));
+  }
+  const { value: checkedRegion } = validateString(user.region);
+
+  const departmentMatches = Array.isArray(checkedDepartement) ? checkedDepartement.includes(program.department) : checkedDepartement === program.department;
+  return departmentMatches || program.region === checkedRegion;
+}
+
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: checkedProgram } = validateProgram(req.body);
@@ -67,6 +88,7 @@ router.get(
     try {
       const data = await ProgramModel.findById(req.validatedParams.id);
       if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!isProgramVisibleToUser(req.user, data)) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({ ok: true, data });
     } catch (error) {
       capture(error);
