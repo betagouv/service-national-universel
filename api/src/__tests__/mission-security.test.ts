@@ -370,6 +370,43 @@ describe("Sécurité des missions", () => {
       expect(apres!.tutorId).toBeFalsy();
     });
 
+    it("laisse un responsable changer le tuteur d'une mission déjà validée sans toucher au statut (GOO-191)", async () => {
+      const structure = await createStructure();
+      const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const ancienTuteur = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const nouveauTuteur = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await createMission(structure, { status: MISSION_STATUS.VALIDATED, tutorId: String(ancienTuteur._id) });
+
+      // ModalChangeTutor.jsx:286 renvoie `hit` (résultat Elasticsearch, la mission entière) tel
+      // quel, status et description/actions inclus : seuls tutorId/tutorName changent vraiment.
+      const res = await request(await getAppHelperWithAcl(responsable))
+        .put(`/mission/${mission._id}`)
+        .send({ ...(mission as any).toObject(), tutorId: String(nouveauTuteur._id), tutorName: "ignoré, recalculé par le contrôleur" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.VALIDATED);
+      expect(String(apres!.tutorId)).toEqual(String(nouveauTuteur._id));
+    });
+
+    it("laisse un superviseur changer le tuteur d'une mission déjà validée sans toucher au statut (GOO-191)", async () => {
+      const reseau = await createStructure({ isNetwork: "true" });
+      const structure = await createStructure({ networkId: String(reseau._id) });
+      const superviseur = await createReferent({ role: ROLES.SUPERVISOR, structureId: String(reseau._id) });
+      const ancienTuteur = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const nouveauTuteur = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await createMission(structure, { status: MISSION_STATUS.VALIDATED, tutorId: String(ancienTuteur._id) });
+
+      const res = await request(await getAppHelperWithAcl(superviseur))
+        .put(`/mission/${mission._id}`)
+        .send({ ...(mission as any).toObject(), tutorId: String(nouveauTuteur._id) });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getMissionByIdHelper(mission._id);
+      expect(apres!.status).toEqual(MISSION_STATUS.VALIDATED);
+      expect(String(apres!.tutorId)).toEqual(String(nouveauTuteur._id));
+    });
+
     it("refuse à un responsable de créer une mission déjà validée", async () => {
       const structure = await createStructure();
       const responsable = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });

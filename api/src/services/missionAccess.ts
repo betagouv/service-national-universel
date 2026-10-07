@@ -127,7 +127,7 @@ type CheckMissionPayloadParams = {
   /** Corps déjà validé par `validateMission`. Les champs dérivés en sont retirés sur place. */
   payload: Record<string, any>;
   /** Mission stockée, ou `null` à la création. */
-  storedMission: (MissionScope & { placesLeft?: number | null }) | null;
+  storedMission: (MissionScope & { placesLeft?: number | null; status?: string | null }) | null;
 };
 
 /**
@@ -148,10 +148,17 @@ export async function checkMissionPayload({ user, payload, storedMission }: Chec
     if (!isMissionInReferentTerritory(user, target)) return ERRORS.OPERATION_UNAUTHORIZED;
   }
 
-  // Statut : liste blanche par rôle, fail-closed pour tout rôle non listé.
+  // Statut : liste blanche par rôle, fail-closed pour tout rôle non listé. Un statut identique à
+  // celui déjà enregistré n'est pas une transition (GOO-191 : ModalChangeTutor.jsx renvoie la
+  // mission entière, status inclus, pour ne changer que le tuteur) : on l'ignore plutôt que de le
+  // soumettre à la liste blanche, sans autoriser de transition supplémentaire.
   if (payload.status) {
-    const allowedStatus = MISSION_STATUS_BY_ROLE[user?.role as string] || [];
-    if (!allowedStatus.includes(payload.status)) return ERRORS.OPERATION_UNAUTHORIZED;
+    if (storedMission && payload.status === storedMission.status) {
+      delete payload.status;
+    } else {
+      const allowedStatus = MISSION_STATUS_BY_ROLE[user?.role as string] || [];
+      if (!allowedStatus.includes(payload.status)) return ERRORS.OPERATION_UNAUTHORIZED;
+    }
   }
 
   // La structure porteuse ne se change que par la route dédiée `PUT /mission/:id/structure/:structureId`.
