@@ -3,27 +3,16 @@ import React, { useState } from "react";
 const SeeAsContext = React.createContext({});
 
 // FIXME: find a way to get roles defined for the organisation on admin side
-const roles = [
-  "admin",
-  "referent",
-  "structure",
-  "head_center",
-  "head_center_adjoint",
-  "referent_sanitaire",
-  "young",
-  "young_cle",
-  "public",
-  "visitor",
-  "dsnj",
-  "administrateur_cle_coordinateur_cle",
-  "administrateur_cle_referent_etablissement",
-  "referent_classe",
-];
+// Sans les rôles décommissionnés (DECOMMISSIONED_ROLES de snu-lib) : chef de centre et adjoint,
+// référent sanitaire, visiteur, administrateurs CLE et référent classe.
+const roles = ["admin", "referent", "structure", "young", "young_cle", "public", "dsnj"];
 
 export const SeeAsProvider = ({ children }) => {
   const [seeAs, setSeeAsState] = useState(() => {
     if (typeof window === "undefined") return null;
-    return window?.sessionStorage?.getItem("snu-base-de-connaissancesee-as") || null;
+    const storedSeeAs = window?.sessionStorage?.getItem("snu-base-de-connaissancesee-as");
+    // Une vue mémorisée sur un rôle retiré de la liste retombe sur la vue par défaut.
+    return roles.includes(storedSeeAs) ? storedSeeAs : null;
   });
 
   const setSeeAs = (role) => {
