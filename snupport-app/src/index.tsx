@@ -11,6 +11,12 @@ import "emoji-mart/css/emoji-mart.css";
 import "react-day-picker/dist/style.css";
 import "./style.css";
 import { capture } from "./sentry";
+import { reloadAfterPreloadError } from "./utils/preloadErrorReload";
+
+// Import dynamique en échec (build remplacé, bascule d'instances) : la page est rechargée (garde-fou dans le module)
+window.addEventListener("vite:preloadError", () => {
+  reloadAfterPreloadError();
+});
 
 const { store, persistor } = redux();
 const container = document.getElementById("root");
