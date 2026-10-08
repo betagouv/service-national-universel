@@ -1008,7 +1008,7 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
     // à égalité stricte : ils ne valent que pour une clé connue (constat PH20). La validation précède
     // la recherche du volontaire et le contrôle de périmètre.
     const { error, value } = Joi.object({
-      youngId: Joi.string().required(),
+      youngId: Joi.string().alphanum().length(24).required(),
       key: Joi.string()
         .valid(...FILE_KEYS, ...MILITARY_FILE_KEYS)
         .required(),
@@ -1093,7 +1093,7 @@ router.get(
       // Les pièces de préparation militaire sont rangées sous `military-preparation/<clé>/` : la clé est
       // l'une des quatre connues et le nom un seul niveau, sinon le chemin sortirait de ce sous-arbre.
       const { error, value } = Joi.object({
-        youngId: Joi.string().required(),
+        youngId: Joi.string().alphanum().length(24).required(),
         key: Joi.string()
           .valid(...MILITARY_FILE_KEYS)
           .required(),
@@ -1174,17 +1174,18 @@ router.post(
       if (!canViewYoungFile(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       // Validate files with Joi
+      // `name` compose le chemin d'écriture (`app/young/<id>/<key>/<name>`) : un seul niveau d'arborescence (GOO-189).
       const { error: filesError, value: files } = Joi.array()
         .items(
           Joi.alternatives().try(
             Joi.object({
-              name: Joi.string().required(),
+              name: safePathSegment().required(),
               data: Joi.binary().required(),
               tempFilePath: Joi.string().allow("").optional(),
             }).unknown(),
             Joi.array().items(
               Joi.object({
-                name: Joi.string().required(),
+                name: safePathSegment().required(),
                 data: Joi.binary().required(),
                 tempFilePath: Joi.string().allow("").optional(),
               }).unknown(),

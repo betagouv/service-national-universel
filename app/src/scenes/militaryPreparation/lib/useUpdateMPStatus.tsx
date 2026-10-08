@@ -24,7 +24,7 @@ export default function useUpdateMPStatus() {
       toastr.error("Oups", "Une erreur est survenue lors de la modification de votre dossier.");
       capture(error);
     },
-    onSettled: (data: YoungType) => {
+    onSuccess: (data: YoungType) => {
       dispatch(setYoung(data));
       toastr.success("Votre dossier a bien été mis à jour !", "");
     },

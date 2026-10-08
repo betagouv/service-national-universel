@@ -127,7 +127,7 @@ type CheckMissionPayloadParams = {
   /** Corps déjà validé par `validateMission`. Les champs dérivés en sont retirés sur place. */
   payload: Record<string, any>;
   /** Mission stockée, ou `null` à la création. */
-  storedMission: (MissionScope & { placesLeft?: number | null }) | null;
+  storedMission: (MissionScope & { placesLeft?: number | null; status?: string | null }) | null;
 };
 
 /**
@@ -148,10 +148,19 @@ export async function checkMissionPayload({ user, payload, storedMission }: Chec
     if (!isMissionInReferentTerritory(user, target)) return ERRORS.OPERATION_UNAUTHORIZED;
   }
 
-  // Statut : liste blanche par rôle, fail-closed pour tout rôle non listé.
+  // Statut : liste blanche par rôle, fail-closed pour tout rôle non listé. Un statut identique à
+  // celui déjà enregistré n'est pas une transition (GOO-191 : ModalChangeTutor.jsx renvoie la
+  // mission entière, status inclus, pour ne changer que le tuteur) : on ne le soumet pas à la
+  // liste blanche, mais on le laisse dans le corps plutôt que de le retirer — `mission.set()`
+  // d'une valeur identique est un no-op, alors qu'un retrait ferait lire `checkedMission.status`
+  // comme `undefined` au contrôleur (revalidation, géocodage) et changerait son comportement pour
+  // tout statut renvoyé à l'identique, pas seulement VALIDATED (relecture B).
   if (payload.status) {
-    const allowedStatus = MISSION_STATUS_BY_ROLE[user?.role as string] || [];
-    if (!allowedStatus.includes(payload.status)) return ERRORS.OPERATION_UNAUTHORIZED;
+    const statusInchange = !!storedMission && payload.status === storedMission.status;
+    if (!statusInchange) {
+      const allowedStatus = MISSION_STATUS_BY_ROLE[user?.role as string] || [];
+      if (!allowedStatus.includes(payload.status)) return ERRORS.OPERATION_UNAUTHORIZED;
+    }
   }
 
   // La structure porteuse ne se change que par la route dédiée `PUT /mission/:id/structure/:structureId`.

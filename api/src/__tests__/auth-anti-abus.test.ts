@@ -603,19 +603,10 @@ describe("M42/M65 — rate limiting des routes d'auth", () => {
   });
 });
 
-describe("PL3 — rate limiting de /young/signup_verify et /young/signup_invite", () => {
-  it("bloque une rafale de signup_verify venant de la même IP", async () => {
-    const app = getAppHelper();
-    const statuses: number[] = [];
-
-    for (let i = 0; i < 25; i++) {
-      const res = await request(app).post("/young/signup_verify").send({ invitationToken: `jeton-${i}` });
-      statuses.push(res.status);
-    }
-
-    expect(statuses).toContain(429);
-  });
-
+describe("PL3 — rate limiting de /young/signup_invite", () => {
+  // M43 : /young/signup_verify est supprimée (voir young.test.ts), le test de rafale sur cette
+  // route n'a plus d'objet ; celui sur signup_invite, route sœur partageant le même
+  // youngSigninLimiter, reste la non-régression de PL3.
   it("bloque une rafale de signup_invite venant de la même IP", async () => {
     const app = getAppHelper();
     const statuses: number[] = [];

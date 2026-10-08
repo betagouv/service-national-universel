@@ -22,6 +22,7 @@ import { FILE_KEYS, MILITARY_FILE_KEYS, ROLES } from "snu-lib";
 
 import { logger } from "../logger";
 import { ApplicationModel, ReferentModel, StructureModel, YoungModel } from "../models";
+import * as fileUtils from "../utils/file";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -37,6 +38,8 @@ import { createApplication } from "./helpers/application";
 const mockGetFile = jest.fn();
 const mockUploadFile = jest.fn();
 const mockDeleteFile = jest.fn();
+// `afterEach` restaure tous les spies (`jest.restoreAllMocks`) : celui-ci est recréé à chaque test.
+let getMimeFromFileSpy: jest.SpyInstance;
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -66,6 +69,7 @@ beforeEach(async () => {
   mockUploadFile.mockResolvedValue({});
   mockDeleteFile.mockReset();
   mockDeleteFile.mockResolvedValue({});
+  getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 });
 afterEach(() => {
   resetAppAuth();
@@ -98,6 +102,14 @@ const BAD_FILE_NAMES = [
   ["un octet nul", "fichier%00.pdf"],
   ["un retour à la ligne", "fichier%0A.pdf"],
   ["un caractère de contrôle", "fichier%1F.pdf"],
+];
+
+/** Valeurs de youngId qui passent `Joi.string()` mais doivent échouer `Joi.string().alphanum().length(24)` (GOO-189). */
+const BAD_YOUNG_IDS = [
+  ["trop court", "abc"],
+  ["trop long", "a".repeat(30)],
+  ["un caractère non alphanumérique", "12345678901234567890123!"],
+  ["une remontée d'arborescence encodée", "..%2Fetc"],
 ];
 
 async function createResponsibleInScope(options: { isMilitaryPreparation?: boolean } = {}) {
@@ -157,6 +169,17 @@ describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
 
       const res = await request(await getAppHelperWithAcl(actor))
         .get(`/referent/youngFile/${young._id}/application/${application._id}%2FcontractAvenantFiles%2Fpiece.pdf`)
+        .send();
+
+      expect(res.statusCode).toEqual(400);
+      expect(mockGetFile).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("youngId borné (GOO-189)", () => {
+    it.each(BAD_YOUNG_IDS)("refuse (400) pour un administrateur un youngId contenant %s, sans toucher au stockage", async (_label, youngId) => {
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/referent/youngFile/${youngId}/equivalenceFiles/piece.pdf`)
         .send();
 
       expect(res.statusCode).toEqual(400);
@@ -316,6 +339,17 @@ describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
 });
 
 describe("GET /referent/youngFile/:youngId/military-preparation/:key/:fileName", () => {
+  describe("youngId borné (GOO-189)", () => {
+    it.each(BAD_YOUNG_IDS)("refuse (400) pour un administrateur un youngId contenant %s, sans toucher au stockage", async (_label, youngId) => {
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/referent/youngFile/${youngId}/military-preparation/militaryPreparationFilesIdentity/piece.pdf`)
+        .send();
+
+      expect(res.statusCode).toEqual(400);
+      expect(mockGetFile).not.toHaveBeenCalled();
+    });
+  });
+
   it.each([
     ["une pièce hors préparation militaire", "cniFiles"],
     ["une clé inconnue", "key"],
@@ -439,6 +473,56 @@ describe("POST /referent/file/:key", () => {
       .send({ body: body(young._id.toString()) });
 
     expect(res.statusCode).toEqual(200);
+  });
+
+  /**
+   * `busboy` ne transmet au handler que le nom de base du champ `filename` du multipart quand il est
+   * fourni via le paramètre `filename=` classique : un sous-chemin (`sous-dossier/x.pdf`), un
+   * antislash, ou le segment `.`/`..` seul arrivent déjà réduits à une chaîne vide ou au nom de base
+   * avant toute validation applicative (vérifié directement contre `busboy`, en dehors de la route).
+   *
+   * En revanche, un nom transmis via le paramètre étendu `filename*=` (RFC 2231/5987, que les
+   * navigateurs n'émettent pas mais qu'un client HTTP arbitraire peut construire) n'est pas réduit à
+   * son nom de base par `busboy` : un caractère de contrôle (octet nul, retour à la ligne...) à
+   * l'intérieur du nom, sans `/` ni `\`, survit tel quel jusqu'à la route — `Joi.string()` seul
+   * l'acceptait. `safePathSegment()` le refuse (voir `isSafePathSegment`), et le test ci-dessous le
+   * prouve par une vraie requête HTTP, pas seulement par mutation.
+   */
+  describe("nom du fichier déposé (multipart) (GOO-189)", () => {
+    it("dépose un fichier avec un nom légitime", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      getMimeFromFileSpy.mockResolvedValueOnce("application/pdf");
+
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/referent/file/equivalenceFiles`)
+        .field("body", body(young._id.toString()))
+        .attach("file", Buffer.from("contenu"), { filename: "justificatif-0.pdf", contentType: "application/pdf" });
+
+      expect(res.statusCode).toEqual(200);
+      expect(mockUploadFile).toHaveBeenCalledWith(`app/young/${young._id}/equivalenceFiles/justificatif-0.pdf`, expect.anything());
+    });
+
+    it("refuse (400) un nom de fichier déposé via filename* (RFC 2231) contenant un octet nul, sans écrire", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      // Si la validation du nom était contournée, le fichier devrait quand même franchir le contrôle de type
+      // pour que l'assertion ci-dessous échoue pour la bonne raison (upload effectué) plutôt que par un 500 UNSUPPORTED_TYPE.
+      getMimeFromFileSpy.mockResolvedValueOnce("application/pdf");
+      const boundary = "GOO189BOUNDARY";
+      const payload = Buffer.concat([
+        Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="body"\r\n\r\n${body(young._id.toString())}\r\n`),
+        Buffer.from(`--${boundary}\r\nContent-Disposition: form-data; name="file"; filename*=UTF-8''x%00.pdf\r\nContent-Type: application/pdf\r\n\r\n`),
+        Buffer.from("contenu"),
+        Buffer.from(`\r\n--${boundary}--\r\n`),
+      ]);
+
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/referent/file/equivalenceFiles`)
+        .set("Content-Type", `multipart/form-data; boundary=${boundary}`)
+        .send(payload);
+
+      expect(res.statusCode).toEqual(400);
+      expect(mockUploadFile).not.toHaveBeenCalled();
+    });
   });
 });
 
