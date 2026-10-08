@@ -33,7 +33,7 @@
       "commander": "4.1.1"
     },
     "mailparser": {
-      "nodemailer": "^9.1.0",
+      "nodemailer": "^10.0.9",
       "linkify-it": "^5.0.2"
     }
   },
