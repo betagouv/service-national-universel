@@ -127,6 +127,30 @@ describe("changement d'email : le code part à la nouvelle adresse", () => {
     expect(after!.attemptsEmailValidation).toBe(MAX_EMAIL_VALIDATION_ATTEMPTS);
     expect(after!.email).toBe(young.email);
   });
+
+  it("une demande en libre-service efface un signalement de demande référent resté en attente (GOO-200)", async () => {
+    const young = await createYoung({
+      emailVerified: "true",
+      newEmail: "adresse-posee-par-un-referent@example.com",
+      newEmailRequestedByReferent: true,
+      forgotPasswordResetToken: "jeton-existant",
+    });
+    const app = getAppHelper(young as any, "young");
+
+    const demande = await request(app).post("/young/email").send({ email: NEW_EMAIL, password: PASSWORD });
+    expect(demande.status).toBe(200);
+
+    const stored = await YoungModel.findById(young._id);
+    expect(stored!.newEmailRequestedByReferent).toBeFalsy();
+
+    const res = await request(app).post("/young/email-validation/new-email").send({ token_email_validation: String(stored!.tokenEmailValidation) });
+    expect(res.status).toBe(200);
+
+    const after = await YoungModel.findById(young._id);
+    expect(after!.lastLogoutAt).toBeFalsy();
+    expect(after!.forgotPasswordResetToken).toBe("jeton-existant");
+    expect(sendEmail).not.toHaveBeenCalled();
+  });
 });
 
 describe("POST /young/email : le mot de passe est compté", () => {

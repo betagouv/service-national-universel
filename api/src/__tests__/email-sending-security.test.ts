@@ -169,6 +169,50 @@ describe("M73/GOO-200 — changement d'adresse email d'un volontaire par un réf
     expect(apres?.lastLogoutAt).toBeTruthy();
     expect(apres?.forgotPasswordResetToken).toBeFalsy();
   });
+
+  it("refuse qu'une session empruntée par signin_as valide elle-même le code à la place du volontaire", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+
+    const miseEnAttente = await request(await getAppHelperWithAcl(referent))
+      .put(`/young-edition/${young._id}/identite`)
+      .send({ email: "nouvelle-adresse@example.org" });
+    expect(miseEnAttente.statusCode).toEqual(200);
+
+    // Simule une session jeune obtenue par POST /referent/signin_as/young/:id : passport y pose
+    // `impersonateId` sur req.user (api/src/passport.ts L71-72), que ce soit via un cookie
+    // décodé ou, comme ici, directement sur l'objet de session (même procédé que
+    // impersonation-integrity-goo-71.test.ts).
+    const enAttente: any = await getYoungByIdHelper(young._id);
+    enAttente.impersonateId = referent._id;
+    mockSendTemplate.mockClear();
+
+    const validation = await request(await getAppHelper(enAttente, "young"))
+      .post("/young/email-validation/new-email")
+      .send({ token_email_validation: String(enAttente.tokenEmailValidation) });
+
+    expect(validation.statusCode).toEqual(403);
+    const apres = await getYoungByIdHelper(young._id);
+    expect(apres?.email).toEqual(young.email);
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("refuse qu'une session empruntée redemande elle-même un nouveau code à la place du volontaire", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+
+    const miseEnAttente = await request(await getAppHelperWithAcl(referent))
+      .put(`/young-edition/${young._id}/identite`)
+      .send({ email: "nouvelle-adresse@example.org" });
+    expect(miseEnAttente.statusCode).toEqual(200);
+
+    const enAttente: any = await getYoungByIdHelper(young._id);
+    enAttente.impersonateId = referent._id;
+    mockSendTemplate.mockClear();
+
+    const res = await request(await getAppHelper(enAttente, "young")).get("/young/email-validation/token");
+
+    expect(res.statusCode).toEqual(403);
+    expect(mockSendTemplate).not.toHaveBeenCalled();
+  });
 });
 
 describe("M74 — liens et messages libres dans les emails au volontaire", () => {
