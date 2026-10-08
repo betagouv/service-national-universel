@@ -1,6 +1,5 @@
 import express, { CookieOptions } from "express";
 import passport from "passport";
-import fileUpload from "express-fileupload";
 import fs from "fs";
 import Joi from "joi";
 import { v4 as uuid } from "uuid";
@@ -26,6 +25,7 @@ import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
 import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { abandonableFileUpload, removeTempFiles } from "../middlewares/tempUpload";
 import { authRateLimiter, userRateLimiter } from "../middlewares/rateLimit";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { KNOWLEDGE_BASE_PUBLIC_RESTRICTION, KNOWLEDGE_BASE_RESTRICTIONS, knowledgeBaseReadableRoles } from "../services/knowledgeBaseReader";
@@ -551,20 +551,12 @@ const UPLOAD_EXTENSIONS = new Map<string, string>([
   ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"],
 ]);
 
-const removeTempFiles = (req: UserRequest) => {
-  for (const entry of Object.values(req.files || {})) {
-    for (const file of Array.isArray(entry) ? entry : [entry]) {
-      if (file?.tempFilePath && fs.existsSync(file.tempFilePath)) fs.unlinkSync(file.tempFilePath);
-    }
-  }
-};
-
 // Dépôt réservé aux jeunes et référents connectés, plafonné par requête et par utilisateur (M38). Chaque fichier
 // déposé est enregistré pour son auteur : c'est la seule source des pièces jointes acceptées ensuite (M36).
 router.post(
   "/upload",
   authMiddleware(["referent", "young"]),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  abandonableFileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req: UserRequest, res) => {
     try {
       const { error: filesError, value: files } = Joi.array()
@@ -591,15 +583,15 @@ router.post(
           { stripUnknown: true },
         );
       if (filesError) {
-        removeTempFiles(req);
+        void removeTempFiles(req.files);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
       if (files.length > MAX_FILES_PER_UPLOAD) {
-        removeTempFiles(req);
+        void removeTempFiles(req.files);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
       if (!(await consumeUploadQuota(req.user._id.toString(), files.length))) {
-        removeTempFiles(req);
+        void removeTempFiles(req.files);
         return res.status(429).send({ ok: false, code: "TOO_MANY_REQUESTS" });
       }
 
@@ -613,13 +605,13 @@ router.post(
         const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
         const extension = mimeFromMagicNumbers ? UPLOAD_EXTENSIONS.get(mimeFromMagicNumbers) : undefined;
         if (!(UPLOAD_EXTENSIONS.has(mimetype) && extension)) {
-          removeTempFiles(req);
+          void removeTempFiles(req.files);
           return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
         }
 
         const scanResult = await scanFile(tempFilePath, name);
         if (scanResult.infected) {
-          removeTempFiles(req);
+          void removeTempFiles(req.files);
           return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
         }
 
@@ -631,13 +623,12 @@ router.post(
         const attachment = { name: getSafeDownloadFileName(name, mimeFromMagicNumbers), url: response.Location, path: response.key };
         await rememberAttachment(req.user._id.toString(), attachment);
         responseData.push(attachment);
-        fs.unlinkSync(tempFilePath);
       }
-      removeTempFiles(req);
+      void removeTempFiles(req.files);
 
       return res.status(200).send({ data: responseData, ok: true });
     } catch (error) {
-      removeTempFiles(req);
+      void removeTempFiles(req.files);
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

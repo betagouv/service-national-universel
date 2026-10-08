@@ -3,11 +3,12 @@ import passport from "passport";
 import fs from "fs";
 import { RouteRequest, RouteResponse } from "../controllers/request";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { abandonableFileUpload } from "../middlewares/tempUpload";
 import { capture } from "../sentry";
 import { ERRORS, uploadFile } from "../utils";
 import { toErrorCode } from "../utils/errorCode";
 import { assertImportedFile, buildImportedFileKey, removeTempFile } from "../utils/importedFile";
-import fileUpload, { UploadedFile } from "express-fileupload";
+import { UploadedFile } from "express-fileupload";
 import { MIME_TYPES, PLAN_MARKETING_FOLDER_PATH_EXPORT, PlanMarketingRoutes, isSuperAdmin } from "snu-lib";
 
 const router = express.Router();
@@ -16,7 +17,7 @@ router.use(authMiddleware("referent"));
 router.post(
   "/",
   passport.authenticate("referent", { session: false, failWithError: true }),
-  fileUpload({ limits: { fileSize: 8 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  abandonableFileUpload({ limits: { fileSize: 8 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req: RouteRequest<PlanMarketingRoutes["ImportContacts"]>, res: RouteResponse<PlanMarketingRoutes["ImportContacts"]>) => {
     const file: UploadedFile | undefined = Object.values(req.files || {})[0] as UploadedFile | undefined;
     try {
