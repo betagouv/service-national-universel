@@ -20,6 +20,7 @@ import {
 import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, setSessionCookie, clearSessionCookie } from "./cookie-options";
 import { getToken } from "./passport";
 import { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } from "./utils";
+import { revokeAccessAfterEmailChange, notifyPreviousEmailOfChange } from "./young/edition/youngEditionService";
 import {
   SENDINBLUE_TEMPLATES,
   PHONE_ZONES_NAMES_ARR,
@@ -724,8 +725,16 @@ class Auth {
 
       if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
-      user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null });
+      // GOO-200 : si la demande vient d'un référent (PUT /young-edition/:id/identite), la bascule
+      // d'adresse doit couper les accès en cours et avertir l'ancienne adresse — contrairement au
+      // libre-service, qui a déjà prouvé l'identité par mot de passe (api/src/auth.ts requestEmailUpdate).
+      const wasRequestedByReferent = !!user.newEmailRequestedByReferent;
+      const previousEmail = user.email;
+
+      user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null, newEmailRequestedByReferent: false });
+      if (wasRequestedByReferent) revokeAccessAfterEmailChange(user);
       await user.save();
+      if (wasRequestedByReferent) await notifyPreviousEmailOfChange(user, previousEmail);
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();

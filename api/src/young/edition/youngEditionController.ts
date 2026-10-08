@@ -16,6 +16,7 @@
  */
 
 import express, { Response } from "express";
+import crypto from "crypto";
 import Joi from "joi";
 import { YoungModel, CohortModel, ApplicationModel } from "../../models";
 import { ERRORS, notifDepartmentChange } from "../../utils";
@@ -44,7 +45,7 @@ import { config } from "../../config";
 import { logger } from "../../logger";
 import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
-import { canEditYoungConsent, notifyPreviousEmailOfChange, revokeAccessAfterEmailChange, updateYoungConsent } from "./youngEditionService";
+import { canEditYoungConsent, updateYoungConsent } from "./youngEditionService";
 import { canEditYoungInScope } from "../youngScope";
 
 const router = express.Router({ mergeParams: true });
@@ -71,7 +72,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       firstName: validateFirstName().trim(),
       lastName: Joi.string().uppercase(),
       gender: Joi.string().valid("male", "female"),
-      email: Joi.string().lowercase().trim(),
+      email: Joi.string().lowercase().trim().email(),
       phone: Joi.string().trim(),
       phoneZone: Joi.string()
         .trim()
@@ -159,15 +160,34 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     await Promise.all(updatePromises);
 
-    // Le changement d'adresse email n'est pas une correction comme les autres : il déplace le
-    // point d'entrée du compte (constat M73).
-    const previousEmail = young.email;
-    const emailChanged = !!value.email && value.email !== previousEmail;
+    // GOO-200 (M73) : un changement d'adresse initié par un référent n'est plus immédiat. La
+    // nouvelle adresse est posée en attente et confirmée par le même parcours que le libre-service
+    // (POST /young/email-validation/new-email, api/src/auth.ts validateEmailUpdate), qui bascule
+    // l'email, coupe les accès et avertit l'ancienne adresse SEULEMENT à la validation du code.
+    const requestedEmail = value.email && value.email !== young.email ? value.email : undefined;
+    delete value.email;
 
     young.set(value);
-    if (emailChanged) revokeAccessAfterEmailChange(young);
+    if (requestedEmail) {
+      const tokenEmailValidation = await crypto.randomInt(1000000);
+      young.set({
+        newEmail: requestedEmail,
+        tokenEmailValidation,
+        attemptsEmailValidation: 0,
+        tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
+        newEmailRequestedByReferent: true,
+      });
+    }
     await young.save({ fromUser: req.user });
-    if (emailChanged) await notifyPreviousEmailOfChange(young, previousEmail);
+    if (requestedEmail) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: requestedEmail }],
+        params: {
+          registration_code: young.tokenEmailValidation,
+          cta: `${config.APP_URL}/account/general?newEmailValidationToken=${young.tokenEmailValidation}`,
+        },
+      });
+    }
 
     // --- result
     return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
