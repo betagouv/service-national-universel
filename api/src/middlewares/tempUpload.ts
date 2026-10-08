@@ -41,12 +41,11 @@ export async function removeTempFiles(files: UploadedFiles): Promise<void> {
 // express-fileupload arrête son délai d'envoi : tant que la partie ne se termine pas, le fichier n'est ni dans req.files ni
 // abandonné par ce délai. Il l'est donc à la fermeture de la connexion, comme il l'aurait été par le délai : express-fileupload
 // supprime alors le fichier et referme son descripteur.
-function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter, onAbandon: () => void) {
+function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter) {
   parser.on("file", (_field: string, file: Readable) => {
     file.once("limit", () => {
       const { socket } = req;
       const abandon = () => {
-        onAbandon();
         // Le parseur ne signalera plus sa fin : un fichier reçu ensuite ne serait jamais purgé, l'analyse s'arrête donc ici.
         req.unpipe();
         req.resume();
@@ -60,21 +59,28 @@ function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter
 
 // express-fileupload, dont un fichier trop gros est abandonné à la fermeture de la connexion si sa partie n'est pas terminée.
 // La dépendance ne donne pas accès aux fichiers en cours de réception : on récupère le parseur qu'elle branche sur la requête.
-// Une requête abandonnée n'est pas transmise au gestionnaire : la connexion est fermée, personne ne recevra la réponse. Les
-// fichiers déjà reçus sont purgés ici, le fichier tronqué l'est par express-fileupload.
+// Une requête dont la réponse se ferme avant la fin de l'analyse (connexion coupée, ou réponse déjà envoyée) n'est pas transmise
+// au gestionnaire. Ses fichiers déjà reçus sont purgés à cette fermeture, puis à la fin de l'analyse ; le fichier en cours l'est
+// par express-fileupload, à la fermeture de la connexion s'il est trop gros, sinon à son délai d'envoi.
 export function abandonableFileUpload(options: fileUpload.Options): RequestHandler {
   const parseMultipart = fileUpload(options);
   return (req, res, next) => {
-    let abandoned = false;
+    let closed = false;
+    let handedOver = false;
+    res.once("close", () => {
+      closed = true;
+      if (!handedOver) void removeTempFiles(requestFiles(req));
+    });
     const pipe = req.pipe;
     req.pipe = function (parser, pipeOptions) {
       req.pipe = pipe;
-      abandonTruncatedFilesOnClose(req, parser, () => (abandoned = true));
+      abandonTruncatedFilesOnClose(req, parser);
       return pipe.call(this, parser, pipeOptions);
     };
     try {
       parseMultipart(req, res, (err?: unknown) => {
-        if (abandoned) return void removeTempFiles(requestFiles(req));
+        if (closed) return void removeTempFiles(requestFiles(req));
+        handedOver = true;
         next(err);
       });
     } finally {

@@ -1,18 +1,20 @@
 /**
  * Lot P29 (suite) — routes de dépôt montées sans `tempFileUpload()` : `POST /SNUpport/upload` et
- * `POST /plan-marketing/import`. Elles n'ont pas de gestionnaire de dépassement : un fichier plus gros que la limite
- * est tronqué sans réponse. Si sa partie ne se termine pas, le fichier tronqué doit être purgé quand le client coupe la
- * connexion, avec les fichiers déjà reçus, et la requête abandonnée ne doit pas être traitée. Un envoi complet reste
- * traité comme avant.
+ * `POST /plan-marketing/import`, et `abandonableFileUpload` qu'elles utilisent. Quand la connexion se ferme avant la fin
+ * de l'analyse, aucun fichier temporaire ne doit rester et la requête ne doit pas être transmise au gestionnaire. Un
+ * envoi complet reste traité comme avant.
  */
 import { once } from "events";
 import fs from "fs";
 import http from "http";
 import { AddressInfo } from "net";
+import os from "os";
+import pathModule from "path";
 import express from "express";
 import { Types } from "mongoose";
 import { MIME_TYPES, ROLES } from "snu-lib";
 
+import { abandonableFileUpload } from "../middlewares/tempUpload";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { consumeUploadQuota } from "../services/supportAttachments";
 import { uploadFile } from "../utils";
@@ -131,6 +133,27 @@ describe("routes de dépôt sans tempFileUpload", () => {
     expect(tempFiles.filter((file) => fs.existsSync(file))).toEqual([]);
   });
 
+  // Le petit fichier est terminé (le délimiteur suivant est arrivé) mais pas les en-têtes de la partie suivante : aucun
+  // fichier n'est en cours, donc ni limite ni délai d'envoi.
+  it.each(routes)("$name : coupure entre deux parties, fichier déjà reçu purgé et requête non traitée", async ({ path, user, smallFile, handlerCalled }) => {
+    const port = await listen(getAppHelper(user));
+    const agent = new http.Agent({ keepAlive: true });
+    const req = post(port, path, agent);
+    req.on("error", () => {});
+    req.write(Buffer.concat([smallFile(), Buffer.from(`--${BOUNDARY}\r\nContent-Disposition: form-data; name="suite"`)]));
+
+    const received = () => tempFiles.length === 1 && fs.existsSync(tempFiles[0]) && fs.statSync(tempFiles[0]).size > 0;
+    await waitUntil(received);
+    expect(received()).toBe(true);
+
+    req.destroy();
+    agent.destroy();
+
+    await waitUntil(() => tempFiles.every((file) => !fs.existsSync(file)));
+    expect(tempFiles.filter((file) => fs.existsSync(file))).toEqual([]);
+    expect(handlerCalled()).toBe(false);
+  });
+
   // Le corps s'arrête en plein fichier trop gros : sa partie ne se termine jamais, et le délai d'envoi d'express-fileupload
   // s'arrête au dépassement. Seule la fermeture de la connexion peut purger le fichier tronqué.
   it.each(cases)("$name : fichier trop gros $label, purgé à la coupure et requête non traitée", async ({ path, limit, user, smallFile, withSmallFile, handlerCalled }) => {
@@ -153,5 +176,58 @@ describe("routes de dépôt sans tempFileUpload", () => {
     await waitUntil(() => tempFiles.every((file) => !fs.existsSync(file)));
     expect(tempFiles.filter((file) => fs.existsSync(file))).toEqual([]);
     expect(handlerCalled()).toBe(false);
+  });
+});
+
+// Coupure en plein fichier sous la limite : le délai d'envoi d'express-fileupload abandonne ce fichier et passe la main.
+describe("abandonableFileUpload : coupure en plein fichier sous la limite (délai d'envoi court)", () => {
+  const LIMIT = 1024 * 1024;
+  let uploadDir: string;
+  let server: http.Server;
+  let handlerCalls: number;
+
+  beforeEach(async () => {
+    uploadDir = fs.mkdtempSync(pathModule.join(os.tmpdir(), "lot-p29-coupure-"));
+    handlerCalls = 0;
+    const app = express();
+    app.post("/upload", abandonableFileUpload({ limits: { fileSize: LIMIT }, useTempFiles: true, tempFileDir: uploadDir, uploadTimeout: 300 }), (_req, res) => {
+      handlerCalls++;
+      res.send({ ok: true });
+    });
+    server = app.listen(0, "127.0.0.1");
+    await once(server, "listening");
+  });
+
+  afterEach(async () => {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+    fs.rmSync(uploadDir, { recursive: true, force: true });
+  });
+
+  it("purge le fichier inachevé et n'appelle pas le gestionnaire", async () => {
+    const agent = new http.Agent({ keepAlive: true });
+    const req = http.request({
+      host: "127.0.0.1",
+      port: (server.address() as AddressInfo).port,
+      method: "POST",
+      path: "/upload",
+      agent,
+      headers: { "content-type": `multipart/form-data; boundary=${BOUNDARY}` },
+    });
+    req.on("error", () => {});
+    req.write(Buffer.concat([filePart("moyen", "moyen.bin", "application/octet-stream"), Buffer.alloc(LIMIT / 2, "a")]));
+
+    const written = () => fs.readdirSync(uploadDir).some((name) => fs.statSync(pathModule.join(uploadDir, name)).size >= LIMIT / 2);
+    await waitUntil(written);
+    expect(written()).toBe(true);
+
+    req.destroy();
+    agent.destroy();
+
+    // Le délai d'envoi supprime le fichier puis passe la main dans la foulée.
+    await waitUntil(() => fs.readdirSync(uploadDir).length === 0);
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    expect(fs.readdirSync(uploadDir)).toEqual([]);
+    expect(handlerCalls).toBe(0);
   });
 });
