@@ -1,6 +1,9 @@
 import fs from "fs";
 import { Request, RequestHandler } from "express";
 import fileUpload, { UploadedFile } from "express-fileupload";
+import { EventEmitter } from "events";
+import { IncomingMessage } from "http";
+import { Readable } from "stream";
 import { ERRORS } from "snu-lib";
 
 import { logger } from "../logger";
@@ -34,6 +37,26 @@ export async function removeTempFiles(files: UploadedFiles): Promise<void> {
   }
 }
 
+// Au dépassement de la limite de taille, busboy cesse d'écrire le fichier mais ne le termine qu'au délimiteur suivant, et
+// express-fileupload arrête son délai d'envoi : tant que la partie ne se termine pas, le fichier n'est ni dans req.files ni
+// abandonné par ce délai. Il l'est donc à la fermeture de la connexion, comme il l'aurait été par le délai : express-fileupload
+// supprime alors le fichier et referme son descripteur.
+function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter) {
+  parser.on("file", (_field: string, file: Readable) => {
+    file.once("limit", () => {
+      const { socket } = req;
+      const abandon = () => {
+        // Le parseur ne signalera plus sa fin : un fichier reçu ensuite ne serait jamais purgé, l'analyse s'arrête donc ici.
+        req.unpipe();
+        req.resume();
+        file.destroy(new Error("tempUpload: connexion fermée avant la fin d'un fichier trop gros"));
+      };
+      socket.once("close", abandon);
+      file.once("close", () => socket.off("close", abandon));
+    });
+  });
+}
+
 // Le plafond est monté à MAX+1 : busboy ignore sans bruit les fichiers au-delà, il faut donc en laisser passer un de plus pour détecter le dépassement.
 // Un fichier trop gros ne coupe pas l'analyse : la réponse 413 part tout de suite, mais l'analyse va à son terme pour que tous les fichiers créés soient purgés.
 export function tempFileUpload({
@@ -47,7 +70,7 @@ export function tempFileUpload({
     });
     next();
   };
-  const upload = fileUpload({
+  const parseMultipart = fileUpload({
     limits: { fileSize, files: MAX_UPLOAD_FILES + 1 },
     limitHandler: (_req, res) => {
       if (!res.headersSent) res.status(413).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -56,6 +79,20 @@ export function tempFileUpload({
     tempFileDir,
     ...(uploadTimeout !== undefined && { uploadTimeout }),
   });
+  // express-fileupload ne donne pas accès aux fichiers en cours de réception : on récupère le parseur qu'il branche sur la requête.
+  const upload: RequestHandler = (req, res, next) => {
+    const pipe = req.pipe;
+    req.pipe = function (parser, options) {
+      req.pipe = pipe;
+      abandonTruncatedFilesOnClose(req, parser);
+      return pipe.call(this, parser, options);
+    };
+    try {
+      parseMultipart(req, res, next);
+    } finally {
+      req.pipe = pipe;
+    }
+  };
   const stopIfAnswered: RequestHandler = (req, res, next) => {
     if (!res.headersSent) return next();
     void removeTempFiles(requestFiles(req));
