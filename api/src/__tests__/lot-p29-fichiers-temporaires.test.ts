@@ -2,8 +2,11 @@
  * Lot P29 — dépôts de fichiers : plafond du nombre de fichiers par requête et purge des fichiers
  * temporaires sur tous les chemins de réponse.
  */
+import { once } from "events";
 import express from "express";
 import fs from "fs";
+import http from "http";
+import { AddressInfo } from "net";
 import os from "os";
 import path from "path";
 import request from "supertest";
@@ -52,6 +55,13 @@ async function waitUntil(condition: () => boolean, attempts = 40) {
 function attachFiles(req: request.Test, count: number, size = 1) {
   for (let i = 0; i < count; i++) req.attach(`file${i}`, Buffer.alloc(size, "a"), `piece-${i}.txt`);
   return req;
+}
+
+const BOUNDARY = "lot-p29";
+
+/** Délimiteur et en-têtes d'une partie fichier d'un corps multipart, sans son contenu. */
+function filePartHeader(name: string) {
+  return Buffer.from(`--${BOUNDARY}\r\nContent-Disposition: form-data; name="${name}"; filename="${name}.txt"\r\nContent-Type: text/plain\r\n\r\n`);
 }
 
 describe("removeTempFiles", () => {
@@ -158,6 +168,74 @@ describe("tempFileUpload : fichier trop gros suivi d'autres fichiers (délai d'e
     req.attach("gros", Buffer.alloc(MAX_FILE_SIZE + 1, "a"), "gros.txt").attach("moyen", Buffer.alloc(5 * 1024 * 1024, "a"), "moyen.txt");
     const res = await req;
     expect(res.status).toBe(413);
+    await waitUntil(() => fs.readdirSync(uploadDir).length === 0, 200);
+    expect(fs.readdirSync(uploadDir)).toEqual([]);
+    expect(handlerCalls).toBe(0);
+  });
+});
+
+// Le corps s'arrête en plein fichier trop gros : sa partie ne se termine jamais. Délai d'envoi par défaut (60 s), que le
+// test n'attend pas : seule la fermeture de la connexion peut purger le fichier tronqué.
+describe("tempFileUpload : fichier plus gros que la limite dont la partie ne se termine pas", () => {
+  let uploadDir: string;
+  let server: http.Server;
+  let handlerCalls: number;
+  beforeEach(async () => {
+    uploadDir = fs.mkdtempSync(path.join(workDir, "upload-"));
+    handlerCalls = 0;
+    const app = express();
+    app.post("/upload", ...tempFileUpload({ tempFileDir: uploadDir }), (_req, res) => {
+      handlerCalls++;
+      res.send({ ok: true });
+    });
+    server = app.listen(0, "127.0.0.1");
+    await once(server, "listening");
+  });
+  afterEach(async () => {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+  });
+
+  /** Envoie un seul fichier de deux fois la limite, sans le délimiteur qui terminerait sa partie. */
+  function sendUnfinishedFile(agent: http.Agent, headers: http.OutgoingHttpHeaders = {}) {
+    const { port } = server.address() as AddressInfo;
+    const req = http.request({
+      host: "127.0.0.1",
+      port,
+      method: "POST",
+      path: "/upload",
+      agent,
+      headers: { "content-type": `multipart/form-data; boundary=${BOUNDARY}`, ...headers },
+    });
+    req.write(Buffer.concat([filePartHeader("gros"), Buffer.alloc(2 * MAX_FILE_SIZE, "a")]));
+    return req;
+  }
+
+  it("purge le fichier tronqué quand le client coupe la connexion après le 413", async () => {
+    const agent = new http.Agent({ keepAlive: true });
+    const req = sendUnfinishedFile(agent);
+    try {
+      const [res] = (await once(req, "response")) as [http.IncomingMessage];
+      expect(res.statusCode).toBe(413);
+      res.resume();
+      await once(res, "end");
+    } finally {
+      req.destroy();
+      agent.destroy();
+    }
+    await waitUntil(() => fs.readdirSync(uploadDir).length === 0, 200);
+    expect(fs.readdirSync(uploadDir)).toEqual([]);
+    expect(handlerCalls).toBe(0);
+  });
+
+  // Avec `Connection: close`, le serveur ferme la socket dès le 413 : le client perd la réponse ou non selon le timing.
+  it("purge le fichier tronqué quand le serveur ferme la connexion après le 413", async () => {
+    const agent = new http.Agent({ keepAlive: false });
+    const req = sendUnfinishedFile(agent, { connection: "close" });
+    req.on("error", () => {});
+    req.on("response", (res: http.IncomingMessage) => res.resume());
+    await new Promise((resolve) => req.once("close", resolve));
+    agent.destroy();
     await waitUntil(() => fs.readdirSync(uploadDir).length === 0, 200);
     expect(fs.readdirSync(uploadDir)).toEqual([]);
     expect(handlerCalls).toBe(0);
