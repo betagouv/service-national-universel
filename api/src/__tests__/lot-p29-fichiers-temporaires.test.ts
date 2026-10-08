@@ -37,15 +37,28 @@ afterAll(async () => {
 });
 afterEach(resetAppAuth);
 
+const servers: http.Server[] = [];
+afterEach(async () => {
+  for (const server of servers.splice(0)) {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+  }
+});
+
+// Serveur lié à 127.0.0.1, l'adresse que vise supertest. `request(app)` écoute sur toutes les interfaces : sous macOS, un
+// autre processus peut alors se lier explicitement à 127.0.0.1 sur le même port, et il reçoit les requêtes du test à sa
+// place (un 404 étranger au lieu du 413 attendu). Sur 127.0.0.1, ce port ne peut plus être pris.
+async function localServer(app: express.Express) {
+  const server = app.listen(0, "127.0.0.1");
+  servers.push(server);
+  await once(server, "listening");
+  return server;
+}
+
 function uploadedFile(content = "x"): UploadedFile {
   const tempFilePath = path.join(workDir, `${Date.now()}-${Math.random()}`);
   fs.writeFileSync(tempFilePath, content);
   return { name: "fichier", tempFilePath } as UploadedFile;
-}
-
-/** Fichiers temporaires d'express-fileupload dans /tmp (`tmp-<n>-<timestamp>`). */
-function fileUploadTempFiles(): string[] {
-  return fs.readdirSync("/tmp").filter((name) => /^tmp-\d+-\d+$/.test(name));
 }
 
 async function waitUntil(condition: () => boolean, attempts = 40) {
@@ -63,6 +76,26 @@ const BOUNDARY = "lot-p29";
 function filePartHeader(name: string) {
   return Buffer.from(`--${BOUNDARY}\r\nContent-Disposition: form-data; name="${name}"; filename="${name}.txt"\r\nContent-Type: text/plain\r\n\r\n`);
 }
+
+describe("serveur de test", () => {
+  it("reçoit ses requêtes même si un autre serveur se lie ensuite au même port sur 127.0.0.1", async () => {
+    const app = express();
+    app.get("/", (_req, res) => res.send("serveur du test"));
+    const server = await localServer(app);
+    const { port } = server.address() as AddressInfo;
+    const other = http.createServer((_req, res) => res.writeHead(404).end("autre serveur"));
+    const otherListening = await new Promise<boolean>((resolve) => {
+      other.once("error", () => resolve(false));
+      other.listen(port, "127.0.0.1", () => resolve(true));
+    });
+    try {
+      const res = await request(server).get("/");
+      expect(res.text).toBe("serveur du test");
+    } finally {
+      if (otherListening) await new Promise((resolve) => other.close(resolve));
+    }
+  });
+});
 
 describe("removeTempFiles", () => {
   it("supprime tous les fichiers, qu'ils soient seuls ou en tableau", async () => {
@@ -102,7 +135,7 @@ describe("tempFileUpload", () => {
 
   it("garde le comportement nominal avec un ou deux fichiers, puis purge le dossier", async () => {
     for (const count of [1, 2]) {
-      const res = await attachFiles(request(app).post("/upload"), count);
+      const res = await attachFiles(request(await localServer(app)).post("/upload"), count);
       expect(res.status).toBe(200);
       expect(res.body.count).toBe(count);
     }
@@ -111,27 +144,32 @@ describe("tempFileUpload", () => {
   });
 
   it.each([[400], [403], [500]])("purge les fichiers quand le gestionnaire répond %i sans les supprimer", async (status) => {
-    const res = await attachFiles(request(app).post("/upload").query({ status }), 2);
+    const res = await attachFiles(
+      request(await localServer(app))
+        .post("/upload")
+        .query({ status }),
+      2,
+    );
     expect(res.status).toBe(status);
     await waitUntil(() => fs.readdirSync(uploadDir).length === 0);
     expect(fs.readdirSync(uploadDir)).toEqual([]);
   });
 
   it("accepte exactement le plafond de fichiers", async () => {
-    const res = await attachFiles(request(app).post("/upload"), MAX_UPLOAD_FILES);
+    const res = await attachFiles(request(await localServer(app)).post("/upload"), MAX_UPLOAD_FILES);
     expect(res.status).toBe(200);
     expect(res.body.count).toBe(MAX_UPLOAD_FILES);
   });
 
   it("refuse en 413 une requête au-dessus du plafond et ne garde aucun fichier", async () => {
-    const res = await attachFiles(request(app).post("/upload"), MAX_UPLOAD_FILES + 5);
+    const res = await attachFiles(request(await localServer(app)).post("/upload"), MAX_UPLOAD_FILES + 5);
     expect(res.status).toBe(413);
     await waitUntil(() => fs.readdirSync(uploadDir).length === 0);
     expect(fs.readdirSync(uploadDir)).toEqual([]);
   });
 
   it("refuse en 413 un fichier plus gros que la limite de taille et ne garde aucun fichier", async () => {
-    const res = await attachFiles(request(app).post("/upload"), 1, MAX_FILE_SIZE + 1);
+    const res = await attachFiles(request(await localServer(app)).post("/upload"), 1, MAX_FILE_SIZE + 1);
     expect(res.status).toBe(413);
     await waitUntil(() => fs.readdirSync(uploadDir).length === 0);
     expect(fs.readdirSync(uploadDir)).toEqual([]);
@@ -153,7 +191,9 @@ describe("tempFileUpload : fichier trop gros suivi d'autres fichiers (délai d'e
   });
 
   it("répond 413 en JSON, ne garde aucun fichier et n'appelle pas le gestionnaire", async () => {
-    const req = request(app).post("/upload").attach("gros", Buffer.alloc(MAX_FILE_SIZE + 1, "a"), "gros.txt");
+    const req = request(await localServer(app))
+      .post("/upload")
+      .attach("gros", Buffer.alloc(MAX_FILE_SIZE + 1, "a"), "gros.txt");
     for (let i = 0; i < 20; i++) req.attach(`petit${i}`, Buffer.alloc(1, "a"), `petit-${i}.txt`);
     const res = await req;
     expect(res.status).toBe(413);
@@ -204,7 +244,12 @@ describe("câblage des quatre routes de dépôt", () => {
       status: 500,
       send: async (files: number) => {
         const young = await createYoungHelper(getNewYoungFixture());
-        return attachFiles(request(await getAppHelperWithAcl(young, "young")).post("/young/file/cniFiles").field("body", "{}"), files);
+        return attachFiles(
+          request(await localServer(await getAppHelperWithAcl(young, "young")))
+            .post("/young/file/cniFiles")
+            .field("body", "{}"),
+          files,
+        );
       },
     },
     {
@@ -212,35 +257,63 @@ describe("câblage des quatre routes de dépôt", () => {
       status: 500,
       send: async (files: number) => {
         const young = await createYoungHelper(getNewYoungFixture());
-        return attachFiles(request(await getAppHelperWithAcl(young, "young")).post(`/young/${young._id}/documents/cniFiles`), files);
+        return attachFiles(request(await localServer(await getAppHelperWithAcl(young, "young"))).post(`/young/${young._id}/documents/cniFiles`), files);
       },
     },
     {
       name: "POST /application/:id/file/:key (candidature inconnue, 404)",
       status: 404,
-      send: async (files: number) => attachFiles(request(getAppHelper()).post(`/application/${UNKNOWN_ID}/file/contractAvenantFiles`).field("body", "{}"), files),
+      send: async (files: number) =>
+        attachFiles(
+          request(await localServer(getAppHelper()))
+            .post(`/application/${UNKNOWN_ID}/file/contractAvenantFiles`)
+            .field("body", "{}"),
+          files,
+        ),
     },
     {
       name: "POST /referent/file/:key (volontaire inconnu, 404)",
       status: 404,
       send: async (files: number) =>
-        attachFiles(request(getAppHelper()).post("/referent/file/cniFiles").field("body", JSON.stringify({ names: ["a.txt"], youngId: UNKNOWN_ID })), files),
+        attachFiles(
+          request(await localServer(getAppHelper()))
+            .post("/referent/file/cniFiles")
+            .field("body", JSON.stringify({ names: ["a.txt"], youngId: UNKNOWN_ID })),
+          files,
+        ),
     },
   ];
 
+  // Fichiers temporaires ouverts par express-fileupload pendant le test. /tmp est partagé avec les autres processus : ceux
+  // qu'ils y déposent pendant le test ne doivent pas compter.
+  let tempFiles: string[];
+  let createWriteStream: jest.SpyInstance;
+  beforeEach(() => {
+    tempFiles = [];
+    const original = fs.createWriteStream;
+    createWriteStream = jest.spyOn(fs, "createWriteStream").mockImplementation((filePath, options) => {
+      if (typeof filePath === "string" && /^\/tmp\/tmp-\d+-\d+$/.test(filePath)) tempFiles.push(filePath);
+      return original(filePath, options);
+    });
+  });
+  afterEach(() => createWriteStream.mockRestore());
+
+  const remainingTempFiles = () => tempFiles.filter((file) => fs.existsSync(file));
+
   it.each(routes)("$name : aucun fichier ne reste dans /tmp", async ({ send, status }) => {
-    const before = fileUploadTempFiles();
     const res = await send(2);
     expect(res.status).toBe(status);
-    await waitUntil(() => fileUploadTempFiles().every((name) => before.includes(name)));
-    expect(fileUploadTempFiles().filter((name) => !before.includes(name))).toEqual([]);
+    expect(tempFiles).toHaveLength(2);
+    await waitUntil(() => remainingTempFiles().length === 0);
+    expect(remainingTempFiles()).toEqual([]);
   });
 
   it.each(routes)("$name : une requête au-dessus du plafond est refusée en 413", async ({ send }) => {
-    const before = fileUploadTempFiles();
     const res = await send(MAX_UPLOAD_FILES + 5);
     expect(res.status).toBe(413);
-    await waitUntil(() => fileUploadTempFiles().every((name) => before.includes(name)));
-    expect(fileUploadTempFiles().filter((name) => !before.includes(name))).toEqual([]);
+    // busboy ignore les fichiers au-delà de MAX_UPLOAD_FILES + 1 sans les écrire.
+    expect(tempFiles).toHaveLength(MAX_UPLOAD_FILES + 1);
+    await waitUntil(() => remainingTempFiles().length === 0);
+    expect(remainingTempFiles()).toEqual([]);
   });
 });
