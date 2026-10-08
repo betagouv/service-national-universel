@@ -197,6 +197,74 @@ describe("tempFileUpload : fichier trop gros suivi d'autres fichiers (délai d'e
   });
 });
 
+// Le corps s'arrête en plein fichier trop gros : sa partie ne se termine jamais. Délai d'envoi par défaut (60 s), que le
+// test n'attend pas : seule la fermeture de la connexion peut purger le fichier tronqué.
+describe("tempFileUpload : fichier plus gros que la limite dont la partie ne se termine pas", () => {
+  let uploadDir: string;
+  let server: http.Server;
+  let handlerCalls: number;
+  beforeEach(async () => {
+    uploadDir = fs.mkdtempSync(path.join(workDir, "upload-"));
+    handlerCalls = 0;
+    const app = express();
+    app.post("/upload", ...tempFileUpload({ tempFileDir: uploadDir }), (_req, res) => {
+      handlerCalls++;
+      res.send({ ok: true });
+    });
+    server = app.listen(0, "127.0.0.1");
+    await once(server, "listening");
+  });
+  afterEach(async () => {
+    server.closeAllConnections();
+    await new Promise((resolve) => server.close(resolve));
+  });
+
+  /** Envoie un seul fichier de deux fois la limite, sans le délimiteur qui terminerait sa partie. */
+  function sendUnfinishedFile(agent: http.Agent, headers: http.OutgoingHttpHeaders = {}) {
+    const { port } = server.address() as AddressInfo;
+    const req = http.request({
+      host: "127.0.0.1",
+      port,
+      method: "POST",
+      path: "/upload",
+      agent,
+      headers: { "content-type": `multipart/form-data; boundary=${BOUNDARY}`, ...headers },
+    });
+    req.write(Buffer.concat([filePartHeader("gros"), Buffer.alloc(2 * MAX_FILE_SIZE, "a")]));
+    return req;
+  }
+
+  it("purge le fichier tronqué quand le client coupe la connexion après le 413", async () => {
+    const agent = new http.Agent({ keepAlive: true });
+    const req = sendUnfinishedFile(agent);
+    try {
+      const [res] = (await once(req, "response")) as [http.IncomingMessage];
+      expect(res.statusCode).toBe(413);
+      res.resume();
+      await once(res, "end");
+    } finally {
+      req.destroy();
+      agent.destroy();
+    }
+    await waitUntil(() => fs.readdirSync(uploadDir).length === 0, 200);
+    expect(fs.readdirSync(uploadDir)).toEqual([]);
+    expect(handlerCalls).toBe(0);
+  });
+
+  // Avec `Connection: close`, le serveur ferme la socket dès le 413 : le client perd la réponse ou non selon le timing.
+  it("purge le fichier tronqué quand le serveur ferme la connexion après le 413", async () => {
+    const agent = new http.Agent({ keepAlive: false });
+    const req = sendUnfinishedFile(agent, { connection: "close" });
+    req.on("error", () => {});
+    req.on("response", (res: http.IncomingMessage) => res.resume());
+    await new Promise((resolve) => req.once("close", resolve));
+    agent.destroy();
+    await waitUntil(() => fs.readdirSync(uploadDir).length === 0, 200);
+    expect(fs.readdirSync(uploadDir)).toEqual([]);
+    expect(handlerCalls).toBe(0);
+  });
+});
+
 describe("câblage des quatre routes de dépôt", () => {
   const routes = [
     {

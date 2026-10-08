@@ -14,6 +14,10 @@ import { getAcl } from "../../services/iam/Permission.service";
 import { ROLE_JEUNE, ROLES } from "snu-lib";
 import { resetRateLimiters } from "../../middlewares/rateLimit";
 import { applyBodyParsers, handleError } from "../../middlewares/httpHardening";
+import { corsOptionsDelegate } from "../../cors-options";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cors = require("cors");
 
 export function resetAppAuth() {
   // Les limiteurs de débit des routes d'auth vivent au niveau du module, donc
@@ -49,7 +53,9 @@ export async function getAppHelperWithAcl(user?: Partial<UserRequest["user"] & {
 
 function getAppHelper(user?: Partial<UserRequest["user"] & { subRole?: any; acl?: any[] }> | YoungDocument | ReferentDocument | null, authStrategy?: "young" | "referent") {
   const app = express();
-  // Mêmes analyseurs de corps et même gestionnaire d'erreurs que main.js.
+  // Même CORS, mêmes analyseurs de corps et même gestionnaire d'erreurs que main.js : un test de
+  // route peut ainsi vérifier les en-têtes CORS qu'un front reçoit (GOO-201).
+  app.use(cors(corsOptionsDelegate));
   applyBodyParsers(app);
   // @ts-ignore
   app.use(cookieParser());
