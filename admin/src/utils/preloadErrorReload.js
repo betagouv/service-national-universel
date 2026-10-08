@@ -9,7 +9,7 @@
 // deux rechargements automatiques par période de deux minutes et par onglet, puis l'erreur suit son
 // cours (ErrorBoundary, Sentry).
 
-const RELOADS_KEY = "snu-preload-error-reloads";
+export const RELOADS_KEY = "snu-preload-error-reloads";
 export const RELOAD_WINDOW_MS = 2 * 60 * 1000;
 export const MAX_RELOADS_PER_WINDOW = 2;
 

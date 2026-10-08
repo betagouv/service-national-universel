@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { MAX_RELOADS_PER_WINDOW, RELOAD_WINDOW_MS } from "./preloadErrorReload";
+import { MAX_RELOADS_PER_WINDOW, RELOAD_WINDOW_MS, RELOADS_KEY } from "./preloadErrorReload";
 
 const T0 = 1_000_000_000;
 
@@ -55,7 +55,7 @@ describe("reloadAfterPreloadError", () => {
     expect(reloadAfterPreloadError({ reload, now: T0 + 5 })).toBe(true);
     expect(reloadAfterPreloadError({ reload, now: T0 + 10 })).toBe(true);
     expect(reload).toHaveBeenCalledTimes(1);
-    expect(JSON.parse(window.sessionStorage.getItem("snu-preload-error-reloads"))).toHaveLength(1);
+    expect(JSON.parse(window.sessionStorage.getItem(RELOADS_KEY))).toHaveLength(1);
     // Le second rechargement de la période reste disponible pour la page suivante
     expect(await failOnNewPage(T0 + 3_000, reload)).toBe(true);
     expect(reload).toHaveBeenCalledTimes(2);
@@ -83,7 +83,7 @@ describe("reloadAfterPreloadError", () => {
 
   it.each(["pas du json", "1234", '{"a":1}', '["x", null]'])("une valeur illisible dans le stockage (%s) n'empêche pas le rechargement", async (stored) => {
     const reload = vi.fn();
-    window.sessionStorage.setItem("snu-preload-error-reloads", stored);
+    window.sessionStorage.setItem(RELOADS_KEY, stored);
 
     expect(await failOnNewPage(T0, reload)).toBe(true);
     expect(reload).toHaveBeenCalledTimes(1);
@@ -94,7 +94,16 @@ describe("reloadAfterPreloadError", () => {
 
     expect(await failOnNewPage(T0, reload, { isOnline: () => false })).toBe(false);
     expect(reload).not.toHaveBeenCalled();
-    expect(window.sessionStorage.getItem("snu-preload-error-reloads")).toBeNull();
+    expect(window.sessionStorage.getItem(RELOADS_KEY)).toBeNull();
+  });
+
+  it("hors ligne selon navigator.onLine (détection par défaut), ne recharge pas", async () => {
+    const reload = vi.fn();
+    vi.spyOn(window.navigator, "onLine", "get").mockReturnValue(false);
+
+    expect(await failOnNewPage(T0, reload)).toBe(false);
+    expect(reload).not.toHaveBeenCalled();
+    expect(window.sessionStorage.getItem(RELOADS_KEY)).toBeNull();
   });
 
   it("sans sessionStorage, ne recharge jamais : pas de garde-fou contre les boucles", async () => {

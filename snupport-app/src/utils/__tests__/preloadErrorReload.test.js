@@ -1,6 +1,6 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { MAX_RELOADS_PER_WINDOW, RELOAD_WINDOW_MS } from "../preloadErrorReload.js";
+import { MAX_RELOADS_PER_WINDOW, RELOAD_WINDOW_MS, RELOADS_KEY } from "../preloadErrorReload.js";
 
 const T0 = 1_000_000_000;
 
@@ -63,7 +63,7 @@ test("plusieurs échecs dans la même page ne comptent qu'un rechargement", asyn
   assert.equal(reloadAfterPreloadError(options(T0 + 5)), true);
   assert.equal(reloadAfterPreloadError(options(T0 + 10)), true);
   assert.deepEqual(reloads, [T0]);
-  assert.equal(JSON.parse(storage.getItem("snu-preload-error-reloads")).length, 1);
+  assert.equal(JSON.parse(storage.getItem(RELOADS_KEY)).length, 1);
   // Le second rechargement de la période reste disponible pour la page suivante
   assert.equal(await failOnNewPage(T0 + 3_000), true);
   assert.deepEqual(reloads, [T0, T0 + 3_000]);
@@ -92,7 +92,7 @@ test("une horloge revenue en arrière ne bloque pas le rechargement", async () =
 test("une valeur illisible dans le stockage n'empêche pas le rechargement", async () => {
   for (const stored of ["pas du json", "1234", '{"a":1}', '["x", null]']) {
     const { storage, reloads, failOnNewPage } = setupTab();
-    storage.setItem("snu-preload-error-reloads", stored);
+    storage.setItem(RELOADS_KEY, stored);
 
     assert.equal(await failOnNewPage(T0), true, stored);
     assert.equal(reloads.length, 1, stored);
@@ -104,7 +104,22 @@ test("hors ligne, ne recharge pas et ne consomme aucun rechargement", async () =
 
   assert.equal(await offline.failOnNewPage(T0), false);
   assert.deepEqual(offline.reloads, []);
-  assert.equal(offline.storage.getItem("snu-preload-error-reloads"), null);
+  assert.equal(offline.storage.getItem(RELOADS_KEY), null);
+});
+
+test("hors ligne selon navigator.onLine (détection par défaut), ne recharge pas", async () => {
+  const { storage, reloads, failOnNewPage } = setupTab();
+  const reloadAfterPreloadError = await loadPage();
+  globalThis.window = { navigator: { onLine: false } };
+  try {
+    assert.equal(reloadAfterPreloadError({ getStorage: () => storage, reload: () => reloads.push(T0), now: T0 }), false);
+  } finally {
+    delete globalThis.window;
+  }
+  assert.deepEqual(reloads, []);
+  assert.equal(storage.getItem(RELOADS_KEY), null);
+  // Garde-fou du test lui-même : la même page, en ligne, recharge bien
+  assert.equal(await failOnNewPage(T0), true);
 });
 
 test("sans sessionStorage, ne recharge jamais : pas de garde-fou contre les boucles", async () => {
