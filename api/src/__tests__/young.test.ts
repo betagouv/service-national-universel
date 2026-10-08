@@ -615,6 +615,46 @@ describe("Young", () => {
         const apres = await YoungModel.findById(young._id);
         expect(apres?.files.militaryPreparationFilesIdentity).toHaveLength(6);
       });
+
+      // Le seul appelant réel de cniFiles (admin/src/scenes/phase0/components/CniModal.jsx) agit en
+      // tant que référent, jamais en tant que volontaire : ce chemin a sa propre non-régression et
+      // son propre refus, avec un vrai ReferentDocument (isReferent + canEditYoung), pas un objet nu.
+      it("un référent (acteur réel) accepte un dépôt qui atteint exactement 3 pièces d'identité", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }] },
+        } as any);
+        const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(referent, "referent"))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["3e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "3e.jpeg" });
+
+        expect(res.status).toEqual(200);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
+
+      it("un référent (acteur réel) est refusé au-delà de 3 pièces d'identité, sans rien écrire", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }, { name: "passeport.pdf" }] },
+        } as any);
+        const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(referent, "referent"))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["4e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "4e.jpeg" });
+
+        expect(res.status).toEqual(403);
+        expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
     });
   });
 
