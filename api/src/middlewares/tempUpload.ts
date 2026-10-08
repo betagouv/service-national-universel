@@ -1,5 +1,5 @@
 import fs from "fs";
-import { RequestHandler } from "express";
+import { Request, RequestHandler } from "express";
 import fileUpload, { UploadedFile } from "express-fileupload";
 import { ERRORS } from "snu-lib";
 
@@ -8,6 +8,13 @@ import { logger } from "../logger";
 export const MAX_UPLOAD_FILES = 10;
 
 type UploadedFiles = fileUpload.FileArray | UploadedFile | UploadedFile[] | null | undefined;
+
+// `files` est lu avec un type local, comme dans UserRequest (controllers/request.ts) : express-fileupload n'a pas
+// de types installés, et le `Request.files` visible dans le monorepo vient de @types/multer (dépendance d'apiv2),
+// absent de l'arbre élagué par `turbo prune api` au build de production.
+function requestFiles(req: Request): UploadedFiles {
+  return (req as Request & { files?: UploadedFiles }).files;
+}
 
 function flattenFiles(files: UploadedFiles): UploadedFile[] {
   if (!files) return [];
@@ -36,7 +43,7 @@ export function tempFileUpload({
 }: { tempFileDir?: string; fileSize?: number; uploadTimeout?: number } = {}): RequestHandler[] {
   const purge: RequestHandler = (req, res, next) => {
     res.once("close", () => {
-      void removeTempFiles(req.files);
+      void removeTempFiles(requestFiles(req));
     });
     next();
   };
@@ -51,10 +58,10 @@ export function tempFileUpload({
   });
   const stopIfAnswered: RequestHandler = (req, res, next) => {
     if (!res.headersSent) return next();
-    void removeTempFiles(req.files);
+    void removeTempFiles(requestFiles(req));
   };
   const capFiles: RequestHandler = (req, res, next) => {
-    if (flattenFiles(req.files).length > MAX_UPLOAD_FILES) return res.status(413).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if (flattenFiles(requestFiles(req)).length > MAX_UPLOAD_FILES) return res.status(413).send({ ok: false, code: ERRORS.INVALID_BODY });
     next();
   };
   return [purge, upload, stopIfAnswered, capFiles];
