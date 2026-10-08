@@ -7,15 +7,24 @@ const CREDENTIALS_ALLOWED_HEADERS = ["Content-Type", "Authorization", "X-Request
 // limité à leurs routes précises. SUPPORT_URL (appel serveur à serveur snupport-api) n'a jamais eu
 // besoin de CORS, et l'hôte "https://inscription.snu.gouv.fr" (2021) codé en dur est mort.
 //
-// /signin/token et /signin/logout gardent les credentials : la base de connaissance les appelle
-// avec `credentials: "include"`, le cookie de session étant la seule preuve du lecteur
-// (controllers/signin.js). Sans Access-Control-Allow-Credentials, le navigateur rejette le
-// preflight et chaque lecteur connecté retombe en visiteur public (régression du 26/09/2026).
-// Le reste de l'API ignore ce cookie depuis l'origine de la KB (passport.getToken, FH16).
+// La base de connaissance appelle l'API v1 sur trois routes, toujours avec `credentials: "include"`
+// (knowledge-base-public/src/services/api.js) : sans Access-Control-Allow-Credentials, le
+// navigateur rejette le preflight (régression du 26/09/2026, GOO-201). /signin/token et
+// /signin/logout lisent le cookie de session, seule preuve du lecteur (controllers/signin.js) ;
+// le reste de l'API l'ignore depuis l'origine de la KB (passport.getToken, FH16), si bien que le
+// retour sur un article reste anonyme. Méthodes et en-têtes sont limités à ce que la KB envoie
+// (plus ceux de Sentry, si son traçage y est réactivé).
+const KNOWLEDGE_BASE_ALLOWED_HEADERS = ["Content-Type", "Accept", "sentry-trace", "baggage"];
+const knowledgeBaseRoute = (path, method) => ({
+  path,
+  getOptions: () => ({ origin: config.KNOWLEDGEBASE_URL, credentials: true, methods: [method], allowedHeaders: KNOWLEDGE_BASE_ALLOWED_HEADERS }),
+});
+
 const DEDICATED_ROUTES = [
-  { path: "/signin/token", getOrigin: () => config.KNOWLEDGEBASE_URL, credentials: true },
-  { path: "/signin/logout", getOrigin: () => config.KNOWLEDGEBASE_URL, credentials: true },
-  { path: "/cohort/public", getOrigin: () => config.SUPPORT_FRONT_URL, credentials: false },
+  knowledgeBaseRoute("/signin/token", "GET"),
+  knowledgeBaseRoute("/signin/logout", "POST"),
+  knowledgeBaseRoute("/SNUpport/knowledgeBase/feedback", "POST"),
+  { path: "/cohort/public", getOptions: () => ({ origin: config.SUPPORT_FRONT_URL, credentials: false }) },
 ];
 
 // Fonction déléguée (corsOptionsDelegate) plutôt que deux middlewares `cors()` empilés : un
@@ -24,7 +33,7 @@ const DEDICATED_ROUTES = [
 function corsOptionsDelegate(req, callback) {
   const dedicatedRoute = DEDICATED_ROUTES.find((route) => req.path === route.path);
   if (dedicatedRoute) {
-    callback(null, { credentials: dedicatedRoute.credentials, origin: dedicatedRoute.getOrigin() });
+    callback(null, dedicatedRoute.getOptions());
     return;
   }
 
