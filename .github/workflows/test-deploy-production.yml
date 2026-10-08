@@ -101,8 +101,15 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          while read row; do
-            ./devops/scripts/cc-watch-deploy.sh  ${{ vars.CC_ORGANIZATION_ID }} $row ${{ github.sha }} &
+          # Un suivi par application, en parallèle. `wait` sans argument renvoie
+          # toujours 0 : on attend chaque PID pour que le job échoue dès qu'un
+          # déploiement n'aboutit pas.
+          pids=()
+          apps=()
+          while read -r row; do
+            ./devops/scripts/cc-watch-deploy.sh  ${{ vars.CC_ORGANIZATION_ID }} "$row" ${{ github.sha }} &
+            pids+=($!)
+            apps+=("$row")
           done <<EOF
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_API }}
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }}
@@ -114,4 +121,11 @@ jobs:
           ${{ vars.CC_APP_ID_PRODUCTION_SNUPPORT_APP }}
           EOF
 
-          wait
+          failed=0
+          for i in "${!pids[@]}"; do
+            if ! wait "${pids[$i]}"; then
+              echo "::error::Déploiement en échec pour l'application ${apps[$i]}"
+              failed=1
+            fi
+          done
+          exit $failed
