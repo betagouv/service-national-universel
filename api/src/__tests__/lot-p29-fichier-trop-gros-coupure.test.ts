@@ -10,10 +10,12 @@ import http from "http";
 import { AddressInfo } from "net";
 import os from "os";
 import pathModule from "path";
+import { PassThrough } from "stream";
 import express from "express";
 import { Types } from "mongoose";
 import { MIME_TYPES, ROLES } from "snu-lib";
 
+import { logger } from "../logger";
 import { abandonableFileUpload } from "../middlewares/tempUpload";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { consumeUploadQuota } from "../services/supportAttachments";
@@ -45,8 +47,9 @@ function filePart(name: string, filename: string, contentType: string, content?:
   return content ? Buffer.concat([header, content, Buffer.from("\r\n")]) : header;
 }
 
-async function waitUntil(condition: () => boolean, attempts = 200) {
-  for (let i = 0; i < attempts && !condition(); i++) await new Promise((resolve) => setTimeout(resolve, 25));
+// Budget large : le premier test d'un lancement absorbe le démarrage de l'application (jusqu'à plusieurs secondes).
+async function waitUntil(condition: () => boolean, timeoutMs = 20000) {
+  for (const deadline = Date.now() + timeoutMs; !condition() && Date.now() < deadline; ) await new Promise((resolve) => setTimeout(resolve, 25));
 }
 
 type AppUser = Parameters<typeof getAppHelper>[0];
@@ -177,43 +180,136 @@ describe("routes de dépôt sans tempFileUpload", () => {
     expect(tempFiles.filter((file) => fs.existsSync(file))).toEqual([]);
     expect(handlerCalled()).toBe(false);
   });
+
+  it("POST /SNUpport/upload : répond même quand la suppression d'un fichier temporaire échoue", async () => {
+    // Type refusé : la route purge ses fichiers avant de répondre.
+    (getMimeFromFile as jest.Mock).mockResolvedValue("text/html");
+    const isUploadTempFile = (filePath: unknown) => typeof filePath === "string" && tempFiles.includes(filePath);
+    const denied = () => Object.assign(new Error("suppression refusée"), { code: "EACCES" });
+    const { unlinkSync } = fs;
+    const { rm } = fs.promises;
+    const unlinkSyncSpy = jest.spyOn(fs, "unlinkSync").mockImplementation((filePath) => {
+      if (isUploadTempFile(filePath)) throw denied();
+      return unlinkSync(filePath);
+    });
+    const rmSpy = jest.spyOn(fs.promises, "rm").mockImplementation(async (filePath, options) => {
+      if (isUploadTempFile(filePath)) throw denied();
+      return rm(filePath, options);
+    });
+    const agent = new http.Agent({ keepAlive: true });
+    try {
+      const port = await listen(getAppHelper(routes[0].user));
+      const req = post(port, routes[0].path, agent);
+      req.setTimeout(10000, () => req.destroy(new Error("pas de réponse")));
+      req.end(Buffer.concat([routes[0].smallFile(), Buffer.from(`--${BOUNDARY}--\r\n`)]));
+      const [res] = (await once(req, "response")) as [http.IncomingMessage];
+      res.resume();
+      await once(res, "end");
+      expect(res.statusCode).toBe(500);
+    } finally {
+      agent.destroy();
+      unlinkSyncSpy.mockRestore();
+      rmSpy.mockRestore();
+      for (const file of tempFiles) fs.rmSync(file, { force: true });
+    }
+  });
 });
 
-// Coupure en plein fichier sous la limite : le délai d'envoi d'express-fileupload abandonne ce fichier et passe la main.
-describe("abandonableFileUpload : coupure en plein fichier sous la limite (délai d'envoi court)", () => {
+describe("abandonableFileUpload", () => {
   const LIMIT = 1024 * 1024;
   let uploadDir: string;
-  let server: http.Server;
+  let server: http.Server | undefined;
   let handlerCalls: number;
 
-  beforeEach(async () => {
+  beforeEach(() => {
     uploadDir = fs.mkdtempSync(pathModule.join(os.tmpdir(), "lot-p29-coupure-"));
     handlerCalls = 0;
-    const app = express();
-    app.post("/upload", abandonableFileUpload({ limits: { fileSize: LIMIT }, useTempFiles: true, tempFileDir: uploadDir, uploadTimeout: 300 }), (_req, res) => {
-      handlerCalls++;
-      res.send({ ok: true });
-    });
-    server = app.listen(0, "127.0.0.1");
-    await once(server, "listening");
   });
 
   afterEach(async () => {
-    server.closeAllConnections();
-    await new Promise((resolve) => server.close(resolve));
+    server?.closeAllConnections();
+    await new Promise((resolve) => (server ? server.close(resolve) : resolve(undefined)));
+    server = undefined;
     fs.rmSync(uploadDir, { recursive: true, force: true });
+    jest.restoreAllMocks();
   });
 
-  it("purge le fichier inachevé et n'appelle pas le gestionnaire", async () => {
-    const agent = new http.Agent({ keepAlive: true });
-    const req = http.request({
-      host: "127.0.0.1",
-      port: (server.address() as AddressInfo).port,
-      method: "POST",
-      path: "/upload",
-      agent,
-      headers: { "content-type": `multipart/form-data; boundary=${BOUNDARY}` },
+  async function serve(upload: express.RequestHandler, handler: express.RequestHandler = (_req, res) => void res.send({ ok: true })) {
+    const app = express();
+    app.post("/upload", upload, (req, res, next) => {
+      handlerCalls++;
+      handler(req, res, next);
     });
+    server = app.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    return (server.address() as AddressInfo).port;
+  }
+
+  function postUpload(port: number, agent: http.Agent, contentType = `multipart/form-data; boundary=${BOUNDARY}`) {
+    return http.request({ host: "127.0.0.1", port, method: "POST", path: "/upload", agent, headers: { "content-type": contentType } });
+  }
+
+  it("refuse à la compilation des options mal orthographiées", () => {
+    // @ts-expect-error `limit` au lieu de `limits` : la limite de taille disparaîtrait sans erreur.
+    expect(typeof abandonableFileUpload({ limit: { fileSize: LIMIT }, useTempFiles: true, tempFileDir: uploadDir })).toBe("function");
+  });
+
+  it("rend la main au gestionnaire sans laisser son interception de req.pipe (requête sans fichier)", async () => {
+    const destination = new PassThrough();
+    let fileListeners = -1;
+    const port = await serve(abandonableFileUpload({ limits: { fileSize: LIMIT }, useTempFiles: true, tempFileDir: uploadDir }), (req, res) => {
+      req.pipe(destination);
+      fileListeners = destination.listenerCount("file");
+      res.send({ ok: true });
+    });
+    const agent = new http.Agent({ keepAlive: true });
+    try {
+      const req = postUpload(port, agent, "text/plain");
+      req.end("pas de fichier");
+      const [res] = (await once(req, "response")) as [http.IncomingMessage];
+      res.resume();
+      await once(res, "end");
+      expect(res.statusCode).toBe(200);
+    } finally {
+      agent.destroy();
+    }
+    expect(fileListeners).toBe(0);
+  });
+
+  it("journalise une erreur d'analyse survenue après la réponse", async () => {
+    const warn = jest.spyOn(logger, "warn");
+    const port = await serve(
+      abandonableFileUpload({
+        limits: { fileSize: LIMIT },
+        useTempFiles: true,
+        tempFileDir: uploadDir,
+        limitHandler: (_req, res) => void res.status(413).send({ ok: false }),
+      }),
+    );
+    const agent = new http.Agent({ keepAlive: true });
+    try {
+      const req = postUpload(port, agent);
+      req.on("error", () => {});
+      req.write(Buffer.concat([filePart("gros", "gros.bin", "application/octet-stream"), Buffer.alloc(2 * LIMIT, "a")]));
+      const [res] = (await once(req, "response")) as [http.IncomingMessage];
+      res.resume();
+      await once(res, "end");
+      expect(res.statusCode).toBe(413);
+      // Le corps s'arrête en pleine partie : le parseur signale une erreur, alors que la réponse est déjà partie.
+      req.end();
+      await waitUntil(() => warn.mock.calls.length > 0, 5000);
+    } finally {
+      agent.destroy();
+    }
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining("Unexpected end of form"));
+    expect(handlerCalls).toBe(0);
+  });
+
+  // Coupure en plein fichier sous la limite : le délai d'envoi d'express-fileupload abandonne ce fichier et passe la main.
+  it("purge le fichier inachevé et n'appelle pas le gestionnaire quand la connexion est coupée sous la limite", async () => {
+    const port = await serve(abandonableFileUpload({ limits: { fileSize: LIMIT }, useTempFiles: true, tempFileDir: uploadDir, uploadTimeout: 300 }));
+    const agent = new http.Agent({ keepAlive: true });
+    const req = postUpload(port, agent);
     req.on("error", () => {});
     req.write(Buffer.concat([filePart("moyen", "moyen.bin", "application/octet-stream"), Buffer.alloc(LIMIT / 2, "a")]));
 

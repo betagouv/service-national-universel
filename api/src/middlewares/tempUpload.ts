@@ -12,6 +12,16 @@ export const MAX_UPLOAD_FILES = 10;
 
 type UploadedFiles = fileUpload.FileArray | UploadedFile | UploadedFile[] | null | undefined;
 
+// express-fileupload n'a pas de types installés (`fileUpload.Options` vaut `any`) : les options utilisées ici sont typées
+// localement, pour qu'une faute de frappe, sur `limits` notamment, ne retire pas une limite sans erreur.
+type AbandonableFileUploadOptions = {
+  limits: { fileSize: number; files?: number };
+  useTempFiles: true;
+  tempFileDir: string;
+  limitHandler?: RequestHandler;
+  uploadTimeout?: number;
+};
+
 // `files` est lu avec un type local, comme dans UserRequest (controllers/request.ts) : express-fileupload n'a pas
 // de types installés, et le `Request.files` visible dans le monorepo vient de @types/multer (dépendance d'apiv2),
 // absent de l'arbre élagué par `turbo prune api` au build de production.
@@ -62,7 +72,7 @@ function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter
 // Une requête dont la réponse se ferme avant la fin de l'analyse (connexion coupée, ou réponse déjà envoyée) n'est pas transmise
 // au gestionnaire. Ses fichiers déjà reçus sont purgés à cette fermeture, puis à la fin de l'analyse ; le fichier en cours l'est
 // par express-fileupload, à la fermeture de la connexion s'il est trop gros, sinon à son délai d'envoi.
-export function abandonableFileUpload(options: fileUpload.Options): RequestHandler {
+export function abandonableFileUpload(options: AbandonableFileUploadOptions): RequestHandler {
   const parseMultipart = fileUpload(options);
   return (req, res, next) => {
     let closed = false;
@@ -79,7 +89,13 @@ export function abandonableFileUpload(options: fileUpload.Options): RequestHandl
     };
     try {
       parseMultipart(req, res, (err?: unknown) => {
-        if (closed) return void removeTempFiles(requestFiles(req));
+        // Une requête sans fichier est rendue sans attendre : la suite de la chaîne ne doit pas hériter de l'interception.
+        req.pipe = pipe;
+        if (closed) {
+          // Le gestionnaire d'erreurs ne peut plus répondre : l'erreur n'est que journalisée.
+          if (err) logger.warn(`tempUpload: erreur d'analyse après la fermeture de la réponse: ${err instanceof Error ? err.message : err}`);
+          return void removeTempFiles(requestFiles(req));
+        }
         handedOver = true;
         next(err);
       });
