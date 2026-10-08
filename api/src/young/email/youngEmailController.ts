@@ -17,8 +17,8 @@ import { sendEmailToYoung } from "./youngEmailService";
 
 const router = express.Router();
 
-// Le seul envoi déclenché par un volontaire depuis l'app est la fiche sanitaire (MedicalFileModal) :
-// 10 par heure suffisent, sans lui laisser arroser des adresses de son choix (constats PM24, PM37).
+// GOO-198 : un volontaire n'envoie plus jamais de gabarit depuis cette route (refus systématique
+// ci-dessous). Le limiteur reste en défense en profondeur et compte aussi les tentatives refusées.
 // Les référents envoient depuis l'admin : ils ne sont pas limités ici.
 const youngEmailLimiter = userRateLimiter({ prefix: "young-email-template", windowMs: 60 * 60 * 1000, limit: 10 });
 const limitYoung = (req: UserRequest, res: Response, next) => (isYoung(req.user) ? youngEmailLimiter(req, res, next) : next());

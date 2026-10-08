@@ -2,7 +2,7 @@
 
 Date : 2026-10-08 · Décision 4a de Philippe du 06/10, révisée le 08/10 · Ticket GOO-198 · Branche `nuit/goo-198`, base `origin/main`
 
-Déploiement : api seul. Aucune migration.
+Déploiement : api et app. Aucune migration.
 
 ## Ce qui est corrigé
 
@@ -19,13 +19,18 @@ s'il fournit un lien de confiance, ce qui change le code de certaines tentatives
 bloquées (ex. lien vers un autre bucket Cellar : 400 avant, 403 maintenant — toujours bloqué, code
 différent).
 
-## Code mort signalé, non supprimé (hors périmètre de ce ticket)
+## Changement visible côté app (décision validée par ce ticket)
 
-`app/src/scenes/phase1/components/MedicalFileModal.tsx` (le seul appelant app de cette route) n'est
-importé que par `app/src/scenes/phase1/Files.jsx` (`DocumentsPhase1`), qui n'est lui-même importé nulle
-part (vérifié par `git grep` sur `app/src`). L'écran `/phase1` (`app/src/Espace.jsx:62`,
-`scenes/phase1/index.tsx`) ne monte que `Done`, `Cancel` et `WaitingAffectation` : `Files.jsx` était déjà
-inatteignable avant ce ticket. Rien n'est supprimé ici.
+`app/src/scenes/phase1/components/MedicalFileModal.tsx` (le seul appelant app de cette route) est
+atteignable : `app/src/scenes/phase1/waitingAffectation.tsx:11,47` monte `Files.jsx`
+(`DocumentsPhase1`), rendu par défaut dans `scenes/phase1/index.tsx:22` (statut `WAITING_AFFECTATION`,
+valeur par défaut du schéma) pour un volontaire dont le statut global n'est pas `VALIDATED` (ex.
+`IN_PROGRESS`, `REINSCRIPTION`, `NOT_AUTORISED`). Pour ces volontaires, le bouton « Recevoir sur ma
+boîte mail » de la modale appelait `POST /young/:id/email/young.LINK`, désormais toujours refusé (403).
+Le bouton (et la confirmation d'envoi associée) est donc retiré de
+`MedicalFileModal.tsx` dans un commit séparé : la modale garde le lien de téléchargement direct de la
+fiche sanitaire et les instructions de remise en mains propres, mais ne propose plus l'envoi par email
+qui échouerait systématiquement.
 
 ## Non concerné
 
