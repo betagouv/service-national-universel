@@ -6,7 +6,7 @@ Date : 2026-10-08 · Base `origin/main` (`dc3949264`)
 
 | Où | Avant | Après |
 |---|---|---|
-| `api` `POST /young/:id/documents/:key`, `api/src/controllers/young/documents.js:167` | le contrôle testait `body.category === "cniFiles"` (valeur envoyée par le client : `cniNew`, `cniOld` ou `passport`, jamais égale à `"cniFiles"`) : le plafond ne s'appliquait jamais | le contrôle porte sur la clé de route `key === "cniFiles"` ; refus (403 `OPERATION_NOT_ALLOWED`) si les pièces déjà présentes plus celles de la requête courante dépassent 3 |
+| `api` `POST /young/:id/documents/:key`, `api/src/controllers/young/documents.js:167` | le plafond de 3 pièces d'identité ne s'appliquait pas | le contrôle porte sur la clé de route `key === "cniFiles"` ; refus (403 `OPERATION_NOT_ALLOWED`) si les pièces déjà présentes plus celles de la requête courante dépassent 3 |
 
 Pas de rétroactivité : un dossier déjà au-delà de 3 pièces garde ses pièces et ne peut simplement plus en ajouter. Aucun plafond introduit sur les autres clés (préparation militaire, droit à l'image, etc.).
 
@@ -34,7 +34,8 @@ Appelant modifié : le handler `POST /young/:id/documents/:key` (`api/src/contro
 - refus d'un 4e dépôt avec 3 pièces déjà présentes, rien d'écrit (dossier inchangé en base) ;
 - refus d'un dépôt à 2 présentes + 2 envoyées (dépassement par la requête courante) ;
 - acceptation exacte à 3 (2 présentes + 1 envoyée) — non-régression bornée ;
-- non-plafond sur une autre clé (`militaryPreparationFilesIdentity`, 5 pièces déjà présentes + 1 envoyée, acceptée) — non-régression sur les autres clés.
+- non-plafond sur une autre clé (`militaryPreparationFilesIdentity`, 5 pièces déjà présentes + 1 envoyée, acceptée) — non-régression sur les autres clés ;
+- deux tests dédiés avec un vrai `ReferentDocument` (acceptation à exactement 3, refus au-delà) : le seul appelant réel de cette clé (`CniModal.jsx`) agit en tant que référent, pas en tant que volontaire ; ajoutés après la relecture B qui a signalé que les premiers tests exerçaient uniquement le chemin volontaire.
 
 La purge du fichier temporaire sur un 403 de cette route est déjà couverte, pour toute cause de 403, par `api/src/__tests__/lot-p29-fichiers-temporaires.test.ts` (« tempFileUpload : purge les fichiers quand le gestionnaire répond %i sans les supprimer », cas 403).
 
@@ -56,6 +57,3 @@ Mutations annulées (`git checkout --`) avant commit.
 | `young-documents.test.ts`, `young-file-path.test.ts`, `lot-p29-fichiers-temporaires.test.ts`, `correction-request-security.test.ts`, `referent-young-file-path.test.ts` | 312/316 passés (4 `skip` préexistants) |
 | `npm test` (suite complète `api`) | voir PR |
 
-## Incidents consignés pendant ce lot
-
-[GOO-202](https://linear.app/goodpace-product/issue/GOO-202) (démon Docker indisponible dans le bac à sable) ; commentaire ajouté sur [GOO-196](https://linear.app/goodpace-product/issue/GOO-196) (contournement mongod confirmé + complément réplica set).
