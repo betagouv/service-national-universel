@@ -19,7 +19,7 @@
  */
 import request from "supertest";
 
-import { APPLICATION_STATUS, MISSION_STATUS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ReferentStatus, ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
+import { APPLICATION_STATUS, ERRORS, MISSION_STATUS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ReferentStatus, ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
 
 import { ApplicationModel, MissionModel, ReferentModel, StructureModel, YoungModel } from "../models";
 import { config } from "../config";
@@ -211,6 +211,22 @@ describe("M73/GOO-200 — changement d'adresse email d'un volontaire par un réf
     const res = await request(await getAppHelper(enAttente, "young")).get("/young/email-validation/token");
 
     expect(res.statusCode).toEqual(403);
+    expect(mockSendTemplate).not.toHaveBeenCalled();
+  });
+
+  it("refuse une adresse déjà utilisée par un autre compte, comme avant GOO-200", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+    await createYoungHelper(getNewYoungFixture({ email: "deja-utilisee@example.org" } as any));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .put(`/young-edition/${young._id}/identite`)
+      .send({ email: "deja-utilisee@example.org" });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.code).toEqual(ERRORS.ALREADY_EXISTS);
+    const apres = await getYoungByIdHelper(young._id);
+    expect(apres?.email).toEqual(young.email);
+    expect(apres?.newEmail).toBeFalsy();
     expect(mockSendTemplate).not.toHaveBeenCalled();
   });
 });

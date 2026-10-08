@@ -167,6 +167,13 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     const requestedEmail = value.email && value.email !== young.email ? value.email : undefined;
     delete value.email;
 
+    if (requestedEmail) {
+      // L'écriture directe de `email` levait un 11000 (unicité) rattrapé en ALREADY_EXISTS ;
+      // poser `newEmail` ne passe plus par cet index, donc le contrôle doit être explicite ici.
+      const existingUser = await YoungModel.findOne({ email: requestedEmail });
+      if (existingUser) return res.status(400).send({ ok: false, code: ERRORS.ALREADY_EXISTS });
+    }
+
     young.set(value);
     if (requestedEmail) {
       const tokenEmailValidation = await crypto.randomInt(1000000);
