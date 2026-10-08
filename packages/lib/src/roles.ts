@@ -222,7 +222,7 @@ function isSubRoleAllowedForRole(role?: string | null, subRole?: string | null):
 
 // TODO - Geography department ref-ref array-array ref-ref/struc|young array-string
 const sameGeography = (actor, target) => {
-  const actorAndTargetInTheSameRegion = (actor?.region && actor?.region === target?.region) || region2department[actor?.region].includes(target?.department);
+  const actorAndTargetInTheSameRegion = (actor?.region && actor?.region === target?.region) || region2department[actor?.region]?.includes(target?.department);
   const actorAndTargetInTheSameDepartment = actor?.department && actor?.department.includes(target?.department);
 
   switch (actor?.role) {
