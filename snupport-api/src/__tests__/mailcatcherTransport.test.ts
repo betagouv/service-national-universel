@@ -14,7 +14,7 @@ describe("sendMailCatcher (transport SMTP réel de nodemailer)", () => {
   let server: net.Server;
   let receivedData = "";
 
-  beforeEach((done) => {
+  beforeEach(() => {
     receivedData = "";
     let buffer = "";
     let inData = false;
@@ -50,15 +50,19 @@ describe("sendMailCatcher (transport SMTP réel de nodemailer)", () => {
         }
       });
     });
-    server.listen(0, "127.0.0.1", () => {
-      const { port } = server.address() as net.AddressInfo;
-      config.SMTP_PORT = port;
-      done();
+    return new Promise<void>((resolve) => {
+      server.listen(0, "127.0.0.1", () => {
+        const { port } = server.address() as net.AddressInfo;
+        config.SMTP_PORT = port;
+        resolve();
+      });
     });
   });
 
-  afterEach((done) => {
-    server.close(done);
+  afterEach(() => {
+    return new Promise<void>((resolve) => {
+      server.close(() => resolve());
+    });
   });
 
   it("envoie un email sans erreur ; le serveur SMTP reçoit le sujet et le destinataire attendus", async () => {

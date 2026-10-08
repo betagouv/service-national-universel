@@ -10,7 +10,7 @@ describe("EmailBrevoCatcherProvider.send (transport SMTP réel de nodemailer)", 
     let server: net.Server;
     let receivedData = "";
 
-    beforeEach((done) => {
+    beforeEach(() => {
         receivedData = "";
         let buffer = "";
         let inData = false;
@@ -46,11 +46,15 @@ describe("EmailBrevoCatcherProvider.send (transport SMTP réel de nodemailer)", 
                 }
             });
         });
-        server.listen(0, "127.0.0.1", done);
+        return new Promise<void>((resolve) => {
+            server.listen(0, "127.0.0.1", () => resolve());
+        });
     });
 
-    afterEach((done) => {
-        server.close(done);
+    afterEach(() => {
+        return new Promise<void>((resolve) => {
+            server.close(() => resolve());
+        });
     });
 
     it("envoie un email sans erreur ; le serveur SMTP reçoit le sujet et le destinataire attendus", async () => {
