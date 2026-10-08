@@ -72,6 +72,10 @@ describe("GET /signin/token depuis la base de connaissance", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.user).toEqual({ role: "referent_department", initials: "JM", allowedRole: "referent" });
+    // La KB appelle cette route avec credentials: "include" : sans ces en-têtes, le navigateur
+    // jette la réponse et la KB voit un visiteur public (GOO-201).
+    expect(res.headers["access-control-allow-origin"]).toBe(config.KNOWLEDGEBASE_URL);
+    expect(res.headers["access-control-allow-credentials"]).toBe("true");
   });
 
   it("remet le jeton de lecture signé par snupport-api pour les rôles du compte (M86)", async () => {
@@ -165,6 +169,8 @@ describe("POST /signin/logout depuis la base de connaissance", () => {
 
     expect(res.status).toBe(200);
     expect(String(res.headers["set-cookie"])).toMatch(/jwt_ref=;/);
+    expect(res.headers["access-control-allow-origin"]).toBe(config.KNOWLEDGEBASE_URL);
+    expect(res.headers["access-control-allow-credentials"]).toBe("true");
     const after = await ReferentModel.findById(referent._id);
     expect(after!.lastLogoutAt).toBeTruthy();
   });
