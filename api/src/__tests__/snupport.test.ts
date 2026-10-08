@@ -9,6 +9,7 @@ import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper } from "./helpers/young";
 import { YoungModel } from "../models";
+import { config } from "../config";
 
 // Redis en mémoire : les pièces jointes déposées et le quota de dépôt y sont conservés.
 const mockRedisStore: Record<string, string> = {};
@@ -484,6 +485,18 @@ describe("POST /SNUpport/knowledgeBase/feedback (L22)", () => {
     const res = await feedback({ isPositive: false, knowledgeBaseArticle: ARTICLE_ID, comment: "pas clair" });
     expect(res.status).toBe(200);
     expect(JSON.parse(SNUpport.api.mock.calls[0][1].body)).toEqual({ isPositive: false, knowledgeBaseArticle: ARTICLE_ID, comment: "pas clair" });
+  });
+
+  // La KB envoie ce retour avec credentials: "include" : sans ces en-têtes, le navigateur bloque
+  // l'appel (GOO-201).
+  it("should be readable cross-origin by the knowledge base", async () => {
+    const res = await request(getAppHelper())
+      .post("/SNUpport/knowledgeBase/feedback")
+      .set("Origin", config.KNOWLEDGEBASE_URL)
+      .send({ isPositive: true, knowledgeBaseArticle: ARTICLE_ID });
+    expect(res.status).toBe(200);
+    expect(res.headers["access-control-allow-origin"]).toBe(config.KNOWLEDGEBASE_URL);
+    expect(res.headers["access-control-allow-credentials"]).toBe("true");
   });
 
   it("should reject unexpected fields", async () => {
