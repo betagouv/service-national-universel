@@ -160,7 +160,11 @@ router.post(
 
       if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       if (isReferent(req.user) && !canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      if (body.category === "cniFiles" && young.files.cniFiles.length >= 3) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      // Le plafond porte sur la clé de route `key` (`cniFiles`), pas sur `body.category` (qui vaut
+      // "cniNew", "cniOld" ou "passport" et n'est jamais égal à "cniFiles") : sans quoi le contrôle ne
+      // s'applique jamais. On compte aussi les pièces de la requête courante : pas de rétroactivité
+      // pour un dossier déjà au-delà de 3, et aucun plafond sur les autres clés.
+      if (key === "cniFiles" && young.files.cniFiles.length + files.length > 3) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
       // Upload files
 
