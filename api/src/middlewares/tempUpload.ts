@@ -12,6 +12,16 @@ export const MAX_UPLOAD_FILES = 10;
 
 type UploadedFiles = fileUpload.FileArray | UploadedFile | UploadedFile[] | null | undefined;
 
+// express-fileupload n'a pas de types installés (`fileUpload.Options` vaut `any`) : les options utilisées ici sont typées
+// localement, pour qu'une faute de frappe, sur `limits` notamment, ne retire pas une limite sans erreur.
+type AbandonableFileUploadOptions = {
+  limits: { fileSize: number; files?: number };
+  useTempFiles: true;
+  tempFileDir: string;
+  limitHandler?: RequestHandler;
+  uploadTimeout?: number;
+};
+
 // `files` est lu avec un type local, comme dans UserRequest (controllers/request.ts) : express-fileupload n'a pas
 // de types installés, et le `Request.files` visible dans le monorepo vient de @types/multer (dépendance d'apiv2),
 // absent de l'arbre élagué par `turbo prune api` au build de production.
@@ -57,6 +67,44 @@ function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter
   });
 }
 
+// express-fileupload, dont un fichier trop gros est abandonné à la fermeture de la connexion si sa partie n'est pas terminée.
+// La dépendance ne donne pas accès aux fichiers en cours de réception : on récupère le parseur qu'elle branche sur la requête.
+// Une requête dont la réponse se ferme avant la fin de l'analyse (connexion coupée, ou réponse déjà envoyée) n'est pas transmise
+// au gestionnaire. Ses fichiers déjà reçus sont purgés à cette fermeture, puis à la fin de l'analyse ; le fichier en cours l'est
+// par express-fileupload, à la fermeture de la connexion s'il est trop gros, sinon à son délai d'envoi.
+export function abandonableFileUpload(options: AbandonableFileUploadOptions): RequestHandler {
+  const parseMultipart = fileUpload(options);
+  return (req, res, next) => {
+    let closed = false;
+    let handedOver = false;
+    res.once("close", () => {
+      closed = true;
+      if (!handedOver) void removeTempFiles(requestFiles(req));
+    });
+    const pipe = req.pipe;
+    req.pipe = function (parser, pipeOptions) {
+      req.pipe = pipe;
+      abandonTruncatedFilesOnClose(req, parser);
+      return pipe.call(this, parser, pipeOptions);
+    };
+    try {
+      parseMultipart(req, res, (err?: unknown) => {
+        // Une requête sans fichier est rendue sans attendre : la suite de la chaîne ne doit pas hériter de l'interception.
+        req.pipe = pipe;
+        if (closed) {
+          // Le gestionnaire d'erreurs ne peut plus répondre : l'erreur n'est que journalisée.
+          if (err) logger.warn(`tempUpload: erreur d'analyse après la fermeture de la réponse: ${err instanceof Error ? err.message : err}`);
+          return void removeTempFiles(requestFiles(req));
+        }
+        handedOver = true;
+        next(err);
+      });
+    } finally {
+      req.pipe = pipe;
+    }
+  };
+}
+
 // Le plafond est monté à MAX+1 : busboy ignore sans bruit les fichiers au-delà, il faut donc en laisser passer un de plus pour détecter le dépassement.
 // Un fichier trop gros ne coupe pas l'analyse : la réponse 413 part tout de suite, mais l'analyse va à son terme pour que tous les fichiers créés soient purgés.
 export function tempFileUpload({
@@ -70,7 +118,7 @@ export function tempFileUpload({
     });
     next();
   };
-  const parseMultipart = fileUpload({
+  const upload = abandonableFileUpload({
     limits: { fileSize, files: MAX_UPLOAD_FILES + 1 },
     limitHandler: (_req, res) => {
       if (!res.headersSent) res.status(413).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -79,20 +127,6 @@ export function tempFileUpload({
     tempFileDir,
     ...(uploadTimeout !== undefined && { uploadTimeout }),
   });
-  // express-fileupload ne donne pas accès aux fichiers en cours de réception : on récupère le parseur qu'il branche sur la requête.
-  const upload: RequestHandler = (req, res, next) => {
-    const pipe = req.pipe;
-    req.pipe = function (parser, options) {
-      req.pipe = pipe;
-      abandonTruncatedFilesOnClose(req, parser);
-      return pipe.call(this, parser, options);
-    };
-    try {
-      parseMultipart(req, res, next);
-    } finally {
-      req.pipe = pipe;
-    }
-  };
   const stopIfAnswered: RequestHandler = (req, res, next) => {
     if (!res.headersSent) return next();
     void removeTempFiles(requestFiles(req));

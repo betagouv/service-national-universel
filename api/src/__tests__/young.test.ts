@@ -1,5 +1,5 @@
 import request from "supertest";
-import { ROLES, COHORTS, YOUNG_SOURCE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { ROLES, COHORTS, YOUNG_SOURCE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS, ERRORS } from "snu-lib";
 import * as fileUtils from "../utils/file";
 import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -16,7 +16,7 @@ import { createReferentHelper } from "./helpers/referent";
 import { getNewReferentFixture } from "./fixtures/referent";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
-import { ClasseModel } from "../models";
+import { ClasseModel, YoungModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 
@@ -538,6 +538,123 @@ describe("Young", () => {
         .field("body", JSON.stringify({ names: ["test.csv"] }))
         .attach("file", Buffer.from("contenu"), { filename: "test.csv", contentType: "text/csv" });
       expect(res.status).toEqual(400);
+    });
+
+    // GOO-174 : le plafond de 3 pièces d'identité portait sur body.category (valeur envoyée par le
+    // client, jamais égale à "cniFiles") au lieu de la clé de route key : il ne s'appliquait jamais.
+    describe("plafond de 3 pièces d'identité sur la clé cniFiles (GOO-174)", () => {
+      it("refuse un 4e dépôt quand 3 pièces d'identité sont déjà présentes, sans rien écrire", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }, { name: "passeport.pdf" }] },
+        } as any);
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(young))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["4e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "4e.jpeg" });
+
+        expect(res.status).toEqual(403);
+        expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
+
+      it("refuse un dépôt qui ferait dépasser 3 pièces d'identité (2 présentes + 2 envoyées)", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }] },
+        } as any);
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg").mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(young))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["3e.jpeg", "4e.jpeg"], category: "cniNew" }))
+          .attach("fichier1", Buffer.from("contenu"), { filename: "3e.jpeg" })
+          .attach("fichier2", Buffer.from("contenu"), { filename: "4e.jpeg" });
+
+        expect(res.status).toEqual(403);
+        expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(2);
+      });
+
+      it("accepte un dépôt qui atteint exactement 3 pièces d'identité (2 présentes + 1 envoyée)", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }] },
+        } as any);
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(young))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["3e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "3e.jpeg" });
+
+        expect(res.status).toEqual(200);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
+
+      it("ne plafonne pas une autre clé (préparation militaire) même avec de nombreuses pièces déjà présentes", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture(),
+          files: {
+            militaryPreparationFilesIdentity: [{ name: "a.pdf" }, { name: "b.pdf" }, { name: "c.pdf" }, { name: "d.pdf" }, { name: "e.pdf" }],
+          },
+        } as any);
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(young))
+          .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
+          .field("body", JSON.stringify({ names: ["f.jpeg"] }))
+          .attach("file", Buffer.from("contenu"), { filename: "f.jpeg" });
+
+        expect(res.status).toEqual(200);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.militaryPreparationFilesIdentity).toHaveLength(6);
+      });
+
+      // Le seul appelant réel de cniFiles (admin/src/scenes/phase0/components/CniModal.jsx) agit en
+      // tant que référent, jamais en tant que volontaire : ce chemin a sa propre non-régression et
+      // son propre refus, avec un vrai ReferentDocument (isReferent + canEditYoung), pas un objet nu.
+      it("un référent (acteur réel) accepte un dépôt qui atteint exactement 3 pièces d'identité", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }] },
+        } as any);
+        const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(referent, "referent"))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["3e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "3e.jpeg" });
+
+        expect(res.status).toEqual(200);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
+
+      it("un référent (acteur réel) est refusé au-delà de 3 pièces d'identité, sans rien écrire", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }, { name: "passeport.pdf" }] },
+        } as any);
+        const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(referent, "referent"))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["4e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "4e.jpeg" });
+
+        expect(res.status).toEqual(403);
+        expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
     });
   });
 
