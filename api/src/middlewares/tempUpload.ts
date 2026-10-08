@@ -41,11 +41,12 @@ export async function removeTempFiles(files: UploadedFiles): Promise<void> {
 // express-fileupload arrête son délai d'envoi : tant que la partie ne se termine pas, le fichier n'est ni dans req.files ni
 // abandonné par ce délai. Il l'est donc à la fermeture de la connexion, comme il l'aurait été par le délai : express-fileupload
 // supprime alors le fichier et referme son descripteur.
-function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter) {
+function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter, onAbandon: () => void) {
   parser.on("file", (_field: string, file: Readable) => {
     file.once("limit", () => {
       const { socket } = req;
       const abandon = () => {
+        onAbandon();
         // Le parseur ne signalera plus sa fin : un fichier reçu ensuite ne serait jamais purgé, l'analyse s'arrête donc ici.
         req.unpipe();
         req.resume();
@@ -55,6 +56,31 @@ function abandonTruncatedFilesOnClose(req: IncomingMessage, parser: EventEmitter
       file.once("close", () => socket.off("close", abandon));
     });
   });
+}
+
+// express-fileupload, dont un fichier trop gros est abandonné à la fermeture de la connexion si sa partie n'est pas terminée.
+// La dépendance ne donne pas accès aux fichiers en cours de réception : on récupère le parseur qu'elle branche sur la requête.
+// Une requête abandonnée n'est pas transmise au gestionnaire : la connexion est fermée, personne ne recevra la réponse. Les
+// fichiers déjà reçus sont purgés ici, le fichier tronqué l'est par express-fileupload.
+export function abandonableFileUpload(options: fileUpload.Options): RequestHandler {
+  const parseMultipart = fileUpload(options);
+  return (req, res, next) => {
+    let abandoned = false;
+    const pipe = req.pipe;
+    req.pipe = function (parser, pipeOptions) {
+      req.pipe = pipe;
+      abandonTruncatedFilesOnClose(req, parser, () => (abandoned = true));
+      return pipe.call(this, parser, pipeOptions);
+    };
+    try {
+      parseMultipart(req, res, (err?: unknown) => {
+        if (abandoned) return void removeTempFiles(requestFiles(req));
+        next(err);
+      });
+    } finally {
+      req.pipe = pipe;
+    }
+  };
 }
 
 // Le plafond est monté à MAX+1 : busboy ignore sans bruit les fichiers au-delà, il faut donc en laisser passer un de plus pour détecter le dépassement.
@@ -70,7 +96,7 @@ export function tempFileUpload({
     });
     next();
   };
-  const parseMultipart = fileUpload({
+  const upload = abandonableFileUpload({
     limits: { fileSize, files: MAX_UPLOAD_FILES + 1 },
     limitHandler: (_req, res) => {
       if (!res.headersSent) res.status(413).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -79,20 +105,6 @@ export function tempFileUpload({
     tempFileDir,
     ...(uploadTimeout !== undefined && { uploadTimeout }),
   });
-  // express-fileupload ne donne pas accès aux fichiers en cours de réception : on récupère le parseur qu'il branche sur la requête.
-  const upload: RequestHandler = (req, res, next) => {
-    const pipe = req.pipe;
-    req.pipe = function (parser, options) {
-      req.pipe = pipe;
-      abandonTruncatedFilesOnClose(req, parser);
-      return pipe.call(this, parser, options);
-    };
-    try {
-      parseMultipart(req, res, next);
-    } finally {
-      req.pipe = pipe;
-    }
-  };
   const stopIfAnswered: RequestHandler = (req, res, next) => {
     if (!res.headersSent) return next();
     void removeTempFiles(requestFiles(req));

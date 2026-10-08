@@ -1,6 +1,5 @@
 import express, { CookieOptions } from "express";
 import passport from "passport";
-import fileUpload from "express-fileupload";
 import fs from "fs";
 import Joi from "joi";
 import { v4 as uuid } from "uuid";
@@ -26,6 +25,7 @@ import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
 import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { abandonableFileUpload } from "../middlewares/tempUpload";
 import { authRateLimiter, userRateLimiter } from "../middlewares/rateLimit";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { KNOWLEDGE_BASE_PUBLIC_RESTRICTION, KNOWLEDGE_BASE_RESTRICTIONS, knowledgeBaseReadableRoles } from "../services/knowledgeBaseReader";
@@ -564,7 +564,7 @@ const removeTempFiles = (req: UserRequest) => {
 router.post(
   "/upload",
   authMiddleware(["referent", "young"]),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  abandonableFileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req: UserRequest, res) => {
     try {
       const { error: filesError, value: files } = Joi.array()
