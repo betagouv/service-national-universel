@@ -704,10 +704,20 @@ describe("Young", () => {
         .send();
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 200 if young found", async () => {
+    it("should return 403 if actor is a young, even on their own dossier (GOO-198)", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
       const res = await request(await getAppHelperWithAcl(young))
+        .post("/young/" + young._id + "/email/" + validTemplate)
+        .send({ message: "hello" });
+      expect(res.statusCode).toEqual(403);
+      expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
+    });
+    it("should return 200 if actor is a referent", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+      const res = await request(await getAppHelperWithAcl(referent))
         .post("/young/" + young._id + "/email/" + validTemplate)
         .send({ message: "hello" });
       expect(res.statusCode).toEqual(200);

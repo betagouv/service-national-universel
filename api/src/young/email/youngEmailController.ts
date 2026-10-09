@@ -17,8 +17,8 @@ import { sendEmailToYoung } from "./youngEmailService";
 
 const router = express.Router();
 
-// Le seul envoi déclenché par un volontaire depuis l'app est la fiche sanitaire (MedicalFileModal) :
-// 10 par heure suffisent, sans lui laisser arroser des adresses de son choix (constats PM24, PM37).
+// GOO-198 : un volontaire n'envoie plus jamais de gabarit depuis cette route (refus systématique
+// ci-dessous). Le limiteur reste en défense en profondeur et compte aussi les tentatives refusées.
 // Les référents envoient depuis l'admin : ils ne sont pas limités ici.
 const youngEmailLimiter = userRateLimiter({ prefix: "young-email-template", windowMs: 60 * 60 * 1000, limit: 10 });
 const limitYoung = (req: UserRequest, res: Response, next) => (isYoung(req.user) ? youngEmailLimiter(req, res, next) : next());
@@ -51,10 +51,9 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    // Les gabarits « parent » partent vers `parent1Email`, que le volontaire fixe lui-même : ouverts
-    // au volontaire, ils lui font envoyer un faux email officiel (consentement parental, parcours
-    // décommissionné) à l'adresse de son choix (constat PM37).
-    if (isYoung(req.user) && Object.values(SENDINBLUE_TEMPLATES.parent).includes(template)) {
+    // GOO-198 : la phase 1 n'existe plus, donc plus de fiche sanitaire à transmettre. Un volontaire
+    // ne peut plus déclencher aucun gabarit sur cette route (l'ancienne exception sur young.LINK tombe).
+    if (isYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -67,11 +66,6 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     // The young must exist.
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // If actor is a young it must be the same as the young.
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
 
     // If actor is a referent it must be allowed to send template.
     if (isReferent(req.user) && !(await canEditYoungInScope(req.user, young))) {

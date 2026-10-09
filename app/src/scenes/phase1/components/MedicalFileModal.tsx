@@ -1,20 +1,14 @@
 import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
-import { toastr } from "react-redux-toastr";
 import Modal from "../../../components/ui/modals/Modal";
-import { SENDINBLUE_TEMPLATES } from "../../../utils";
 import API from "../../../services/api";
 import { CDN_BASE_URL } from "@/config";
-import { HiOutlineDownload, HiMail } from "react-icons/hi";
+import { HiOutlineDownload } from "react-icons/hi";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
-import ButtonLight from "../../../components/ui/buttons/ButtonLight";
-import ConfirmationModal from "../../../components/ui/modals/ConfirmationModal";
-import { capture } from "@/sentry";
 import { useQuery } from "@tanstack/react-query";
 import { SessionPhase1Type } from "snu-lib";
 
 const MedicalFileModal = ({ isOpen, onClose, onClick = () => {}, title = "Transmettez votre fiche sanitaire" }) => {
-  const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { young } = useAuth();
   const { data: session } = useQuery({
@@ -37,33 +31,8 @@ const MedicalFileModal = ({ isOpen, onClose, onClick = () => {}, title = "Transm
     onClose();
   };
 
-  const handleConfirm = async () => {
-    try {
-      const { ok, code } = await API.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`, {
-        object: `Fiche sanitaire à compléter`,
-        message: "Vous trouverez téléchargeable ci-dessous la fiche sanitaire à compléter.",
-        link: CDN_BASE_URL + "/file/fiche-sanitaire-2024.pdf" + "?utm_campaign=transactionnel+telecharger+docum&utm_source=notifauto&utm_medium=mail+410+telecharger",
-      });
-      if (!ok) throw new Error(code);
-      toastr.success(`Document envoyé à ${young.email}`, "");
-    } catch (error) {
-      capture(error);
-      toastr.error("Erreur lors de l'envoi du document", "");
-    } finally {
-      setOpen(false);
-    }
-  };
-
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
-      <ConfirmationModal
-        isOpen={open}
-        onCancel={() => setOpen(false)}
-        onClose={() => setOpen(false)}
-        onConfirm={handleConfirm}
-        title="Envoi de document par mail"
-        subTitle={`Vous allez recevoir le lien de téléchargement de la fiche sanitaire par mail à l'adresse ${young.email}.`}
-      />
       <h2 className="font-medium text-gray-800 text-xl text-center m-0">{title}</h2>
       <ul className="mt-3">
         <li className="flex px-3 py-2 gap-3">
@@ -82,10 +51,6 @@ const MedicalFileModal = ({ isOpen, onClose, onClick = () => {}, title = "Transm
                 <HiOutlineDownload className="mr-1 h-5 w-5 text-gray-500 flex-none" />
                 Télécharger
               </a>
-              <ButtonLight onClick={() => setOpen(true)}>
-                <HiMail className="mr-1 h-5 w-5 text-gray-500 flex-none" />
-                Recevoir sur ma boîte mail
-              </ButtonLight>
             </div>
           </div>
         </li>
