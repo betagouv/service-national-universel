@@ -119,7 +119,7 @@ router.get(
       params: Joi.object({ id: idSchema().required() }),
       query: Joi.object({ withDetails: Joi.boolean().default(true) }),
     }),
-    accessControlMiddleware([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
   ],
   async (req: RouteRequest<ClassesRoutes["GetOne"]>, res: RouteResponse<ClassesRoutes["GetOne"]>) => {
     try {
@@ -208,7 +208,7 @@ router.get(
     requestValidatorMiddleware({
       params: Joi.object({ id: idSchema().required() }),
     }),
-    accessControlMiddleware([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
   ],
   async (req: UserRequest, res) => {
     try {

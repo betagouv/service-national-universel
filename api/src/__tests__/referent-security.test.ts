@@ -271,7 +271,7 @@ describe("Sécurité référent — audit 2026-09-21", () => {
       expect(res.statusCode).toEqual(403);
     });
 
-    it("autorise un référent départemental modifiant un chef de centre de son département", async () => {
+    it("refuse un référent départemental modifiant un chef de centre de son département (rôle décommissionné, GOO-165 : changement de comportement, cf. décision en tête de PR)", async () => {
       const centre = await CohesionCenterModel.create(getNewCohesionCenterFixture({ department: "Sarthe", region: "Pays de la Loire" }));
       const chefDeCentre = await createReferentHelper(
         getNewReferentFixture({ role: ROLES.HEAD_CENTER, cohesionCenterId: centre._id.toString(), department: undefined, region: undefined }),
@@ -282,7 +282,7 @@ describe("Sécurité référent — audit 2026-09-21", () => {
         .put(`/referent/${chefDeCentre._id}`)
         .send({ firstName: "NOUVEAU" });
 
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(403);
     });
 
     it("refuse d'attribuer un sous-rôle étranger au rôle via PUT /referent/:id", async () => {
