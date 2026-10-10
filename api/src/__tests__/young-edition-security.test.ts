@@ -148,24 +148,24 @@ describe("H88/H89 — périmètre de canEditYoung sur les routes d'édition du v
       expect(res.statusCode).toEqual(403);
     });
 
-    it("autorise un chef de centre sur un jeune de sa session", async () => {
+    it("refuse un chef de centre sur un jeune de sa session (rôle décommissionné)", async () => {
       const { chefDeCentre, young } = await chefDeCentreEtJeuneDansPerimetre();
 
       const res = await request(await getAppHelperWithAcl(chefDeCentre))
         .put(`/young-edition/${young._id}/identite`)
         .send({ lastName: "NOUVEAU" });
 
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(403);
     });
 
-    it("autorise un référent de classe sur un jeune de sa classe", async () => {
+    it("refuse un référent de classe sur un jeune de sa classe (rôle décommissionné)", async () => {
       const { referent, young } = await referentCleEtJeuneDansPerimetre();
 
       const res = await request(await getAppHelperWithAcl(referent))
         .put(`/young-edition/${young._id}/identite`)
         .send({ lastName: "NOUVEAU" });
 
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(403);
     });
   });
 
