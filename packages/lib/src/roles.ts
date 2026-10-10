@@ -3,7 +3,6 @@ import { department2region, region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import {
   APPLICATION_STATUS,
-  COHORT_TYPE,
   LIMIT_DATE_ESTIMATED_SEATS,
   LIMIT_DATE_TOTAL_SEATS,
   YOUNG_STATUS_PHASE1,
@@ -294,7 +293,6 @@ const canDeleteYoung = (actor) => {
  */
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
-  const isHeadCenter = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 
   // fail-closed : un acteur ou un volontaire sans territoire ne peut jamais matcher (et ne doit pas
   // faire planter l'appelant, ce qui transformait une 403 en 500).
@@ -302,9 +300,7 @@ function canEditYoung(actor, young) {
   const actorAndTargetInTheSameDepartment = !!young?.department && (actor.department || []).includes(young.department);
   const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && actorAndTargetInTheSameRegion;
   const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actorAndTargetInTheSameDepartment;
-  //TODO update this
-  const referentCLEAuthorized = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role) && young.source === "CLE";
-  const authorized = isAdmin || isHeadCenter || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment || referentCLEAuthorized;
+  const authorized = isAdmin || referentRegionFromTheSameRegion || referentDepartmentFromTheSameDepartment;
   return authorized;
 }
 
@@ -313,13 +309,13 @@ function canDeleteReferent({ actor }) {
 }
 
 function canDeletePatchesHistory(actor, target) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   const isOwner = actor._id.toString() === target._id.toString();
   return isAdminOrReferent || isOwner;
 }
 
 function canViewNotes(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor?.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor?.role);
   return isAdminOrReferent;
 }
 
@@ -396,14 +392,9 @@ function canViewReferent(actor, target) {
   const isMe = actor.id === target.id;
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   const isResponsibleModifyingResponsible = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) && [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(target.role);
-  const isHeadCenter =
-    [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role) &&
-    [ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(target.role);
-  const isAdministratorCLE = actor.role === ROLES.ADMINISTRATEUR_CLE && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(target.role);
-  const isReferentClasse = actor.role === ROLES.REFERENT_CLASSE && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(target.role);
   //@todo update doc
   // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  return isMe || isAdminOrReferent || isResponsibleModifyingResponsible || isHeadCenter || isAdministratorCLE || isReferentClasse;
+  return isMe || isAdminOrReferent || isResponsibleModifyingResponsible;
 }
 
 type CanUpdateReferent = {
@@ -480,13 +471,6 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(originalTarget.role!) &&
     // ... witout changing its role.
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(targetRoleAfterUpdate!);
-  const isReferentModifyingHeadCenterWithoutChangingRole =
-    // Is referent...
-    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
-    // ... modifying referent ...
-    [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(originalTarget.role!) &&
-    // ... witout changing its role.
-    [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(targetRoleAfterUpdate!);
 
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
@@ -503,13 +487,10 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isActorAdmin ||
       isSupervisorModifyingTeamMember ||
       isResponsibleModifyingResponsibleWithoutChangingRole ||
-      isReferentModifyingReferentWithoutChangingRole ||
-      isReferentModifyingHeadCenterWithoutChangingRole) &&
-    (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
+      isReferentModifyingReferentWithoutChangingRole) &&
+    (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
-      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) ||
-          isMe) &&
-        (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
+      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) || isMe) && isActorAndTargetInTheSameDepartment
       : true);
   return authorized;
 }
@@ -793,16 +774,17 @@ const canSigninAs = (
   if (!isReferentRegDep(actor)) return false;
 
   if (source === "referent") {
-    // ReferentType
-    const targetReferent = target as Pick<ReferentType, "role" | "subRole" | "department" | "region">;
-    const allowedTargetRoles = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
-    if (!allowedTargetRoles.includes(targetReferent.role!)) return false;
-    if (actor.role === ROLES.REFERENT_DEPARTMENT && (actor.department as string[]).some((d) => targetReferent.department.includes(d))) return true;
-  } else {
-    // YoungType
-    const targetYoung = target as Pick<YoungType, "department" | "region">;
-    if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(targetYoung.department!)) return true;
+    // Les seules cibles référent autorisées (ADMINISTRATEUR_CLE, REFERENT_CLASSE) sont désormais
+    // des rôles décommissionnés : plus aucune cible referent n'est autorisée. Fail-closed explicite
+    // (et non plus seulement sur `allowedTargetRoles`) pour empêcher le fallthrough du contrôle
+    // REFERENT_REGION ci-dessous de s'appliquer à ce cas (il ne teste que la région, pas le rôle
+    // de la cible).
+    return false;
   }
+
+  // YoungType
+  const targetYoung = target as Pick<YoungType, "department" | "region">;
+  if (actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(targetYoung.department!)) return true;
   if (actor.role === ROLES.REFERENT_REGION && actor.region === target.region) return true;
   return false;
 };
@@ -877,18 +859,7 @@ function canGetYoungByEmail(actor) {
 }
 
 function canViewYoung(actor) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.RESPONSIBLE,
-    ROLES.SUPERVISOR,
-    ROLES.ADMINISTRATEUR_CLE,
-    ROLES.REFERENT_CLASSE,
-  ].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
 function canViewBus(actor) {
@@ -909,18 +880,7 @@ function canViewStructureChildren(actor) {
 
 function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: string) {
   if (type === "certificate" || type === "convocation") {
-    return [
-      ROLES.REFERENT_DEPARTMENT,
-      ROLES.REFERENT_REGION,
-      ROLES.ADMIN,
-      ROLES.HEAD_CENTER,
-      ROLES.HEAD_CENTER_ADJOINT,
-      ROLES.REFERENT_SANITAIRE,
-      ROLES.RESPONSIBLE,
-      ROLES.SUPERVISOR,
-      ROLES.REFERENT_CLASSE,
-      ROLES.ADMINISTRATEUR_CLE,
-    ].includes(actor.role);
+    return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else {
     return (
       canEditYoung(actor, target) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role)
@@ -939,10 +899,6 @@ function canInviteYoung(actor: UserDto, cohort?: CohortDto | null) {
       return cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentDepartment === true;
     case ROLES.REFERENT_REGION:
       return cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentRegion === true;
-    case ROLES.REFERENT_CLASSE:
-      return cohort.type === COHORT_TYPE.CLE && (cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentClasse === true);
-    case ROLES.ADMINISTRATEUR_CLE:
-      return cohort.type === COHORT_TYPE.CLE && (cohort.isInscriptionOpen || cohort.inscriptionOpenForAdministrateurCle === true);
     default:
       return false;
   }
