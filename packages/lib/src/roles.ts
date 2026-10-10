@@ -1100,8 +1100,10 @@ function canSearchStudent(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canAllowSNU(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+// GOO-165 (P25b) : ADMINISTRATEUR_CLE et REFERENT_CLASSE retirés — route réservée exclusivement
+// à ces 2 rôles décommissionnés (PUT /young-edition/ref-allow-snu, PUT /:id/ref-allow-snu).
+function canAllowSNU(_actor) {
+  return false;
 }
 
 function canEditEstimatedSeats(actor) {
@@ -1128,8 +1130,10 @@ function canManageMig(user: ReferentDto) {
 }
 
 //CLE
-function canValidateMultipleYoungsInClass(actor: UserDto) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
+// GOO-165 (P25b) : ADMINISTRATEUR_CLE et REFERENT_CLASSE retirés — route réservée exclusivement
+// à ces 2 rôles décommissionnés (PUT /referent/youngs).
+function canValidateMultipleYoungsInClass(_actor: UserDto) {
+  return false;
 }
 
 // Pas d'entrée pour la phase 1 : son statut ne se modifie plus manuellement, y compris par l'ADMIN (GOO-65).

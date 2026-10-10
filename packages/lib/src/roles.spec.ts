@@ -259,6 +259,11 @@ describe("décommissionnement P25b : périmètres, édition et routes réservée
   const helperExpectations: Array<[string, string[]]> = [
     ["canViewYoung", [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR]],
     ["canViewNotes", ADMIN_REFS],
+    // `canAllowSNU`/`canValidateMultipleYoungsInClass` n'autorisaient QUE des rôles CLE décommissionnés
+    // (ADMINISTRATEUR_CLE, REFERENT_CLASSE) : gardes exclusives de PUT /referent/youngs et
+    // PUT .../ref-allow-snu, citées par le ticket par route (section 3), plus aucun rôle autorisé.
+    ["canAllowSNU", []],
+    ["canValidateMultipleYoungsInClass", []],
   ];
 
   it.each(helperExpectations)("%s : ne garde que les rôles attendus, aucun rôle décommissionné", async (name, allowed) => {
