@@ -17,6 +17,7 @@ import { isEtablissementInUserScope } from "../cle/etablissement/etablissementSc
 import { isClasseInUserScope } from "../cle/classe/classeScope";
 import { canActOnLigneBus } from "../services/sejourAccess";
 import { isEmailInUserScope } from "../email/emailNotificationScope";
+import { isReferentReadableByUser } from "../referent/referentScope";
 
 /**
  * GOO-165 (P25b) : appels DIRECTS aux fonctions exportées de périmètre.
@@ -62,6 +63,24 @@ describe("GOO-165 — rôles CLE (ADMINISTRATEUR_CLE, REFERENT_CLASSE) retirés 
 
     expect(await isClasseInUserScope(actor, classe)).toBe(false);
     expect(await isEtablissementInUserScope(actor, etablissement._id.toString())).toBe(false);
+  });
+});
+
+describe("GOO-165 — lecture d'une fiche référent (isReferentReadableByUser) retirée pour chef de centre et rôles CLE", () => {
+  it("doit refuser un chef de centre dont la géographie recouvre celle de la cible", async () => {
+    const actor = { _id: new ObjectId().toString(), role: ROLES.HEAD_CENTER, region: "Pays de la Loire", department: [] } as any;
+    const target = { _id: new ObjectId().toString(), role: ROLES.REFERENT_DEPARTMENT, region: "Pays de la Loire", department: ["Sarthe"] } as any;
+
+    expect(await isReferentReadableByUser(actor, target)).toBe(false);
+  });
+
+  it("doit refuser un administrateur CLE coordinateur de l'établissement d'un référent départemental du même département", async () => {
+    const actorId = new ObjectId().toString();
+    const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [actorId], referentEtablissementIds: [], department: "Sarthe" }));
+    const actor = { _id: actorId, role: ROLES.ADMINISTRATEUR_CLE } as any;
+    const target = { _id: new ObjectId().toString(), role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"] } as any;
+
+    expect(await isReferentReadableByUser(actor, target)).toBe(false);
   });
 });
 
