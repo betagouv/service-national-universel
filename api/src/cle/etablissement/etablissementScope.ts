@@ -1,6 +1,6 @@
 import { ROLES, UserDto } from "snu-lib";
 
-import { ClasseModel, EtablissementModel } from "../../models";
+import { EtablissementModel } from "../../models";
 
 /**
  * Périmètre faisant foi pour consulter un établissement CLE.
@@ -24,12 +24,6 @@ export async function isEtablissementInUserScope(user: UserDto, etablissementId:
       return Boolean(user.region) && etablissement.region === user.region;
     case ROLES.REFERENT_DEPARTMENT:
       return Boolean(etablissement.department) && ((user.department as string[]) || []).includes(etablissement.department as string);
-    case ROLES.ADMINISTRATEUR_CLE:
-      // Chef d'établissement ou coordinateur rattaché à cet établissement.
-      return [...(etablissement.referentEtablissementIds || []), ...(etablissement.coordinateurIds || [])].includes(userId);
-    case ROLES.REFERENT_CLASSE:
-      // Un référent de classe n'a pas d'`etablissementId` : son rattachement passe par ses classes.
-      return (await ClasseModel.countDocuments({ etablissementId: etablissement._id.toString(), referentClasseIds: userId })) > 0;
     default:
       return false;
   }

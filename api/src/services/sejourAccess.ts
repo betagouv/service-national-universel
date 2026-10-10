@@ -121,13 +121,11 @@ export async function isLigneBusInUserScope(user: UserDto, ligneBus?: { centerId
 
 /**
  * Écriture sur une ligne de bus (équipe, points de rassemblement, demandes de modification).
- * Le transporteur est un acteur national : il garde l'accès à toutes les lignes, sous
- * réserve des fenêtres d'édition vérifiées par chaque route. Les référents restent
- * dans leur périmètre ; tout autre rôle est refusé.
+ * Les référents restent dans leur périmètre ; tout autre rôle est refusé (GOO-165 : le
+ * rôle TRANSPORTER, décommissionné, n'a plus d'accès dédié).
  */
 export async function canActOnLigneBus(user: UserDto, ligneBus?: { centerId?: string | null } | null): Promise<boolean> {
   if (!ligneBus) return false;
-  if (user?.role === ROLES.TRANSPORTER) return true;
   return isLigneBusInUserScope(user, ligneBus);
 }
 

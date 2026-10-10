@@ -1,41 +1,9 @@
 import { ROLES, UserDto, YoungType, canEditYoung, MILITARY_FILE_KEYS } from "snu-lib";
 
-import { ApplicationModel, ClasseModel, SessionPhase1Model, StructureModel } from "../models";
+import { ApplicationModel, SessionPhase1Model, StructureModel } from "../models";
 import { NOT_A_PROPOSAL } from "../application/applicationProposal";
-import { getResponsibleCenterField } from "../controllers/elasticsearch/utils";
 
-const HEAD_CENTER_ROLES: string[] = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
-const CLE_ROLES: string[] = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE];
 const GEO_ROLES: string[] = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
-
-/**
- * Périmètre d'un chef de centre (ou de ses adjoints) : le volontaire doit être affecté à une session
- * dont l'utilisateur est chef de centre / adjoint. Le lien passe par `SessionPhase1`, seule source
- * fiable (le `sessionPhase1Id` porté par le référent n'est pas maintenu).
- */
-async function isYoungInHeadCenterScope(user: UserDto, young: Pick<YoungType, "sessionPhase1Id">): Promise<boolean> {
-  if (!young.sessionPhase1Id) return false;
-  const field = getResponsibleCenterField(user.role);
-  if (!field) return false;
-  const session = await SessionPhase1Model.findOne({ _id: young.sessionPhase1Id, [field]: user._id!.toString() });
-  return !!session;
-}
-
-/**
- * Périmètre d'un référent de classe / administrateur CLE : le volontaire doit appartenir à une classe
- * dont l'utilisateur est référent, ou à un établissement dont il est chef ou coordinateur.
- */
-async function isYoungInCleScope(user: UserDto, young: Pick<YoungType, "classeId">): Promise<boolean> {
-  if (!young.classeId) return false;
-  const classe = await ClasseModel.findById(young.classeId).populate({
-    path: "etablissement",
-    options: { select: { coordinateurIds: 1, referentEtablissementIds: 1 } },
-  });
-  if (!classe) return false;
-  const userId = user._id!.toString();
-  const etablissement: any = (classe as any).etablissement;
-  return classe.referentClasseIds.includes(userId) || !!etablissement?.referentEtablissementIds?.includes(userId) || !!etablissement?.coordinateurIds?.includes(userId);
-}
 
 /**
  * Autorisation d'édition d'un volontaire, périmètre compris.
@@ -46,10 +14,7 @@ async function isYoungInCleScope(user: UserDto, young: Pick<YoungType, "classeId
  * être utilisée à la place de `canEditYoung` sur les routes d'écriture.
  */
 export async function canEditYoungInScope(user: UserDto, young: Pick<YoungType, "sessionPhase1Id" | "classeId" | "region" | "department" | "source">): Promise<boolean> {
-  if (!canEditYoung(user, young)) return false;
-  if (HEAD_CENTER_ROLES.includes(user.role)) return isYoungInHeadCenterScope(user, young);
-  if (CLE_ROLES.includes(user.role)) return isYoungInCleScope(user, young);
-  return true;
+  return canEditYoung(user, young);
 }
 
 /**
@@ -87,7 +52,6 @@ async function isSessionInReferentTerritory(user: UserDto, sessionPhase1Id: stri
  */
 export async function isSessionPhase1InUserScope(user: UserDto, sessionPhase1Id: string | undefined): Promise<boolean> {
   if (user.role === ROLES.ADMIN) return true;
-  if (HEAD_CENTER_ROLES.includes(user.role)) return isYoungInHeadCenterScope(user, { sessionPhase1Id });
   if (GEO_ROLES.includes(user.role)) return isSessionInReferentTerritory(user, sessionPhase1Id);
   return false;
 }
@@ -103,8 +67,6 @@ export async function isSessionPhase1InUserScope(user: UserDto, sessionPhase1Id:
  */
 export async function isYoungInUserScope(user: UserDto, young: Pick<YoungType, "region" | "department" | "classeId" | "sessionPhase1Id">): Promise<boolean> {
   if (user.role === ROLES.ADMIN) return true;
-  if (HEAD_CENTER_ROLES.includes(user.role)) return isYoungInHeadCenterScope(user, young);
-  if (CLE_ROLES.includes(user.role)) return isYoungInCleScope(user, young);
   if (GEO_ROLES.includes(user.role)) return isYoungInReferentTerritory(user, young);
   return false;
 }
