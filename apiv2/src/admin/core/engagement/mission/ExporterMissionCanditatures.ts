@@ -239,7 +239,8 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
                 // @ts-ignore
                 mission.candidatures = mission.candidatures.map((candidature) => ({
                     ...candidature,
-                    young: youngsById[candidature.youngId!.toString()],
+                    // L'anonymisation d'un volontaire supprime le youngId de ses candidatures.
+                    young: candidature.youngId ? youngsById[candidature.youngId.toString()] : undefined,
                 }));
             }
             return mission;
