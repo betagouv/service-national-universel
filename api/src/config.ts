@@ -66,6 +66,19 @@ export const config = {
   SMTP_HOST: _env(envStr, "SMTP_HOST", "localhost"),
   SMTP_PORT: _env(envInt, "SMTP_PORT", 1025),
   ENABLE_ANTIVIRUS: _env(envBool, "ENABLE_ANTIVIRUS", false),
+  // PM23 (06/10/2026) : bascule progressive du chiffrement des pièces S3 vers un format versionné
+  // AES-256-GCM (authentifié) — voir api/src/cryptoUtils.ts. À false, `encrypt` continue d'écrire
+  // l'ancien format AES-256-CTR (non authentifié) ; `decrypt` lit toujours les deux formats, quel
+  // que soit l'état du flag, pour ne jamais casser la lecture des objets déjà stockés.
+  ENABLE_FILE_ENCRYPTION_V1: _env(envBool, "ENABLE_FILE_ENCRYPTION_V1", false),
+  // PM23 : coupe-circuit pour fermer complètement le constat une fois tous les objets existants
+  // rechiffrés en AES-256-GCM. À true (défaut), `decrypt` lit encore l'ancien format CTR non
+  // authentifié ; un objet altéré dont l'en-tête versionné a été retiré ou remplacé se déchiffre
+  // alors silencieusement, sans authentification (constat PM23 toujours ouvert tant que ce flag
+  // reste à true — relecture A). À false, tout objet non versionné fait lever `decrypt` : à
+  // n'activer qu'après avoir rechiffré tous les objets existants en V1 (script de migration hors
+  // périmètre de cette PR).
+  ENABLE_FILE_ENCRYPTION_LEGACY_READ: _env(envBool, "ENABLE_FILE_ENCRYPTION_LEGACY_READ", true),
   ENABLE_FLATTEN_ERROR_LOGS: _env(envBool, "ENABLE_FLATTEN_ERROR_LOGS", false), // Print error stack without newlines on stderr
   API_URL: _env(envStr, "API_URL", "http://localhost:8080"),
   APIV2_URL: _env(envStr, "APIV2_URL", "http://localhost:8086"),
