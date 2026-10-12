@@ -410,33 +410,15 @@ describe("PM24/PM37 — gabarits parents et liens Cellar depuis un compte volont
     expect(mockSendTemplate).not.toHaveBeenCalled();
   });
 
-  it("refuse un lien vers un autre bucket du stockage Cellar mutualisé", async () => {
+  it("refuse un volontaire avant même la vérification du lien (GOO-198 : plus d'exception young.LINK)", async () => {
     const { young } = await jeuneEtSonReferent();
 
     const res = await request(await getAppHelperWithAcl(young))
       .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`)
       .send({ object: "Fiche sanitaire", link: "https://cellar-c2.services.clever-cloud.com/bucket-pirate/consentement.html" });
 
-    expect(res.statusCode).toEqual(400);
+    expect(res.statusCode).toEqual(403);
     expect(mockSendTemplate).not.toHaveBeenCalled();
-  });
-
-  it("laisse le volontaire s'envoyer la fiche sanitaire (MedicalFileModal), dans la limite de son quota", async () => {
-    const { young } = await jeuneEtSonReferent();
-    const app = await getAppHelperWithAcl(young);
-    const envoyer = () =>
-      request(app).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`).send({
-        object: "Fiche sanitaire à compléter",
-        message: "Vous trouverez téléchargeable ci-dessous la fiche sanitaire à compléter.",
-        link: "https://cellar-c2.services.clever-cloud.com/cni-bucket-prod/file/fiche-sanitaire-2024.pdf?utm_campaign=transactionnel+telecharger+docum",
-      });
-
-    const statuts: number[] = [];
-    for (let i = 0; i < 11; i++) statuts.push((await envoyer()).statusCode);
-
-    expect(statuts.slice(0, 10).every((statut) => statut === 200)).toBe(true);
-    expect(statuts[10]).toEqual(429);
-    expect(dernierMail()[1].params.link).toContain("/cni-bucket-prod/file/fiche-sanitaire-2024.pdf");
   });
 
   it("n'applique pas ce quota aux référents", async () => {
@@ -447,5 +429,42 @@ describe("PM24/PM37 — gabarits parents et liens Cellar depuis un compte volont
     for (let i = 0; i < 11; i++) statuts.push((await request(app).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`).send({ object: "Document" })).statusCode);
 
     expect(statuts.every((statut) => statut === 200)).toBe(true);
+  });
+});
+
+describe("GOO-198 — un volontaire ne peut plus déclencher aucun gabarit d'email officiel", () => {
+  it("refuse un gabarit young quelconque, pas seulement LINK ou les gabarits parents", async () => {
+    const { young } = await jeuneEtSonReferent();
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION}`)
+      .send({});
+
+    expect(res.statusCode).toEqual(403);
+    expect(mockSendTemplate).not.toHaveBeenCalled();
+  });
+
+  it("le référent garde son accès actuel sur young.LINK", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`)
+      .send({ object: "Document" });
+
+    expect(res.statusCode).toEqual(200);
+    expect(mockSendTemplate).toHaveBeenCalled();
+  });
+
+  it("le refus du volontaire compte quand même dans la limite horaire (défense en profondeur inchangée)", async () => {
+    const { young } = await jeuneEtSonReferent();
+    const app = await getAppHelperWithAcl(young);
+    const envoyer = () => request(app).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.LINK}`).send({ object: "Fiche sanitaire" });
+
+    const statuts: number[] = [];
+    for (let i = 0; i < 11; i++) statuts.push((await envoyer()).statusCode);
+
+    expect(statuts.slice(0, 10).every((statut) => statut === 403)).toBe(true);
+    expect(statuts[10]).toEqual(429);
+    expect(mockSendTemplate).not.toHaveBeenCalled();
   });
 });
