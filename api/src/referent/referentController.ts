@@ -1027,16 +1027,8 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     switch (req.user.role) {
-      case ROLES.HEAD_CENTER:
-      case ROLES.HEAD_CENTER_ADJOINT:
-      case ROLES.REFERENT_SANITAIRE: {
-        const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-        if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const center = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
-        if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (sessionPhase1.headCenterId !== req.user._id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        break;
-      }
+      // GOO-165 (P25b) : HEAD_CENTER / HEAD_CENTER_ADJOINT / REFERENT_SANITAIRE retirés — `isDecommissionedRole()`
+      // (verrou P24, passport.ts) refuse déjà toute session HTTP pour ces rôles, cette branche était inatteignable.
       case ROLES.SUPERVISOR:
       case ROLES.RESPONSIBLE: {
         // `canViewYoungFile(acteur, jeune, saPropreStructure)` ne comparait que l'acteur à SA PROPRE

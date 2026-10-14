@@ -16,16 +16,19 @@ import request from "supertest";
 
 import { ROLES } from "snu-lib";
 
-import { ReferentModel, YoungModel, StructureModel, ApplicationModel } from "../models";
+import { ReferentModel, YoungModel, StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel } from "../models";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewYoungFixture from "./fixtures/young";
 import getNewStructureFixture from "./fixtures/structure";
 import { getNewApplicationFixture } from "./fixtures/application";
+import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
+import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
 import { createYoungHelper } from "./helpers/young";
 import { createStructureHelper } from "./helpers/structure";
 import { createApplication } from "./helpers/application";
+import { createCohesionCenterWithSession } from "./helpers/cohesionCenter";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -39,6 +42,8 @@ jest.mock("../cryptoUtils", () => ({
   encrypt: () => Buffer.from("test"),
 }));
 
+jest.setTimeout(60000);
+
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
 });
@@ -48,6 +53,8 @@ beforeEach(async () => {
   await YoungModel.deleteMany();
   await StructureModel.deleteMany();
   await ApplicationModel.deleteMany();
+  await SessionPhase1Model.deleteMany();
+  await CohesionCenterModel.deleteMany();
 });
 afterEach(resetAppAuth);
 
@@ -252,6 +259,29 @@ describe("Sécurité — téléchargement des pièces d'un volontaire (audit 202
         .send({ filesList: [] });
 
       expect(res.statusCode).toEqual(200);
+    });
+  });
+
+  /**
+   * GOO-165 (P25b) : `isDecommissionedRole()` (verrou P24) refuse déjà toute session HTTP réelle
+   * pour HEAD_CENTER/HEAD_CENTER_ADJOINT/REFERENT_SANITAIRE — ce test contourne volontairement cette
+   * couche (comme `decommissioned-roles-scope.test.ts`) en injectant directement `req.user` via
+   * `getAppHelperWithAcl`, pour exercer la branche du switch de la route elle-même (code mort en
+   * profondeur, pas une faille active).
+   */
+  describe("GOO-165 — cas chef de centre retiré de GET /referent/youngFile/:youngId/:key/:fileName", () => {
+    it("ne doit plus laisser un chef de centre rattaché à la session télécharger la pièce du volontaire", async () => {
+      const center = await createCohesionCenterWithSession(getNewCohesionCenterFixture(), getNewSessionPhase1Fixture());
+      const session = await SessionPhase1Model.findOne({ cohesionCenterId: center._id });
+      const actor = { _id: "104a49ba503040e4d2153973", role: ROLES.HEAD_CENTER };
+      await SessionPhase1Model.updateOne({ _id: session!._id }, { headCenterId: actor._id });
+      const young = await createYoungHelper(getNewYoungFixture({ sessionPhase1Id: session!._id.toString() } as any));
+
+      const res = await request(await getAppHelperWithAcl(actor as any))
+        .get(`/referent/youngFile/${young._id}/cniFiles/cni.pdf`)
+        .send();
+
+      expect(res.statusCode).toEqual(403);
     });
   });
 });
