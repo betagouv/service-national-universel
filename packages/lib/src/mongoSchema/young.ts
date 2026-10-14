@@ -179,6 +179,13 @@ export const YoungSchema = {
       description: "E-mail que le volontaire souhaite utiliser (valiation par code envoyé par email avant changement définitif de l'email)",
     },
   },
+  newEmailRequestedByReferent: {
+    type: Boolean,
+    documentation: {
+      description:
+        "La demande de changement d'adresse (newEmail) en attente de validation a été posée par un référent (PUT /young-edition/:id/identite, GOO-200), pas par le volontaire en libre-service : sa validation coupe les accès en cours et avertit l'ancienne adresse.",
+    },
+  },
   phone: {
     type: String,
     documentation: {

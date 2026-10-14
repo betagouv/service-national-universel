@@ -20,6 +20,7 @@ import {
 import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, setSessionCookie, clearSessionCookie } from "./cookie-options";
 import { getToken } from "./passport";
 import { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } from "./utils";
+import { revokeAccessAfterEmailChange, notifyPreviousEmailOfChange } from "./young/edition/youngEditionService";
 import {
   SENDINBLUE_TEMPLATES,
   PHONE_ZONES_NAMES_ARR,
@@ -686,7 +687,17 @@ class Auth {
 
       if (!currentUser) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       const tokenEmailValidation = await crypto.randomInt(1000000);
-      currentUser.set({ newEmail: value.email, tokenEmailValidation, attemptsEmailValidation: 0, tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60 });
+      // GOO-200 : une demande en libre-service (mot de passe déjà vérifié ci-dessus) écrase un
+      // signalement "demande initiée par un référent" resté en attente — sinon la validation
+      // qui suit révoquerait les accès et avertirait l'ancienne adresse comme si le volontaire
+      // n'avait pas lui-même choisi la nouvelle, ce qui n'est pas le comportement du libre-service.
+      currentUser.set({
+        newEmail: value.email,
+        tokenEmailValidation,
+        attemptsEmailValidation: 0,
+        tokenEmailValidationExpires: Date.now() + 1000 * 60 * 60,
+        newEmailRequestedByReferent: false,
+      });
 
       await currentUser.save();
 
@@ -707,6 +718,10 @@ class Auth {
 
   async validateEmailUpdate(req, res) {
     try {
+      // GOO-200 : une session empruntée par un référent (POST /referent/signin_as/young/:id)
+      // ne doit pas pouvoir valider elle-même le code envoyé au volontaire — la confirmation
+      // doit venir du volontaire, pas de celui qui a demandé le changement.
+      if (req.user.impersonateId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       const { token_email_validation } = value;
@@ -724,8 +739,16 @@ class Auth {
 
       if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
-      user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null });
+      // GOO-200 : si la demande vient d'un référent (PUT /young-edition/:id/identite), la bascule
+      // d'adresse doit couper les accès en cours et avertir l'ancienne adresse — contrairement au
+      // libre-service, qui a déjà prouvé l'identité par mot de passe (api/src/auth.ts requestEmailUpdate).
+      const wasRequestedByReferent = !!user.newEmailRequestedByReferent;
+      const previousEmail = user.email;
+
+      user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null, newEmailRequestedByReferent: false });
+      if (wasRequestedByReferent) revokeAccessAfterEmailChange(user);
       await user.save();
+      if (wasRequestedByReferent) await notifyPreviousEmailOfChange(user, previousEmail);
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
@@ -787,6 +810,9 @@ class Auth {
 
   async requestNewEmailValidationToken(req, res) {
     try {
+      // GOO-200 : même restriction que validateEmailUpdate (une session empruntée ne doit pas
+      // pouvoir redemander le code à la place du volontaire).
+      if (req.user.impersonateId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       const user = await this.model.findOne({
         email: req.user.email,
       });

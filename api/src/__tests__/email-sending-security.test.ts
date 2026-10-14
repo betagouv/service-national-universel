@@ -19,7 +19,7 @@
  */
 import request from "supertest";
 
-import { APPLICATION_STATUS, MISSION_STATUS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ReferentStatus, ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
+import { APPLICATION_STATUS, ERRORS, MISSION_STATUS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ReferentStatus, ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS } from "snu-lib";
 
 import { ApplicationModel, MissionModel, ReferentModel, StructureModel, YoungModel } from "../models";
 import { config } from "../config";
@@ -84,8 +84,8 @@ function dernierMail() {
   return mockSendTemplate.mock.calls[mockSendTemplate.mock.calls.length - 1];
 }
 
-describe("M73 — changement d'adresse email d'un volontaire par un référent", () => {
-  it("avertit l'ancienne adresse et coupe les accès en cours", async () => {
+describe("M73/GOO-200 — changement d'adresse email d'un volontaire par un référent", () => {
+  it("pose l'adresse en attente et envoie le code à la nouvelle adresse, sans rien changer tout de suite", async () => {
     const { young, referent } = await jeuneEtSonReferent({
       forgotPasswordResetToken: "jeton-de-reinitialisation",
       forgotPasswordResetExpires: new Date(Date.now() + 3600 * 1000),
@@ -98,18 +98,22 @@ describe("M73 — changement d'adresse email d'un volontaire par un référent",
 
     expect(res.statusCode).toEqual(200);
     const apres = await getYoungByIdHelper(young._id);
-    expect(apres?.email).toEqual("nouvelle-adresse@example.org");
 
-    // L'ancienne adresse est prévenue : c'est le seul signal dont dispose la victime.
-    expect(mockSendEmail).toHaveBeenCalled();
-    expect(mockSendEmail.mock.calls[0][0].email).toEqual(ancienneAdresse);
+    // L'email réel ne change pas avant la confirmation par code : seule une adresse en attente est posée.
+    expect(apres?.email).toEqual(ancienneAdresse);
+    expect(apres?.newEmail).toEqual("nouvelle-adresse@example.org");
+    expect(apres?.tokenEmailValidation).toBeTruthy();
 
-    // Les accès obtenus avant le changement ne doivent pas survivre.
-    expect(apres?.lastLogoutAt).toBeTruthy();
-    expect(apres?.forgotPasswordResetToken).toBeFalsy();
+    // Le code part à la NOUVELLE adresse (gabarit officiel), rien n'est envoyé à l'ancienne pour l'instant.
+    expect(mockSendTemplate).toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.PROFILE_EMAIL_VALIDATION, expect.objectContaining({ emailTo: [expect.objectContaining({ email: "nouvelle-adresse@example.org" })] }));
+    expect(mockSendEmail).not.toHaveBeenCalled();
+
+    // Les accès ne sont pas encore coupés : ce n'est pas encore un changement effectif.
+    expect(apres?.lastLogoutAt).toBeFalsy();
+    expect(apres?.forgotPasswordResetToken).toBeTruthy();
   });
 
-  it("n'avertit personne quand l'adresse n'est pas modifiée", async () => {
+  it("n'avertit personne et ne pose rien quand l'adresse n'est pas modifiée", async () => {
     const { young, referent } = await jeuneEtSonReferent();
 
     const res = await request(await getAppHelperWithAcl(referent))
@@ -118,7 +122,112 @@ describe("M73 — changement d'adresse email d'un volontaire par un référent",
 
     expect(res.statusCode).toEqual(200);
     expect(mockSendEmail).not.toHaveBeenCalled();
-    expect((await getYoungByIdHelper(young._id))?.lastLogoutAt).toBeFalsy();
+    expect(mockSendTemplate).not.toHaveBeenCalled();
+    const apres = await getYoungByIdHelper(young._id);
+    expect(apres?.lastLogoutAt).toBeFalsy();
+    expect(apres?.newEmail).toBeFalsy();
+  });
+
+  it("refuse une adresse qui n'a pas la forme d'un email", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .put(`/young-edition/${young._id}/identite`)
+      .send({ email: "pas-un-email" });
+
+    expect(res.statusCode).toEqual(400);
+    expect((await getYoungByIdHelper(young._id))?.email).toEqual(young.email);
+  });
+
+  it("coupe les accès et avertit l'ancienne adresse SEULEMENT à la validation du code par le volontaire", async () => {
+    const { young, referent } = await jeuneEtSonReferent({
+      forgotPasswordResetToken: "jeton-de-reinitialisation",
+      forgotPasswordResetExpires: new Date(Date.now() + 3600 * 1000),
+    });
+    const ancienneAdresse = young.email;
+
+    const miseEnAttente = await request(await getAppHelperWithAcl(referent))
+      .put(`/young-edition/${young._id}/identite`)
+      .send({ email: "nouvelle-adresse@example.org" });
+    expect(miseEnAttente.statusCode).toEqual(200);
+
+    const enAttente = await getYoungByIdHelper(young._id);
+    mockSendTemplate.mockClear();
+
+    const validation = await request(await getAppHelper(enAttente as any, "young"))
+      .post("/young/email-validation/new-email")
+      .send({ token_email_validation: String(enAttente!.tokenEmailValidation) });
+
+    expect(validation.statusCode).toEqual(200);
+    const apres = await getYoungByIdHelper(young._id);
+    expect(apres?.email).toEqual("nouvelle-adresse@example.org");
+    expect(apres?.newEmail).toBeFalsy();
+
+    // Seulement maintenant : l'ancienne adresse est prévenue et les accès coupés.
+    expect(mockSendEmail).toHaveBeenCalled();
+    expect(mockSendEmail.mock.calls[0][0].email).toEqual(ancienneAdresse);
+    expect(apres?.lastLogoutAt).toBeTruthy();
+    expect(apres?.forgotPasswordResetToken).toBeFalsy();
+  });
+
+  it("refuse qu'une session empruntée par signin_as valide elle-même le code à la place du volontaire", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+
+    const miseEnAttente = await request(await getAppHelperWithAcl(referent))
+      .put(`/young-edition/${young._id}/identite`)
+      .send({ email: "nouvelle-adresse@example.org" });
+    expect(miseEnAttente.statusCode).toEqual(200);
+
+    // Simule une session jeune obtenue par POST /referent/signin_as/young/:id : passport y pose
+    // `impersonateId` sur req.user (api/src/passport.ts L71-72), que ce soit via un cookie
+    // décodé ou, comme ici, directement sur l'objet de session (même procédé que
+    // impersonation-integrity-goo-71.test.ts).
+    const enAttente: any = await getYoungByIdHelper(young._id);
+    enAttente.impersonateId = referent._id;
+    mockSendTemplate.mockClear();
+
+    const validation = await request(await getAppHelper(enAttente, "young"))
+      .post("/young/email-validation/new-email")
+      .send({ token_email_validation: String(enAttente.tokenEmailValidation) });
+
+    expect(validation.statusCode).toEqual(403);
+    const apres = await getYoungByIdHelper(young._id);
+    expect(apres?.email).toEqual(young.email);
+    expect(mockSendEmail).not.toHaveBeenCalled();
+  });
+
+  it("refuse qu'une session empruntée redemande elle-même un nouveau code à la place du volontaire", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+
+    const miseEnAttente = await request(await getAppHelperWithAcl(referent))
+      .put(`/young-edition/${young._id}/identite`)
+      .send({ email: "nouvelle-adresse@example.org" });
+    expect(miseEnAttente.statusCode).toEqual(200);
+
+    const enAttente: any = await getYoungByIdHelper(young._id);
+    enAttente.impersonateId = referent._id;
+    mockSendTemplate.mockClear();
+
+    const res = await request(await getAppHelper(enAttente, "young")).get("/young/email-validation/token");
+
+    expect(res.statusCode).toEqual(403);
+    expect(mockSendTemplate).not.toHaveBeenCalled();
+  });
+
+  it("refuse une adresse déjà utilisée par un autre compte, comme avant GOO-200", async () => {
+    const { young, referent } = await jeuneEtSonReferent();
+    await createYoungHelper(getNewYoungFixture({ email: "deja-utilisee@example.org" } as any));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .put(`/young-edition/${young._id}/identite`)
+      .send({ email: "deja-utilisee@example.org" });
+
+    expect(res.statusCode).toEqual(400);
+    expect(res.body.code).toEqual(ERRORS.ALREADY_EXISTS);
+    const apres = await getYoungByIdHelper(young._id);
+    expect(apres?.email).toEqual(young.email);
+    expect(apres?.newEmail).toBeFalsy();
+    expect(mockSendTemplate).not.toHaveBeenCalled();
   });
 });
 
