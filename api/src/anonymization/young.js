@@ -35,6 +35,7 @@ function anonymize(itemToAnonymize) {
     "statusPhase2UpdatedAt",
     "statusPhase2OpenedAt",
     "statusPhase2ValidatedAt",
+    "phase2ExceptionalValidation",
     "statusPhase2Contract",
     "statusPhase3",
     "statusPhase3UpdatedAt",

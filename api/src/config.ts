@@ -87,6 +87,8 @@ export const config = {
   API_ANALYTICS_API_KEY: _env(envStr, "API_ANALYTICS_API_KEY"),
   ES_ENDPOINT: _env(envStr, "ES_ENDPOINT", "http://localhost:9200"),
   SENDINBLUEKEY: _env(envStr, "SENDINBLUEKEY"),
+  // À renseigner une fois le nouveau template de validation exceptionnelle créé dans Brevo.
+  PHASE2_EXCEPTIONAL_VALIDATION_TEMPLATE_ID: _env(envStr, "PHASE2_EXCEPTIONAL_VALIDATION_TEMPLATE_ID"),
   DIAGORIENTE_URL: _env(envStr, "DIAGORIENTE_URL", "https://api-ql-dev.projetttv.org/graphql"),
   DIAGORIENTE_TOKEN: _env(envStr, "DIAGORIENTE_TOKEN"),
   CELLAR_ENDPOINT: _env(envStr, "CELLAR_ENDPOINT"),
