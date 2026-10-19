@@ -10,6 +10,10 @@ import { config } from "../config";
 import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS, ReferentStatus } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
 import dayjs from "dayjs";
+import type { ClientSession } from "mongoose";
+import type { CustomSaveParams } from "snu-lib";
+import { PHASE2_TOTAL_HOURS } from "snu-lib";
+import type { YoungDocument, ApplicationDocument } from "../models";
 
 // Timeout a promise in ms
 export const timeout = (prom, time) => {
@@ -190,6 +194,44 @@ export function validatePassword(password) {
   return schema.validate(password);
 }
 
+type Phase2ValidationOptions = {
+  validatedAt?: Date;
+  session?: ClientSession | null;
+  notify?: boolean;
+};
+
+// Effets communs aux validations ordinaires et exceptionnelles. L'appelant sauvegarde le jeune.
+// Le cron diffère les notifications jusqu'à la validation de sa transaction.
+export async function validateYoungPhase2(
+  young: YoungDocument,
+  pendingApplications: ApplicationDocument[],
+  fromUser: CustomSaveParams["fromUser"],
+  options: Phase2ValidationOptions = {},
+) {
+  const validatedAt = options.validatedAt ?? new Date();
+  young.set({
+    statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+    statusPhase2UpdatedAt: validatedAt,
+    statusPhase2ValidatedAt: validatedAt,
+    "files.militaryPreparationFilesIdentity": [],
+    "files.militaryPreparationFilesCensus": [],
+    "files.militaryPreparationFilesAuthorization": [],
+    "files.militaryPreparationFilesCertificate": [],
+    statusMilitaryPreparationFiles: undefined,
+  });
+  await cancelPendingApplications(pendingApplications, fromUser, options);
+  if (options.notify !== false) {
+    const template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
+    await sendTemplate(template, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: {
+        cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
+      },
+      cc: getCcOfYoung({ template, young }),
+    });
+  }
+}
+
 export async function updateYoungPhase2StatusAndHours(young, fromUser) {
   try {
     await recomputeYoungPhase2StatusAndHours(young, fromUser);
@@ -253,29 +295,11 @@ export async function recomputeYoungPhase2StatusAndHours(young, fromUser) {
 
   if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
     // Ne pas changer le statut si déjà VALIDATED ou WITHDRAWN
-    young.set({ statusPhase2ValidatedAt: Date.now() });
+    young.set({ statusPhase2ValidatedAt: young.phase2ExceptionalValidation?.validatedAt ?? Date.now() });
     await cancelPendingApplications(pendingApplication, fromUser);
-  } else if (Number(young.phase2NumberHoursDone) >= 84) {
+  } else if (Number(young.phase2NumberHoursDone) >= PHASE2_TOTAL_HOURS) {
     // Valider la phase 2 si 84 heures effectuées
-    young.set({
-      statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
-      statusPhase2ValidatedAt: Date.now(),
-      "files.militaryPreparationFilesIdentity": [],
-      "files.militaryPreparationFilesCensus": [],
-      "files.militaryPreparationFilesAuthorization": [],
-      "files.militaryPreparationFilesCertificate": [],
-      statusMilitaryPreparationFiles: undefined,
-    });
-    await cancelPendingApplications(pendingApplication, fromUser);
-    let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
-    let cc = getCcOfYoung({ template, young });
-    await sendTemplate(template, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: {
-        cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
-      },
-      cc,
-    });
+    await validateYoungPhase2(young, pendingApplication, fromUser);
   } else if (activeApplication.length) {
     // Mettre le statut en IN_PROGRESS si une application est active
     young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
@@ -358,29 +382,11 @@ export const updateStatusPhase2 = async (young, fromUser) => {
 
     if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
       // We do not change young status if phase 2 is already VALIDATED (2020 cohort or manual change) or WITHDRAWN.
-      young.set({ statusPhase2ValidatedAt: Date.now() });
+      young.set({ statusPhase2ValidatedAt: young.phase2ExceptionalValidation?.validatedAt ?? Date.now() });
       await cancelPendingApplications(pendingApplication, fromUser);
-    } else if (Number(young.phase2NumberHoursDone) >= 84) {
+    } else if (Number(young.phase2NumberHoursDone) >= PHASE2_TOTAL_HOURS) {
       // We change young status to DONE if he has 84 hours of phase 2 done.
-      young.set({
-        statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
-        statusPhase2ValidatedAt: Date.now(),
-        "files.militaryPreparationFilesIdentity": [],
-        "files.militaryPreparationFilesCensus": [],
-        "files.militaryPreparationFilesAuthorization": [],
-        "files.militaryPreparationFilesCertificate": [],
-        statusMilitaryPreparationFiles: undefined,
-      });
-      await cancelPendingApplications(pendingApplication, fromUser);
-      let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
-        },
-        cc,
-      });
+      await validateYoungPhase2(young, pendingApplication, fromUser);
     } else if (activeApplication.length) {
       // We change young status to IN_PROGRESS if he has an 'active' application.
       young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
@@ -463,11 +469,11 @@ export const recomputeYoungStatusPhase2Contract = async (young, fromUser) => {
   await young.save({ fromUser });
 };
 
-export async function cancelPendingApplications(pendingApplication, fromUser) {
+export async function cancelPendingApplications(pendingApplication, fromUser, options: Pick<Phase2ValidationOptions, "session" | "notify"> = {}) {
   for (const application of pendingApplication) {
     application.set({ status: APPLICATION_STATUS.CANCEL });
-    await application.save({ fromUser });
-    await sendNotificationApplicationClosedBecausePhase2Validated(application);
+    await application.save({ fromUser, ...(options.session ? { session: options.session } : {}) });
+    if (options.notify !== false) await sendNotificationApplicationClosedBecausePhase2Validated(application);
   }
 }
 
@@ -507,7 +513,7 @@ export function inSevenDays() {
 export const getCcOfYoung = ({ template, young }) => {
   if (!young || !template) return [];
   let cc: { name: string; email: string }[] = [];
-  if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
+  if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template) || template === config.PHASE2_EXCEPTIONAL_VALIDATION_TEMPLATE_ID) {
     if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
     if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
   }

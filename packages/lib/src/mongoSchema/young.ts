@@ -1,4 +1,5 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
+import { PHASE2_EXCEPTIONAL_VALIDATION } from "../constants/phase2";
 
 import { YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_ACCOUNT_STATUS } from "../constants/constants";
 import { PHONE_ZONES_NAMES_ARR } from "../phone-number";
@@ -334,6 +335,23 @@ export const YoungSchema = {
     type: Date,
     documentation: {
       description: "Date à laquelle la seconde phase est validée",
+    },
+  },
+  phase2ExceptionalValidation: {
+    type: new Schema(
+      {
+        reason: { type: String, enum: [PHASE2_EXCEPTIONAL_VALIDATION.REASON], required: true },
+        validatedAt: { type: Date, required: true },
+        hoursDone: { type: Number, required: true },
+        cohortId: String,
+        cohort: String,
+        notifiedAt: Date,
+        notificationLockedUntil: Date,
+      },
+      { _id: false },
+    ),
+    documentation: {
+      description: "Validation exceptionnelle de la phase 2 des cohortes 2025 à partir de 42 heures, et suivi de sa notification",
     },
   },
   statusPhase2Contract: {
