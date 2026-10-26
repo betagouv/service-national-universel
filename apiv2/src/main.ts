@@ -7,11 +7,12 @@ import helmet = require("helmet");
 import { AppModule } from "./App.module";
 import { AuthProvider } from "./admin/infra/iam/auth/Auth.provider";
 import { hostGuard, hotesAutorises } from "./infra/security/HostGuard";
+import { parseursSansDecompression } from "./infra/security/ParseursCorps";
 import { RATE_LIMITS, estRouteCouteuse, jetonCookieAdmin, normaliserIp, rateLimitStoreFactory, rateLimiter } from "./infra/security/RateLimit";
 import { pipesGlobaux } from "./shared/infra/ObjectIdParams.pipe";
 
 async function bootstrap() {
-    const app = await NestFactory.create<NestExpressApplication>(AppModule);
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: false });
     app.useGlobalPipes(...pipesGlobaux());
     const config = app.get(ConfigService);
 
@@ -65,6 +66,10 @@ async function bootstrap() {
             skip: (req) => !estRouteCouteuse(req),
         }),
     );
+
+    // Après les gardes et le rate limiting, à la place des parseurs par défaut que Nest monte au
+    // même endroit : un corps n'est lu qu'une fois la requête admise (CVE-2026-111497).
+    parseursSansDecompression(app);
 
     const port = config.getOrThrow("httpServer.port");
     if (config.getOrThrow("urls.apiv2").endsWith("/v2")) {
