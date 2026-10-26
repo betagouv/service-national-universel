@@ -32,3 +32,5 @@ road-code-refund-*.csv
 .worktrees
 .playwright-cli/
 CLAUDE.md
+
+vitrine/.htpasswd

@@ -1,0 +1,4 @@
+# Jetons factices des fixtures de test (faux positifs generic-api-key)
+api/src/__tests__/young-security.test.ts:generic-api-key:103
+api/src/__tests__/young-security.test.ts:generic-api-key:105
+api/src/__tests__/young-security.test.ts:generic-api-key:106
