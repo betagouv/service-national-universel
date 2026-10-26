@@ -9,7 +9,8 @@ export default defineConfig({
   },
   test: {
     // happy-dom plutôt que jsdom : jsdom (>=27) tire html-encoding-sniffer -> @exodus/bytes,
-    // un paquet ESM-only que Node 20 ne peut pas require() depuis vitest en CJS (GOO-194).
+    // un paquet ESM-only que Node 20 ne pouvait pas require() depuis vitest en CJS (GOO-194).
+    // Node 24 sait require() un module ESM : le retour à jsdom serait possible, non réévalué.
     environment: "happy-dom",
     globals: false,
     // globals: false désactive le cleanup() automatique de @testing-library/react (il ne
