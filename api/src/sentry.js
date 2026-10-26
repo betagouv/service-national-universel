@@ -1,12 +1,24 @@
 const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, init, extraErrorDataIntegration, rewriteFramesIntegration } = require("@sentry/node");
-const { nodeProfilingIntegration } = require("@sentry/profiling-node");
 
 const { config } = require("./config");
 const { logger } = require("./logger");
 const { redactSentryEvent } = require("./utils/logRedaction");
 
+// Le profiler est un module natif : sans binaire pour la version de Node courante (8.x n'en fournit pas
+// au-delà de Node 22), son chargement lève. L'api démarre alors sans profiling plutôt que de tomber.
+let nodeProfilingIntegration = null;
+let profilingLoadError = null;
+try {
+  ({ nodeProfilingIntegration } = require("@sentry/profiling-node"));
+} catch (error) {
+  profilingLoadError = error;
+}
+
 function initSentry() {
   if (config.ENABLE_SENTRY) {
+    if (profilingLoadError) {
+      logger.warn(`Sentry : profiling désactivé, @sentry/profiling-node ne se charge pas sous Node ${process.version} (${profilingLoadError.message})`);
+    }
     init({
       debug: config.SENTRY_DEBUG_MODE,
       dsn: "https://f6de4fc0bffdc6392b2700fd0c2d16a3@sentry.incubateur.net/243",
@@ -18,7 +30,11 @@ function initSentry() {
       // PH18 : les transactions de performance (requestDataIntegration) ne passent PAS par beforeSend
       // — sans ce hook dédié, chaque requête échantillonnée partait avec cookies, en-têtes et corps en clair.
       beforeSendTransaction: redactSentryEvent,
-      integrations: [extraErrorDataIntegration({ depth: 16 }), rewriteFramesIntegration({ root: process.cwd() }), nodeProfilingIntegration()],
+      integrations: [
+        extraErrorDataIntegration({ depth: 16 }),
+        rewriteFramesIntegration({ root: process.cwd() }),
+        ...(nodeProfilingIntegration ? [nodeProfilingIntegration()] : []),
+      ],
       // Le repli `|| 0.01` masquait un défaut de config.ts resté à 1 (100%) : le défaut est maintenant
       // porté par config.ts lui-même (0.01), sans second filet ici qui en camouflerait la valeur réelle.
       tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE),
