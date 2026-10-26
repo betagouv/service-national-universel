@@ -174,6 +174,7 @@ function anonymize(itemToAnonymize) {
     "parent1Location.lon",
     "parent1FromFranceConnect",
     "parent1Inscription2023Token",
+    "parent1Inscription2023TokenExpiresAt",
     "parent1DataVerified",
     "parent1AddressVerified",
     "parent1AllowCovidAutotest",
@@ -200,6 +201,7 @@ function anonymize(itemToAnonymize) {
     "parent2Location.lon",
     "parent2FromFranceConnect",
     "parent2Inscription2023Token",
+    "parent2Inscription2023TokenExpiresAt",
     "parent2AllowImageRights",
     "parent2AllowImageRightsReset",
     "parent2ContactPreference",
@@ -492,6 +494,8 @@ function anonymize(itemToAnonymize) {
   item.phase3Token = "";
   item.parent1Inscription2023Token = randomUUID();
   item.parent2Inscription2023Token = randomUUID();
+  item.parent1Inscription2023TokenExpiresAt = undefined;
+  item.parent2Inscription2023TokenExpiresAt = undefined;
   item.password = "";
   item.accountStatus = undefined;
   item.roadCodeRefund = undefined;

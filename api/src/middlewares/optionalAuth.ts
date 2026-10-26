@@ -31,7 +31,8 @@ const optionalAuth = async (req: UserRequest, _: Response, next: NextFunction) =
         lastLogoutAt: Joi.date().allow(null),
       }).validate(jwtPayload, { stripUnknown: true });
 
-      if (error || !checkJwtSigninVersion(value)) return;
+      // Jeton inexploitable : on poursuit en anonyme (sans `next()`, la requête resterait suspendue).
+      if (error || !checkJwtSigninVersion(value)) return next();
 
       const { _id, passwordChangedAt, lastLogoutAt } = value;
       let user = await ReferentModel.findById(_id);

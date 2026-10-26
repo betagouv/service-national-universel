@@ -1,12 +1,13 @@
 const passport = require("passport");
 const express = require("express");
+const Joi = require("joi");
 const router = express.Router();
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
-const { SessionPhase1Model, CohortModel, ReferentModel } = require("../../../models");
-const { ES_NO_LIMIT, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
+const { CohortModel, ReferentModel } = require("../../../models");
+const { ES_NO_LIMIT, ROLES, region2department, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -58,7 +59,7 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
           ].filter(Boolean),
           filter: [
             //query
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
+            user.role === ROLES.REFERENT_REGION ? { terms: { "schoolRegion.keyword": [user.region] } } : null,
             user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "schoolDepartment.keyword": user.department } } : null,
           ].filter(Boolean),
         },
@@ -66,7 +67,12 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
       aggs: {
         school: {
           terms: { field: "schoolId.keyword", size: 500 },
-          aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
+          aggs: {
+            departments: { terms: { field: "department.keyword" } },
+            // Un `top_hits` sans `_source` renvoie le document jeune complet.
+            // Le tableau du dashboard n'a besoin que de l'établissement.
+            firstUser: { top_hits: { size: 1, _source: ["schoolId", "schoolName", "schoolCity", "schoolZip", "schoolDepartment", "schoolRegion"] } },
+          },
         },
       },
       size: 0,
@@ -82,17 +88,41 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
   }
 });
 
+const youngsReportSchema = Joi.object({
+  // Le front transmet tous ses filtres ; seul `cohort` est utilisé ici.
+  filters: Joi.object({ cohort: Joi.array().items(Joi.string()).max(200).default([]) }).default({ cohort: [] }),
+  department: Joi.string().required(),
+});
+
+/**
+ * Un rapport départemental reste dans le périmètre du compte (L11).
+ */
+function isDepartmentInDashboardScope(user, department) {
+  switch (user.role) {
+    case ROLES.ADMIN:
+      return true;
+    case ROLES.REFERENT_REGION:
+      return Boolean(user.region) && (region2department[user.region] || []).includes(department);
+    case ROLES.REFERENT_DEPARTMENT:
+      return (user.department || []).includes(department);
+    default:
+      return false;
+  }
+}
+
 router.post("/youngsReport", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { user } = req;
-    const { filters, department } = req.body;
 
     if (!canSeeDashboardInscriptionInfo(user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (user.role === ROLES.REFERENT_REGION && !region2department[user.region].includes(department))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Corps non validé jusqu'ici : `department` et `filters.cohort` partaient tels
+    // quels dans la requête Elasticsearch (L11).
+    const { error, value } = youngsReportSchema.validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { filters, department } = value;
 
-    if (user.role === ROLES.REFERENT_DEPARTMENT && !user.department.includes(department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isDepartmentInDashboardScope(user, department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const body = {
       query: {
@@ -126,28 +156,18 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     const filterFields = ["status", "cohort", "academy", "department"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    let session = null;
-    if (req.user.role === ROLES.HEAD_CENTER) {
-      session = await SessionPhase1Model.findOne({ headCenterId: req.user._id, cohort: queryFilters.cohort });
-    }
-    if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) {
-      session = await SessionPhase1Model.findOne({ adjointsIds: { $in: [req.user._id] }, cohort: queryFilters.cohort });
-    }
-
     const body = {
       query: {
         bool: {
           must: [
             { match_all: {} },
             //context fitler
-            session ? { terms: { "sessionPhase1Id.keyword": [session._id] } } : null,
-            session ? { term: { "status.keyword": YOUNG_STATUS.VALIDATED } } : null,
             queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
             queryFilters?.status?.length ? { terms: { "status.keyword": queryFilters.status } } : null,
           ].filter(Boolean),
           filter: [
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
+            user.role === ROLES.REFERENT_REGION
               ? {
                   bool: {
                     should: [
@@ -322,6 +342,7 @@ router.post("/getInAndOutCohort", passport.authenticate(["referent"], { session:
         bool: {
           must: [{ match_all: {} }],
           filter: [
+            // Le visiteur est borné à sa région, comme sur les autres agrégations (L11).
             user.role === ROLES.REFERENT_REGION
               ? {
                   bool: {
@@ -398,7 +419,7 @@ router.post("/youngForInscription", passport.authenticate(["referent"], { sessio
             queryFilters?.academy?.length ? { terms: { "academy.keyword": queryFilters.academy } } : null,
           ].filter(Boolean),
           filter: [
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
+            user.role === ROLES.REFERENT_REGION
               ? {
                   bool: {
                     should: [
@@ -503,7 +524,7 @@ router.post("/totalYoungByDate", passport.authenticate(["referent"], { session: 
           ].filter(Boolean),
 
           filter: [
-            user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR
+            user.role === ROLES.REFERENT_REGION
               ? {
                   bool: {
                     should: [

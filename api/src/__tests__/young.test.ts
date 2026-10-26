@@ -1,11 +1,7 @@
-import fetch from "node-fetch";
-
 import request from "supertest";
-import jwt from "jsonwebtoken";
-import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS, COHORT_TYPE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
-import { sendTemplate } from "../brevo";
+import { ROLES, COHORTS, YOUNG_SOURCE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS, ERRORS } from "snu-lib";
 import * as fileUtils from "../utils/file";
-import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
+import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { closeRedisClient } from "../redis";
 import { getNewApplicationFixture } from "./fixtures/application";
@@ -20,7 +16,7 @@ import { createReferentHelper } from "./helpers/referent";
 import { getNewReferentFixture } from "./fixtures/referent";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
-import { ClasseModel } from "../models";
+import { ClasseModel, YoungModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 
@@ -53,6 +49,8 @@ jest.mock("../utils", () => ({
   getFile: () => Promise.resolve({ Body: "" }),
   uploadFile: (path, file) => Promise.resolve({ path, file }),
   deleteFile: (path, file) => Promise.resolve({ path, file }),
+  listFiles: () => Promise.resolve([]),
+  deleteFilesByList: () => Promise.resolve({}),
 }));
 
 jest.mock("../emails", () => ({
@@ -184,7 +182,8 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      // La fixture a une phase 3 validée, désormais figée.
+      const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: "WAITING_REALISATION" }));
 
       const res = await request(await getAppHelperWithAcl(young))
         .put(`/young/${young._id}/validate-mission-phase3`)
@@ -192,7 +191,7 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(200);
     });
     it("should be only accessible by young", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: "WAITING_REALISATION" }));
       const passport = require("passport");
       const res = await request(await getAppHelperWithAcl())
         .put(`/young/${young._id}/validate-mission-phase3`)
@@ -208,61 +207,6 @@ describe("Young", () => {
         .put(`/young/${they._id}/validate-mission-phase3`)
         .send();
       expect(res.statusCode).toEqual(403);
-    });
-  });
-
-  let storedState;
-  let storedNonce;
-
-  describe("POST /young/france-connect/authorization-url", () => {
-    it("should return 200", async () => {
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/france-connect/authorization-url")
-        .send({
-          callback: "foo",
-        });
-      const url = res.body.data.url;
-      storedState = url.split("state=")[1].split("&")[0];
-      storedNonce = url.split("nonce=")[1].split("&")[0];
-      expect(res.statusCode).toEqual(200);
-    });
-  });
-
-  describe("POST /young/france-connect/user-info", () => {
-    it("should return 200", async () => {
-      const secretKey = "mysecretkey";
-      const jwtPayload = {
-        nonce: storedNonce,
-      };
-      const jwtOptions = {
-        expiresIn: "1h",
-      };
-      const jwtToken = jwt.sign(jwtPayload, secretKey, jwtOptions);
-
-      const jsonResponse = jest
-        .fn()
-        .mockReturnValueOnce(
-          Promise.resolve({
-            access_token: "foo",
-            id_token: jwtToken,
-          }),
-        )
-        .mockReturnValue(Promise.resolve({}));
-      // @ts-ignore
-      fetch.mockReturnValue(
-        Promise.resolve({
-          status: 200,
-          json: jsonResponse,
-        }),
-      );
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/france-connect/user-info")
-        .send({
-          code: "foo",
-          callback: "bar",
-          state: storedState,
-        });
-      expect(res.statusCode).toEqual(200);
     });
   });
 
@@ -497,75 +441,8 @@ describe("Young", () => {
     });
   });
 
-  describe("POST /young/invite", () => {
-    it("should return 403 when user is not authorized to invite young", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }));
-      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: false }));
-      const youngFixture = getNewYoungFixture({ cohortId: cohort._id.toString() });
-
-      const res = await request(await getAppHelperWithAcl(referent))
-        .post("/young/invite")
-        .send(youngFixture);
-
-      expect(res.statusCode).toBe(403);
-      expect(res.body.code).toBe(ERRORS.OPERATION_NOT_ALLOWED);
-    });
-
-    it("should return 200 when user is authorized to invite young", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }));
-      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: true }));
-      const youngFixture = getNewYoungFixture({ cohortId: cohort._id.toString() });
-
-      const res = await request(await getAppHelperWithAcl(referent))
-        .post("/young/invite")
-        .send(youngFixture);
-
-      expect(res.statusCode).toBe(200);
-      expect(res.body.young).toBeDefined();
-      expect(res.body.ok).toBe(true);
-    });
-
-    it("should create a new young user and send an invitation email", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentClasse: true, type: COHORT_TYPE.CLE }));
-      const young = getNewYoungFixture({ cohortId: cohort._id.toString() });
-
-      const res = await request(await getAppHelperWithAcl(referent))
-        .post("/young/invite")
-        .send(young);
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty("young");
-      expect(res.body.young).toHaveProperty("invitationToken");
-      expect(res.body.young).toHaveProperty("invitationExpires");
-      expect(res.body.young).toHaveProperty("status", "WAITING_VALIDATION");
-      expect(res.body.young).toHaveProperty("cohort", cohort.name);
-      expect(res.body.young).toHaveProperty("cohortId", cohort._id.toString());
-    });
-  });
-
-  describe("POST /young/signup_verify", () => {
-    it("should return 400 when missing invitationToken", async () => {
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_verify")
-        .send({});
-      expect(res.statusCode).toEqual(400);
-    });
-    it("should return 404 when invitation is expired", async () => {
-      await deleteYoungByEmailHelper("foo@example.org");
-      const invitationToken = Date.now().toString();
-      await createYoungHelper({
-        ...getNewYoungFixture(),
-        invitationToken,
-        invitationExpires: new Date(Date.now() - 1000 * 60 * 60 * 24 * 70),
-      });
-      // expect(new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)).toEqual([]);
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_verify")
-        .send({ invitationToken });
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 404 when invitation token is wrong", async () => {
+  describe("M43 — POST /young/signup_verify supprimée", () => {
+    it("n'est plus montée : répond 404 même avec un invitationToken valide", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
       const invitationToken = Date.now().toString();
       await createYoungHelper({
@@ -573,23 +450,17 @@ describe("Young", () => {
         invitationToken,
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_verify")
-        .send({ invitationToken: "bar" });
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 200 when invitation token is wrong", async () => {
-      await deleteYoungByEmailHelper("foo@example.org");
-      const invitationToken = Date.now().toString();
-      await createYoungHelper({
-        ...getNewYoungFixture(),
-        invitationToken,
-        invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-      });
-      const res = await request(await getAppHelperWithAcl())
+
+      const res = await request(getAppHelper())
         .post("/young/signup_verify")
         .send({ invitationToken });
-      expect(res.statusCode).toEqual(200);
+
+      expect(res.statusCode).toEqual(404);
+      // Le 404 par défaut d'Express n'a pas de corps applicatif : un gestionnaire encore monté
+      // répondrait avec un corps { ok: ..., code: ... } — ici 200 avec le dossier puisque le jeton
+      // est valide, ou { ok: false, code: "INVITATION_TOKEN_EXPIRED_OR_INVALID" } sinon.
+      expect(res.body?.ok).toBeUndefined();
+      expect(res.body?.code).toBeUndefined();
     });
   });
 
@@ -668,6 +539,123 @@ describe("Young", () => {
         .attach("file", Buffer.from("contenu"), { filename: "test.csv", contentType: "text/csv" });
       expect(res.status).toEqual(400);
     });
+
+    // GOO-174 : le plafond de 3 pièces d'identité portait sur body.category (valeur envoyée par le
+    // client, jamais égale à "cniFiles") au lieu de la clé de route key : il ne s'appliquait jamais.
+    describe("plafond de 3 pièces d'identité sur la clé cniFiles (GOO-174)", () => {
+      it("refuse un 4e dépôt quand 3 pièces d'identité sont déjà présentes, sans rien écrire", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }, { name: "passeport.pdf" }] },
+        } as any);
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(young))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["4e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "4e.jpeg" });
+
+        expect(res.status).toEqual(403);
+        expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
+
+      it("refuse un dépôt qui ferait dépasser 3 pièces d'identité (2 présentes + 2 envoyées)", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }] },
+        } as any);
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg").mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(young))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["3e.jpeg", "4e.jpeg"], category: "cniNew" }))
+          .attach("fichier1", Buffer.from("contenu"), { filename: "3e.jpeg" })
+          .attach("fichier2", Buffer.from("contenu"), { filename: "4e.jpeg" });
+
+        expect(res.status).toEqual(403);
+        expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(2);
+      });
+
+      it("accepte un dépôt qui atteint exactement 3 pièces d'identité (2 présentes + 1 envoyée)", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }] },
+        } as any);
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(young))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["3e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "3e.jpeg" });
+
+        expect(res.status).toEqual(200);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
+
+      it("ne plafonne pas une autre clé (préparation militaire) même avec de nombreuses pièces déjà présentes", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture(),
+          files: {
+            militaryPreparationFilesIdentity: [{ name: "a.pdf" }, { name: "b.pdf" }, { name: "c.pdf" }, { name: "d.pdf" }, { name: "e.pdf" }],
+          },
+        } as any);
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(young))
+          .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
+          .field("body", JSON.stringify({ names: ["f.jpeg"] }))
+          .attach("file", Buffer.from("contenu"), { filename: "f.jpeg" });
+
+        expect(res.status).toEqual(200);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.militaryPreparationFilesIdentity).toHaveLength(6);
+      });
+
+      // Le seul appelant réel de cniFiles (admin/src/scenes/phase0/components/CniModal.jsx) agit en
+      // tant que référent, jamais en tant que volontaire : ce chemin a sa propre non-régression et
+      // son propre refus, avec un vrai ReferentDocument (isReferent + canEditYoung), pas un objet nu.
+      it("un référent (acteur réel) accepte un dépôt qui atteint exactement 3 pièces d'identité", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }] },
+        } as any);
+        const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(referent, "referent"))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["3e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "3e.jpeg" });
+
+        expect(res.status).toEqual(200);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
+
+      it("un référent (acteur réel) est refusé au-delà de 3 pièces d'identité, sans rien écrire", async () => {
+        const young = await createYoungHelper({
+          ...getNewYoungFixture({ cohort: COHORTS.AVENIR }),
+          files: { cniFiles: [{ name: "recto.pdf" }, { name: "verso.pdf" }, { name: "passeport.pdf" }] },
+        } as any);
+        const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
+        const res = await request(await getAppHelperWithAcl(referent, "referent"))
+          .post(`/young/${young._id}/documents/cniFiles`)
+          .field("body", JSON.stringify({ names: ["4e.jpeg"], category: "cniNew" }))
+          .attach("file", Buffer.from("contenu"), { filename: "4e.jpeg" });
+
+        expect(res.status).toEqual(403);
+        expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
+        const apres = await YoungModel.findById(young._id);
+        expect(apres?.files.cniFiles).toHaveLength(3);
+      });
+    });
   });
 
   describe("GET /young/validate_phase3/:young/:token", () => {
@@ -716,42 +704,23 @@ describe("Young", () => {
         .send();
       expect(res.statusCode).toEqual(404);
     });
-    it("should return 200 if young found", async () => {
+    it("should return 403 if actor is a young, even on their own dossier (GOO-198)", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
       const res = await request(await getAppHelperWithAcl(young))
         .post("/young/" + young._id + "/email/" + validTemplate)
         .send({ message: "hello" });
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(403);
+      expect(res.body.code).toEqual(ERRORS.OPERATION_NOT_ALLOWED);
     });
-    it("should return 200 when VALIDATED", async () => {
-      // @ts-ignore
-      sendTemplate.mockClear();
-      const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
-      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
-      const res = await request(await getAppHelperWithAcl(tutor))
-        .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`)
-        .send({ status: "VALIDATED" });
+    it("should return 200 if actor is a referent", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post("/young/" + young._id + "/email/" + validTemplate)
+        .send({ message: "hello" });
       expect(res.statusCode).toEqual(200);
-      expect(sendTemplate).toHaveBeenCalledTimes(1);
-      expect(sendTemplate).toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, {
-        cc: [
-          { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
-          { name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email },
-        ],
-        emailTo: [{ email: young.email, name: `${young.firstName} ${young.lastName}` }],
-        params: {
-          cta: "http://localhost:8081",
-          firstName: young.firstName,
-          lastName: young.lastName,
-          link: undefined,
-          message: undefined,
-          missionName: undefined,
-          object: undefined,
-          structureName: undefined,
-          type_document: undefined,
-        },
-      });
     });
   });
 

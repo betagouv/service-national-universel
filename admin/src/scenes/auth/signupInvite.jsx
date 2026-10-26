@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 
 import { setUser } from "../../redux/auth/actions";
 
-import api, { setJwtToken } from "../../services/api";
+import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import PasswordEye from "../../components/PasswordEye";
 import Header from "./components/header";
@@ -28,8 +28,7 @@ export default function SignupInvite() {
     (async () => {
       try {
         if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
-        const { data, token } = await api.post(`/referent/signup_verify`, { invitationToken });
-        if (token) setJwtToken(token);
+        const { data } = await api.post(`/referent/signup_verify`, { invitationToken });
         setNewUser(data);
       } catch (error) {
         if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
@@ -63,12 +62,11 @@ export default function SignupInvite() {
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
           <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">{title}</h1>
           <Formik
-            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: newuser.email, password: "", repassword: "", acceptCGU: "" }}
+            initialValues={{ firstName: newuser.firstName, lastName: newuser.lastName, email: "", password: "", repassword: "", acceptCGU: "" }}
             onSubmit={async (values, actions) => {
               try {
-                const { data: user, token, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken, acceptCGU: values.acceptCGU });
+                const { data: user, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken, acceptCGU: values.acceptCGU });
                 actions.setSubmitting(false);
-                if (ok && token) setJwtToken(token);
                 if (ok && user) dispatch(setUser(user));
               } catch (e) {
                 actions.setSubmitting(false);
@@ -98,7 +96,7 @@ export default function SignupInvite() {
                       type="email"
                       value={values.email}
                       onChange={handleChange}
-                      placeholder="Email"
+                      placeholder="Adresse email à laquelle vous avez reçu l'invitation"
                       haserror={errors.email}
                     />
                     <p className="text-xs text-red-500">{errors.email}</p>

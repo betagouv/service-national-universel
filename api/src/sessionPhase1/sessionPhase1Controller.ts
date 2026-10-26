@@ -5,6 +5,7 @@ import { capture } from "../sentry";
 import { ERRORS } from "../utils";
 import { SessionPhase1Model, LigneBusModel } from "../models";
 import { validateId } from "../utils/validator";
+import { isSessionPhase1InUserScope } from "../services/sejourAccess";
 
 import { UserRequest } from "../controllers/request";
 
@@ -17,8 +18,9 @@ router.get("/:id/plan-de-transport", passport.authenticate("referent", { session
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const session = await SessionPhase1Model.findById(id).select({ cohort: 1, cohesionCenterId: 1 });
+    const session = await SessionPhase1Model.findById(id).select({ cohort: 1, cohortId: 1, cohesionCenterId: 1, department: 1, region: 1 });
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isSessionPhase1InUserScope(req.user, session)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const lignesDeBus = await LigneBusModel.find({ cohortId: session.cohortId, centerId: session.cohesionCenterId }).select({ _id: 1 });
 

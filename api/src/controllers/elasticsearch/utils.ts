@@ -1,11 +1,14 @@
 import Joi from "joi";
-import { ROLES, canSearchInElasticSearch } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, getEsSensitiveFields, region2department } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS, isYoung, isReferent } from "../../utils";
 import { StructureModel } from "../../models";
 import { UserDto } from "snu-lib";
 
 const ES_NO_LIMIT = 10000;
+// PM12 : chaque mot génère 3 clauses multi_match ; sans plafond, une searchbar à plusieurs
+// centaines de mots ferait grossir la requête ES d'autant.
+const MAX_SEARCHBAR_WORDS = 20;
 
 type SearchFields = string[];
 type FilterFields = string[];
@@ -23,7 +26,7 @@ type Sort = {
 } | null;
 
 function searchSubQuery([value]: string[], fields: SearchFields) {
-  const words = value?.trim().split(" ");
+  const words = value?.trim().split(" ").slice(0, MAX_SEARCHBAR_WORDS);
 
   const shouldClauses = words.map((word) => {
     return [
@@ -94,13 +97,44 @@ function unsafeStrucuredClone(obj: any) {
   return JSON.parse(JSON.stringify(obj));
 }
 
+/**
+ * Ajoute l'exclusion des champs secrets de l'index au `_source` d'une requête ES.
+ * C'est la défense principale : quoi que demande l'appelant (`_source: "*"`, liste
+ * de champs choisie par le client), le cluster ne renvoie jamais ces champs.
+ */
+function applySourceExcludes(index: string | undefined, query: any): any {
+  const excludes = getEsSensitiveFields(index);
+  if (!excludes.length || !query || typeof query !== "object" || Array.isArray(query)) return query;
+  const current = query._source;
+  let includes: string[];
+  if (!current || current === "*") includes = ["*"];
+  else if (Array.isArray(current)) includes = current;
+  else includes = current.includes || ["*"];
+  return { ...query, _source: { includes, excludes } };
+}
+
 function buildNdJson(header: any, hitsQuery: any, aggsQuery: any = null): string {
-  if (!aggsQuery) return [JSON.stringify(header), JSON.stringify(hitsQuery)].join("\n") + "\n";
-  return [JSON.stringify(header), JSON.stringify(hitsQuery), JSON.stringify(header), JSON.stringify(aggsQuery)].join("\n") + "\n";
+  const index = header?.index;
+  const hits = applySourceExcludes(index, hitsQuery);
+  if (!aggsQuery) return [JSON.stringify(header), JSON.stringify(hits)].join("\n") + "\n";
+  return [JSON.stringify(header), JSON.stringify(hits), JSON.stringify(header), JSON.stringify(applySourceExcludes(index, aggsQuery))].join("\n") + "\n";
 }
 
 function buildArbitratyNdJson(...args: any[]): string {
-  return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
+  // Les arguments alternent en-tête / corps de requête : on applique l'exclusion
+  // aux corps, en s'appuyant sur l'index déclaré par l'en-tête qui les précède.
+  let currentIndex: string | undefined;
+  return (
+    args
+      .map((arg, position) => {
+        if (position % 2 === 0) {
+          currentIndex = arg?.index;
+          return JSON.stringify(arg);
+        }
+        return JSON.stringify(applySourceExcludes(currentIndex, arg));
+      })
+      .join("\n") + "\n"
+  );
 }
 
 interface RequestBodyParams {
@@ -181,6 +215,14 @@ function joiElasticSearch({ filterFields, sortFields = [], body }: JoiElasticSea
           return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.number().allow(null)).max(200) };
         }
 
+        // PM12 : searchbar alimente searchSubQuery, qui génère 3 clauses ES par mot — sans borne
+        // de longueur, une chaîne de plusieurs centaines de Ko fait grossir la requête générée
+        // d'autant (blocage de l'API). Les autres filtres (facettes) ne sont pas concernés : ce
+        // sont des valeurs choisies dans une liste fermée côté front, pas du texte libre.
+        if (fieldWithoutKeyword === "searchbar") {
+          return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.string().allow("").max(200)).max(200) };
+        }
+
         // Default case: filter is a string
         return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.string().allow("")).max(200) };
       }, {}),
@@ -201,7 +243,8 @@ function joiElasticSearch({ filterFields, sortFields = [], body }: JoiElasticSea
       .allow(null)
       .default(null),
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
-    size: Joi.number().integer().min(10).max(100).default(10),
+    // `0` : comptage seul (hits.total), sans renvoyer de dossier (cf. YoungFooterNoRequest).
+    size: Joi.alternatives().try(Joi.number().valid(0), Joi.number().integer().min(10).max(100)).default(10),
   });
 
   const { error, value } = schema.validate({ ...body }, { stripUnknown: true });
@@ -217,12 +260,32 @@ interface MissionContextResult {
   };
 }
 
-async function buildMissionContext(user: UserDto): Promise<MissionContextResult> {
+type MissionContextOptions = {
+  /**
+   * Garde le périmètre national des référents. Réservé à la recherche de missions à proposer à un
+   * volontaire : elle ne porte que sur des missions validées et visibles, que le volontaire trouve
+   * lui-même au-delà des limites du département.
+   */
+  referentNationalScope?: boolean;
+};
+
+async function buildMissionContext(user: UserDto, { referentNationalScope = false }: MissionContextOptions = {}): Promise<MissionContextResult> {
   const contextFilters: ContextFilters = [];
 
   // A young can only see validated missions.
   if (isYoung(user)) contextFilters.push({ term: { "status.keyword": "VALIDATED" } });
   if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // Les référents ne listent que les missions de leur territoire, comme `isMissionInUserScope` (GOO-45).
+  if (!referentNationalScope && user.role === ROLES.REFERENT_DEPARTMENT) {
+    const departments = ([] as string[]).concat(user.department || []);
+    if (!departments.length) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "department.keyword": departments } });
+  }
+  if (!referentNationalScope && user.role === ROLES.REFERENT_REGION) {
+    if (!user.region) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ term: { "region.keyword": user.region } });
+  }
 
   // A responsible cans only see their structure's missions.
   if (user.role === ROLES.RESPONSIBLE) {
@@ -248,16 +311,49 @@ interface ApplicationContextResult {
   };
 }
 
+/**
+ * Rôles pour lesquels `buildApplicationContext` sait construire un périmètre.
+ * Un rôle absent de cette liste n'obtiendrait AUCUN filtre : il verrait l'index
+ * `application` national, et via `exportFields` les fiches jeunes peuplées.
+ * La fonction refuse donc par défaut (cf. H26).
+ * ADMIN est national par conception.
+ */
+const APPLICATION_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
+
+/**
+ * Une proposition de mission que le volontaire n'a pas acceptée n'est pas une candidature pour la
+ * structure, même sortie en REFUSED ou CANCEL (marqueur `proposalNotAccepted`, cf. `NOT_A_PROPOSAL`).
+ */
+const UNACCEPTED_PROPOSALS_EXCLUDED = { bool: { must_not: [{ term: { proposalNotAccepted: true } }] } };
+
 async function buildApplicationContext(user: UserDto): Promise<ApplicationContextResult> {
   const contextFilters: ContextFilters = [];
 
   if (!canSearchInElasticSearch(user, "application")) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+  if (!APPLICATION_CONTEXT_SCOPED_ROLES.includes(user.role)) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // Périmètre géographique des référents, aligné sur les policies
+  // CANDIDATURE_DEPARTMENT_* / CANDIDATURE_REGION_* (young.department / young.region).
+  // L'index `application` ne porte pas `youngRegion` : la région est traduite en
+  // liste de départements.
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    const departments = user.department || [];
+    if (!departments.length) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "youngDepartment.keyword": departments } });
+  }
+
+  if (user.role === ROLES.REFERENT_REGION) {
+    const departments = region2department[user.region as string] || [];
+    if (!departments.length) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "youngDepartment.keyword": departments } });
+  }
 
   // A responsible can only see their structure's applications.
   if (user.role === ROLES.RESPONSIBLE) {
     if (!user.structureId) return { applicationContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push({ terms: { "structureId.keyword": [user.structureId] } });
     contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
+    contextFilters.push(UNACCEPTED_PROPOSALS_EXCLUDED);
   }
 
   // A supervisor can only see their structures' applications.
@@ -266,6 +362,7 @@ async function buildApplicationContext(user: UserDto): Promise<ApplicationContex
     const data = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
     contextFilters.push({ terms: { "structureId.keyword": data.map((e) => e._id.toString()) } });
     contextFilters.push({ terms: { "status.keyword": ["WAITING_VALIDATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"] } });
+    contextFilters.push(UNACCEPTED_PROPOSALS_EXCLUDED);
   }
 
   return { applicationContextFilters: contextFilters };
@@ -280,11 +377,15 @@ function buildDashboardUserRoleContext(user: UserDto): DashboardUserRoleContextR
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
-  if (user.role === ROLES.REFERENT_REGION || user.role === ROLES.VISITOR) {
+  if (user.role === ROLES.REFERENT_REGION) {
     contextFilters.push({ terms: { "region.keyword": [user.region] } });
   }
   return { dashboardUserRoleContextFilters: contextFilters };
 }
+
+/** Bornes des recherches de missions côté jeune : `from + size` ≤ 10 000 (fenêtre ES). */
+const YOUNG_MISSION_SEARCH_MAX_SIZE = 100;
+const YOUNG_MISSION_SEARCH_MAX_PAGE = 99;
 
 function getResponsibleCenterField(role: string | undefined): string | null {
   if (!role) return null;
@@ -298,12 +399,16 @@ function getResponsibleCenterField(role: string | undefined): string | null {
 }
 
 export {
+  applySourceExcludes,
   buildNdJson,
   buildArbitratyNdJson,
   buildRequestBody,
   joiElasticSearch,
+  searchSubQuery,
   buildMissionContext,
   buildApplicationContext,
   buildDashboardUserRoleContext,
   getResponsibleCenterField,
+  YOUNG_MISSION_SEARCH_MAX_SIZE,
+  YOUNG_MISSION_SEARCH_MAX_PAGE,
 };

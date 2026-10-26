@@ -37,10 +37,14 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const { error: errorProgram, value: checkedProgram } = validateProgram(req.body);
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorProgram || errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    if (!canCreateOrUpdateProgram(req.user, checkedProgram)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let obj = checkedProgram;
     const data = await ProgramModel.findById(checkedId);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // Deux contrôles : sur le programme STOCKÉ (l'acteur a-t-il la main dessus ?) et sur le programme
+    // résultant (le fait-il sortir de son périmètre ?). N'évaluer que le corps de la requête laissait
+    // un référent départemental réécrire un programme national ou d'un autre territoire.
+    if (!canCreateOrUpdateProgram(req.user, data.toJSON())) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateOrUpdateProgram(req.user, { ...data.toJSON(), ...obj })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     data.set(obj);
     await data.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data });

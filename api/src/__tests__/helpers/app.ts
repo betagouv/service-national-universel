@@ -1,7 +1,6 @@
 /* eslint-disable no-import-assign */
 import express from "express";
 import cookieParser from "cookie-parser";
-import bodyParser from "body-parser";
 import passport from "passport";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
@@ -13,8 +12,18 @@ import { isReferent, isYoung } from "../../utils";
 import { ReferentDocument, YoungDocument } from "../../models";
 import { getAcl } from "../../services/iam/Permission.service";
 import { ROLE_JEUNE, ROLES } from "snu-lib";
+import { resetRateLimiters } from "../../middlewares/rateLimit";
+import { applyBodyParsers, handleError } from "../../middlewares/httpHardening";
+import { corsOptionsDelegate } from "../../cors-options";
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const cors = require("cors");
 
 export function resetAppAuth() {
+  // Les limiteurs de débit des routes d'auth vivent au niveau du module, donc
+  // sont partagés par tous les getAppHelper() d'un même process : sans remise à
+  // zéro, un cas de test épuiserait le quota des suivants.
+  resetRateLimiters();
   // @ts-ignore
   passport.user = getNewReferentFixture();
   // @ts-ignore
@@ -36,8 +45,6 @@ export async function getAppHelperWithAcl(user?: Partial<UserRequest["user"] & {
       // @ts-ignore
       user.acl = await getAcl(user as any);
     }
-    // @ts-ignore
-    console.log("userWithAcl", user?._id, JSON.stringify(user?.acl, null, 2));
     return getAppHelper(user, authStrategy);
   } else {
     return getAppHelper({ role: ROLES.ADMIN, acl: await getAcl({ role: ROLES.ADMIN }) } as any, authStrategy);
@@ -46,12 +53,14 @@ export async function getAppHelperWithAcl(user?: Partial<UserRequest["user"] & {
 
 function getAppHelper(user?: Partial<UserRequest["user"] & { subRole?: any; acl?: any[] }> | YoungDocument | ReferentDocument | null, authStrategy?: "young" | "referent") {
   const app = express();
-  app.use(bodyParser.json());
-  app.use(bodyParser.text({ type: "application/x-ndjson" }));
-  app.use(bodyParser.urlencoded({ extended: true }));
+  // Même CORS, mêmes analyseurs de corps et même gestionnaire d'erreurs que main.js : un test de
+  // route peut ainsi vérifier les en-têtes CORS qu'un front reçoit (GOO-201).
+  app.use(cors(corsOptionsDelegate));
+  applyBodyParsers(app);
   // @ts-ignore
   app.use(cookieParser());
   injectRoutes(app);
+  app.use(handleError);
 
   if (user) {
     // @ts-ignore

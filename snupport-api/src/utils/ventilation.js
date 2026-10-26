@@ -6,14 +6,21 @@ const { setAgent, setContact } = require("../utils");
 
 const matchVentilationRule = async (ticket) => {
   try {
+    // Un référent ne lit (ticketScope.js) que les tickets QUESTION de son territoire : ses règles de
+    // ventilation ne doivent pas non plus agir sur un ticket TECHNICAL hors de ce périmètre (PM47).
+    // `formSubjectStep1` est un champ du ticket, pas de la règle : c'est le ticket traité qui doit
+    // être QUESTION pour que les branches référent entrent même dans la requête.
+    const isReferentEligible = ticket.formSubjectStep1 === "QUESTION";
     let ventilations = await VentilationModel.find({
       active: true,
       $or: [
-        {
-          userRole: "AGENT",
-        },
-        { userRole: "REFERENT_REGION", userRegion: ticket.contactRegion },
-        { userRole: "REFERENT_DEPARTMENT", userDepartment: ticket.contactDepartment },
+        { userRole: "AGENT" },
+        ...(isReferentEligible
+          ? [
+              { userRole: "REFERENT_REGION", userRegion: ticket.contactRegion },
+              { userRole: "REFERENT_DEPARTMENT", userDepartment: ticket.contactDepartment },
+            ]
+          : []),
       ],
     });
     //match all ET conditions
@@ -139,8 +146,12 @@ const matchVentilationRule = async (ticket) => {
 
     return ticket;
   } catch (error) {
-    ticket.logVentilation.push(error);
+    // `ticket` peut être devenu undefined si un appelant en amont (ex. un futur bug de setField) ne
+    // respecte pas son contrat : ne pas déréférencer une deuxième fois dans le bloc qui journalise
+    // l'erreur, c'est exactement ce qui transformait cette erreur en requête sans réponse (PM47).
+    if (ticket) ticket.logVentilation.push(error);
     capture(error);
+    return ticket;
   }
 };
 const setField = async (ticket, action) => {
@@ -151,7 +162,10 @@ const setField = async (ticket, action) => {
 
     return ticket;
   } catch (error) {
+    // Ne jamais renvoyer undefined : l'appelant (matchVentilationRule) déréférence le ticket juste
+    // après pour journaliser la règle appliquée (PM47).
     capture(error);
+    return ticket;
   }
 };
 

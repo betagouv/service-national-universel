@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
+const { sanitizeUserHtml } = require("../utils/userContent");
 const { capture } = require("../sentry");
 const TicketModel = require("../models/ticket");
 const MacroModel = require("../models/macro");
@@ -11,6 +12,8 @@ const ShortcutModel = require("../models/shortcut");
 const MessageModel = require("../models/message");
 const { sendEmailWithConditions, getHoursDifference } = require("../utils");
 const { agentGuard } = require("../middlewares/authenticationGuards");
+const { requireRole } = require("../middlewares/userRoleGuards");
+const { canAccessTicket } = require("../utils/ticketScope");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_TICKET_STATUS } = require("../schemas");
@@ -45,13 +48,17 @@ const SCHEMA_MACRO = Joi.object({
 
 router.use(agentGuard);
 
-router.post("/", validateBody(SCHEMA_MACRO.prefs({ presence: "required" })), async (req, res) => {
+// Créer, modifier, supprimer et appliquer une macro sont réservés au support central : snupport-app ne
+// propose les macros qu'au rôle AGENT, et une macro modifie des tickets en masse et peut écrire au
+// contact (FH11, GOO-13). La lecture reste ouverte aux agents authentifiés.
+
+router.post("/", requireRole("AGENT"), validateBody(SCHEMA_MACRO.prefs({ presence: "required" })), async (req, res) => {
   const { firstName, lastName, role, _id } = req.user;
   await MacroModel.create({ ...req.cleanBody, updatedBy: { firstName, lastName, role, _id } });
   return res.status(200).send({ ok: true });
 });
 
-router.patch("/:id", validateParams(idSchema), validateBody(SCHEMA_MACRO.min(1)), async (req, res) => {
+router.patch("/:id", requireRole("AGENT"), validateParams(idSchema), validateBody(SCHEMA_MACRO.min(1)), async (req, res) => {
   const { firstName, lastName, role, _id } = req.user;
   const macro = await MacroModel.findById(req.cleanParams.id);
   if (!macro) {
@@ -64,13 +71,14 @@ router.patch("/:id", validateParams(idSchema), validateBody(SCHEMA_MACRO.min(1))
   return res.status(200).send({ ok: true });
 });
 
-router.delete("/:id", validateParams(idSchema), async (req, res) => {
+router.delete("/:id", requireRole("AGENT"), validateParams(idSchema), async (req, res) => {
   await MacroModel.deleteOne({ _id: req.cleanParams.id });
   return res.status(200).send({ ok: true });
 });
 
 router.post(
   "/:id",
+  requireRole("AGENT"),
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -84,9 +92,20 @@ router.post(
     if (!agent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const macros = await MacroModel.findById(req.cleanParams.id);
     if (!macros) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Load and authorize the whole batch before touching anything: a macro must never be
+    // applied to a ticket outside the caller's perimeter (same rule as ticket.ts/message.js),
+    // and must not be half-applied when one of the ids is out of reach.
+    const tickets = [];
+    for (const tickId of req.cleanBody.ticketsId) {
+      const ticket = await TicketModel.findById(tickId);
+      if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      tickets.push(ticket);
+    }
+
     let ticketId = "";
-    for (let tickId of req.cleanBody.ticketsId) {
-      let ticket = await TicketModel.findById(tickId);
+    for (let ticket of tickets) {
       if (ticket._id === ticketId) return res.status(200).send({ ok: true });
       ticketId = JSON.parse(JSON.stringify(ticket._id));
       // set default agent
@@ -188,7 +207,7 @@ const setField = async (ticket, macroAction) => {
 
     if (macroAction.field === "notes.content") {
       if (!ticket.notes) ticket.notes = [];
-      ticket.notes.push({ content: macroAction.value, authorName: "supi-bot" });
+      ticket.notes.push({ content: sanitizeUserHtml(macroAction.value), authorName: "supi-bot" });
     } else {
       Array.isArray(ticket[macroAction.field]) ? ticket[macroAction.field].push(macroAction.value) : ticket.set({ [macroAction.field]: macroAction.value });
     }

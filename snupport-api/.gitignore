@@ -2,3 +2,6 @@
 /build
 .env-prod
 .env-staging
+# déclarations émises par tsc (outDir = ./src, cf. tsconfig.build.json)
+*.d.ts
+!/src/@types/**/*.d.ts

@@ -1,4 +1,4 @@
-import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility, CohortType, UserDto, ROLES } from "snu-lib";
+import { YOUNG_STATUS, regionsListDROMS, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility, CohortType, UserDto, ROLES } from "snu-lib";
 import { CohortModel, CohortDocument, InscriptionGoalModel, YoungModel } from "../models";
 
 export type CohortDocumentWithPlaces = CohortDocument<{
@@ -67,31 +67,6 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
     session.isEligible = true;
   }
   return getPlaces(sessionsEligibles, region);
-}
-
-export async function getAllSessions(young: YoungInfo) {
-  const cohorts = await CohortModel.find({});
-  const region = getRegionForEligibility(young);
-  const sessionsWithPlaces = await getPlaces(cohorts, region);
-  const availableSessions = await getFilteredSessions(young);
-  for (let session of sessionsWithPlaces) {
-    session.isEligible = availableSessions.some((e) => e.name === session.name);
-  }
-  return sessionsWithPlaces;
-}
-
-export async function getFilteredSessionsForCLE() {
-  const sessionsCLE = await CohortModel.find({ type: COHORT_TYPE.CLE, status: COHORT_STATUS.PUBLISHED });
-  let now = Date.now();
-  const sessions = sessionsCLE.filter(
-    (session) =>
-      !!session.inscriptionStartDate &&
-      // @ts-expect-error comparaison d'une Date avec un number...
-      session.inscriptionStartDate <= now &&
-      // @ts-expect-error comparaison d'une Date avec un number...
-      ((session.inscriptionEndDate && session.inscriptionEndDate > now) || (session.instructionEndDate && session.instructionEndDate > now)),
-  );
-  return sessions;
 }
 
 async function getPlaces(sessions: CohortDocumentWithPlaces[], region: string): Promise<CohortDocumentWithPlaces[]> {

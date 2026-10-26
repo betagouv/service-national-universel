@@ -22,6 +22,8 @@ import { ERRORS, deleteFile } from "../utils";
 import { sendTemplate } from "../brevo";
 import { UserRequest } from "./request";
 import { validateId } from "../utils/validator";
+import { canEditYoungInScope } from "../young/youngScope";
+import { canReferentChangeYoungStatus } from "../young/youngStatusTransitions";
 
 const router = express.Router({ mergeParams: true });
 
@@ -49,6 +51,19 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // Contrôle de périmètre AVANT toute écriture : la boucle ci-dessous supprime les pièces
+    // d'identité sur S3 et bascule le dossier en WAITING_CORRECTION (constat H22).
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // PH5 : une demande de correction ne rouvre que les dossiers en attente de validation (le dossier
+    // reste éligible s'il y est déjà) ; l'ADMIN garde toute latitude via canReferentChangeYoungStatus.
+    // Ce contrôle précède la boucle ci-dessous : une requête refusée ne supprime aucune pièce.
+    if (young.status !== YOUNG_STATUS.WAITING_CORRECTION && !canReferentChangeYoungStatus(req.user, young.status, YOUNG_STATUS.WAITING_CORRECTION)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const requests = young.correctionRequests ? young.correctionRequests : ([] as NonNullable<typeof young.correctionRequests>);
 
     const sentAt = Date.now();
@@ -73,10 +88,6 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       }
     }
 
-    if (!canUpdateYoungStatus({ body: { status: YOUNG_STATUS.WAITING_CORRECTION }, current: young })) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
     young.set({ correctionRequests: requests, status: YOUNG_STATUS.WAITING_CORRECTION });
     await young.save({ fromUser: req.user });
 
@@ -92,7 +103,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       capture(e);
     }
 
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -108,6 +119,10 @@ router.delete("/:youngId/:field", passport.authenticate("referent", { session: f
 
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     let found = false;
     let stillWaitingCorrection = false;
@@ -139,7 +154,7 @@ router.delete("/:youngId/:field", passport.authenticate("referent", { session: f
       young.set({ correctionRequests: requests, status });
       await young.save({ fromUser: req.user });
 
-      return res.status(200).send({ ok: true, data: serializeYoung(young) });
+      return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -157,10 +172,15 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let found = false;
     const requests = young.correctionRequests ? young.correctionRequests : [];
 
     for (const request of requests) {
+      if (request.status !== "SENT" && request.status !== "REMINDED") continue;
       found = true;
       // @ts-expect-error moderatorId is a string
       request.moderatorId = req.user._id;
@@ -184,34 +204,10 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
         capture(e);
       }
 
-      return res.status(200).send({ ok: true, data: serializeYoung(young) });
+      return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:youngId/remind-cni", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
-    if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
-
-    const young = await YoungModel.findById(youngId);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
-
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

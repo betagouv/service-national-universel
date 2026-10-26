@@ -1,0 +1,27 @@
+{
+  "name": "@snu/log-redaction",
+  "version": "1.0.0",
+  "description": "Redaction des secrets et des données personnelles avant écriture dans les logs et l'envoi à Sentry",
+  "main": "dist/index.js",
+  "module": "dist/esm/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc -b && tsc -p tsconfig.esm.json",
+    "check-types": "tsc -b",
+    "test": "jest",
+    "lint": "eslint ./src --ext .ts",
+    "lint:fix": "eslint ./src --ext .ts --fix",
+    "clean": "rm -fr node_modules .turbo dist coverage"
+  },
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/jest": "^29.5.12",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.2.5",
+    "typescript": "^5.2.2"
+  }
+}

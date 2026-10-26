@@ -1,6 +1,7 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import anonymize from "../anonymization/application";
+import { needsPreviousStatus, nextProposalMarker } from "../application/applicationProposal";
 
 import { ApplicationSchema, InterfaceExtended, MONGO_COLLECTION, getVirtualUser, buildPatchUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 import { MissionDocument } from "./mission";
@@ -46,6 +47,19 @@ schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   }
   this.updatedAt = new Date();
   next();
+});
+
+// Marqueur d'une proposition de mission non acceptée : tenu ici, et non dans chaque route, parce que
+// le statut change par plusieurs chemins (volontaire, référents, lot, crons, annulation de mission).
+schema.pre<SchemaExtended>("save", async function () {
+  if (!this.isNew && !this.isModified("status")) return;
+  let previousStatus: string | null | undefined;
+  if (!this.isNew && needsPreviousStatus({ status: this.status, current: this.proposalNotAccepted })) {
+    const previous = await (this.constructor as typeof ApplicationModel).findById(this._id).select({ status: 1 }).lean();
+    previousStatus = previous?.status;
+  }
+  const marker = nextProposalMarker({ status: this.status, previousStatus, current: this.proposalNotAccepted });
+  if (marker !== undefined) this.proposalNotAccepted = marker;
 });
 
 schema.set("toObject", { virtuals: true });

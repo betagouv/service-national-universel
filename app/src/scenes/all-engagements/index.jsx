@@ -3,7 +3,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import usePrograms from "../phase2/scenes/usePrograms";
 import Loader from "@/components/Loader";
-import EngagementCard from "../preinscription/components/EngagementCard";
+import EngagementCard from "@/components/engagement/EngagementCard";
 
 const Index = () => {
   const { isPending, error, data: programs } = usePrograms();

@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Modal, ModalHeader, ModalBody, Row, Col, FormGroup } from "reactstrap";
 import { Formik, Field } from "formik";
 import styled from "styled-components";
-import ReactSelect from "react-select";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import {
@@ -26,29 +25,6 @@ import ErrorMessage, { requiredMessage } from "../../errorMessage";
 import CustomMultiSelect from "../../CustomMultiSelect";
 
 export default function InviteHeader({ setOpen, open, label = "Inviter un référent" }) {
-  const { user } = useSelector((state) => state.Auth);
-
-  const [centers, setCenters] = useState(null);
-
-  // TODO - Refresh session on reselect other center
-
-  useEffect(() => {
-    (async () => {
-      if (!open) return;
-      try {
-        let { data } = await api.get("/cohesion-center");
-
-        if (user.role === ROLES.REFERENT_REGION) data = data.filter((e) => e.region === user.region);
-        if (user.role === ROLES.REFERENT_DEPARTMENT) data = data.filter((e) => user.department.includes(e.department));
-
-        const c = data.map((e) => ({ label: e.name, value: e.name, _id: e._id }));
-        setCenters(c);
-      } catch (e) {
-        console.log(e);
-      }
-    })();
-  }, [open]);
-
   const getSubRoleOptions = (subRoles) => {
     return Object.keys(subRoles).map((e) => ({ value: e, label: translate(subRoles[e]) }));
   };
@@ -71,26 +47,14 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
               email: "",
               region: "",
               department: [],
-              cohesionCenterName: "",
-              cohesionCenterId: "",
-              sessionPhase1Id: "",
             }}
             onSubmit={async (values, { setSubmitting }) => {
               try {
                 const obj = { ...values };
                 if (obj.role === ROLES.REFERENT_DEPARTMENT) obj.region = department2region[obj.department[0]];
                 if (obj.role === ROLES.REFERENT_REGION) obj.department = null;
-                if (obj.role !== ROLES.HEAD_CENTER) {
-                  obj.cohesionCenterId = null;
-                  obj.cohesionCenterName = null;
-                  obj.sessionPhase1Id = null;
-                }
                 if (obj.department && !obj.region) obj.region = department2region[obj.department];
-                const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
-
-                if (values.sessionPhase1Id) {
-                  await api.put(`/session-phase1/${values.sessionPhase1Id}`, { headCenterId: referent._id });
-                }
+                await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
                 toastr.success("Invitation envoyée");
                 setOpen();
                 setOpen(false);
@@ -207,22 +171,6 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                       </Col>
                     </Row>
                   )}
-                  {values.role === ROLES.HEAD_CENTER && (
-                    <Row>
-                      <Col md={6}>
-                        <FormGroup>
-                          <ChooseCenter validate={(v) => !v && requiredMessage} value={values} name="cohesionCenterId" onChange={handleChange} centers={centers} />
-                          <ErrorMessage errors={errors} touched={touched} name="cohesionCenterId" />
-                        </FormGroup>
-                      </Col>
-                      <Col md={6}>
-                        <FormGroup>
-                          <ChooseSessionPhase1 validate={(v) => !v && requiredMessage} value={values} name="sessionPhase1Id" onChange={handleChange} />
-                          <ErrorMessage errors={errors} touched={touched} name="sessionPhase1Id" />
-                        </FormGroup>
-                      </Col>
-                    </Row>
-                  )}
                 </ModalBody>
 
                 <br />
@@ -297,63 +245,6 @@ const ChooseRegion = ({ value, onChange, validate }) => {
   );
 };
 
-const ChooseCenter = ({ onChange, centers, onSelect, value, validate }) => {
-  const { user } = useSelector((state) => state.Auth);
-
-  useEffect(() => {
-    if (user.role === ROLES.HEAD_CENTER) {
-      return onChange({ target: { value: user.cohesionCenterId, name: "cohesionCenterId" } }), onChange({ target: { value: user.cohesionCenterName, name: "cohesionCenterName" } });
-    }
-  }, []);
-
-  return (
-    <>
-      <Field hidden value={value.cohesionCenterName} name="cohesionCenterName" onChange={onChange} validate={validate} />
-      <Field hidden value={value.cohesionCenterId} name="cohesionCenterId" onChange={onChange} validate={validate} />
-      <ReactSelect
-        disabled={user.role === ROLES.HEAD_CENTER}
-        options={centers}
-        placeholder="Choisir un centre"
-        noOptionsMessage={() => "Aucun centre ne correspond à cette recherche."}
-        validate={validate}
-        onChange={(e) => {
-          onChange({ target: { value: e._id, name: "cohesionCenterId" } });
-          onChange({ target: { value: e.value, name: "cohesionCenterName" } });
-          onSelect?.(e);
-        }}
-      />
-    </>
-  );
-};
-
-const ChooseSessionPhase1 = ({ onChange, value, validate }) => {
-  const [sessions, setSessions] = useState([]);
-  useEffect(() => {
-    if (!value.cohesionCenterId) return;
-
-    (async () => {
-      const { ok, error, data } = await api.get(`/cohesion-center/${value.cohesionCenterId}/session-phase1`);
-      if (!ok) return toastr.error("Erreur", error);
-      setSessions(data.map((e) => ({ label: e.cohort, value: e._id })));
-    })();
-  }, [value.cohesionCenterId]);
-
-  return (
-    <>
-      <Field hidden value={value.sessionPhase1Id} name="sessionPhase1Id" onChange={onChange} validate={validate} />
-      <ReactSelect
-        options={sessions}
-        placeholder="Choisir une session"
-        noOptionsMessage={() => "Aucune session ne correspond à cette recherche."}
-        validate={validate}
-        onChange={(e) => {
-          onChange({ target: { value: e.value, name: "sessionPhase1Id" } });
-        }}
-      />
-    </>
-  );
-};
-
 const ChooseRole = ({ value, onChange, validate }) => {
   const { user } = useSelector((state) => state.Auth);
 
@@ -361,7 +252,6 @@ const ChooseRole = ({ value, onChange, validate }) => {
     <Field as="select" validate={validate} className="form-control" placeholder="Rôle" name="role" value={value} onChange={onChange}>
       <option value=""></option>
       {[ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) ? <option value={ROLES.VISITOR}>{translate(ROLES.VISITOR)}</option> : null}
-      {user.role === ROLES.ADMIN ? <option value={ROLES.HEAD_CENTER}>{translate(ROLES.HEAD_CENTER)}</option> : null}
       <option value={ROLES.REFERENT_DEPARTMENT}>{translate(ROLES.REFERENT_DEPARTMENT)}</option>
       {user.role === ROLES.ADMIN || user.role === ROLES.REFERENT_REGION ? <option value={ROLES.REFERENT_REGION}>{translate(ROLES.REFERENT_REGION)}</option> : null}
       {user.role === ROLES.ADMIN ? <option value={ROLES.ADMIN}>{translate(ROLES.ADMIN)}</option> : null}

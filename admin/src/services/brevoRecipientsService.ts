@@ -4,7 +4,6 @@ import api from "../services/api";
 
 export type FiltersYoungsForExport = Record<string, string[]>;
 
-
 const BrevoRecipientsService = {
   getFilteredYoungsForExport: async (filtersSelected: FiltersYoungsForExport, tab: "volontaire" | "inscription"): Promise<any> => {
     const route = `/elasticsearch/young/export${tab === "volontaire" ? "?tab=volontaire" : ""}`;
@@ -60,7 +59,7 @@ const BrevoRecipientsService = {
     })();
   },
 
-  importRecipients: async (file: File) => {
+  importRecipients: async (file: File): Promise<string | undefined> => {
     const res = await api.uploadFiles(`/plan-marketing/import`, [file], {}, 0);
     if (!res.ok) {
       throw new Error(res.code + (res.message || ""));

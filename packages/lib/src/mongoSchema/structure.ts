@@ -64,6 +64,7 @@ export const StructureSchema = {
   },
   networkId: {
     type: String,
+    index: true,
     documentation: {
       description: "Identifiant de la structure principale (tête de réseau).",
     },
@@ -190,12 +191,14 @@ export const StructureSchema = {
   },
   department: {
     type: String,
+    index: true,
     documentation: {
       description: "Département de la structure",
     },
   },
   region: {
     type: String,
+    index: true,
     documentation: {
       description: "Région de la structure",
     },

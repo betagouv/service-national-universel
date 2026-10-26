@@ -1,15 +1,13 @@
 import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
-import { toastr } from "react-redux-toastr";
-import plausibleEvent from "@/services/plausible";
 import Input from "../../components/dsfr/forms/input";
 import api from "../../services/api";
 import Error from "../../components/error";
 import queryString from "query-string";
 import { useHistory } from "react-router-dom";
 import { BsShieldLock } from "react-icons/bs";
-import { isValidRedirectUrl, DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
-import { captureMessage } from "../../sentry";
+import { DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS } from "snu-lib";
+import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { Button } from "@snu/ds/dsfr";
 
@@ -46,18 +44,9 @@ const Signin2FA: React.FC = () => {
 
       if (!response.user) return;
 
-      plausibleEvent("2FA/ Connexion réussie");
       await login(response.user);
 
-      const redirectionApproved = isValidRedirectUrl(redirect);
-
-      if (!redirectionApproved) {
-        captureMessage("Invalid redirect url", { extra: { redirect } });
-        toastr.error("Erreur", "Url de redirection invalide : " + redirect);
-        return history.push("/");
-      }
-
-      return history.push(redirect || "/");
+      return redirectAfterSignin(history, redirect);
     } catch (e) {
       setError({
         text: "(Double authentification) Code non reconnu.",

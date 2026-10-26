@@ -15,7 +15,7 @@ export default function RenewInvitation({ userId, user }: { userId: string; user
       return data;
     },
     onSuccess: (response) => {
-      toastr.success("Date d'expiration d'invitation renouvelée avec succès", formatLongDateFR(response?.invitationExpires));
+      toastr.success("Nouvelle invitation envoyée par email", `Le lien précédent n'est plus valable. Nouveau lien valable jusqu'au ${formatLongDateFR(response?.invitationExpires)}.`);
     },
     onError: (error) => {
       toastr.error("Une erreur est survenue lors du renouvellement de l'invitation", translate(error.message));

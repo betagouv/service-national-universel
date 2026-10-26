@@ -28,9 +28,7 @@ import TabList from "@/components/views/TabList";
 import Title from "@/components/views/Title";
 import { appURL } from "@/config";
 import api from "@/services/api";
-import plausibleEvent from "@/services/plausible";
 import { Button } from "./Buttons";
-import { ChangeCohortPen } from "./ChangeCohortPen";
 import ConfirmationModal from "./ConfirmationModal";
 import Field from "./Field";
 import Tab from "./Tab";
@@ -159,15 +157,12 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   };
 
   async function changeStatus(status, withdrawnReason, withdrawnMessage) {
-    const note = status === YOUNG_STATUS.WITHDRAWN ? WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label + " " + withdrawnMessage : undefined;
-
     const payload = {
       status,
       lastStatusAt: new Date().toISOString(),
       withdrawnReason: status === YOUNG_STATUS.WITHDRAWN ? withdrawnReason : undefined,
       withdrawnMessage: status === YOUNG_STATUS.WITHDRAWN ? withdrawnMessage : undefined,
       phase: status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION ? YOUNG_PHASE.CONTINUE : undefined,
-      historic: [...young.historic, { phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note }],
     };
 
     mutate(payload, {
@@ -187,21 +182,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     return young.notes.filter((note) => note.phase === phase);
   };
 
-  const canYoungChangeCohort = () => {
-    if (young.status === YOUNG_STATUS.DELETED || isResponsableDeCentre(user)) {
-      return false;
-    }
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
-      return false;
-    }
-    return true;
-  };
-
   const onPrendreLaPlace = async (young_id) => {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
     try {
-      plausibleEvent("Volontaires/CTA - Prendre sa place");
       await signinAs("young", young_id);
     } catch (e) {
       toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
@@ -222,11 +206,8 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 </div>
               </div>
               <Badge {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)} text={young.cohort} />
-              {canYoungChangeCohort() && (
-                <>
-                  <ChangeCohortPen young={young} onChange={onChange} />
-                  {young.originalCohort && <Badge {...greyBadge} text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />}
-                </>
+              {young.status !== YOUNG_STATUS.DELETED && !isResponsableDeCentre(user) && young.originalCohort && (
+                <Badge {...greyBadge} text={young.originalCohort} tooltipText={`Anciennement ${young.originalCohort}`} style={{ cursor: "default" }} />
               )}
             </Title>
             {![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && <AttestationDownloadButton young={young} />}

@@ -16,24 +16,28 @@ import { colors } from "../../utils";
 export default function Index() {
   const [young, setYoung] = useState(null);
   const [done, setDone] = useState(false);
+  const [invalidLink, setInvalidLink] = useState(false);
   const params = queryString.parse(location.search);
   const { token, young_id } = params;
 
-  if (!token || !young_id) {
+  // Paramètres insérés dans des chemins d'API : format vérifié avant tout appel (FL5).
+  if (typeof young_id !== "string" || !/^[0-9a-fA-F]{24}$/.test(young_id) || typeof token !== "string" || !/^[A-Za-z0-9_-]+$/.test(token)) {
     return <Redirect to="/" />;
   }
 
   useEffect(() => {
     (async () => {
       try {
-        const { ok, data } = await api.get(`/young/validate_phase3/${young_id}/${token}`);
-        if (!ok) return;
+        const { ok, data } = await api.get(`/young/validate_phase3/${encodeURIComponent(young_id)}/${encodeURIComponent(token)}`);
+        if (!ok) return setInvalidLink(true);
         setYoung(data);
       } catch (e) {
         console.log(e);
       }
     })();
   }, []);
+  // Le lien est à usage unique : une fois la mission validée, il n'est plus reconnu.
+  if (invalidLink) return <InvalidLink>Ce lien de validation n&apos;est plus valide. La mission a peut-être déjà été validée.</InvalidLink>;
   if (!young) return <Loader />;
   if (done) return <Done />;
   else
@@ -43,7 +47,7 @@ export default function Index() {
           initialValues={young}
           onSubmit={async (values) => {
             try {
-              const { ok } = await api.put(`/young/validate_phase3/${young_id}/${token}`, values);
+              const { ok } = await api.put(`/young/validate_phase3/${encodeURIComponent(young_id)}/${encodeURIComponent(token)}`, values);
               if (!ok) return;
               setDone(true);
             } catch (e) {
@@ -101,6 +105,12 @@ export default function Index() {
       </Container>
     );
 }
+
+const InvalidLink = styled.div`
+  margin: 4rem auto;
+  text-align: center;
+  color: ${colors.grey};
+`;
 
 const Bold = ({ children }) => <span style={{ fontWeight: "500" }}>{children}</span>;
 

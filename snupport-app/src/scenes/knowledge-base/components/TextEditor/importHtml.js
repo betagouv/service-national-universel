@@ -1,8 +1,10 @@
 import { jsx } from "slate-hyperscript";
 import { Transforms } from "slate";
+import { sanitizeImageUrl, sanitizeLinkUrl } from "../../utils/safeUrl";
 
 const ELEMENT_TAGS = {
-  A: (el) => ({ type: "link", url: el.getAttribute("href") }),
+  // Contenu collé depuis une autre page : l'URL est filtrée dès l'import (FH17).
+  A: (el) => ({ type: "link", url: sanitizeLinkUrl(el.getAttribute("href")) ?? "" }),
   BLOCKQUOTE: () => ({ type: "quote" }),
   H1: () => ({ type: "heading-one" }),
   H2: () => ({ type: "heading-two" }),
@@ -10,7 +12,7 @@ const ELEMENT_TAGS = {
   H4: () => ({ type: "heading-four" }),
   H5: () => ({ type: "heading-five" }),
   H6: () => ({ type: "heading-six" }),
-  IMG: (el) => ({ type: "image", url: el.getAttribute("src") }),
+  IMG: (el) => ({ type: "image", url: sanitizeImageUrl(el.getAttribute("src")) ?? "" }),
   LI: () => ({ type: "list-item" }),
   OL: () => ({ type: "numbered-list" }),
   P: () => ({ type: "paragraph" }),

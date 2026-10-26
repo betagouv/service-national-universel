@@ -11,6 +11,7 @@ import {
   translatePhase2,
   translateReferentStatus,
   translateStatusClasse,
+  sanitizeLinkUrl,
 } from "snu-lib";
 import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
@@ -223,9 +224,10 @@ export function classNames(...classes) {
 
 export const ENABLE_PM = true;
 
+/** Lien externe saisi sans schéma (« www.site.fr ») : http ajouté, puis filtre d'URL partagé (GOO-19). */
 export function urlWithScheme(url) {
-  if (!/^https?:\/\//i.test(url)) return `http://${url}`;
-  return url;
+  const withScheme = /^https?:\/\//i.test(url) ? url : `http://${url}`;
+  return sanitizeLinkUrl(withScheme) ?? undefined;
 }
 
 export function slugifyFileName(str) {
@@ -279,7 +281,7 @@ function formatField(field) {
 }
 
 function formatValue(path, value) {
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     return value ? "Oui" : "Non";
   }
   if (!value) return "Vide";
@@ -328,12 +330,12 @@ export function createEvent(e, value, originalValue, role) {
 
 function filterEmptyValues(e) {
   const ignoredValues = [null, undefined, "", "Vide", "[]"];
-  
+
   const checkEmpty = (val) => {
-    if (typeof val === 'boolean') return false;
-    return !val || (typeof val === 'string' && !val.length) || ignoredValues.includes(val);
+    if (typeof val === "boolean") return false;
+    return !val || (typeof val === "string" && !val.length) || ignoredValues.includes(val);
   };
-  
+
   return checkEmpty(e.value) && checkEmpty(e.originalValue);
 }
 
@@ -453,15 +455,6 @@ export const debouncePromise = (func, delay) => {
       }
     });
   };
-};
-
-export const youngCheckinField = {
-  [ROLES.ADMIN]: "youngCheckinForAdmin",
-  [ROLES.HEAD_CENTER]: "youngCheckinForHeadOfCenter",
-  [ROLES.HEAD_CENTER_ADJOINT]: "youngCheckinForHeadOfCenter",
-  [ROLES.REFERENT_SANITAIRE]: "youngCheckinForHeadOfCenter",
-  [ROLES.REFERENT_REGION]: "youngCheckinForRegionReferent",
-  [ROLES.REFERENT_DEPARTMENT]: "youngCheckinForDepartmentReferent",
 };
 
 export const CDN_BASE_URL =

@@ -6,6 +6,7 @@ const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const Joi = require("joi");
 const { JVA_MISSION_DOMAINS } = require("snu-lib");
+const { YOUNG_MISSION_SEARCH_MAX_PAGE, YOUNG_MISSION_SEARCH_MAX_SIZE } = require("./utils");
 
 router.post("/search/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -20,16 +21,18 @@ router.post("/search/", passport.authenticate("young", { session: false, failWit
         }),
         publisherName: Joi.string().allow(""),
       }),
+      // `size` et `page` n'étaient pas bornés : un jeune pouvait demander 10 000 missions
+      // par appel (L13). On plafonne sans rejeter, et `from + size` reste sous la fenêtre
+      // de résultats d'Elasticsearch.
       page: Joi.number()
         .integer()
         .default(0)
-        .custom((value, helpers) => {
-          if (value < 0) {
-            return 0;
-          }
-          return value;
-        }),
-      size: Joi.number().integer().min(0).default(20),
+        .custom((value) => Math.min(Math.max(value, 0), YOUNG_MISSION_SEARCH_MAX_PAGE)),
+      size: Joi.number()
+        .integer()
+        .min(0)
+        .default(20)
+        .custom((value) => Math.min(value, YOUNG_MISSION_SEARCH_MAX_SIZE)),
       sort: Joi.string().allow("geo", "recent", "short", "long").default("geo"),
     });
     const { error, value } = schema.validate(req.body, { stripUnknown: true });
@@ -45,7 +48,7 @@ router.post("/search/", passport.authenticate("young", { session: false, failWit
           must: [{ range: { endAt: { gt: "now" } } }, { range: { places: { gt: 0 } } }],
         },
       },
-      from: page * 20,
+      from: page * size,
       size,
       sort: [],
     };

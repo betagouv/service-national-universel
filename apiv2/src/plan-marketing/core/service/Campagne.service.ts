@@ -20,6 +20,8 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { EmailTestParams, EmailTemplate } from "@notification/core/Notification";
 import { ReferentModelLight } from "@admin/core/iam/Referent.model";
 
+const OBJECT_ID = /^[0-9a-fA-F]{24}$/;
+
 @Injectable()
 export class CampagneService {
     private readonly logger: Logger = new Logger(CampagneService.name);
@@ -34,7 +36,7 @@ export class CampagneService {
     ) {}
 
     async findById(id: string) {
-        const campagne = await this.campagneGateway.findById(id);
+        const campagne = OBJECT_ID.test(id) ? await this.campagneGateway.findById(id) : null;
         if (!campagne) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }

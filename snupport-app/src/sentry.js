@@ -1,6 +1,15 @@
-import { ExtraErrorData, Offline, ReportingObserver } from "@sentry/integrations";
-import { init, reactRouterV5Instrumentation, withSentryRouting, captureException as sentryCaptureException, captureMessage as sentryCaptureMessage } from "@sentry/react";
-import { BrowserTracing } from "@sentry/tracing";
+import {
+  extraErrorDataIntegration,
+  reportingObserverIntegration,
+  init,
+  reactRouterV5BrowserTracingIntegration,
+  withSentryRouting,
+  captureException as sentryCaptureException,
+  captureMessage as sentryCaptureMessage,
+  makeBrowserOfflineTransport,
+  makeFetchTransport,
+} from "@sentry/react";
+import { redactFrontBreadcrumb, redactFrontSentryEvent } from "@snu/log-redaction";
 import { RELEASE, ENVIRONMENT, SNUPPORT_URL_API, SENTRY_DEBUG_MODE } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
@@ -19,20 +28,25 @@ function initSentry() {
       environment: ENVIRONMENT,
       release: RELEASE,
       normalizeDepth: 16,
+      transport: makeBrowserOfflineTransport(makeFetchTransport),
+      transportOptions: {
+        maxQueueSize: 50,
+      },
+      // Pas d'en-têtes, de cookies ni d'IP : ils peuvent porter le JWT de session.
+      sendDefaultPii: false,
+      // Corps de requête/réponse, query strings, state Redux et console retirés (FH7, FM4).
+      beforeSend: redactFrontSentryEvent,
+      beforeSendTransaction: redactFrontSentryEvent,
+      beforeBreadcrumb: redactFrontBreadcrumb,
+      // Pass tracing info to this domain
+      tracePropagationTargets: [SNUPPORT_URL_API],
       integrations: [
-        new ExtraErrorData({ depth: 16 }),
-        new BrowserTracing({
-          routingInstrumentation: reactRouterV5Instrumentation(history),
-          // Pass tracing info to this domain
-          tracingOrigins: [SNUPPORT_URL_API].map((url) => new URL(url).host),
-        }),
-        new Offline({ maxStoredEvents: 50, maxCacheSize: 10000000 }),
-        new ReportingObserver({
+        extraErrorDataIntegration({ depth: 16 }),
+        reactRouterV5BrowserTracingIntegration({ history }),
+        reportingObserverIntegration({
           types: ["crash", "deprecation", "intervention"],
         }),
       ],
-      replaysSessionSampleRate: 0.005,
-      replaysOnErrorSampleRate: 1,
       tracesSampleRate: 0.01,
       ignoreErrors: [
         /^No error$/,
@@ -60,7 +74,6 @@ function initSentry() {
         /window\.regainData/,
         /ztePageScrollModule/,
       ],
-      urlPrefix: "https://admin-support.snu.gouv.fr/", // Update the URL prefix to match your application
     });
   }
 }

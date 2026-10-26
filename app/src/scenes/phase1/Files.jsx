@@ -3,7 +3,7 @@ import { YOUNG_STATUS_PHASE1 } from "../../utils";
 import FileCard from "./components/FileCard";
 import MedicalFileModal from "./components/MedicalFileModal";
 import useCohort from "@/services/useCohort";
-import { CDN_BASE_URL } from "../representants-legaux/commons";
+import { CDN_BASE_URL } from "@/config";
 import FileIcon from "@/assets/FileIcon";
 import ButtonExternalLinkPrimary from "@/components/ui/buttons/ButtonExternalLinkPrimary";
 import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";

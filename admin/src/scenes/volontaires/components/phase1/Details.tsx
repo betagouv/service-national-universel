@@ -1,44 +1,17 @@
-import React, { useState } from "react";
+import React from "react";
 import { Container } from "@snu/ds/admin";
-import { CohesionCenterType, CohortDto, YoungType, LigneBusType, LigneToPointType, PointDeRassemblementType } from "snu-lib";
-import { isCohortOpenForAffectation } from "../../utils";
-import { User } from "@/types";
+import { CohesionCenterType, YoungType } from "snu-lib";
 import Loader from "@/components/Loader";
 
-import ModalAffectations from "../ModalAffectation";
-import ModalAffectationsForCLE from "../ModalAffectationsForCLE";
-import ModalChangePDRSameLine from "../ModalChangePDRSameLine";
 import CohesionCenterInfos from "./CohesionCenterInfos";
-
-type ModalAffectationsType = {
-  isOpen: boolean;
-  center: CohesionCenterType | null;
-  sessionId: string;
-};
-
-type meetingPointType = {
-  bus: LigneBusType;
-  ligneToPoint: LigneToPointType;
-  pointDeRassemblement: PointDeRassemblementType;
-};
 
 interface Props {
   cohesionCenter: CohesionCenterType;
-  cohort: CohortDto;
   young: YoungType;
-  setYoung: () => void;
-  user: User;
 }
 
-export default function Details({ cohesionCenter, cohort, young, setYoung, user }: Props) {
-  const [modalAffectations, setModalAffectation] = useState<ModalAffectationsType>({
-    isOpen: false,
-    center: null,
-    sessionId: "",
-  });
-  const [modalAffectationsForCLE, setModalAffectationForCLE] = useState(false);
-  const [modalChangePdrSameLine, setModalChangePdrSameLine] = useState({ isOpen: false });
-  const isOpenForAffectation = isCohortOpenForAffectation(user, young, cohort);
+// Consultation seule : l'affectation manuelle et le changement de point de rassemblement ont été supprimés.
+export default function Details({ cohesionCenter, young }: Props) {
   const isYoungAffected = young.cohesionCenterId ? true : false;
 
   return (
@@ -51,30 +24,9 @@ export default function Details({ cohesionCenter, cohort, young, setYoung, user 
         <Loader />
       ) : (
         <div className="mt-4 flex">
-          <CohesionCenterInfos
-            cohesionCenter={cohesionCenter}
-            cohort={cohort}
-            setModalAffectation={setModalAffectation}
-            modalAffectations={modalAffectations}
-            isOpenForAffectation={isOpenForAffectation}
-          />
+          <CohesionCenterInfos cohesionCenter={cohesionCenter} />
         </div>
       )}
-      <ModalAffectations
-        isOpen={modalAffectations.isOpen}
-        onCancel={() => setModalAffectation({ isOpen: false, center: null, sessionId: "" })}
-        young={young}
-        cohort={cohort}
-        center={modalAffectations.center}
-        sessionId={modalAffectations.sessionId ?? null}
-      />
-      <ModalAffectationsForCLE
-        isOpen={modalAffectationsForCLE}
-        onClose={() => setModalAffectationForCLE(false)}
-        young={{ ...young, classeId: young.classeId || "" }}
-        setYoung={setYoung}
-      />
-      <ModalChangePDRSameLine isOpen={modalChangePdrSameLine?.isOpen} onCancel={() => setModalChangePdrSameLine({ isOpen: false })} young={young} cohort={cohort} />
     </Container>
   );
 }

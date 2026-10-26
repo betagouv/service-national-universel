@@ -1,6 +1,10 @@
 import { SearchTerm } from "snu-lib";
 import { ESSearchQuery } from "./ElasticQuery";
 
+export function escapeWildcard(value: string): string {
+    return value.replace(/[\\*?]/g, "\\$&");
+}
+
 export class ElasticsearchQueryBuilder<T> {
     private query: ESSearchQuery<T>;
 
@@ -40,18 +44,21 @@ export class ElasticsearchQueryBuilder<T> {
             return this;
         }
 
+        // `*` et `?` du terme saisi restent littéraux : sans échappement, un motif comme `*a*b*c*`
+        // devient une requête wildcard coûteuse au lieu d'une recherche par préfixe/suffixe.
+        const value = escapeWildcard(String(searchTerm.value));
         const should = searchTerm.fields.flatMap((field) => [
             {
                 wildcard: {
                     [`${field}.keyword`]: {
-                        value: `${searchTerm.value}*`,
+                        value: `${value}*`,
                     },
                 },
             },
             {
                 wildcard: {
                     [`${field}.keyword`]: {
-                        value: `*${searchTerm.value}`,
+                        value: `*${value}`,
                     },
                 },
             },

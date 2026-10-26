@@ -21,12 +21,16 @@ jest.mock("../../../slack", () => ({
 }));
 
 import { syncMission } from "../../../crons/missionsJVA/JVAService";
-import { MissionModel, ReferentModel, StructureModel } from "../../../models";
+import { ApplicationModel, MissionModel, ReferentModel, StructureModel } from "../../../models";
 import { fetchStructureById } from "../../../crons/missionsJVA/JVARepository";
+import { updateApplicationTutor } from "../../../application/applicationService";
 import { jest } from "@jest/globals";
 import { MISSION_STATUS } from "snu-lib";
 
 jest.mock("../../../models", () => ({
+  ApplicationModel: {
+    countDocuments: jest.fn(),
+  },
   MissionModel: {
     findOne: jest.fn(),
     create: jest.fn(),
@@ -72,6 +76,7 @@ describe("syncMission", () => {
     jest.clearAllMocks();
     jest.useFakeTimers();
     jest.setSystemTime(new Date("2026-05-01T00:00:00.000Z"));
+    (ApplicationModel.countDocuments as any).mockResolvedValue(0);
   });
 
   afterEach(() => {
@@ -224,6 +229,88 @@ describe("syncMission", () => {
     expect(fetchStructureById).not.toHaveBeenCalled();
     // La mission doit être créée
     expect(MissionModel.create).toHaveBeenCalled();
+  });
+});
+
+// L29 de l'audit du 21/09/2026 : les données JVA écrasaient les décisions SNU.
+describe("syncMission — décisions SNU préservées", () => {
+  const SYNCABLE_MISSION = { ...JVA_MISSION_MOCK, startAt: "2026-01-01T00:00:00.000Z", endAt: "2026-02-01T00:00:00.000Z", snuPlaces: 5 };
+
+  function existingMission(fields: Record<string, any>) {
+    const mission: any = { _id: "snu-mission-id", jvaMissionId: 123, save: (jest.fn() as any).mockResolvedValue(null), ...fields };
+    mission.set = jest.fn((values: any) => Object.assign(mission, values));
+    return mission;
+  }
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-05-01T00:00:00.000Z"));
+    (StructureModel.findOne as any).mockResolvedValue({ _id: "jva-structure-id", id: "jva-structure-id", name: "Structure JVA" });
+    (ReferentModel.exists as any).mockResolvedValue(true);
+    (ReferentModel.findOne as any).mockResolvedValue({ _id: "jva-referent-id", id: "jva-referent-id", firstName: "John", lastName: "Doe" });
+    (ApplicationModel.countDocuments as any).mockResolvedValue(0);
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it.each([MISSION_STATUS.CANCEL, MISSION_STATUS.REFUSED, MISSION_STATUS.ARCHIVED])("ne rouvre pas une mission %s", async (status) => {
+    const mission = existingMission({ status, placesTotal: 5, placesLeft: 5, tutorId: "t", structureId: "s" });
+    (MissionModel.findOne as any).mockResolvedValue(mission);
+
+    await syncMission(SYNCABLE_MISSION as any);
+
+    expect(mission.status).toBe(status);
+    expect(mission.save).toHaveBeenCalled();
+  });
+
+  it("ne réaffecte ni le tuteur ni la structure d'une mission déjà rattachée", async () => {
+    const mission = existingMission({
+      status: MISSION_STATUS.VALIDATED,
+      placesTotal: 5,
+      placesLeft: 5,
+      tutorId: "snu-tutor-id",
+      tutorName: "Tuteur SNU",
+      structureId: "snu-structure-id",
+      structureName: "Structure SNU",
+    });
+    (MissionModel.findOne as any).mockResolvedValue(mission);
+
+    await syncMission(SYNCABLE_MISSION as any);
+
+    expect(mission.tutorId).toBe("snu-tutor-id");
+    expect(mission.tutorName).toBe("Tuteur SNU");
+    expect(mission.structureId).toBe("snu-structure-id");
+    expect(mission.structureName).toBe("Structure SNU");
+    expect(updateApplicationTutor).not.toHaveBeenCalled();
+  });
+
+  it("rattache une mission qui n'a pas encore de tuteur", async () => {
+    const mission = existingMission({ status: MISSION_STATUS.VALIDATED, placesTotal: 5, placesLeft: 5 });
+    (MissionModel.findOne as any).mockResolvedValue(mission);
+
+    await syncMission(SYNCABLE_MISSION as any);
+
+    expect(mission.tutorId).toBe("jva-referent-id");
+    expect(mission.structureId).toBe("jva-structure-id");
+  });
+
+  it("recalcule placesLeft depuis les candidatures, sans descendre sous zéro", async () => {
+    // Ancien calcul : 0 + 2 - 10 = -8.
+    const mission = existingMission({ status: MISSION_STATUS.VALIDATED, placesTotal: 10, placesLeft: 0, tutorId: "t", structureId: "s" });
+    (MissionModel.findOne as any).mockResolvedValue(mission);
+    (ApplicationModel.countDocuments as any).mockResolvedValue(4);
+
+    await syncMission({ ...SYNCABLE_MISSION, snuPlaces: 2 } as any);
+    expect(mission.placesLeft).toBe(0);
+    expect(mission.placesStatus).toBe("FULL");
+
+    (ApplicationModel.countDocuments as any).mockResolvedValue(1);
+    await syncMission({ ...SYNCABLE_MISSION, snuPlaces: 6 } as any);
+    expect(mission.placesLeft).toBe(5);
+    expect(mission.placesStatus).toBe("ONE_OR_MORE");
   });
 });
 

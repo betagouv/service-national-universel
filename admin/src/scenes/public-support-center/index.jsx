@@ -9,7 +9,6 @@ import api from "../../services/api";
 //import { HeroContainer } from "../../components/Content";
 import { colors, urlWithScheme } from "../../utils";
 import { adminURL, environment, knowledgebaseURL } from "../../config";
-import plausibleEvent from "../../services/plausible";
 import SNUpportForm from "./form";
 import FooterComponent from "../../components/footer";
 
@@ -90,7 +89,6 @@ const KnowledgeBaseSearch = ({ path, showAllowedRoles, noAnswer, placeholder = "
           className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
           type="text"
           placeholder={placeholder}
-          onClick={() => plausibleEvent("Besoin d'aide - Barre de recherche")}
           onChange={(e) => setSearch(e.target.value)}
           value={search}
         />
@@ -200,13 +198,12 @@ export default function PublicSupportCenter(props) {
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
-              Le support du SNU sera exceptionnellement ralenti du <strong>1er août au 1er septembre inclus</strong>. Nous traiterons votre demande dès que possible. Vous recevrez
+              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
               une réponse par mail.
             </div>
             <div className="bda-container">
               <LinkButton
                 onClick={() => {
-                  plausibleEvent("Besoin d'aide - Contacter quelqu'un");
                   setOpen(true);
                 }}>
                 Contacter quelqu&apos;un

@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 
 import { AuthState } from "@/redux/auth/reducer";
-import plausibleEvent from "@/services/plausible";
 import DashboardContainer from "../../../components/DashboardContainer";
 import General from "../../../components/inscription/General";
 import ExportReport from "./ExportReport";
@@ -43,7 +42,6 @@ export default function Index() {
             </p>
           ),
           action: () => {
-            plausibleEvent("Dashboard/CTA - Exporter statistiques inscriptions");
             print();
           },
         },
@@ -75,7 +73,6 @@ export default function Index() {
             title: `${loading ? `Téléchargement ${loadingText}` : "Confirmer"}`,
             disabled: loading,
             onClick: () => {
-              plausibleEvent("Dashboard/CTA - Exporter rapport Inscription");
               ExportReport({ filter: selectedFilters, user, setLoading, setLoadingText });
             },
           },

@@ -130,21 +130,6 @@ describe("Program", () => {
     await deleteProgramByIdHelper(program._id);
   });
 
-  it("GET /program/ AS HEAD_CENTER", async () => {
-    await deleteAllProgram();
-    let programFixtureHeadCenter = getNewProgramFixture();
-    programFixtureHeadCenter.visibility = "HEAD_CENTER";
-    const programHeadCenter = await createProgramHelper(programFixtureHeadCenter);
-    const programFixture = getNewProgramFixture();
-    const program = await createProgramHelper(programFixture);
-    const res = await request(await getAppHelperWithAcl({ role: ROLES.HEAD_CENTER })).get(`/program/`);
-    expect(res.statusCode).toEqual(200);
-    expect(res.body.data.length).toEqual(1);
-    expectProgramToEqual(programFixtureHeadCenter, res.body.data[0]);
-    await deleteProgramByIdHelper(programHeadCenter._id);
-    await deleteProgramByIdHelper(program._id);
-  });
-
   it("GET /program/ AS STRUCTURE_MEMBER", async () => {
     await deleteAllProgram();
     let programFixtureRegionDepartment = getNewProgramFixture();

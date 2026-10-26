@@ -1,5 +1,9 @@
 import { Test } from "@nestjs/testing";
 import { ConfigService } from "@nestjs/config";
+import { PlanMarketingWebhookService } from "../service/PlanMarketingWebhook.service";
+
+// L'URL de rappel remise à Brevo porte le jeton qui authentifie le webhook (H77).
+const URL_WEBHOOK_SIGNEE = "https://api.test/v2/plan-marketing/import/webhook?token=jeton-signe";
 import { ImporterContacts } from "./ImporterContacts";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -53,6 +57,10 @@ describe("ImporterContacts", () => {
                     },
                 },
                 {
+                    provide: PlanMarketingWebhookService,
+                    useValue: { construireUrlWebhook: () => URL_WEBHOOK_SIGNEE },
+                },
+                {
                     provide: CryptoGateway,
                     useValue: {
                         getUuid: jest.fn(),
@@ -102,7 +110,7 @@ describe("ImporterContacts", () => {
             "Test Liste-uuid42ve",
             "contacts-data",
             "folder-123",
-            "http://api.test/plan-marketing/import/webhook",
+            URL_WEBHOOK_SIGNEE,
         );
 
         expect(taskGateway.create).toHaveBeenCalledWith({

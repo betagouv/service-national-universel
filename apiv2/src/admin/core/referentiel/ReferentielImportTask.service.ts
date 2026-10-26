@@ -3,10 +3,10 @@ import { FileGateway } from "@shared/core/File.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { TaskGateway } from "@task/core/Task.gateway";
 
-import { ReferentielTaskType, TaskName, TaskStatus } from "snu-lib";
+import { TaskName, TaskStatus } from "snu-lib";
 import { TaskModel } from "@task/core/Task.model";
 import { ReferentielImportTaskAuthor } from "./ReferentielImportTask.model";
-import { FilePath, IMPORT_REQUIRED_COLUMN_NAMES, IMPORT_TAB_NAMES } from "./Referentiel";
+import { FilePath, IMPORT_REQUIRED_COLUMN_NAMES, IMPORT_TAB_NAMES, ReferentielImportType } from "./Referentiel";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 
 @Injectable()
@@ -24,7 +24,7 @@ export class ReferentielImportTaskService {
         mimetype,
         auteur,
     }: {
-        importType: (typeof ReferentielTaskType)[keyof typeof ReferentielTaskType];
+        importType: ReferentielImportType;
         fileName: string;
         buffer: Buffer;
         mimetype: string;

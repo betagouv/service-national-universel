@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
 import fs from "fs";
-import fileUpload from "express-fileupload";
+import { tempFileUpload } from "../middlewares/tempUpload";
 import mime from "mime-types";
 
 import {
@@ -26,11 +26,25 @@ import {
 } from "snu-lib";
 
 import { capture, captureMessage } from "../sentry";
-import { YoungModel, CohortModel, ReferentModel, ApplicationModel, ContractModel, MissionModel, StructureModel, StructureDocument } from "../models";
+import {
+  YoungModel,
+  YoungDocument,
+  CohortModel,
+  CohortDocument,
+  ReferentModel,
+  ApplicationModel,
+  ApplicationDocument,
+  ContractModel,
+  MissionModel,
+  StructureModel,
+  StructureDocument,
+} from "../models";
 import { decrypt, encrypt } from "../cryptoUtils";
 import { sendTemplate } from "../brevo";
 import { validateUpdateApplication, validateNewApplication, validateId, idSchema } from "../utils/validator";
+import { safePathSegment } from "../utils/pathSegment";
 import { config } from "../config";
+import { sanitizeEmailText } from "../email/emailInput";
 import { serializeApplication, serializeYoung, serializeContract } from "../utils/serializer";
 import {
   uploadFile,
@@ -41,11 +55,13 @@ import {
   updateYoungPhase2StatusAndHours,
   getFile,
   updateYoungStatusPhase2Contract,
+  recomputeYoungPhase2StatusAndHours,
+  recomputeYoungStatusPhase2Contract,
   getReferentManagerPhase2,
   updateYoungApplicationFilesType,
 } from "../utils";
 import { scanFile } from "../utils/virusScanner";
-import { getAuthorizationToApply, updateMission, sendNotificationsByStatus } from "../application/applicationService";
+import { getAuthorizationToApply, updateMission, recomputeMissionPlaces, sendNotificationsByStatus } from "../application/applicationService";
 import { apiEngagement } from "../services/gouv.fr/api-engagement";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
@@ -60,10 +76,36 @@ import { UserRequest } from "../controllers/request";
 import patches from "../controllers/patches";
 import { logger } from "../logger";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { isApplicationInUserScope, isContractInUserScope } from "../services/contractAccess";
+import { toErrorCode } from "../utils/errorCode";
+import { canReferentChangeApplicationStatus } from "../young/youngStatusTransitions";
+import { isStructureActor, isUnacceptedProposal } from "./applicationProposal";
+import { userRateLimiter } from "../middlewares/rateLimit";
 
 const { ObjectId } = require("mongoose").Types;
 
 const router = express.Router();
+
+const APPLICATION_FILE_KEYS = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+
+/**
+ * Les pièces sont rangées par candidature. Jusqu'ici elles l'étaient par volontaire
+ * (`app/young/<youngId>/application/<key>/<name>`) : deux candidatures du même volontaire partageaient
+ * un espace, et déposer un nom identique remplaçait la pièce de l'autre candidature (PM3).
+ */
+function getApplicationFilePath(youngId: string, applicationId: string, key: string, name: string) {
+  return `app/young/${youngId}/application/${applicationId}/${key}/${name}`;
+}
+
+/** Les pièces déposées avant le rangement par candidature restent lues à leur ancien emplacement. */
+async function getApplicationFile(youngId: string, applicationId: string, key: string, name: string) {
+  try {
+    return await getFile(getApplicationFilePath(youngId, applicationId, key, name));
+  } catch (error) {
+    if (error?.code !== "NoSuchKey") throw error;
+    return getFile(`app/young/${youngId}/application/${key}/${name}`);
+  }
+}
 
 router.post("/:id/change-classement/:rank", passport.authenticate(["young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
@@ -110,6 +152,13 @@ router.post(
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.APPLICATION, action: PERMISSION_ACTIONS.CREATE, ignorePolicy: true }]),
   async (req: UserRequest, res: Response) => {
     try {
+      // Une structure ne crée pas de candidature : elle suit celles que les volontaires lui adressent. Les
+      // propositions de mission relèvent de l'administrateur et des référents territoriaux, et la structure
+      // n'a pas d'accès à l'écran qui les crée.
+      if (isStructureActor(req.user)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       const { value, error } = validateNewApplication(req.body, req.user);
       if (error) {
         capture(error);
@@ -131,6 +180,10 @@ router.post(
       }
 
       value.isJvaMission = mission.isJvaMission;
+      // La candidature est rattachée à la structure de SA mission : sans cela, le `structureId` du body
+      // (jamais rapproché de la mission) permet de rattacher à sa propre structure une candidature
+      // portant sur la mission d'une autre structure, et de contourner les contrôles ci-dessous.
+      value.structureId = mission.structureId;
 
       const young = await YoungModel.findById(value.youngId);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -138,11 +191,30 @@ router.post(
       const cohort = await CohortModel.findById(young.cohortId);
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+      // Les champs dénormalisés viennent du volontaire et de la mission, jamais du body : le client y
+      // désignait le tuteur, le contrat ou les destinataires des notifications (PH19).
+      Object.assign(value, {
+        youngFirstName: young.firstName,
+        youngLastName: young.lastName,
+        youngEmail: young.email,
+        youngBirthdateAt: young.birthdateAt ? new Date(young.birthdateAt).toISOString() : undefined,
+        youngCity: young.city,
+        youngDepartment: young.department,
+        youngCohort: young.cohort,
+        missionName: mission.name,
+        missionDepartment: mission.department,
+        missionRegion: mission.region,
+        tutorId: mission.tutorId,
+        tutorName: mission.tutorName,
+      });
+
       if (isYoung(req.user)) {
         const { canApply, message } = await getAuthorizationToApply(mission, young, cohort);
         if (!canApply) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
         }
+        // La durée est celle de la mission : sinon un volontaire peut se créditer des heures de phase 2.
+        value.missionDuration = mission.duration;
       }
 
       // A young can only create their own applications.
@@ -151,24 +223,34 @@ router.post(
       }
       // - admin can create all applications
       // - referent can create applications of their department/region
-      // - responsible and supervisor can create applications of their structures
+      // - responsible and supervisor ne créent pas de candidature (refus en tête de route)
       if (isReferent(req.user)) {
+        // Le périmètre se juge sur la structure de la mission, pas sur le `structureId` fourni par l'appelant.
         if (req.user.role === ROLES.RESPONSIBLE) {
           if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-          if (value.structureId.toString() !== req.user.structureId.toString()) {
+          if (!mission.structureId || String(mission.structureId) !== String(req.user.structureId)) {
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
         if (req.user.role === ROLES.SUPERVISOR) {
           if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
           const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-          if (!structures.map((e) => e._id.toString()).includes(value.structureId.toString())) {
+          if (!mission.structureId || !structures.map((e) => e._id.toString()).includes(String(mission.structureId))) {
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
         const cohort = await CohortModel.findById(young.cohortId);
         if (!cohort) {
           return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        }
+
+        // Seuls l'admin et les référents territoriaux saisissent une mission déjà réalisée (mission
+        // personnalisée). Pour tout autre rôle, la candidature n'est qu'une proposition que le volontaire
+        // doit accepter, sur la durée de la mission : sinon une structure validait la phase 2 de
+        // n'importe quel volontaire en créant une candidature DONE de 84 h (PH1).
+        if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(req.user.role)) {
+          value.status = APPLICATION_STATUS.WAITING_ACCEPTATION;
+          value.missionDuration = mission.duration;
         }
 
         let canCreate: boolean;
@@ -315,6 +397,7 @@ router.post(
         structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
       }
 
+      const cohorts = new Map<string, CohortDocument | null>();
       for (const application of applications) {
         const young = application.young;
         if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -334,31 +417,62 @@ router.post(
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
+        // Une proposition que le volontaire n'a pas acceptée (en attente, refusée ou annulée) ne relève pas de
+        // la structure : aucun changement de statut, quelle qu'en soit la cible.
+        if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        // Mêmes transitions par rôle que PUT /application (GOO-12 : FL2) : sans ce contrôle, le lot
+        // permettait à une structure de passer une candidature WAITING_ACCEPTATION à DONE.
+        if (application.status !== valueKey.key) {
+          const cohortKey = young.cohortId ? `id:${young.cohortId}` : `name:${young.cohort}`;
+          if (!cohorts.has(cohortKey)) {
+            cohorts.set(cohortKey, young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort }));
+          }
+          if (!canReferentChangeApplicationStatus(req.user, application.status, valueKey.key, cohorts.get(cohortKey), application)) {
+            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          }
+        }
       }
 
-      await Promise.all(
-        value.ids.map(async (id: string) => {
-          const application = await ApplicationModel.findById(id);
-          if (!application) return;
+      // 1. Écriture des candidatures, une par une.
+      const updatedApplications: ApplicationDocument[] = [];
+      for (const id of value.ids) {
+        const application = await ApplicationModel.findById(id);
+        if (!application) continue;
+        application.set({ status: valueKey.key });
+        await application.save({ fromUser: req.user });
+        updatedApplications.push(application);
 
-          const young = await YoungModel.findById(application.youngId);
+        if (application.apiEngagementId) {
+          await apiEngagement.update(application);
+        }
+      }
 
-          application.set({ status: valueKey.key });
-          await application.save({ fromUser: req.user });
+      // 2. Un seul recalcul par volontaire et par mission, une fois toutes les candidatures écrites
+      // (lot D : L1). Les erreurs remontent : un lot dont un recalcul échoue répond 500 au lieu
+      // de laisser des heures de phase 2 ou des places de mission faussées sans le dire.
+      const youngIds = [...new Set(updatedApplications.map((application) => String(application.youngId)))];
+      const youngs = new Map<string, YoungDocument>();
+      for (const youngId of youngIds) {
+        const young = await YoungModel.findById(youngId);
+        if (!young) continue;
+        await recomputeYoungPhase2StatusAndHours(young, req.user);
+        await recomputeYoungStatusPhase2Contract(young, req.user);
+        youngs.set(youngId, young);
+      }
+      const missionIds = [...new Set(updatedApplications.map((application) => String(application.missionId)))];
+      for (const missionId of missionIds) {
+        await recomputeMissionPlaces(missionId, req.user);
+      }
 
-          if (application.apiEngagementId) {
-            await apiEngagement.update(application);
-          }
-
-          await updateYoungPhase2StatusAndHours(young, req.user);
-          await updateYoungStatusPhase2Contract(young, req.user);
-          await updateMission(application, req.user);
-
-          if (young) {
-            await sendNotificationsByStatus(application, young, valueKey.key);
-          }
-        }),
-      );
+      // 3. Notifications, une fois l'état stabilisé.
+      for (const application of updatedApplications) {
+        const young = youngs.get(String(application.youngId));
+        if (young) {
+          await sendNotificationsByStatus(application, young, valueKey.key);
+        }
+      }
       res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
@@ -412,9 +526,22 @@ router.put(
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
+        // Une proposition que le volontaire n'a pas acceptée (en attente, refusée ou annulée) ne relève pas de
+        // la structure : ni son statut, ni sa durée, ni ses commentaires.
+        if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
       }
 
       const originalStatus = application.status;
+
+      // Transitions de statut par rôle, appliquées jusqu'ici seulement dans l'admin (GOO-12 : FL2).
+      if (isReferent(req.user) && value.status && value.status !== originalStatus) {
+        const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
+        if (!canReferentChangeApplicationStatus(req.user, originalStatus, value.status, cohort, application)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
 
       application.set(value);
 
@@ -479,7 +606,11 @@ router.put(
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // A young can only update his own application.
-      if (isWriteAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON() } })) {
+      // La condition était inversée : seules les candidatures des AUTRES volontaires étaient modifiables.
+      if (application.youngId?.toString() !== req.user._id.toString()) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+      if (!isWriteAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON(), application: application.toJSON() } })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
@@ -516,7 +647,12 @@ router.get(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
-      return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
+      // La permission des référents est seedée sans policy : le périmètre est contrôlé ici.
+      if (!(await isContractInUserScope(req.user, contract.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      return res.status(200).send({ ok: true, data: serializeContract(contract) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -546,41 +682,13 @@ router.get(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
+      // `CANDIDATURE_READ` est seedée sans policy (responsable, superviseur, référents dep/région,
+      // chefs de centre) : `isReadAuthorized` répond vrai pour n'importe quelle candidature.
+      if (!(await isApplicationInUserScope(req.user, data.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       return res.status(200).send({ ok: true, data: serializeApplication(data) });
-    } catch (error) {
-      capture(error);
-      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  },
-);
-
-router.post(
-  "/notify/docs-military-preparation/:template",
-  authMiddleware("young"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.APPLICATION, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true }]),
-  async (req: UserRequest, res: Response) => {
-    try {
-      const { error, value: template } = Joi.string().required().validate(req.params.template);
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const toReferents = await getReferentManagerPhase2(req.user.department);
-      if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      if (SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED !== template) {
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const mail = await sendTemplate(template, {
-        emailTo: toReferents.map((referent) => ({
-          name: `${referent.firstName} ${referent.lastName}`,
-          email: referent.email,
-        })),
-        params: { cta: `${config.ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
-      });
-      return res.status(200).send({ ok: true, data: mail });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -601,23 +709,65 @@ type Params = {
 
 type CC = { name: string; email: string };
 
+/**
+ * Notifications qu'un volontaire peut déclencher sur sa propre candidature, avec les statuts de
+ * candidature qui les justifient (lot D : L2) — ce sont celles qu'envoie l'app après un changement
+ * de statut (`scenes/missions/view*.jsx`). `null` : pas de condition de statut (ajout de pièce jointe).
+ * Le reste (validation, refus, relance…) est réservé aux référents.
+ */
+const YOUNG_NOTIFY_TEMPLATES: Record<string, string[] | null> = {
+  [SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION]: [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION],
+  [SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION]: [APPLICATION_STATUS.ABANDON],
+  [SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION]: [APPLICATION_STATUS.CANCEL],
+  [SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION]: [APPLICATION_STATUS.CANCEL],
+  [SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION]: null,
+};
+
+/** Templates traités par la route : toute autre valeur est refusée avant la moindre lecture. */
+const REFERENT_NOTIFY_TEMPLATES = [
+  SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED,
+  SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
+  SENDINBLUE_TEMPLATES.referent.VALIDATE_APPLICATION_TUTOR,
+  SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION,
+  SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION,
+  SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION,
+  SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION,
+  SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION,
+  SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION,
+  SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION,
+];
+
+/** Types de pièces jointes de phase 2 (cf. `translateAddFilePhase2`). */
+const PHASE2_ATTACHMENT_TYPES = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+
+// Un volontaire déclenche au plus 2 notifications par action (annulation) : 20 par heure laissent
+// de la marge sans permettre d'arroser les référents. Les référents envoient en masse depuis
+// l'admin : ils ne sont pas limités ici.
+const youngNotifyLimiter = userRateLimiter({ prefix: "application-notify", windowMs: 60 * 60 * 1000, limit: 20 });
+
 router.post(
   "/:id/notify/:template",
   authMiddleware(["referent", "young"]),
+  (req: UserRequest, res: Response, next) => (isYoung(req.user) ? youngNotifyLimiter(req, res, next) : next()),
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.APPLICATION, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true }]),
   async (req: UserRequest, res: Response) => {
     try {
+      const allowedTemplates = isYoung(req.user) ? Object.keys(YOUNG_NOTIFY_TEMPLATES) : REFERENT_NOTIFY_TEMPLATES;
       const { error, value } = Joi.object({
-        id: Joi.string().required(),
-        template: Joi.string().required(),
-        message: Joi.string().optional(),
-        type: Joi.string().optional(),
-        multipleDocument: Joi.string().optional(),
+        id: idSchema().required(),
+        template: Joi.string()
+          .required()
+          .valid(...allowedTemplates),
+        // Seul texte libre repris dans un email (motif de refus, envoyé par un référent) : on le borne en longueur.
+        message: isYoung(req.user) ? Joi.forbidden() : Joi.string().max(2000).optional(),
+        type: Joi.string()
+          .valid(...PHASE2_ATTACHMENT_TYPES)
+          .optional(),
+        multipleDocument: Joi.string().valid("true", "false").optional(),
       })
         .unknown()
         .validate({ ...req.params, ...req.body }, { stripUnknown: true });
       if (error) {
-        capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
@@ -625,6 +775,13 @@ router.post(
 
       const application = await ApplicationModel.findById(id);
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Un volontaire ne notifie que ce que le statut de sa candidature justifie (pas d'« abandon »
+      // sur une candidature en cours, par exemple).
+      const youngAllowedStatuses = isYoung(req.user) ? YOUNG_NOTIFY_TEMPLATES[defaultTemplate] : null;
+      if (youngAllowedStatuses && !youngAllowedStatuses.includes(application.status!)) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
       const mission = await MissionModel.findById(application.missionId);
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const referent = await ReferentModel.findById(mission.tutorId);
@@ -654,6 +811,10 @@ router.post(
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
+        // Une structure n'écrit pas au volontaire (ni à ses représentants) au sujet d'une proposition qu'il n'a pas acceptée.
+        if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
       }
 
       let template = defaultTemplate;
@@ -661,7 +822,9 @@ router.post(
       // build default values for params
       // => young name, and mission name
 
-      let params: Params = { youngFirstName: application.youngFirstName || "", youngLastName: application.youngLastName || "", missionName: mission.name };
+      // Nom de mission et motif de refus sont saisis par la structure : on en retire le balisage
+      // avant de les recopier dans le mail (constat PM2).
+      let params: Params = { youngFirstName: application.youngFirstName || "", youngLastName: application.youngLastName || "", missionName: sanitizeEmailText(mission.name) };
 
       if (template === SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED) {
         if (!isReferentActive) return res.status(200).send({ ok: true });
@@ -694,7 +857,7 @@ router.post(
         ].filter((destinataire) => destinataire.email);
         params = {
           ...params,
-          message,
+          message: sanitizeEmailText(message),
           cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater`,
         };
       } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
@@ -837,16 +1000,25 @@ router.post(
 router.post(
   "/:id/file/:key",
   authMiddleware(["referent", "young"]),
-  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  ...tempFileUpload(),
   async (req: UserRequest, res: Response) => {
     try {
       const application = await ApplicationModel.findById(req.params.id);
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
 
-      const rootKeys = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+      // Sans ce contrôle, n'importe quel volontaire ou référent dépose des fichiers sur n'importe
+      // quelle candidature (l'ancienne vérification avait été laissée en commentaire plus bas).
+      if (isYoung(req.user)) {
+        if (application.youngId?.toString() !== req.user._id.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
+      } else if (!(await isApplicationInUserScope(req.user, application.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       const { error: keyError, value: key } = Joi.string()
         .required()
-        .valid(...rootKeys)
+        .valid(...APPLICATION_FILE_KEYS)
         .validate(req.params.key, { stripUnknown: true });
       if (keyError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
@@ -884,9 +1056,8 @@ router.post(
           { stripUnknown: true },
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      //const application = await ApplicationModel.find({ youngId: req.user._id });
-      if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
 
+      const uploadedNames: string[] = [];
       for (let i = 0; i < files.length; i++) {
         let currentFile = files[i];
         // If multiple file with same names are provided, currentFile is an array. We just take the latest.
@@ -914,16 +1085,23 @@ router.post(
         const data = fs.readFileSync(tempFilePath);
         const encryptedBuffer = encrypt(data);
         const resultingFile = { mimetype: "image/png", encoding: "7bit", data: encryptedBuffer };
-        await uploadFile(`app/young/${user._id}/application/${key}/${name}`, resultingFile);
-        //get application et get j eunes
+        await uploadFile(getApplicationFilePath(user._id.toString(), application._id.toString(), key, name), resultingFile);
+        uploadedNames.push(name);
         fs.unlinkSync(tempFilePath);
       }
-      application.set({ [key]: names });
+      // La liste ne retient que des pièces réelles de CETTE candidature : déjà présentes, ou déposées à
+      // l'instant. Sinon un nom quelconque y entrait, puis ouvrait la lecture de la pièce homonyme (PM3).
+      const existingNames = (application[key] || []).map(String);
+      application.set({ [key]: names.filter((fileName) => existingNames.includes(fileName) || uploadedNames.includes(fileName)) });
       await application.save({ fromUser: req.user });
 
       await updateYoungApplicationFilesType(application, req.user);
 
-      return res.status(200).send({ young: serializeYoung(user, user), data: names, ok: true });
+      // `user` ici est le volontaire (YoungModel.findById(application.youngId), L961) : le second
+      // argument de serializeYoung doit être l'acteur authentifié, pas le jeune candidat, sinon le
+      // masquage GOO-11 (santé, CNI) ne s'applique jamais pour un responsable/superviseur qui dépose
+      // une pièce (constat PH3, audit production 2026-09-25).
+      return res.status(200).send({ young: serializeYoung(user, req.user), data: application[key], ok: true });
     } catch (error) {
       capture(error);
       if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
@@ -937,7 +1115,9 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     const { error, value } = Joi.object({
       id: Joi.string().required(),
       key: Joi.string().required(),
-      name: Joi.string().required(),
+      // `name` complète le chemin lu (`.../<clé>/<nom>`) : un seul niveau de l'arborescence, y compris pour
+      // un nom présent dans la liste de la candidature.
+      name: safePathSegment().required(),
     })
       .unknown()
       .validate({ ...req.params }, { stripUnknown: true });
@@ -953,9 +1133,20 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung(req.user)) {
+      if (req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else if (!(await isApplicationInUserScope(req.user, application.toJSON()))) {
+      // Côté référent il n'y avait aucun contrôle : tout rôle, y compris visiteur ou transporteur,
+      // téléchargeait les pièces jointes de n'importe quelle candidature.
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
-    const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
+    // Seules les quatre listes de pièces, et seulement les pièces de CETTE candidature : le chemin ne
+    // dépendait que du volontaire, une structure lisait donc les pièces d'une autre candidature (PM3).
+    if (!APPLICATION_FILE_KEYS.includes(key)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!(application[key] || []).map(String).includes(name)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    const downloaded = await getApplicationFile(young._id.toString(), application._id.toString(), key, name);
     const decryptedBuffer = decrypt(downloaded.Body);
 
     let mimeFromFile: any = null;
@@ -993,13 +1184,17 @@ router.get(
       const application = await ApplicationModel.findById(id);
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const applicationPatches = await patches.get(req, ApplicationModel);
+      if (!(await isApplicationInUserScope(req.user, application.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const applicationPatches = await patches.get(req, ApplicationModel, application);
       if (!applicationPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       return res.status(200).send({ ok: true, data: applicationPatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );

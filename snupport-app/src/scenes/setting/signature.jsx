@@ -3,7 +3,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { HiDotsVertical } from "react-icons/hi";
 import DropdownButton from "../../components/DropdownButton";
-import { classNames, translateRole, filterObjectByKeys } from "../../utils";
+import { classNames, translateRole, filterObjectByKeys, htmlToText } from "../../utils";
 
 import { HiPlus, HiX } from "react-icons/hi";
 import { useSelector } from "react-redux";
@@ -162,7 +162,7 @@ const Table = ({ shortcuts, updateShortcut, deleteShortcut, user }) => {
             >
               <p className="flex-1 break-all py-4 pl-4 text-sm text-gray-900">{shortcut.name}</p>
 
-              <p className="flex-[2] overflow-hidden px-6 py-4 text-sm text-gray-500" dangerouslySetInnerHTML={{ __html: shortcut.text }}></p>
+              <p className="flex-[2] overflow-hidden px-6 py-4 text-sm text-gray-500">{htmlToText(shortcut.text)}</p>
 
               {user.role === "AGENT" && (
                 <>

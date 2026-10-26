@@ -1,19 +1,14 @@
 import API from "./api";
 
-// we use cache in localstorage AT LEAST because in dev mode, hot reload works much better like that
-// @TODO: see if it's useful also in production ?
-function sessionStorageProvider() {
-  if (typeof window === "undefined") return new Map([]);
-  // When initializing, we restore the data from `localStorage` into a map.
-  const map = new Map(JSON.parse(window.sessionStorage.getItem("snu-user-cache") || "[]"));
-  // Before unloading the app, we write back all the data into `localStorage`.
-  window.addEventListener("beforeunload", () => {
-    const appCache = JSON.stringify(Array.from(map.entries()));
-    window.sessionStorage.setItem("snu-user-cache", appCache);
-  });
-
-  // We still use the map for write & read for performance.
-  return map;
+// Le cache SWR reste en mémoire : il était auparavant recopié dans le sessionStorage, avec la
+// réponse de /signin/token (profil complet d'un jeune, santé et représentants légaux compris),
+// lisible par tout script de la page (FL9). On efface la copie laissée par les versions précédentes.
+if (typeof window !== "undefined") {
+  try {
+    window.sessionStorage.removeItem("snu-user-cache");
+  } catch (error) {
+    // Stockage indisponible (navigation privée, cookies bloqués) : rien à effacer.
+  }
 }
 
 const swrConfigOptions = {
@@ -28,7 +23,6 @@ const swrConfigOptions = {
     // Retry after 5 seconds.
     setTimeout(() => revalidate({ retryCount }), 5000);
   },
-  provider: sessionStorageProvider,
 };
 
 export default swrConfigOptions;

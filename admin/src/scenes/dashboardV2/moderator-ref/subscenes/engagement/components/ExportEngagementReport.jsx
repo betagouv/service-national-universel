@@ -1,5 +1,6 @@
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import { safeJsonToSheet } from "@/utils/file";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../../services/api";
 import { REFERENT_ROLES, STRUCTURE_LEGAL_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, region2department, translate } from "snu-lib";
@@ -47,9 +48,9 @@ export default async function ExportEngagementReport({ filter, user, setLoading,
   }
 
   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-  const sheetYoungs = XLSX.utils.json_to_sheet(youngStatuses);
-  const sheetStructures = XLSX.utils.json_to_sheet(structures);
-  const sheetFilter = XLSX.utils.json_to_sheet(linesFilter);
+  const sheetYoungs = safeJsonToSheet(youngStatuses);
+  const sheetStructures = safeJsonToSheet(structures);
+  const sheetFilter = safeJsonToSheet(linesFilter);
   const wb = { Sheets: { Volontaires: sheetYoungs, Structures: sheetStructures, Filtres: sheetFilter }, SheetNames: ["Volontaires", "Structures", "Filtres"] };
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const data = new Blob([excelBuffer], { type: fileType });

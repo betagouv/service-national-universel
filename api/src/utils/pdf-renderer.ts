@@ -1,4 +1,4 @@
-import { ContractType, YoungType, MINISTRES } from "snu-lib";
+import { ContractType, YoungType, MINISTRES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import path from "path";
 import { logger } from "../logger";
 import { Writable } from "node:stream";
@@ -34,11 +34,46 @@ class InMemoryWritable extends Writable {
   }
 }
 
+// Documents que `generatePdfIntoStream` sait produire, par type puis gabarit. La convocation au séjour
+// de cohésion n'en fait plus partie depuis la fermeture de la phase 1 (#5214) : les routes la refusent
+// en 400 au lieu d'échouer en 500 (GOO-51).
+const PDF_DOCUMENTS: Record<string, string[]> = {
+  certificate: ["1", "2", "3", "snu"],
+  droitImage: ["droitImage"],
+  contract: ["2"],
+  image_right_batch: ["droitImage"],
+  consent_batch: ["consentement"],
+};
+
+export function isPdfDocumentAvailable(type: string, template: string): boolean {
+  return Object.hasOwn(PDF_DOCUMENTS, type) && PDF_DOCUMENTS[type].includes(template);
+}
+
+// Chaque attestation ne sanctionne que la phase réellement terminée : phase 1 (DONE), phase 2
+// (VALIDATED), phase 3 (VALIDATED), et l'attestation SNU qui résume les phases 1 et 2. Pour le
+// SNU, une phase 1 EXEMPTED compte comme terminée, comme partout ailleurs dans le dépôt
+// (hasValidatedPhase1 dans packages/lib/src/roles.ts, getAuthorizationToApply dans
+// api/src/application/applicationService.ts, equivalenceController.ts) : sinon un volontaire
+// dispensé de phase 1 qui valide sa phase 2 perdrait l'accès à son attestation SNU.
+export function isCertificateStatusValid(template: string, young: Pick<YoungType, "statusPhase1" | "statusPhase2" | "statusPhase3">): boolean {
+  if (template === "1") return young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE;
+  if (template === "2") return young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  if (template === "3") return young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
+  if (template === "snu") {
+    const hasValidatedOrExemptedPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED;
+    return hasValidatedOrExemptedPhase1 && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
+  }
+  return false;
+}
+
 export async function generatePdfIntoStream(outStream, { type, template, young, contract }: { type: string; template: string; young?: YoungType; contract?: ContractType }) {
   // Un jeune anonymisé (RGPD) ne doit plus pouvoir générer/télécharger ses documents
   // (attestations phase 1/2/3, droit à l'image…). Garde central : couvre toutes les
   // variantes ci-dessous. Les flux batch (tableau d'youngs) sont déjà filtrés par statut.
   if (young && !Array.isArray(young) && (young as any).anonymized) {
+    throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+  }
+  if (type === "certificate" && young && !isCertificateStatusValid(template, young)) {
     throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
   }
   if (type === "certificate" && template === "1" && young) {
@@ -76,7 +111,7 @@ export async function generatePdfIntoBuffer(options) {
 }
 
 async function getTemplate(template) {
-  const _path = path.join(config.IMAGES_ROOTDIR, template);
+  const _path = path.join(config.PDF_TEMPLATES_ROOTDIR, template);
   try {
     const handle = await fs.open(_path, "wx");
     logger.debug(`Downloading ${template}`);
@@ -94,13 +129,13 @@ async function getTemplate(template) {
 }
 
 export async function getAllPdfTemplates() {
-  await fs.mkdir(path.join(config.IMAGES_ROOTDIR, "certificates"), { recursive: true });
+  await fs.mkdir(path.join(config.PDF_TEMPLATES_ROOTDIR, "certificates"), { recursive: true });
   const ministres = [...MINISTRES].reverse(); // Most recent first
   for (const m of ministres) {
     await getTemplate(m.template);
   }
 
-  await fs.mkdir(path.join(config.IMAGES_ROOTDIR, "convocation"), { recursive: true });
+  await fs.mkdir(path.join(config.PDF_TEMPLATES_ROOTDIR, "convocation"), { recursive: true });
   for (const convoc of ["convocation/convocation_template_base_2024_V3.png", "convocation/convocation_template_base_NC.png"]) {
     await getTemplate(convoc);
   }

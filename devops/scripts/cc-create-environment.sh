@@ -54,7 +54,7 @@ fi
 directory=$(dirname $0)
 
 echo "branch_name: $branch_name"
-env_name=$($directory/cc-environment-name.sh $branch_name)
+env_name=$("$directory/cc-environment-name.sh" "$branch_name")
 echo "env_name: $env_name"
 
 domain=ci.beta-snu.dev
@@ -99,12 +99,13 @@ else # Create application
 
     clever curl -s -X PUT "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/branch" \
         -H 'Content-Type: application/json' \
-        --data-raw "{\"branch\":\"$branch_name\"}"
+        --data-raw "$(jq -cn --arg branch "$branch_name" '{branch: $branch}')"
 
     clever env --app $ci_app_id | sed \
         -e "s#ENVIRONMENT=\"ci\"#ENVIRONMENT=\"$env_name\"#g" \
         -e "s#ci.beta-snu.dev#$env_name.$domain#g" \
         -e "s#SUPPORT_URL=\"[^\"]*\"#SUPPORT_URL=\"https://api-support.ci.beta-snu.dev\"#g" \
+        -e "s#SNUPPORT_URL_ADMIN=\"[^\"]*\"#SNUPPORT_URL_ADMIN=\"https://admin-support.ci.beta-snu.dev\"#g" \
         | clever env import --app $app_id
 
     clever domain add api.$env_name.$domain/

@@ -17,8 +17,6 @@ export async function sendEmailToYoung(template: string, young, params: EmailPar
   const { cta, message, missionName, structureName, type_document, object, link } = params;
   let buttonCta = cta || config.APP_URL;
   if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
-  if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED)
-    buttonCta = `${config.APP_URL}/inscription/coordonnees?utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+219+acceder`;
   if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION || template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_PM)
     buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+170+acceder`;
   if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED)

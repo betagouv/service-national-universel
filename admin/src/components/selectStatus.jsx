@@ -27,7 +27,6 @@ import ModalRefused from "./modals/ModalRefused";
 import ModalWithdrawn from "./modals/ModalWithdrawn";
 import Chevron from "./Chevron";
 import ModalConfirm from "./modals/ModalConfirm";
-import ModalConfirmMultiAction from "./modals/ModalConfirmMultiAction";
 import { YOUNG_STATUS_PHASE2, isCle, translateInscriptionStatus } from "snu-lib";
 
 const lookUpAuthorizedStatus = ({ status, role }) => {
@@ -55,18 +54,8 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const user = useSelector((state) => state.Auth.user);
   const cohortList = useSelector((state) => state.Cohorts);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
-  const [modalGoal, setModalGoal] = useState({ isOpen: false, onConfirm: null });
   const [isModalValidatePhase2Open, setModalValidatePhase2] = useState(false);
   const [newStatus, setNewStatus] = useState(null);
-
-  const getInscriptionGoalReachedNormalized = async ({ department, cohort }) => {
-    const { data, ok, code } = await api.get(`/inscription-goal/${encodeURIComponent(cohort)}/department/${encodeURIComponent(department)}`);
-    if (!ok) {
-      toastr.error("Oups, une erreur s'est produite", translate(code));
-      return null;
-    }
-    return data;
-  };
 
   useEffect(() => {
     (async () => {
@@ -93,22 +82,8 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     } else {
       setModalConfirm({
         isOpen: true,
-        onConfirm: async () => {
+        onConfirm: () => {
           if ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.REFUSED, YOUNG_STATUS.WITHDRAWN].includes(status)) return setModal(status);
-          if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-            const fillingRate = await getInscriptionGoalReachedNormalized({ department: young.department, cohort: young.cohort });
-            if (fillingRate >= 1)
-              return setModalGoal({
-                isOpen: true,
-                onConfirm: () => handleChangeStatus(YOUNG_STATUS.WAITING_LIST),
-                confirmText: "Placer en liste complémentaire",
-                onConfirm2: () => handleChangeStatus(YOUNG_STATUS.VALIDATED),
-                confirmText2: "Valider quand même",
-                title: "Jauge de candidats atteinte",
-                message:
-                  "Attention, vous avez atteint la jauge, merci de placer le candidat sur liste complémentaire ou de vous rapprocher de votre coordinateur régional avant de valider la candidature.",
-              });
-          }
           handleChangeStatus(status);
         },
         title: "Modification de statut",
@@ -254,29 +229,6 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
         onChange={() => setModal(false)}
         onConfirm={(values) => {
           handleChangeStatus(YOUNG_STATUS.WITHDRAWN, values);
-          setModal(null);
-        }}
-      />
-      <ModalConfirmMultiAction
-        showHeaderIcon={true}
-        showHeaderText={false}
-        isOpen={modalGoal?.isOpen}
-        title={modalGoal?.title}
-        message={modalGoal?.message}
-        confirmText={modalGoal?.confirmText}
-        confirmText2={modalGoal?.confirmText2}
-        onConfirm={() => {
-          modalGoal?.onConfirm?.();
-          setModalGoal({ isOpen: false, onConfirm: null });
-          setModal(null);
-        }}
-        onConfirm2={() => {
-          modalGoal?.onConfirm2?.();
-          setModalGoal({ isOpen: false, onConfirm: null });
-          setModal(null);
-        }}
-        onCancel={() => {
-          setModalGoal({ isOpen: false, onConfirm: null });
           setModal(null);
         }}
       />

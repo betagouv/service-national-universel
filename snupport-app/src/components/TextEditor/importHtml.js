@@ -1,6 +1,7 @@
 import escapeHtml from "escape-html";
 import { Text, Transforms } from "slate";
 import { jsx } from "slate-hyperscript";
+import { sanitizeLinkUrl } from "../../utils/safeUrl";
 
 const ELEMENT_TAGS = {
   A: (el) => ({ type: "link", url: el.getAttribute("href") }),
@@ -106,8 +107,11 @@ export const serialize = (node) => {
     case "paragraph":
       //dirty setInnerHtml not supporting \n
       return `<p>${children === "" ? "<br>" : children}</p>`;
-    case "link":
-      return `<a href="${escapeHtml(node.url)}">${children}</a>`;
+    case "link": {
+      // Le HTML produit part dans les e-mails et les messages : un schéma hors liste blanche perd son lien.
+      const url = sanitizeLinkUrl(node.url);
+      return url ? `<a href="${escapeHtml(url)}">${children}</a>` : children;
+    }
     case "numbered-list":
       return `<ol>${children}</ol>`;
     case "list-item":

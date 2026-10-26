@@ -5,7 +5,6 @@ import styled from "styled-components";
 import { copyToClipboard } from "../utils";
 import { BiCopy } from "react-icons/bi";
 import { HiCheckCircle } from "react-icons/hi";
-import { htmlCleaner } from "snu-lib";
 
 export const Info = ({ children, title }) => {
   return (
@@ -31,7 +30,7 @@ export const Details = ({ title, value, copy }) => {
     <div className="detail">
       <div className="detail-title">{title}&nbsp;:</div>
       <div style={{ display: "flex" }}>
-        {typeof value === "object" ? <div className="detail-text">{value}</div> : <div className="detail-text" dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />}
+        <div className="detail-text">{value}</div>
         {copy ? (
           <div
             className="text-snu-purple-400 mx-1 flex cursor-pointer items-center justify-center hover:scale-105"

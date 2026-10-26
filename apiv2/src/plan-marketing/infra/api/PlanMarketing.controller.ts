@@ -1,11 +1,14 @@
-import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { Body, Controller, Logger, Post, UseGuards } from "@nestjs/common";
 import { PlanMarketingActionSelectorService } from "@plan-marketing/core/PlanMarketingActionSelector.service";
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsString, Matches } from "class-validator";
+import { PLAN_MARKETING_FOLDER_PATH_EXPORT } from "snu-lib";
 import { ImporterEtCreerListeDiffusion } from "../../core/useCase/ImporterEtCreerListeDiffusion";
-import { BrevoIpGuard } from "../guard/BrevoIpGuard";
+import { BrevoWebhookGuard } from "../guard/BrevoWebhook.guard";
 
-class ImporterContactsEtCreerListeDiffusionDto {
+export const PLAN_MARKETING_PATH_FILE_REGEX = new RegExp(`^${PLAN_MARKETING_FOLDER_PATH_EXPORT}/[A-Za-z0-9_-]+\\.csv$`);
+
+export class ImporterContactsEtCreerListeDiffusionDto {
     @IsString()
     @IsNotEmpty()
     nom: string;
@@ -14,8 +17,11 @@ class ImporterContactsEtCreerListeDiffusionDto {
     @IsNotEmpty()
     campagneId: string;
 
+    // Seuls les CSV déposés par l'import marketing (api v1 `POST /plan-marketing/import`) peuvent
+    // être envoyés à Brevo : le fichier est lu dans le bucket partagé sans autre contrôle.
     @IsString()
     @IsNotEmpty()
+    @Matches(PLAN_MARKETING_PATH_FILE_REGEX)
     pathFile: string;
 }
 
@@ -28,14 +34,18 @@ export class PlanMarketingController {
         private readonly planMarketingActionSelectorService: PlanMarketingActionSelectorService,
     ) {}
 
-    @UseGuards(AdminGuard)
+    /**
+     * @deprecated Utiliser CreerListeDiffusion et ImporterContacts. Encore appelée par l'export
+     * Brevo des listes Volontaires / Inscriptions (`useBrevoExport`), réservé aux super-administrateurs.
+     */
+    @UseGuards(SuperAdminGuard)
     @Post("liste-diffusion")
     async creer(@Body() dto: ImporterContactsEtCreerListeDiffusionDto) {
         await this.importerEtCreerListeDiffusion.execute(dto.nom, dto.campagneId, dto.pathFile);
     }
 
     @Post("import/webhook")
-    @UseGuards(BrevoIpGuard)
+    @UseGuards(BrevoWebhookGuard)
     async webhook(@Body("proc_success") processId: string) {
         this.logger.log(`Webhook received from Brevo for processId: ${processId}`);
         await this.planMarketingActionSelectorService.selectAction(Number(processId));

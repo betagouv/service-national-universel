@@ -15,10 +15,15 @@ if [[ $destination == "" ]]; then
     exit 1
 fi
 
+source "$(cd "$(dirname "$0")" && pwd)/copy-packages.sh"
+source "$(cd "$(dirname "$0")" && pwd)/csp-report.sh"
+
 cd "$(dirname $0)/../.."
 
-turbo_version=$(cat package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
-npm install --global "turbo@$turbo_version"
+# Version exacte résolue dans le lockfile (et non la plage de package.json, qui
+# installait la dernière 2.x publiée) ; turbo n'a pas besoin de script d'installation.
+turbo_version=$(node -p "require('./package-lock.json').packages['node_modules/turbo'].version")
+npm install --global --ignore-scripts "turbo@$turbo_version"
 
 rm -Rf out
 turbo prune app admin api apiv2
@@ -38,8 +43,7 @@ mv out/admin/build $destination/admin
 mv out/app/build $destination/app
 
 # back
-mkdir -p $destination/packages/lib/
-mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
+copy_workspace_packages $destination
 mv out/node_modules $destination/
 
 # api
@@ -50,7 +54,11 @@ mv out/api/{src,migrations,public,node_modules} $destination/api/
 mkdir -p $destination/apiv2/
 mv out/apiv2/{dist/*,node_modules} $destination/apiv2/
 
-envsubst '$APP_HOME $PORT' < devops/build/all/nginx.conf > $destination/nginx.conf
+# Affectations séparées de l'export : sous `set -e`, un échec de csp_report_uri arrête le build
+CSP_REPORT_URI_APP=$(csp_report_uri app)
+CSP_REPORT_URI_ADMIN=$(csp_report_uri admin)
+export CSP_REPORT_URI_APP CSP_REPORT_URI_ADMIN
+envsubst '$APP_HOME $PORT $CSP_REPORT_URI_APP $CSP_REPORT_URI_ADMIN' < devops/build/all/nginx.conf > $destination/nginx.conf
 mkdir -p $destination/nginx/{proxy,client}
 cp devops/build/all/{package.json,ecosystem.config.js,start-nginx.sh} $destination
 

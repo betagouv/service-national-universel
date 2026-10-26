@@ -1,29 +1,6 @@
 const { SessionPhase1Model } = require("../../models");
 const mongoose = require("mongoose");
 
-const filteredRegionList = [
-  "Auvergne-Rhône-Alpes",
-  "Bourgogne-Franche-Comté",
-  "Bretagne",
-  "Centre-Val de Loire",
-  "Corse",
-  "Grand Est",
-  "Hauts-de-France",
-  "Île-de-France",
-  "Normandie",
-  "Nouvelle-Aquitaine",
-  "Occitanie",
-  "Pays de la Loire",
-  "Provence-Alpes-Côte d'Azur",
-  "Guadeloupe",
-  "Martinique",
-  "Guyane",
-  "La Réunion",
-  "Mayotte",
-  "Polynésie française",
-  "Nouvelle-Calédonie",
-];
-
 async function getCohesionCenterFromSession(sessionId) {
   const result = await SessionPhase1Model.aggregate([
     { $match: { _id: new mongoose.Types.ObjectId(sessionId) } },
@@ -50,4 +27,4 @@ async function getCohesionCenterFromSession(sessionId) {
   }
 }
 
-module.exports = { filteredRegionList, getCohesionCenterFromSession };
+module.exports = { getCohesionCenterFromSession };

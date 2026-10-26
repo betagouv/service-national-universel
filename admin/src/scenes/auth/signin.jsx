@@ -4,16 +4,14 @@ import { Link, Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
-import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
-import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
-import api, { setJwtToken } from "../../services/api";
+import api from "../../services/api";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
-import { FEATURES_NAME, isFeatureEnabled, formatToActualTime, isValidRedirectUrl, ERRORS } from "snu-lib";
-import { captureMessage } from "../../sentry";
+import { formatToActualTime, ERRORS, isInternalRedirectUrl, translate } from "snu-lib";
+import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import useDocumentCss from "../../hooks/useDocumentCss";
 
@@ -27,12 +25,14 @@ export default function Signin() {
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
   const [isReferentInactive, setIsReferentInactive] = useState(false);
+  const [isAccessRestricted, setIsAccessRestricted] = useState(false);
+  const [isPasswordResetRequired, setIsPasswordResetRequired] = useState(false);
 
   const [tooManyRequests, setTooManyRequests] = useState({ status: false, date: null });
 
   const { redirect, unauthorized } = queryString.parse(location.search);
 
-  if (user) return <Redirect to={redirect || "/"} />;
+  if (user) return <Redirect to={isInternalRedirectUrl(redirect) ? redirect : "/"} />;
   if (unauthorized === "1") toastr.error("Votre session a expiré", "Merci de vous reconnecter.", { timeOut: 10000 });
 
   return (
@@ -65,25 +65,17 @@ export default function Signin() {
                 onSubmit={async ({ email, password }, actions) => {
                   try {
                     setIsReferentInactive(false);
-                    const { user, token, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
+                    setIsAccessRestricted(false);
+                    setIsPasswordResetRequired(false);
+                    const { user, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
                     if (code === "2FA_REQUIRED") {
-                      plausibleEvent("2FA demandée");
                       return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
                     } else if (code === "VERIFICATION_REQUIRED") {
                       return history.push(signinRedirect);
                     }
-                    if (token) setJwtToken(token);
                     if (user) {
-                      plausibleEvent("Connexion réussie");
                       dispatch(setUser(user));
-                      if ((isFeatureEnabled(FEATURES_NAME.FORCE_REDIRECT, undefined, environment) && redirect) || isValidRedirectUrl(redirect)) {
-                        return (window.location.href = redirect || "/");
-                      }
-                      if (redirect) {
-                        captureMessage("Invalid redirect url", { extra: { redirect } });
-                        toastr.error("Url de redirection invalide : " + redirect);
-                        return history.push("/");
-                      }
+                      return redirectAfterSignin(history, redirect);
                     }
                   } catch (e) {
                     actions.setFieldValue("password", "");
@@ -93,6 +85,12 @@ export default function Signin() {
                     }
                     if (e.code === ERRORS.REFERENT_INACTIVE) {
                       setIsReferentInactive(true);
+                    }
+                    if (e.code === ERRORS.ADMIN_ACCESS_RESTRICTED) {
+                      setIsAccessRestricted(true);
+                    }
+                    if (e.code === ERRORS.PASSWORD_RESET_REQUIRED) {
+                      return setIsPasswordResetRequired(true);
                     }
                     if (e.code === "TOO_MANY_REQUESTS") {
                       setTooManyRequests({ status: true, date: formatToActualTime(e?.data?.nextLoginAttemptIn) });
@@ -106,10 +104,20 @@ export default function Signin() {
                   return (
                     <Form className="mb-6 flex flex-col items-start gap-4">
                       {!userIsValid && (
-                        <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">E-mail et/ou mot de passe incorrect(s)</div>
+                        <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
+                          E-mail et/ou mot de passe incorrect(s). Après plusieurs échecs consécutifs, la connexion est temporairement suspendue : réessayez dans quelques minutes.
+                        </div>
                       )}
                       {isReferentInactive && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">Votre compte a été désactivé</div>
+                      )}
+                      {isAccessRestricted && (
+                        <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
+                          L'accès à la plateforme est temporairement restreint.
+                        </div>
+                      )}
+                      {isPasswordResetRequired && (
+                        <div className="block w-full rounded border border-blue-400 bg-blue-50 py-2.5 px-4 text-sm text-blue-700">{translate(ERRORS.PASSWORD_RESET_REQUIRED)}</div>
                       )}
                       {tooManyRequests?.status && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
@@ -157,14 +165,6 @@ export default function Signin() {
             )}
           </div>
           <div className="flex flex-col gap-3 border-t border-gray-200 pt-4">
-            {!maintenance && (
-              <p className="text-center text-sm text-brand-grey ">
-                Vous êtes une structure ?{" "}
-                <Link to="/auth/signup" className="text-snu-purple-200 transition-colors hover:text-snu-purple-600 hover:underline">
-                  Publiez vos missions
-                </Link>
-              </p>
-            )}
             <p className="text-center text-sm text-brand-grey ">
               Vous avez besoin d&apos;aide ?{" "}
               <Link

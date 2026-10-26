@@ -1,21 +1,11 @@
 import React from "react";
 import { RouteComponentProps } from "react-router-dom";
-import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
+import { HiOutlineBell } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useMount, useUpdateEffect } from "react-use";
 
-import {
-  CohortType,
-  LigneBusDto,
-  ROLES,
-  canExportLigneBus,
-  getZonedDate,
-  isLigneBusDemandeDeModificationOpen,
-  isSuperAdmin,
-  ligneBusCanCreateDemandeDeModification,
-  translate,
-} from "snu-lib";
+import { CohortType, LigneBusDto, ROLES, canExportLigneBus, getZonedDate, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import Bus from "@/assets/icons/Bus";
@@ -29,14 +19,12 @@ import { Phase1Service } from "@/services/phase1Service";
 import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
 import { Title } from "../../components/commons";
 import { exportLigneBusJeune } from "../../util";
-import Creation from "../modificationPanel/Creation";
 import BusTeam from "./components/BusTeam";
 import Centre from "./components/Centre";
 import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
-import DeleteLigneButton from "./components/Partials/DeleteLigneButton";
 
 export interface DataForCheck {
   meetingPoints: { youngsCount: number; meetingPointId: string }[];
@@ -51,9 +39,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
   const [cohort, setCohort] = React.useState<CohortType | null>(null);
   const [dataForCheck, setDataForCheck] = React.useState<DataForCheck | null>(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
-  const [panelOpen, setPanelOpen] = React.useState(false);
   const [nbYoung, setNbYoung] = React.useState<number>();
-  const [addOpen, setAddOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
   const getBus = async () => {
@@ -148,9 +134,6 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
     getDataForCheck();
     getDemandeDeModification();
   }, [props.match?.params?.id]);
-  React.useEffect(() => {
-    setAddOpen(false);
-  }, [data]);
   if (!data || !cohort) return <Loader />;
 
   const leader = data.team.filter((item) => item.role === "leader")[0]?._id?.toString() || null;
@@ -199,7 +182,6 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
       <div className="flex justify-between mr-8 items-center">
         <Breadcrumbs items={[{ title: "Séjours" }, { label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche de la ligne" }]} />
         <div className="flex items-center gap-2 mt-8">
-          {isSuperAdmin(user) && <DeleteLigneButton cohort={cohort} ligneDeBus={data} />}
           {canExportLigneBus(user) && data.team.length > 0 ? (
             <SelectAction
               title="Exporter la ligne"
@@ -225,12 +207,6 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
             <div className="cursor-pointer rounded-full border-[1px] border-[#66A7F4] bg-[#F9FCFF] px-3 py-1 text-xs font-medium leading-5 text-[#0C7CFF]">{data.cohort}</div>
           </div>
           <div className="flex items-center gap-2">
-            {ligneBusCanCreateDemandeDeModification(user) && isLigneBusDemandeDeModificationOpen(user, cohort) && (
-              <button className="flex items-center gap-2 px-3 bg-white text-blue-600 rounded-lg hover:scale-105 h-[30px]" onClick={() => setPanelOpen(true)}>
-                <HiOutlineChatAlt className="text-blue-600 h-4 w-4" />
-                Demander une modification
-              </button>
-            )}
             {user.role === ROLES.ADMIN && (
               <button
                 disabled={isLoading}
@@ -257,55 +233,30 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
               aller={getZonedDate(data.departuredDate)}
               retour={getZonedDate(data.returnDate)}
               center={{ ...data.centerDetail, departureHour: data.centerArrivalTime, returnHour: data.centerDepartureTime }}
-              bus={data}
-              setBus={setData}
             />
-            <Modification demandeDeModification={demandeDeModification} getModification={getDemandeDeModification} />
+            <Modification demandeDeModification={demandeDeModification} />
           </div>
-          <Info bus={data} setBus={setData} dataForCheck={dataForCheck} nbYoung={nbYoung} cohort={cohort} />
+          <Info bus={data} dataForCheck={dataForCheck} nbYoung={nbYoung} />
 
-          <BusTeam bus={data} setBus={setData} title={"Chef de file"} role={"leader"} idTeam={leader} addOpen={addOpen} cohort={cohort} />
+          <BusTeam bus={data} title={"Chef de file"} idTeam={leader} />
           {data.team.filter((item) => item.role === "supervisor").length > 0 ? (
             data.team
               .filter((item) => item.role === "supervisor")
-              .map((value) => (
-                <BusTeam
-                  key={value._id?.toString()}
-                  bus={data}
-                  setBus={setData}
-                  title="Encadrant"
-                  role={"supervisor"}
-                  idTeam={value._id?.toString()}
-                  addOpen={addOpen}
-                  setAddOpen={setAddOpen}
-                  cohort={cohort}
-                />
-              ))
+              .map((value) => <BusTeam key={value._id?.toString()} bus={data} title="Encadrant" idTeam={value._id?.toString()} />)
           ) : (
-            <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} cohort={cohort} />
+            <BusTeam bus={data} title="Encadrant" />
           )}
-          {addOpen ? <BusTeam bus={data} setBus={setData} title="Encadrant" role={"supervisor"} setAddOpen={setAddOpen} cohort={cohort} /> : null}
 
           <div className="flex items-start gap-4">
             <div className="flex w-1/2 flex-col gap-4">
               {data.meetingsPointsDetail?.map((pdr, index) => (
-                <PointDeRassemblement
-                  bus={data}
-                  pdr={pdr as any}
-                  onBusChange={setData}
-                  index={index + 1}
-                  key={pdr._id}
-                  volume={dataForCheck?.meetingPoints}
-                  getVolume={getDataForCheck}
-                  cohort={cohort}
-                />
+                <PointDeRassemblement bus={data} pdr={pdr as any} index={index + 1} key={pdr._id} volume={dataForCheck?.meetingPoints} cohort={cohort} />
               ))}
             </div>
-            <Centre bus={data} setBus={setData} cohort={cohort} />
+            <Centre bus={data} />
           </div>
         </div>
       </div>
-      <Creation open={panelOpen} setOpen={setPanelOpen} bus={data} getModification={getDemandeDeModification} />
     </>
   );
 }

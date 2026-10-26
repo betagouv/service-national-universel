@@ -3,7 +3,6 @@ import styled from "styled-components";
 import Header from "./header";
 import "react-responsive-carousel/lib/styles/carousel.min.css"; // requires a loader
 import { Carousel } from "react-responsive-carousel";
-import plausibleEvent from "../../services/plausible";
 import { urlWithScheme } from "../../utils";
 
 export default function Maintenance() {
@@ -18,7 +17,6 @@ export default function Maintenance() {
           {/* PlayButton */}
           <a
             className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-white md:h-20 md:w-20"
-            onClick={() => plausibleEvent("LP - Video")}
             href="https://www.youtube.com/watch?v=rE-8fe9xPDo"
             target="_blank"
             rel="noreferrer">
@@ -37,7 +35,6 @@ export default function Maintenance() {
           <div className=" hidden justify-around md:flex">
             <div className="w-[20rem] lg:w-[25rem] ">
               <CardPhase
-                onClick={() => plausibleEvent("LP - Phase 1")}
                 upText="phase 1"
                 title="Le séjour de cohésion"
                 downText="3 sessions possibles en février, juin et juillet 2022"
@@ -46,7 +43,6 @@ export default function Maintenance() {
             </div>
             <div className="w-[20rem] lg:w-[25rem]">
               <CardPhase
-                onClick={() => plausibleEvent("LP - Phase 2")}
                 upText="phase 2"
                 title="La mission d'intérêt général"
                 downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
@@ -54,39 +50,25 @@ export default function Maintenance() {
               />
             </div>
             <div className="w-[20rem] lg:w-[25rem]  ">
-              <CardPhase
-                onClick={() => plausibleEvent("LP - Phase 3")}
-                upText="phase 3 - facultative"
-                title="L'engagement"
-                downText="Mission facultative de 3 mois minimum"
-                to="https://www.snu.gouv.fr/l-engagement-28"
-              />
+              <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" to="https://www.snu.gouv.fr/l-engagement-28" />
             </div>
           </div>
 
           {/* Mobile View Carusel*/}
           <Carousel className="flex p-3 md:hidden" showThumbs={false} showStatus={false} showArrows={true}>
             <CardPhase
-              onClick={() => plausibleEvent("LP - Phase 1")}
               upText="phase 1"
               title="Le séjour de cohésion"
               downText="3 sessions possibles en février, juin et juillet 2022"
               to="https://www.snu.gouv.fr/le-sejour-de-cohesion-26"
             />
             <CardPhase
-              onClick={() => plausibleEvent("LP - Phase 2")}
               upText="phase 2"
               title="La mission d'intérêt général"
               downText="84 heures à réaliser au cours de l'année suivant le séjour de cohésion"
               to="https://www.snu.gouv.fr/la-mission-d-interet-general-27"
             />
-            <CardPhase
-              onClick={() => plausibleEvent("LP - Phase 3")}
-              upText="phase 3 - facultative"
-              title="L'engagement"
-              downText="Mission facultative de 3 mois minimum"
-              to="https://www.snu.gouv.fr/l-engagement-28"
-            />
+            <CardPhase upText="phase 3 - facultative" title="L'engagement" downText="Mission facultative de 3 mois minimum" to="https://www.snu.gouv.fr/l-engagement-28" />
           </Carousel>
 
           {/* Start Button Desktop View */}

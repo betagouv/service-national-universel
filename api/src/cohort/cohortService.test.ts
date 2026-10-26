@@ -1,6 +1,5 @@
-import { CohortModel } from "../models";
-import { findCohortBySnuIdOrThrow, isCohortInscriptionOpen } from "./cohortService";
-import { CohortType, ERRORS } from "snu-lib";
+import { isCohortInscriptionOpen } from "./cohortService";
+import { CohortType } from "snu-lib";
 
 jest.mock("../models", () => ({
   CohortModel: {
@@ -8,21 +7,7 @@ jest.mock("../models", () => ({
   },
 }));
 
-describe("findCohortBySnuIdOrThrow", () => {
-  it("should return the cohort if it exists", async () => {
-    const mockCohort = { snuId: "testCohort" };
-    (CohortModel.findOne as jest.Mock).mockResolvedValue(mockCohort);
-
-    const result = await findCohortBySnuIdOrThrow("testCohort");
-
-    expect(result).toEqual(mockCohort);
-  });
-
-  it("should throw an error if the cohort does not exist", async () => {
-    (CohortModel.findOne as jest.Mock).mockResolvedValue(null);
-
-    await expect(findCohortBySnuIdOrThrow("nonexistentCohort")).rejects.toThrow(ERRORS.COHORT_NOT_FOUND);
-  });
+describe("isCohortInscriptionOpen", () => {
   it("should return true if inscription is open and false otherwise", () => {
     const cohortOpen = {
       snuId: "testCohortOpen",

@@ -13,7 +13,7 @@ import GenericError from "./GenericError";
 
 // legacy
 const limitedAccess = {
-  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
+  [ROLES.TRANSPORTER]: { authorised: ["/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/centre" },
   [ROLES.ADMINISTRATEUR_CLE]: {
     authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
     default: "/accueil",
@@ -80,9 +80,6 @@ const PERMISSIONS_BY_ROUTE = {
   "/ligne-de-bus": {
     permissions: [{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }],
   },
-  "/edit-transport": {
-    permissions: [{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.WRITE }],
-  },
   "/volontaire": {
     ignorePolicy: true, // should have read permission but not specific to a young
     permissions: [{ resource: PERMISSION_RESOURCES.YOUNG, action: PERMISSION_ACTIONS.READ }],
@@ -116,9 +113,6 @@ const PERMISSIONS_BY_ROUTE = {
   },
   "/import-si-snu": {
     permissions: [{ resource: PERMISSION_RESOURCES.IMPORT_SI_SNU, action: PERMISSION_ACTIONS.READ }],
-  },
-  "/table-repartition": {
-    permissions: [{ resource: PERMISSION_RESOURCES.TABLE_DE_REPARTITION, action: PERMISSION_ACTIONS.READ }],
   },
   "/classes": {
     permissions: [{ resource: PERMISSION_RESOURCES.CLASSE, action: PERMISSION_ACTIONS.READ }],

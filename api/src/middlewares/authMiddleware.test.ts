@@ -16,7 +16,9 @@ describe("authMiddleware", () => {
   let req, res, next;
 
   beforeEach(() => {
-    req = { path: "", originalUrl: "", ipInfo: "an-ip" } as any;
+    // PL6 : l'IP journalisée doit venir de req.ip (Express, fiable via trust proxy), jamais d'une
+    // valeur calculée par le package request-ip, falsifiable via X-Client-IP / X-Forwarded-For.
+    req = { path: "", originalUrl: "", ip: "an-ip", ipInfo: "falsifiable-ip" } as any;
     res = {} as Response;
     next = jest.fn();
   });

@@ -14,7 +14,6 @@ import { Details, Info } from "../../components/Panel";
 import PatchHistoric from "../../components/views/PatchHistoric";
 import { appURL } from "../../config";
 import api from "../../services/api";
-import plausibleEvent from "../../services/plausible";
 import { formatPhoneNumberFR, getAge, isInRuralArea, translate as t, YOUNG_STATUS } from "../../utils";
 import styled from "styled-components";
 import PanelV2 from "../../components/PanelV2";
@@ -59,7 +58,6 @@ export default function InscriptionPanel({ onChange, value }) {
 
   const onPrendreLaPlace = async (young_id) => {
     try {
-      plausibleEvent("Volontaires/CTA - Prendre sa place");
       await signinAs("young", young_id);
     } catch (e) {
       toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
@@ -90,7 +88,7 @@ export default function InscriptionPanel({ onChange, value }) {
             ) : null}
             {value.frenchNationality === "true" ? <div style={{ fontStyle: "italic", fontSize: "0.9rem" }}>🇫🇷 Nationalité française</div> : null}
             <div className="flex flex-wrap justify-around">
-              <Link to={`/volontaire/${value._id}`} onClick={() => plausibleEvent("Inscriptions/CTA - Consulter profil jeune")}>
+              <Link to={`/volontaire/${value._id}`}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
               <button

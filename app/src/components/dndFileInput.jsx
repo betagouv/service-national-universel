@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
 import Download from "../assets/icons/Download";
-import { requiredMessage } from "../scenes/inscription2023/components/ErrorMessageOld";
+import { requiredMessage } from "./forms/ErrorMessageOld";
 import { slugifyFileName } from "../utils";
 import ModalConfirm from "./modals/ModalConfirm";
 import image from "../assets/image.svg";

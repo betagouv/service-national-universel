@@ -25,6 +25,8 @@ interface FieldProps {
   options?: Array<any>;
   filterOnType?: boolean;
   disabled?: boolean;
+  // Textarea en lecture seule : garde les retours à la ligne d'un texte saisi sans balisage.
+  preserveLineBreaks?: boolean;
 }
 
 export default function Field({
@@ -50,6 +52,7 @@ export default function Field({
   options,
   filterOnType,
   disabled = false,
+  preserveLineBreaks = false,
 }: FieldProps) {
   const [copied, setCopied] = useState(false);
 
@@ -101,7 +104,10 @@ export default function Field({
 
         {type === "textarea" &&
           (readOnly ? (
-            <div className={"w-full h-[84px] text-start overflow-x-auto " + className} dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
+            <div
+              className={"w-full h-[84px] text-start overflow-x-auto " + (preserveLineBreaks ? "whitespace-pre-line " : "") + className}
+              dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }}
+            />
           ) : (
             <textarea
               rows={row}

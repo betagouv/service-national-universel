@@ -1,0 +1,611 @@
+import request from "supertest";
+import { ROLES } from "snu-lib";
+
+import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
+import { dbConnect, dbClose } from "./helpers/db";
+import { getNewReferentFixture } from "./fixtures/referent";
+import getNewStructureFixture from "./fixtures/structure";
+import { StructureModel } from "../models";
+import { PermissionModel } from "../models/permissions/permission";
+import { addPermissionHelper } from "./helpers/permissions";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES } from "snu-lib";
+import { getYoungsFilters } from "../controllers/elasticsearch/young";
+
+/**
+ * Reproduction des constats C3/C4/C9/C10/C11 et H24/H25/H70 :
+ * l'index `young` (et `referent`) est interrogeable sans contrôle de rôle ni
+ * périmètre, et les hits sont renvoyés bruts — donc avec les champs secrets
+ * répliqués par Monstache depuis Mongo.
+ */
+
+// Champs secrets répliqués dans ES et qui ne doivent JAMAIS sortir de l'API.
+const YOUNG_SECRETS = {
+  password: "$2b$10$hashdujeune",
+  token2FA: "TOKEN_2FA_JEUNE",
+  tokenEmailValidation: "TOKEN_EMAIL_JEUNE",
+  invitationToken: "TOKEN_INVITATION_JEUNE",
+  phase3Token: "TOKEN_PHASE3_JEUNE",
+  forgotPasswordResetToken: "TOKEN_RESET_JEUNE",
+  parent1Inscription2023Token: "TOKEN_PARENT1",
+  parent2Inscription2023Token: "TOKEN_PARENT2",
+};
+
+const REFERENT_SECRETS = {
+  password: "$2b$10$hashdureferent",
+  token2FA: "TOKEN_2FA_REFERENT",
+  invitationToken: "TOKEN_INVITATION_REFERENT",
+  forgotPasswordResetToken: "TOKEN_RESET_REFERENT",
+};
+
+const mockEsCalls: { msearch: any[]; search: any[] } = { msearch: [], search: [] };
+const mockEsDocs: any[] = [];
+
+jest.mock("../es", () => {
+  // Reproduit le filtrage `_source` d'Elasticsearch pour que les assertions
+  // reflètent ce que le vrai cluster renverrait.
+  const applySource = (doc: any, source: any) => {
+    if (!source || source === "*") return { ...doc };
+    const includes = Array.isArray(source) ? source : source.includes;
+    const excludes = Array.isArray(source) ? [] : source.excludes || [];
+    let out = { ...doc };
+    if (includes && !(includes.length === 1 && includes[0] === "*")) {
+      out = Object.fromEntries(Object.entries(out).filter(([key]) => includes.includes(key)));
+    }
+    for (const field of excludes) delete out[field];
+    return out;
+  };
+
+  const buildHits = (source?: any, size?: number) => ({
+    total: { value: mockEsDocs.length, relation: "eq" },
+    hits: size === 0 ? [] : mockEsDocs.map((doc) => ({ _id: doc._id, _index: "young", _source: applySource(doc, source) })),
+  });
+
+  return {
+    msearch: jest.fn(async (params: any) => {
+      mockEsCalls.msearch.push(params);
+      const bodies = String(params.body)
+        .trim()
+        .split("\n")
+        .map((line) => JSON.parse(line));
+      // Les lignes paires sont les en-têtes, les impaires les requêtes.
+      const hitsQuery = bodies[1];
+      return {
+        body: {
+          responses: [
+            { hits: buildHits(hitsQuery?._source, hitsQuery?.size), status: 200 },
+            { hits: { total: { value: 0 }, hits: [] }, aggregations: {}, status: 200 },
+          ],
+        },
+      };
+    }),
+    search: jest.fn(async (params: any) => {
+      mockEsCalls.search.push(params);
+      const topHitsSource = params.body?.aggs?.school?.aggs?.firstUser?.top_hits?._source;
+      return {
+        body: {
+          _scroll_id: null,
+          hits: buildHits(params.body?._source, params.body?.size),
+          aggregations: {
+            school: {
+              buckets: [
+                {
+                  key: "school-1",
+                  doc_count: mockEsDocs.length,
+                  departments: { buckets: [] },
+                  firstUser: { hits: buildHits(topHitsSource) },
+                },
+              ],
+            },
+          },
+        },
+      };
+    }),
+    scroll: jest.fn(async () => ({ body: { _scroll_id: null, hits: { total: { value: 0 }, hits: [] } } })),
+    clearScroll: jest.fn(async () => ({ body: {} })),
+  };
+});
+
+jest.mock("../sentry", () => ({ capture: jest.fn(), captureMessage: jest.fn(), initSentry: jest.fn(), capture404: jest.fn() }));
+
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
+  sendEmail: () => Promise.resolve(),
+}));
+
+function setEsDocs(...docs: any[]) {
+  mockEsDocs.length = 0;
+  mockEsDocs.push(...docs);
+}
+
+function youngDoc(overrides: any = {}) {
+  return {
+    _id: "6600000000000000000000aa",
+    firstName: "Jean",
+    lastName: "Dupont",
+    email: "jean.dupont@example.org",
+    department: "Rhône",
+    region: "Auvergne-Rhône-Alpes",
+    schoolId: "school-1",
+    schoolName: "Lycée Victor Hugo",
+    schoolCity: "Lyon",
+    schoolZip: "69003",
+    schoolDepartment: "Rhône",
+    status: "VALIDATED",
+    ...YOUNG_SECRETS,
+    ...overrides,
+  };
+}
+
+function referentDoc(overrides: any = {}) {
+  return {
+    _id: "6600000000000000000000bb",
+    firstName: "Claire",
+    lastName: "Martin",
+    email: "claire.martin@example.org",
+    role: ROLES.RESPONSIBLE,
+    structureId: "structure-1",
+    region: "Bretagne",
+    department: ["Finistère"],
+    ...REFERENT_SECRETS,
+    ...overrides,
+  };
+}
+
+/** Récupère toutes les valeurs secrètes présentes n'importe où dans la réponse. */
+function leakedSecrets(payload: any, secrets: Record<string, string>): string[] {
+  const serialized = JSON.stringify(payload ?? {});
+  return Object.entries(secrets)
+    .filter(([, value]) => serialized.includes(value))
+    .map(([field]) => field);
+}
+
+/** Aplatit les filtres de contexte envoyés à ES pour vérifier le périmètre. */
+function lastMsearchQuery() {
+  const call = mockEsCalls.msearch[mockEsCalls.msearch.length - 1];
+  return JSON.parse(String(call.body).trim().split("\n")[1]);
+}
+
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await PermissionModel.deleteMany({});
+  await addPermissionHelper([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT], PERMISSION_RESOURCES.REFERENT, PERMISSION_ACTIONS.READ);
+});
+
+afterAll(async () => {
+  await dbClose();
+});
+
+beforeEach(() => {
+  resetAppAuth();
+  mockEsCalls.msearch.length = 0;
+  mockEsCalls.search.length = 0;
+  setEsDocs(youngDoc());
+});
+
+// Ces rôles n'existent plus sur la plateforme, mais des comptes résiduels peuvent
+// encore les porter en base : ils doivent être refusés, pas simplement inutilisés.
+describe("C9 — POST /elasticsearch/young/:action sans contrôle de rôle", () => {
+  it.each([
+    ROLES.DSNJ,
+    ROLES.INJEP,
+    ROLES.TRANSPORTER,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.VISITOR,
+  ])("refuse la recherche au rôle %s", async (role) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+  });
+
+  it.each([
+    ROLES.DSNJ,
+    ROLES.INJEP,
+    ROLES.TRANSPORTER,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.VISITOR,
+  ])("refuse l'export au rôle %s", async (role) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
+      .post("/elasticsearch/young/export")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+  });
+});
+
+describe("FH8 — le visiteur n'accède plus aux dossiers des volontaires", () => {
+  it.each(["search", "export"])("refuse /elasticsearch/young/%s au rôle visitor, même dans sa région", async (action) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.VISITOR, region: "Auvergne-Rhône-Alpes" } as any))
+      .post(`/elasticsearch/young/${action}`)
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+    expect(mockEsCalls.msearch).toHaveLength(0);
+    expect(mockEsCalls.search).toHaveLength(0);
+  });
+});
+
+describe("GOO-12 — comptage des volontaires en liste complémentaire (YoungFooterNoRequest)", () => {
+  it("accepte size: 0 et ne renvoie aucun dossier, seulement le total", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: { status: ["WAITING_LIST"] }, size: 0 });
+    expect(res.status).toBe(200);
+    const hitsQuery = JSON.parse(String(mockEsCalls.msearch[0].body).trim().split("\n")[1]);
+    expect(hitsQuery.size).toBe(0);
+    expect(res.body.responses[0].hits.hits).toEqual([]);
+    expect(res.body.responses[0].hits.total.value).toBeGreaterThan(0);
+  });
+
+  it("refuse toujours une taille de page arbitraire entre 1 et 9", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: {}, size: 5 });
+    expect(res.status).toBe(400);
+  });
+});
+
+describe("FH4 — export ES des classes CLE", () => {
+  it.each([ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE])("refuse l'export des classes au rôle %s", async (role) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
+      .post("/elasticsearch/cle/classe/export?type=export-des-classes")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+    expect(mockEsCalls.search).toHaveLength(0);
+  });
+
+  it("refuse le schéma de répartition au transporteur, avant toute lecture", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.TRANSPORTER } as any))
+      .post("/elasticsearch/cle/classe/export?type=schema-de-repartition")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+    expect(mockEsCalls.search).toHaveLength(0);
+  });
+
+  it("refuse le schéma de répartition au référent départemental", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT } as any))
+      .post("/elasticsearch/cle/classe/export?type=schema-de-repartition")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+  });
+
+  it("refuse la recherche des classes au transporteur, rôle décommissionné", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.TRANSPORTER } as any))
+      .post("/elasticsearch/cle/classe/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+    expect(mockEsCalls.search).toHaveLength(0);
+  });
+});
+
+describe("C10/H70 — les hits young sortent bruts", () => {
+  it("ne renvoie aucun secret dans la recherche d'un admin", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(leakedSecrets(res.body, YOUNG_SECRETS)).toEqual([]);
+  });
+
+  it("ne renvoie aucun secret quand l'export les demande explicitement via exportFields", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/young/export")
+      .send({ filters: {}, exportFields: ["firstName", "lastName", ...Object.keys(YOUNG_SECRETS)] });
+    expect(res.status).toBe(200);
+    expect(leakedSecrets(res.body, YOUNG_SECRETS)).toEqual([]);
+  });
+});
+
+describe("C11 — POST /elasticsearch/young/young-having-school-in-dep-or-region/:action", () => {
+  it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE])(
+    "refuse le rôle %s, qui n'a aucun filtre de périmètre",
+    async (role) => {
+      const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
+        .post("/elasticsearch/young/young-having-school-in-dep-or-region/_msearch")
+        .send({ filters: {} });
+      expect(res.status).toBe(403);
+    },
+  );
+
+  it("ne renvoie aucun secret à un référent départemental", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Rhône"] } as any))
+      .post("/elasticsearch/young/young-having-school-in-dep-or-region/_msearch")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(leakedSecrets(res.body, YOUNG_SECRETS)).toEqual([]);
+  });
+});
+
+describe("C3 — POST /elasticsearch/cle/young/search", () => {
+  it("ne renvoie aucun secret à un référent de classe", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_CLASSE } as any))
+      .post("/elasticsearch/cle/young/search")
+      .send({ filters: {} });
+    // 404 possible si le référent n'a pas de classe : on ne teste la fuite que sur un 200.
+    if (res.status === 200) {
+      expect(leakedSecrets(res.body, YOUNG_SECRETS)).toEqual([]);
+    }
+    expect([200, 404]).toContain(res.status);
+  });
+});
+
+describe("C4 — POST /elasticsearch/dashboard/inscription/youngBySchool", () => {
+  it("ne renvoie pas le document jeune complet dans l'agrégation top_hits", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Auvergne-Rhône-Alpes" } as any))
+      .post("/elasticsearch/dashboard/inscription/youngBySchool")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(leakedSecrets(res.body, YOUNG_SECRETS)).toEqual([]);
+    const source = res.body.aggregations.school.buckets[0].firstUser.hits.hits[0]._source;
+    // Le tableau n'affiche que l'établissement : aucune donnée personnelle ne doit transiter.
+    expect(source.email).toBeUndefined();
+    expect(source.lastName).toBeUndefined();
+    expect(source.schoolName).toBe("Lycée Victor Hugo");
+  });
+});
+
+describe("H24/H25/H70 — index referent", () => {
+  beforeEach(() => {
+    setEsDocs(referentDoc());
+  });
+
+  it("H25 — /referent/structure/:structure ne renvoie aucun secret", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/referent/structure/structure-1")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(leakedSecrets(res.body, REFERENT_SECRETS)).toEqual([]);
+  });
+
+  it("H25 — /referent/structure/:structure refuse une structure hors périmètre", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: "structure-2" } as any))
+      .post("/elasticsearch/referent/structure/structure-1")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+  });
+
+  it("H24 — /referent/team/export ne renvoie aucun secret", async () => {
+    const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Bretagne" } as any);
+    const res = await request(app).post("/elasticsearch/referent/team/export?tab=region").send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(leakedSecrets(res.body, REFERENT_SECRETS)).toEqual([]);
+  });
+
+  it("H24 — la recherche referent d'un référent départemental est bornée géographiquement", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Finistère"], region: "Bretagne" } as any))
+      .post("/elasticsearch/referent/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const query = JSON.stringify(lastMsearchQuery());
+    // Sans borne géographique, aucun des champs de périmètre n'apparaît dans la requête.
+    expect(query).toMatch(/region\.keyword|department\.keyword|structureId\.keyword/);
+    expect(leakedSecrets(res.body, REFERENT_SECRETS)).toEqual([]);
+  });
+});
+
+describe("PH9 — getYoungsFilters retire les filtres masqués selon le rôle (audit production 2026-09-25)", () => {
+  it.each([ROLES.RESPONSIBLE, ROLES.SUPERVISOR])("retire les filtres de santé, d'identité et hasNotes pour %s", (role) => {
+    const filters = getYoungsFilters({ role } as any);
+    for (const masked of [
+      "handicap.keyword",
+      "allergies.keyword",
+      "ppsBeneficiary.keyword",
+      "paiBeneficiary.keyword",
+      "specificAmenagment.keyword",
+      "reducedMobilityAccess.keyword",
+      "handicapInSameDepartment.keyword",
+      "CNIFileNotValidOnStart.keyword",
+      "hasNotes.keyword",
+      "schoolName.keyword",
+    ]) {
+      expect(filters).not.toContain(masked);
+    }
+    // Le reste du périmètre de recherche demeure accessible.
+    expect(filters).toContain("cohort.keyword");
+    expect(filters).toContain("status.keyword");
+  });
+
+  it("laisse tous les filtres de santé et hasNotes à un référent départemental, y compris schoolName", () => {
+    const filters = getYoungsFilters({ role: ROLES.REFERENT_DEPARTMENT } as any);
+    expect(filters).toContain("handicap.keyword");
+    expect(filters).toContain("CNIFileNotValidOnStart.keyword");
+    expect(filters).toContain("hasNotes.keyword");
+    expect(filters).toContain("schoolName.keyword");
+  });
+
+  it("laisse tous les filtres de santé à l'admin, mais pas schoolName (réservé au référent départemental)", () => {
+    const filters = getYoungsFilters({ role: ROLES.ADMIN } as any);
+    expect(filters).toContain("handicap.keyword");
+    expect(filters).toContain("CNIFileNotValidOnStart.keyword");
+    expect(filters).not.toContain("schoolName.keyword");
+  });
+});
+
+describe("PH9 — POST /elasticsearch/young/:action(search|export) refuse un filtre masqué pour le rôle", () => {
+  it("refuse un filtre handicap pour un responsable de structure en périmètre", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: "structure-1" } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: { handicap: ["true"] } });
+    expect(res.status).toBe(400);
+    expect(mockEsCalls.msearch).toHaveLength(0);
+  });
+
+  it("accepte le même filtre pour un référent départemental", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Rhône"] } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: { handicap: ["true"] } });
+    expect(res.status).toBe(200);
+  });
+
+  it("refuse schoolName sur /young-having-school-in-dep-or-region à un référent régional (réservé au départemental)", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, region: "Bretagne" } as any))
+      .post("/elasticsearch/young/young-having-school-in-dep-or-region/_msearch")
+      .send({ filters: { schoolName: ["Lycée"] } });
+    expect(res.status).toBe(400);
+  });
+
+  it("accepte schoolName sur /young-having-school-in-dep-or-region pour un référent départemental", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Rhône"] } as any))
+      .post("/elasticsearch/young/young-having-school-in-dep-or-region/_msearch")
+      .send({ filters: { schoolName: ["Lycée"] } });
+    expect(res.status).toBe(200);
+  });
+
+  it("refuse un filtre de santé pour un rôle sans périmètre d'établissement (RESPONSIBLE) : autorisation d'abord (C11)", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: "structure-1" } as any))
+      .post("/elasticsearch/young/young-having-school-in-dep-or-region/_msearch")
+      .send({ filters: { handicap: ["true"] } });
+    // RESPONSIBLE n'a de toute façon aucun périmètre d'établissement sur cette route (C11) : 403,
+    // pas 400 — le contrôle d'autorisation passe avant le contrôle de filtre masqué.
+    expect(res.status).toBe(403);
+  });
+});
+
+describe("GOO-46 — annuaire « Utilisateurs » d'un référent départemental", () => {
+  /** Valeurs `structureId.keyword` du périmètre poussé à ES pour les responsables / superviseurs. */
+  const structureIdsInQuery = (query: any = lastMsearchQuery()): string[] => {
+    const found: string[] = [];
+    const walk = (node: any) => {
+      if (!node || typeof node !== "object") return;
+      if (Array.isArray(node)) return node.forEach(walk);
+      if (Array.isArray(node.terms?.["structureId.keyword"])) found.push(...node.terms["structureId.keyword"]);
+      Object.values(node).forEach(walk);
+    };
+    walk(query);
+    return found;
+  };
+
+  let structure92: string, structureParis: string, teteDeReseauParis: string, structureNantes: string;
+
+  beforeAll(async () => {
+    await StructureModel.deleteMany({});
+    const teteDeReseau = await StructureModel.create({ ...getNewStructureFixture(), name: "Réseau national", department: "Paris", region: "Île-de-France" });
+    teteDeReseauParis = teteDeReseau._id.toString();
+    structure92 = (
+      await StructureModel.create({ ...getNewStructureFixture(), department: "Hauts-de-Seine", region: "Île-de-France", networkId: teteDeReseauParis })
+    )._id.toString();
+    structureParis = (await StructureModel.create({ ...getNewStructureFixture(), department: "Paris", region: "Île-de-France" }))._id.toString();
+    structureNantes = (await StructureModel.create({ ...getNewStructureFixture(), department: "Loire-Atlantique", region: "Pays de la Loire" }))._id.toString();
+  });
+
+  afterAll(async () => {
+    await StructureModel.deleteMany({});
+  });
+
+  beforeEach(() => {
+    setEsDocs(referentDoc());
+  });
+
+  it.each(["search", "export"])("référent du 92 (%s) : seuls les responsables des structures du 92", async (action) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Hauts-de-Seine"], region: "Île-de-France" } as any))
+      .post(`/elasticsearch/referent/${action}`)
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const ids = structureIdsInQuery(action === "export" ? mockEsCalls.search[mockEsCalls.search.length - 1].body : undefined);
+    expect(ids).toContain(structure92);
+    expect(ids).not.toContain(structureParis);
+    expect(ids).not.toContain(teteDeReseauParis);
+    expect(ids).not.toContain(structureNantes);
+  });
+
+  it("référent régional d'Île-de-France : toutes les structures de sa région, et elles seules", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, department: [], region: "Île-de-France" } as any))
+      .post("/elasticsearch/referent/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const ids = structureIdsInQuery();
+    expect(ids).toEqual(expect.arrayContaining([structure92, structureParis, teteDeReseauParis]));
+    expect(ids).not.toContain(structureNantes);
+  });
+
+  it("référent régional sans région : aucune structure", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, department: [], region: undefined } as any))
+      .post("/elasticsearch/referent/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(structureIdsInQuery()).toEqual([]);
+  });
+});
+
+describe("P11 — annuaires des référents (audit production 2026-09-25)", () => {
+  beforeEach(() => {
+    setEsDocs(referentDoc());
+  });
+
+  const referentSarthe = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
+  const referentPaysDeLaLoire = { role: ROLES.REFERENT_REGION, department: [], region: "Pays de la Loire" };
+
+  /** Toutes les clauses `terms` de la requête ES, aplaties en `{ champ: valeurs }`. */
+  const termsInQuery = (query: any = lastMsearchQuery()): Record<string, any[]> => {
+    const found: Record<string, any[]> = {};
+    const walk = (node: any) => {
+      if (!node || typeof node !== "object") return;
+      if (Array.isArray(node)) return node.forEach(walk);
+      if (node.terms) for (const [field, values] of Object.entries(node.terms)) found[field] = [...(found[field] || []), ...(values as any[])];
+      Object.values(node).forEach(walk);
+    };
+    walk(query);
+    return found;
+  };
+
+  describe("PM11 — POST /elasticsearch/referent/team/:action", () => {
+    it.each([
+      ["départemental", referentSarthe],
+      ["régional", referentPaysDeLaLoire],
+    ])("refuse au référent %s un appel sans onglet (toute la région, tous rôles confondus)", async (_label, actor) => {
+      const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...actor } as any);
+      for (const action of ["search", "export"]) {
+        const res = await request(app).post(`/elasticsearch/referent/team/${action}`).send({ filters: {} });
+        expect(res.status).toBe(400);
+      }
+      expect(mockEsCalls.msearch).toHaveLength(0);
+      expect(mockEsCalls.search).toHaveLength(0);
+    });
+
+    it("garde l'onglet département d'un référent départemental à l'échelle de sa région, limité aux référents départementaux", async () => {
+      const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...referentSarthe } as any);
+      const res = await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {} });
+      expect(res.status).toBe(200);
+      const terms = termsInQuery();
+      expect(terms["role.keyword"]).toEqual([ROLES.REFERENT_DEPARTMENT]);
+      expect(terms["region.keyword"]).toEqual(["Pays de la Loire"]);
+      expect(terms["department.keyword"]).toBeUndefined();
+    });
+
+    it("ignore `syze` et applique la taille validée", async () => {
+      const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...referentSarthe } as any);
+
+      await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {}, syze: 100000 });
+      expect(lastMsearchQuery().size).toBe(10);
+
+      await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {}, size: 50 });
+      expect(lastMsearchQuery().size).toBe(50);
+    });
+
+    it("refuse une taille au-delà du plafond", async () => {
+      const app = await getAppHelperWithAcl({ ...getNewReferentFixture(), ...referentSarthe } as any);
+      const res = await request(app).post("/elasticsearch/referent/team/search?tab=Sarthe").send({ filters: {}, size: 100000 });
+      expect(res.status).toBe(400);
+    });
+  });
+
+  describe("PL10 — champs de session du référent", () => {
+    it("ne restitue ni lastLogoutAt ni metadata dans l'annuaire", async () => {
+      setEsDocs(referentDoc({ lastLogoutAt: "2026-09-20T18:00:00.000Z", metadata: { isFirstInvitationPending: true, invitationType: "inscription" } }));
+      const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+        .post("/elasticsearch/referent/search")
+        .send({ filters: {} });
+      expect(res.status).toBe(200);
+      const source = res.body.responses[0].hits.hits[0]._source;
+      expect(source.email).toBe("claire.martin@example.org");
+      expect(source.lastLogoutAt).toBeUndefined();
+      expect(source.metadata).toBeUndefined();
+    });
+  });
+});

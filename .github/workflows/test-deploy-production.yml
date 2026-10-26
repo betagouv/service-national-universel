@@ -13,6 +13,11 @@ concurrency:
 env:
   PROD_ENV_NAME: production
 
+# Jeton GitHub en lecture seule par défaut : seul deploy_production peut pousser, et
+# donc déclencher un déploiement de production via deploy-production.
+permissions:
+  contents: read
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
@@ -24,11 +29,16 @@ jobs:
         with:
           ref: ${{ github.ref_name }}
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Get matrices configuration
         id: config
         run: |
           # TEST MATRIX
+          # Matrice complète, sans filtrage par chemins : c'est le seul endroit où
+          # la totalité du code partant en production est vérifiée d'un bloc. Les
+          # runs sur main sont sélectifs et ne couvrent pas les cassages croisés
+          # (un changement dans api qui casse admin n'y est jamais vu).
           echo "[]" \
           | jq  '. + [{name:"api"}]' \
           | jq  '. + [{name:"apiv2"}]' \
@@ -40,48 +50,66 @@ jobs:
           cat test.json
           echo "test=$(jq -c < test.json)" >> $GITHUB_OUTPUT
 
-      - name: Changelog
-        id: changelog
-        env:
-          NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
-          NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
-        run: |
-          devops/scripts/generate_changelog.sh "${{ github.event.before }}...${{ github.event.after }}" > CHANGELOG.md
-          cat CHANGELOG.md
-          {
-            echo 'changelog<<EOF'
-            cat CHANGELOG.md
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
-
-      - name: Post Changelog on slack
-        uses: slackapi/slack-github-action@v1.25.0
+  test:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
         with:
-          channel-id: "#dev-release,#mr-robot"
-          slack-message: "${{ steps.changelog.outputs.changelog }}"
-        env:
-          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+          ref: ${{ github.ref_name }}
+          persist-credentials: false
+
+      - name: Run tests
+        uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1
+        with:
+          uses: ./.github/actions/run-tests-${{matrix.app.name}}
+          with: '{"branch_name": ${{ toJSON(github.ref_name) }}}'
 
   deploy_production:
-    needs: prepare
+    needs: test
+    # Seul job du dépôt autorisé à pousser vers deploy-production. L'environnement
+    # « production » porte les secrets Clever de production et exige une approbation.
+    # La poussée passe par la clé de déploiement DEPLOY_PRODUCTION_SSH_KEY, secret de
+    # cet environnement et seule exception au ruleset restrict-deploy-production : le
+    # jeton GitHub reste en lecture, et personne d'autre ne peut écrire sur la branche.
+    permissions:
+      contents: read
+    environment: production
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ssh-key: ${{ secrets.DEPLOY_PRODUCTION_SSH_KEY }}
+
+      # clever-tools 5 exige Node 24+ : on ne dépend pas du Node (ou de son absence) du runner.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Install clever-tools
+        run: npm install --global --ignore-scripts clever-tools@5.0.2
 
       - name: Merge production in deploy-production
         run: git push --force origin HEAD:deploy-production
-
-      - name: Install clever-tools
-        run: npm install -g clever-tools
 
       - name: Watch deployments
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          while read row; do
-            ./devops/scripts/cc-watch-deploy.sh  ${{ vars.CC_ORGANIZATION_ID }} $row ${{ github.sha }} &
+          # Un suivi par application, en parallèle. `wait` sans argument renvoie
+          # toujours 0 : on attend chaque PID pour que le job échoue dès qu'un
+          # déploiement n'aboutit pas.
+          pids=()
+          apps=()
+          while read -r row; do
+            ./devops/scripts/cc-watch-deploy.sh  ${{ vars.CC_ORGANIZATION_ID }} "$row" ${{ github.sha }} &
+            pids+=($!)
+            apps+=("$row")
           done <<EOF
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_API }}
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }}
@@ -93,4 +121,11 @@ jobs:
           ${{ vars.CC_APP_ID_PRODUCTION_SNUPPORT_APP }}
           EOF
 
-          wait
+          failed=0
+          for i in "${!pids[@]}"; do
+            if ! wait "${pids[$i]}"; then
+              echo "::error::Déploiement en échec pour l'application ${apps[$i]}"
+              failed=1
+            fi
+          done
+          exit $failed

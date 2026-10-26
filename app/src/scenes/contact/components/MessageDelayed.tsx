@@ -1,4 +1,5 @@
 import React from "react";
+import { isAfter, isBefore } from "date-fns";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import Alert from "@/components/dsfr/ui/Alert";
@@ -11,9 +12,9 @@ interface Period {
 
 const DELAYED_PERIODS: Period[] = [
   {
-    start: new Date("2026-08-01T00:00:00"),
-    end: new Date("2026-09-01T23:59:59.999"),
-    message: "Le support du SNU sera exceptionnellement ralenti du 1er août au 1er septembre inclus. 🏝️ Pendant cette période, les délais de réponse seront plus longs.",
+    start: new Date("2025-08-01"),
+    end: new Date("2025-08-31"),
+    message: "",
   },
   {
     start: new Date("2024-12-23"),
@@ -23,13 +24,13 @@ const DELAYED_PERIODS: Period[] = [
 ];
 
 const formatEndDate = (date: Date) => {
-  return format(date, "do MMMM yyyy", { locale: fr });
+  return format(date, "d MMMM yyyy", { locale: fr });
 };
 
 export default function MessageDelayed() {
   const now = new Date();
 
-  const currentPeriod = DELAYED_PERIODS.find((period) => now >= period.start && now <= period.end);
+  const currentPeriod = DELAYED_PERIODS.find((period) => isAfter(now, period.start) && isBefore(now, period.end));
 
   if (!currentPeriod) {
     return null;

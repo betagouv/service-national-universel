@@ -140,10 +140,25 @@ const getZonedDate = (date, timeZone = "Europe/Paris") => {
   return zonedDate;
 };
 
+// Écart maximal à UTC d'un fuseau réel, en minutes (UTC+14 à UTC-12, arrondi symétriquement).
+const MAX_TIMEZONE_OFFSET_MINUTES = 14 * 60;
+
+/**
+ * Ramène un décalage de fuseau fourni par le client (en-tête `x-user-timezone`) dans les bornes d'un
+ * fuseau réel. Sans borne, un décalage arbitraire déplaçait « maintenant » de plusieurs jours et
+ * ouvrait des fenêtres d'inscription ou de changement de séjour fermées (constat M100 de l'audit
+ * du 21/09/2026). Une valeur non numérique vaut 0.
+ */
+const clampTimeZoneOffset = (timeZoneOffset: number | null | undefined): number => {
+  const offset = Number(timeZoneOffset);
+  if (Number.isNaN(offset)) return 0;
+  return Math.min(Math.max(offset, -MAX_TIMEZONE_OFFSET_MINUTES), MAX_TIMEZONE_OFFSET_MINUTES);
+};
+
 const getDateTimeByTimeZoneOffset = (timeZoneOffset: number | null = null) => {
   let now = Date.now();
   if (timeZoneOffset) {
-    const userTimezoneOffsetInMilliseconds = timeZoneOffset * 60 * 1000; // User's offset from UTC
+    const userTimezoneOffsetInMilliseconds = clampTimeZoneOffset(timeZoneOffset) * 60 * 1000; // User's offset from UTC
     // Adjust server's time for user's timezone
     now = new Date().getTime() - userTimezoneOffsetInMilliseconds;
   }
@@ -213,6 +228,8 @@ export {
   dateForDatePicker,
   getAge,
   getDateTimeByTimeZoneOffset,
+  clampTimeZoneOffset,
+  MAX_TIMEZONE_OFFSET_MINUTES,
   getZonedDate,
   formatLongDateUTCWithoutTime,
   isIsoDate,

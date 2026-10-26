@@ -1,16 +1,18 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, YOUNG_STATUS, STATUS_CLASSE, FeatureFlagName, canSearchInElasticSearch, SUB_ROLES, YOUNG_STATUS_PHASE1 } = require("snu-lib");
+const { ROLES, YOUNG_STATUS, FeatureFlagName, canSearchInElasticSearch, YOUNG_STATUS_PHASE1 } = require("snu-lib");
 
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const { EtablissementModel, CohortModel } = require("../../../models");
-const { serializeReferents } = require("../../../utils/es-serializer");
+const { EtablissementModel } = require("../../../models");
+const { serializeReferentNames } = require("../../../utils/es-serializer");
 const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
+
+const CLASSE_EXPORT_ROLES = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -39,6 +41,13 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // Authorization
     if (!canSearchInElasticSearch(user, "classe")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.params.action === "export") {
+      // L'export est réservé aux rôles à qui l'admin propose le bouton (cf. FH4).
+      if (!CLASSE_EXPORT_ROLES.includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (req.query?.type === "schema-de-repartition" && ![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
 
     const { classeContextFilters, classeContextError } = await buildClasseContext(user);
     if (classeContextError) {
@@ -70,18 +79,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       response = await populateWithAllReferentsInfo(response);
 
       if (req.query?.type === "schema-de-repartition") {
-        if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-        if (user.role === ROLES.TRANSPORTER) {
-          const cohort = [...new Set(response.map((item) => item.cohort).filter(Boolean))];
-          if (cohort.length !== 1) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-          const IsSchemaDownloadIsTrue = await CohortModel.findOne({ name: cohort });
-          if (!IsSchemaDownloadIsTrue) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-          if (IsSchemaDownloadIsTrue.repartitionSchemaDownloadAvailibility === false && user.role === ROLES.TRANSPORTER) {
-            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-          }
-        }
-
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
         response = await populateWithLigneInfo(response);
@@ -110,16 +107,6 @@ async function buildClasseContext(user) {
     }
   }
 
-  if (user.role === ROLES.ADMINISTRATEUR_CLE) {
-    const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
-    if (!etablissement) return { classeContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push({ term: { "etablissementId.keyword": etablissement._id.toString() } });
-  }
-
-  if (user.role === ROLES.REFERENT_CLASSE) {
-    contextFilters.push({ term: { "referentClasseIds.keyword": user._id.toString() } });
-  }
-
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     const etablissements = await EtablissementModel.find({ department: user.department });
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
@@ -129,19 +116,15 @@ async function buildClasseContext(user) {
     contextFilters.push({ terms: { "etablissementId.keyword": etablissements.map((e) => e._id.toString()) } });
   }
 
-  if (user.role === ROLES.TRANSPORTER) {
-    contextFilters.push({ bool: { must_not: { term: { "status.keyword": STATUS_CLASSE.WITHDRAWN } } } });
-  }
-
   return { classeContextFilters: contextFilters };
 }
 
 const populateWithReferentClasseInfo = async (classes) => {
   const refIds = [...new Set(classes.map((item) => item._source.referentClasseIds).filter(Boolean))];
 
-  const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+  const referents = await allRecords("referent", { ids: { values: refIds.flat() } }, esClient, ["_id", "firstName", "lastName"]);
 
-  const referentsData = serializeReferents(referents);
+  const referentsData = serializeReferentNames(referents);
 
   return classes.map((item) => {
     item._source.referents = referentsData?.filter((e) => item._source.referentClasseIds.includes(e._id.toString()));
@@ -223,14 +206,14 @@ const populateWithAllReferentsInfo = async (classes) => {
 
   const allReferentIds = [...new Set([...referentEtablissementIds, ...referentClasseIds, ...coordinateurIds].flat())];
 
-  const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, ["_id", "firstName", "lastName", "email", "phone", "invitationToken"]);
+  const referents = await allRecords("referent", { ids: { values: allReferentIds } }, esClient, ["_id", "firstName", "lastName", "invitationToken"]);
 
   const extendedReferents = referents.map((referent) => ({
     ...referent,
     state: referent.invitationToken === null || referent.invitationToken === "" || referent?.invitationToken === undefined ? "Actif" : "Inactif",
   }));
 
-  const referentsData = serializeReferents(extendedReferents);
+  const referentsData = serializeReferentNames(extendedReferents);
 
   return classes.map((item) => {
     const referentEtablissementFiltered = referentsData?.filter((e) => item.etablissement?.referentEtablissementIds?.includes(e._id.toString()));

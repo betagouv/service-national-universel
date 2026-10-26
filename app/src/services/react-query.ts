@@ -20,6 +20,8 @@ export const queryClient = new QueryClient({
       }
     },
   }),
+  // Sans refetch au montage, une requête en cache est relue telle quelle : toute déconnexion vide le
+  // cache (queryClient.clear()), la connexion suivante se faisant dans le même onglet sans rechargement.
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,

@@ -1,4 +1,5 @@
 export * from "./accessControl";
+export * from "./policyQuery";
 export * from "./constantes/actions";
 export * from "./constantes/codes";
 export * from "./constantes/resources";

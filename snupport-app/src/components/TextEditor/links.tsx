@@ -8,6 +8,7 @@ import { Icon, TextEditorButton } from "./components";
 import Modal from "./Modal";
 import API from "../../services/api";
 import { useSelector } from "react-redux";
+import { sanitizeLinkUrl } from "../../utils/safeUrl";
 
 interface KnowledgeBaseArticleProps {
   _id: string;
@@ -62,6 +63,8 @@ export const isLinkActive = (editor: CustomEditor): [LinkElement, number[]] | un
 
 export const isLink = (text: string): boolean => {
   if (!text) return false;
+  // is-url accepte « javascript://… » : le schéma est vérifié à part (FH12).
+  if (!sanitizeLinkUrl(text)) return false;
   if (text.includes("mailto:")) return isEmail(text.replace("mailto:", ""));
   return isUrl(text);
 };
@@ -79,6 +82,7 @@ export const unwrapLink = (editor: CustomEditor): void => {
 };
 
 export const wrapLink = (editor: CustomEditor, url: string): void => {
+  if (!sanitizeLinkUrl(url)) return;
   const { selection } = editor;
   const isCollapsed = selection && Range.isCollapsed(selection);
   const link = isLinkActive(editor);
@@ -107,6 +111,7 @@ export const wrapLink = (editor: CustomEditor, url: string): void => {
 };
 
 export const insertLink = (editor: CustomEditor, url: string, name?: string): void => {
+  if (!sanitizeLinkUrl(url)) return;
   if (!name) {
     if (editor.selection) {
       wrapLink(editor, url);
@@ -198,6 +203,10 @@ export const AddLinkModal: React.FC<AddLinkModalProps> = ({ open, setOpen }) => 
 
   const onSubmit = (event: React.FormEvent) => {
     event.preventDefault();
+    if (url && !sanitizeLinkUrl(url)) {
+      setError("Le lien doit commencer par https://, http:// ou mailto:");
+      return;
+    }
     if (url) insertLink(editor, url, name);
     setOpen();
   };

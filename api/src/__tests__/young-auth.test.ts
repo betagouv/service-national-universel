@@ -5,11 +5,6 @@ import { createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { dbConnect, dbClose } from "./helpers/db";
 import { fakerFR as faker } from "@faker-js/faker";
 import crypto from "crypto";
-import { createCohortHelper } from "./helpers/cohort";
-import getNewCohortFixture from "./fixtures/cohort";
-import { createFixtureClasse } from "./fixtures/classe";
-import { ClasseModel } from "../models";
-import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import jwt from "jsonwebtoken";
 
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
@@ -29,7 +24,7 @@ describe("Young Auth", () => {
   let res;
   describe("POST /young/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      res = await request(getAppHelper()).post("/young/signin");
+      res = await request(getAppHelper()).post("/young/signin").send({});
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/signin").send({ email: "foo@bar.fr" });
@@ -63,129 +58,25 @@ describe("Young Auth", () => {
     });
   });
   describe("POST /young/signup", () => {
-    it("should return 400 when all the fields are note defined or not well informed", async () => {
+    // L'inscription en ligne est fermée (M3, audit du 2026-09-21) : la route
+    // renvoie 403, comme POST /referent/signup. Le tunnel d'inscription est
+    // décommissionné (lot H1) : les cas de l'inscription d'origine, désactivés,
+    // ont été retirés.
+    it("should return 403 because online signup is closed", async () => {
       const fixture = getNewYoungFixture();
-      res = await request(getAppHelper()).post("/young/signup");
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr" });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo@bar.fr" });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", password: "bar" });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper()).post("/young/signup").send({ email: "foo", password: "bar" });
-      expect(res.status).toBe(400);
-
       res = await request(getAppHelper()).post("/young/signup").send({
-        email: "foo",
-        password: "bar",
-        birthdateAt: fixture.birthdateAt,
-      });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper()).post("/young/signup").send({
-        email: "foo",
-        password: "bar",
-        birthdateAt: fixture.birthdateAt,
-        frenchNationality: "false",
-        schooled: "false",
-        cohort: "false",
-      });
-      expect(res.status).toBe(400);
-    });
-
-    it("should return 400 when password does not match requirments", async () => {
-      const fixture = getNewYoungFixture();
-      const email = fixture.email?.toLowerCase();
-      res = await request(getAppHelper()).post("/young/signup").send({ email, password: "bar", firstName: "foo", lastName: "bar", birthdateAt: fixture.birthdateAt });
-      expect(res.status).toBe(400);
-    });
-
-    // TODO - Put this code back next time a cohort is opened
-
-    it.skip("should return 200", async () => {
-      const fixture = getNewYoungFixture();
-      const email = fixture.email?.toLowerCase();
-      res = await request(getAppHelper()).post("/young/signup").send({
-        email: email,
+        email: fixture.email?.toLowerCase(),
         firstName: "foo",
         lastName: "bar",
         password: VALID_PASSWORD,
         birthdateAt: fixture.birthdateAt,
-        schoolRegion: fixture.schoolRegion,
         grade: fixture.grade,
         frenchNationality: fixture.frenchNationality,
         schooled: fixture.schooled,
         cohort: fixture.cohort,
       });
-      expect(res.status).toBe(200);
-      expect(res.body.token).toBeTruthy();
-    });
-
-    it.skip("should transform firstName and lastName", async () => {
-      const fixture = getNewYoungFixture();
-      res = await request(getAppHelper()).post("/young/signup").send({
-        email: fixture.email,
-        firstName: "foo",
-        lastName: "bar",
-        password: VALID_PASSWORD,
-        birthdateAt: fixture.birthdateAt,
-        schoolRegion: fixture.schoolRegion,
-        grade: fixture.grade,
-        frenchNationality: fixture.frenchNationality,
-        schooled: fixture.schooled,
-        cohort: fixture.cohort,
-      });
-      expect(res.body.user.firstName).toBe("Foo");
-      expect(res.body.user.lastName).toBe("BAR");
-      expect(res.body.user.email).toBe(fixture.email?.toLowerCase());
-    });
-
-    it("should return 409 when user already exists", async () => {
-      const fixture = getNewYoungFixture();
-      const email = fixture.email?.toLowerCase();
-      const young = await createYoungHelper({ ...fixture, email });
-      const cohort = await createCohortHelper({ ...getNewCohortFixture(), name: young.cohort });
-      res = await request(getAppHelper()).post("/young/signup").set("x-user-timezone", "-60").send({
-        email: email,
-        phone: fixture.phone,
-        phoneZone: fixture.phoneZone,
-        firstName: "foo",
-        lastName: "bar",
-        password: VALID_PASSWORD,
-        birthdateAt: fixture.birthdateAt,
-        schoolRegion: fixture.schoolRegion,
-        grade: fixture.grade,
-        frenchNationality: fixture.frenchNationality,
-        schooled: fixture.schooled,
-        cohort: cohort.name,
-      });
-      expect(res.status).toBe(409);
-    });
-
-    it("should return 409 when the number of users in the class exceeds the total seats", async () => {
-      const fixture = getNewYoungFixture();
-      const email = fixture.email?.toLowerCase();
-      const classe = await ClasseModel.create({ ...createFixtureClasse(), totalSeats: 1 });
-      await createYoungHelper({ ...fixture, email, classeId: classe._id, status: YOUNG_STATUS.VALIDATED });
-      res = await request(getAppHelper()).post("/young/signup").send({
-        email: "newuser@example.com",
-        phone: fixture.phone,
-        phoneZone: fixture.phoneZone,
-        firstName: "new",
-        lastName: "user",
-        password: VALID_PASSWORD,
-        birthdateAt: fixture.birthdateAt,
-        grade: fixture.grade,
-        frenchNationality: fixture.frenchNationality,
-        classeId: classe._id,
-        source: YOUNG_SOURCE.CLE,
-      });
-      expect(res.status).toBe(409);
+      expect(res.status).toBe(403);
+      expect(res.body.code).toBe("OPERATION_NOT_ALLOWED");
     });
   });
   describe("POST /young/logout", () => {

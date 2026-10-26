@@ -1,15 +1,76 @@
 import { ConfigService } from "@nestjs/config";
-import { RequestMethod, ValidationPipe } from "@nestjs/common";
+import { RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { Request } from "express";
+import helmet = require("helmet");
 import { AppModule } from "./App.module";
+import { AuthProvider } from "./admin/infra/iam/auth/Auth.provider";
+import { hostGuard, hotesAutorises } from "./infra/security/HostGuard";
+import { parseursSansDecompression } from "./infra/security/ParseursCorps";
+import { RATE_LIMITS, estRouteCouteuse, jetonCookieAdmin, normaliserIp, rateLimitStoreFactory, rateLimiter } from "./infra/security/RateLimit";
+import { pipesGlobaux } from "./shared/infra/ObjectIdParams.pipe";
 
 async function bootstrap() {
-    const app = await NestFactory.create(AppModule);
-    app.useGlobalPipes(new ValidationPipe());
+    const app = await NestFactory.create<NestExpressApplication>(AppModule, { bodyParser: false });
+    app.useGlobalPipes(...pipesGlobaux());
     const config = app.get(ConfigService);
+
+    // Avant les gardes : un 421 ou un 429 doit rester lisible par le navigateur.
     app.enableCors({
         origin: [config.getOrThrow("urls.admin"), config.getOrThrow("urls.app")],
+        // L'admin s'authentifie par le cookie httpOnly `jwt_ref` (FM16) : sans credentials, le
+        // navigateur ne l'enverrait pas. Le middleware ne le lit que pour l'origine admin.
+        credentials: true,
     });
+    // Requis pour que req.ip désigne le client réel (rate limiting, liste d'IP de Bull Board).
+    app.set("trust proxy", config.getOrThrow("httpServer.trustProxyHops"));
+    if (config.getOrThrow<boolean>("httpServer.enforceHost")) {
+        app.use(
+            hostGuard(hotesAutorises(config.getOrThrow("urls.apiv2"), config.get("httpServer.allowedHosts") ?? "")),
+        );
+    }
+    // CSP par défaut partout, Bull Board compris : ses scripts et sa feuille de style sont servis
+    // depuis la même origine, ses polices Google passent par `https:` (style-src, font-src).
+    app.use(helmet());
+
+    const authProvider = app.get<AuthProvider>(AuthProvider, { strict: false });
+    const store = rateLimitStoreFactory(config.getOrThrow("environment"), config.getOrThrow("broker.url"));
+    // Clé de comptage : l'utilisateur si son jeton est valide (quota par personne, même derrière
+    // une IP partagée), l'IP sinon. Le jeton est vérifié : un id forgé ne peut pas épuiser le
+    // quota d'un autre. PM41 : à défaut d'en-tête Authorization, le cookie de session admin est
+    // lu (cf. jetonCookieAdmin).
+    const urlAdmin = config.getOrThrow<string>("urls.admin");
+    const cleUtilisateurOuIp = async (req: Request): Promise<string> => {
+        const token = req.headers.authorization?.split(" ")?.[1] ?? jetonCookieAdmin(req, urlAdmin);
+        if (token) {
+            try {
+                const { id } = await authProvider.parseToken(token);
+                if (id) {
+                    return `user:${id}`;
+                }
+            } catch {
+                // jeton invalide : compté sur l'IP
+            }
+        }
+        // PM26 (25/09/2026) : IPv6 regroupée par /64, sinon une rotation d'adresses dans le même
+        // bloc rouvre indéfiniment le quota.
+        return `ip:${normaliserIp(req.ip ?? "")}`;
+    };
+    app.use(rateLimiter({ store: store("global"), ...RATE_LIMITS.global, keyGenerator: cleUtilisateurOuIp }));
+    app.use(
+        rateLimiter({
+            store: store("couteux"),
+            ...RATE_LIMITS.couteux,
+            keyGenerator: cleUtilisateurOuIp,
+            skip: (req) => !estRouteCouteuse(req),
+        }),
+    );
+
+    // Après les gardes et le rate limiting, à la place des parseurs par défaut que Nest monte au
+    // même endroit : un corps n'est lu qu'une fois la requête admise (CVE-2026-111497).
+    parseursSansDecompression(app);
+
     const port = config.getOrThrow("httpServer.port");
     if (config.getOrThrow("urls.apiv2").endsWith("/v2")) {
         app.setGlobalPrefix("v2", {

@@ -12,7 +12,6 @@ import MailCloseIcon from "../../components/MailCloseIcon";
 import MailOpenIcon from "../../components/MailOpenIcon";
 import SuccessIcon from "../../components/SuccessIcon";
 import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles, administrator_cleArticles, referent_classeArticles } from "./articles";
-import plausibleEvent from "../../services/plausible";
 import { ROLES } from "snu-lib";
 import { isResponsableDeCentre } from "snu-lib";
 
@@ -106,7 +105,6 @@ const Dashboard = (props) => {
             className={`w-full py-2.5 pl-10 pr-3 text-sm text-gray-500 transition-colors ${className}`}
             type="text"
             placeholder={placeholder}
-            onClick={() => plausibleEvent("Besoin d'aide - Barre de recherche")}
             onChange={(e) => setSearch(e.target.value)}
             value={search}
           />
@@ -220,13 +218,11 @@ const Dashboard = (props) => {
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Le support du SNU sera exceptionnellement ralenti du <strong>1er août au 1er septembre inclus</strong>. Nous traiterons votre demande dès que possible. Vous recevrez
+              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
               une réponse par mail.
             </div>
             <div className="buttons mt-4">
-              <InternalLink onClick={() => plausibleEvent("Besoin d'aide - Contacter quelqu'un")} to={`/besoin-d-aide/ticket?from=${from}`}>
-                Contacter&nbsp;quelqu&apos;un
-              </InternalLink>
+              <InternalLink to={`/besoin-d-aide/ticket?from=${from}`}>Contacter&nbsp;quelqu&apos;un</InternalLink>
             </div>
           </div>
         </div>

@@ -58,6 +58,8 @@ Il est possible et conseillé de déployer un environnement de test pour une Pul
 Les environnements de test sont stoppés par un cron chaque soir ou lorsque l'on enlève le label `deploy`.
 Les environnements de tests sont supprimés lorsque la branche associée est supprimée. (Par exemple, lors du merge de la PR)
 
+Les workflows `Test Environment - Deploy/Stop/Destroy` se lancent aussi à la main : depuis `main` (seule branche autorisée à lire les secrets Clever de l'environnement GitHub `recette`), en saisissant la branche visée dans le champ `branch`.
+
 
 ### Livraison
 

@@ -1,5 +1,5 @@
 import { CohortDto, ReferentDto, UserDto } from "./dto";
-import { region2department } from "./region-and-departments";
+import { department2region, region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import {
   APPLICATION_STATUS,
@@ -13,6 +13,8 @@ import {
 import { CohortType, MissionType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
 import { isBefore, isPast } from "date-fns";
 import { isCohortArchived, isCohortFullyArchived } from "./sessions";
+import { ReferentStatus } from "./constants/referentConstants";
+import { getUserRoles } from "./permissions/utils";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -149,6 +151,33 @@ const CENTER_ROLES = {
 
 const ROLES_LIST = Object.values(ROLES);
 export const REFERENT_AND_JEUNE_ROLES_LIST = [...ROLES_LIST, ROLE_JEUNE];
+
+/**
+ * Rôles décommissionnés (audit de production du 25/09/2026, lot P24, GOO-56) : plus aucun compte ne
+ * doit pouvoir être créé, invité, activé, réactivé ni authentifié avec l'un de ces rôles. DSNJ et
+ * INJEP sont explicitement conservés par la même décision.
+ */
+const DECOMMISSIONED_ROLES: string[] = [
+  ROLES.HEAD_CENTER,
+  ROLES.HEAD_CENTER_ADJOINT,
+  ROLES.REFERENT_CLASSE,
+  ROLES.ADMINISTRATEUR_CLE,
+  ROLES.REFERENT_SANITAIRE,
+  ROLES.TRANSPORTER,
+  ROLES.VISITOR,
+];
+
+/**
+ * Teste `role` ET `roles[]` : `getUserRoles` (utilisé par `getAcl`) fait primer `roles[]` sur `role`
+ * quand il est renseigné, un compte pourrait donc rester authentifiable via `role` seul sinon.
+ */
+function isDecommissionedRole(user?: Partial<Pick<ReferentType, "role" | "roles">> | null): boolean {
+  if (!user) return false;
+  return getUserRoles(user).some((role) => DECOMMISSIONED_ROLES.includes(role));
+}
+
+/** Rôles qu'un parcours de création ou d'invitation peut encore attribuer. */
+const ASSIGNABLE_ROLES_LIST = ROLES_LIST.filter((role) => !DECOMMISSIONED_ROLES.includes(role));
 const SUB_ROLES_LIST = Object.values(SUB_ROLES);
 const SUPPORT_ROLES_LIST = Object.keys(SUPPORT_ROLES);
 const VISITOR_SUB_ROLES_LIST = Object.keys(VISITOR_SUBROLES);
@@ -173,9 +202,27 @@ const ADMINISTRATEUR_CLE_SUBROLE = {
   coordinateur_cle: SUB_ROLES.coordinateur_cle,
 };
 
+/**
+ * Sous-rôles autorisés pour chaque rôle principal.
+ * `god` n'y figure volontairement pas : il n'est attribuable par aucun flux d'invitation ni d'édition.
+ */
+const SUB_ROLES_BY_ROLE: Record<string, string[]> = {
+  [ROLES.REFERENT_DEPARTMENT]: Object.values(REFERENT_DEPARTMENT_SUBROLE),
+  [ROLES.REFERENT_REGION]: Object.values(REFERENT_REGION_SUBROLE),
+  [ROLES.ADMINISTRATEUR_CLE]: Object.values(ADMINISTRATEUR_CLE_SUBROLE),
+  [ROLES.VISITOR]: Object.keys(VISITOR_SUBROLES),
+};
+
+/** Un sous-rôle n'est acceptable que s'il appartient au rôle principal visé (cf. collection `roles`). */
+function isSubRoleAllowedForRole(role?: string | null, subRole?: string | null): boolean {
+  if (!subRole) return true;
+  if (!role) return false;
+  return (SUB_ROLES_BY_ROLE[role] || []).includes(subRole);
+}
+
 // TODO - Geography department ref-ref array-array ref-ref/struc|young array-string
 const sameGeography = (actor, target) => {
-  const actorAndTargetInTheSameRegion = (actor?.region && actor?.region === target?.region) || region2department[actor?.region].includes(target?.department);
+  const actorAndTargetInTheSameRegion = (actor?.region && actor?.region === target?.region) || region2department[actor?.region]?.includes(target?.department);
   const actorAndTargetInTheSameDepartment = actor?.department && actor?.department.includes(target?.department);
 
   switch (actor?.role) {
@@ -191,6 +238,9 @@ const sameGeography = (actor, target) => {
 const referentInSameGeography = (actor, target) => isReferentRegDep(actor) && sameGeography(actor, target);
 
 function canInviteUser(actorRole, targetRole) {
+  // Rôle décommissionné (GOO-56, P24) : plus aucun acteur ne peut en attribuer un, ADMIN compris.
+  if (isDecommissionedRole({ role: targetRole })) return false;
+
   // Admins can invite any user
   if (actorRole === ROLES.ADMIN) return true;
 
@@ -235,12 +285,21 @@ const canDeleteYoung = (actor) => {
   return isAdmin(actor);
 };
 
+/**
+ * Matrice de RÔLES uniquement : `isHeadCenter` et `referentCLEAuthorized` n'expriment aucun périmètre
+ * (le rattachement session / classe / établissement ne se vérifie qu'en base). Côté API, ne jamais
+ * l'appeler seule sur une route d'écriture : utiliser `canEditYoungInScope` (api/src/young/youngScope.ts),
+ * qui compose cette matrice avec le contrôle du rattachement réel (audit 2026-09-21, H88 et H89).
+ * Côté front, elle reste utilisable pour afficher / masquer une action.
+ */
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isHeadCenter = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 
-  const actorAndTargetInTheSameRegion = actor.region === young.region;
-  const actorAndTargetInTheSameDepartment = actor.department.includes(young.department);
+  // fail-closed : un acteur ou un volontaire sans territoire ne peut jamais matcher (et ne doit pas
+  // faire planter l'appelant, ce qui transformait une 403 en 500).
+  const actorAndTargetInTheSameRegion = !!young?.region && actor.region === young.region;
+  const actorAndTargetInTheSameDepartment = !!young?.department && (actor.department || []).includes(young.department);
   const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && actorAndTargetInTheSameRegion;
   const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actorAndTargetInTheSameDepartment;
   //TODO update this
@@ -260,8 +319,77 @@ function canDeletePatchesHistory(actor, target) {
 }
 
 function canViewNotes(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor?.role);
   return isAdminOrReferent;
+}
+
+/**
+ * Situations particulières du dossier jeune : santé, handicap et suivi médico-social.
+ * Une structure d'accueil de mission n'en a pas besoin pour instruire une candidature.
+ */
+export const YOUNG_HEALTH_FIELDS = [
+  "handicap",
+  "allergies",
+  "handicapInSameDepartment",
+  "reducedMobilityAccess",
+  "ppsBeneficiary",
+  "paiBeneficiary",
+  "medicosocialStructure",
+  "medicosocialStructureName",
+  "medicosocialStructureAddress",
+  "medicosocialStructureComplementAddress",
+  "medicosocialStructureZip",
+  "medicosocialStructureCity",
+  "medicosocialStructureDepartment",
+  "medicosocialStructureRegion",
+  "medicosocialStructureLocation",
+  "specificAmenagment",
+  "specificAmenagmentType",
+];
+
+/** Métadonnées des pièces d'identité (nom, date d'expiration, catégorie du fichier). */
+export const YOUNG_IDENTITY_FILE_FIELDS = ["cniFiles", "files.cniFiles", "latestCNIFileExpirationDate", "latestCNIFileCategory", "CNIFileNotValidOnStart"];
+
+const STRUCTURE_ROLES: string[] = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
+
+/** Données de santé : tout le monde sauf les structures d'accueil. Le jeune voit les siennes. */
+function canViewYoungHealthData(actor) {
+  return !!actor && !STRUCTURE_ROLES.includes(actor.role);
+}
+
+/** Pièces d'identité : tout le monde sauf les structures d'accueil. Le jeune voit les siennes. */
+function canViewYoungIdentityFiles(actor) {
+  return !!actor && !STRUCTURE_ROLES.includes(actor.role);
+}
+
+/**
+ * Champs du dossier jeune que l'API ne doit pas renvoyer à `actor`. Chemins pointés
+ * (`files.cniFiles`) pour les champs imbriqués. Sans acteur connu, on masque tout.
+ */
+export function getYoungFieldsHiddenFrom(actor): string[] {
+  const hidden: string[] = [];
+  if (!canViewNotes(actor)) hidden.push("notes");
+  if (!canViewYoungHealthData(actor)) hidden.push(...YOUNG_HEALTH_FIELDS);
+  if (!canViewYoungIdentityFiles(actor)) hidden.push(...YOUNG_IDENTITY_FILE_FIELDS);
+  return hidden;
+}
+
+/** Retire de `doc` (en place) les champs de `paths`, pointés ou non. */
+export function omitYoungFields<T extends Record<string, any>>(doc: T, paths: string[]): T {
+  if (!doc || typeof doc !== "object") return doc;
+  for (const path of paths) {
+    const [head, ...rest] = path.split(".");
+    if (!rest.length) {
+      delete doc[head];
+      continue;
+    }
+    const child = doc[head];
+    if (child && typeof child === "object") {
+      // Copie de l'objet imbriqué : ne pas muter un sous-document partagé.
+      (doc as any)[head] = omitYoungFields({ ...child }, [rest.join(".")]);
+    }
+  }
+  return doc;
 }
 
 function canViewReferent(actor, target) {
@@ -285,11 +413,34 @@ type CanUpdateReferent = {
   structure?: StructureType | null;
 };
 
+/**
+ * Matrice des rôles pour l'édition d'un référent.
+ *
+ * /!\ Cette fonction est partagée avec le front (affichage des boutons d'édition) : sa vérification
+ * géographique est *indicative*. Elle ne peut pas être le périmètre de référence, car les chefs de
+ * centre n'ont ni `region` ni `department` et la `structure` reçue peut provenir de la requête.
+ * Le périmètre faisant foi est appliqué côté API par `isReferentInUserScope`
+ * (api/src/referent/referentScope.ts), à partir de données serveur uniquement.
+ */
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }: CanUpdateReferent) {
   const isMe = actor._id?.toString() === originalTarget._id?.toString();
+  // Un `modifiedTarget` sans `role` ne change pas le rôle de la cible : le rôle effectif reste celui d'origine.
+  const targetRoleAfterUpdate = modifiedTarget?.role || originalTarget.role;
   const isActorAdmin = isAdmin(actor);
   const isStructureTeamMember = isResponsibleOrSupervisor(actor);
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
+
+  // Rôle décommissionné (GOO-56, P24) : ni attribution ni réactivation, ADMIN compris. Un compte déjà
+  // sur l'un de ces rôles reste modifiable pour le reste (P25 gère leur retrait).
+  const isRoleAttributionToDecommissioned = !withoutChangingRole && isDecommissionedRole({ role: targetRoleAfterUpdate });
+  const isReactivationOfDecommissioned =
+    originalTarget.status === ReferentStatus.INACTIVE &&
+    !!modifiedTarget?.status &&
+    modifiedTarget.status !== ReferentStatus.INACTIVE &&
+    isDecommissionedRole({ role: targetRoleAfterUpdate });
+  if (isRoleAttributionToDecommissioned || isReactivationOfDecommissioned) {
+    return false;
+  }
 
   // Seul les admins peuvent changer les roles des utilisateurs
   if (!isActorAdmin && modifiedTarget?.role && modifiedTarget.role !== originalTarget.role) {
@@ -328,14 +479,14 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     // ... modifying referent ...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(originalTarget.role!) &&
     // ... witout changing its role.
-    (modifiedTarget === null || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(modifiedTarget.role!));
+    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(targetRoleAfterUpdate!);
   const isReferentModifyingHeadCenterWithoutChangingRole =
     // Is referent...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
     // ... modifying referent ...
     [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(originalTarget.role!) &&
     // ... witout changing its role.
-    (modifiedTarget === null || [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(modifiedTarget.role!));
+    [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(targetRoleAfterUpdate!);
 
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
@@ -365,24 +516,40 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
 
 function canViewYoungMilitaryPreparationFile(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
-  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department);
-  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === young.region;
+  // fail-closed : un acteur ou un volontaire sans territoire ne peut jamais matcher.
+  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && !!young?.department && (actor.department || []).includes(young.department);
+  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && !!young?.region && actor.region === young.region;
   const authorized = isAdmin || isReferentDepartmentFromTargetDepartment || isReferentRegionFromTargetRegion;
   return authorized;
 }
 
+/**
+ * Refuser les pièces de préparation militaire les SUPPRIME du stockage : l'autorisation doit être
+ * exactement celle de leur consultation. La clause historique `[RESPONSIBLE, REFERENT_REGION]`
+ * autorisait tout responsable de structure et tout référent régional, hors de son territoire, à
+ * détruire les pièces de n'importe quel volontaire (constat H64).
+ */
 function canRefuseMilitaryPreparation(actor, young) {
-  return canViewYoungMilitaryPreparationFile(actor, young) || [ROLES.RESPONSIBLE, ROLES.REFERENT_REGION].includes(actor.role);
+  return canViewYoungMilitaryPreparationFile(actor, young);
 }
 
+/**
+ * Les branches `targetCenter` comparaient directement `actor.department` / `actor.region` aux champs
+ * du centre : deux `undefined` suffisaient à autoriser (tout compte dont `cleanReferentData` a retiré
+ * la géographie, appelé sans `targetCenter`). Elles exigent désormais une valeur des deux côtés.
+ *
+ * Ce prédicat reste une matrice géographique : il n'exprime aucun rattachement entre l'acteur et le
+ * volontaire. Pour un responsable / superviseur de structure, utiliser `isYoungInStructureScope`
+ * (api/src/young/youngScope.ts) — audit 2026-09-21, H65.
+ */
 function canViewYoungFile(actor, target, targetCenter?) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
   const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
   // @ts-ignore
-  const isReferentCenterFromSameDepartmentTargetCenter = actor.department === targetCenter?.department;
+  const isReferentCenterFromSameDepartmentTargetCenter = !!targetCenter?.department && actor.department === targetCenter.department;
   // @ts-ignore
-  const isReferentCenterFromSameRegionTargetCenter = actor.region === targetCenter?.region;
+  const isReferentCenterFromSameRegionTargetCenter = !!targetCenter?.region && actor.region === targetCenter.region;
   const authorized =
     isAdmin ||
     isReferentDepartmentFromTargetDepartment ||
@@ -392,39 +559,19 @@ function canViewYoungFile(actor, target, targetCenter?) {
   return authorized;
 }
 
-function canCreateOrUpdateCohesionCenter(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
-}
-
 function canCreateEvent(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
-function canCreateOrUpdateSessionPhase1(actor: UserDto, target?: SessionPhase1Type | null) {
-  const isAdmin = actor.role === ROLES.ADMIN;
-  const isReferent = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
-  const isHeadCenter = actor.role === ROLES.HEAD_CENTER && target && actor._id.toString() === target.headCenterId;
-  const isAdjoints = [ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role) && target && target.adjointsIds.includes(actor._id.toString());
-
-  return isAdmin || isReferent || isHeadCenter || isAdjoints;
+function canCreateOrUpdateSessionPhase1(actor: UserDto, _target?: SessionPhase1Type | null) {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canSearchSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.TRANSPORTER].includes(
-    actor.role,
-  );
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canViewSessionPhase1(actor) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.REFERENT_CLASSE,
-    ROLES.ADMINISTRATEUR_CLE,
-  ].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canPutSpecificDateOnSessionPhase1(actor) {
@@ -506,7 +653,7 @@ function canSendTimeScheduleReminderForSessionPhase1(actor) {
 }
 
 function canSendImageRightsForSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canCreateOrModifyMission(user: UserDto, mission: MissionType, structure?: StructureType | null) {
@@ -516,12 +663,30 @@ function canCreateOrModifyMission(user: UserDto, mission: MissionType, structure
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) || (user.role === ROLES.RESPONSIBLE && user.structureId === mission.structureId);
 }
 
+/**
+ * Visibilités qu'un rôle peut poser sur un programme, à l'image de ce que propose l'écran
+ * d'administration : une visibilité nationale engage tout le territoire, une visibilité régionale
+ * toute une région. Un rôle absent de cette table ne peut poser aucune visibilité.
+ */
+const PROGRAM_VISIBILITY_BY_ROLE: Record<string, string[]> = {
+  [ROLES.REFERENT_DEPARTMENT]: ["DEPARTMENT", "HEAD_CENTER"],
+  [ROLES.REFERENT_REGION]: ["DEPARTMENT", "REGION", "HEAD_CENTER"],
+};
+
 function canCreateOrUpdateProgram(user, program) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
-  return (
-    isAdminOrReferent &&
-    !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department?.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
-  );
+  if (user.role === ROLES.ADMIN) return true;
+  if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) return false;
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    if (!user.department?.includes(program.department)) return false;
+    if (program.region && program.region !== department2region[program.department]) return false;
+  }
+  if (user.role === ROLES.REFERENT_REGION) {
+    if (user.region !== program.region) return false;
+    if (program.department && !region2department[program.region]?.includes(program.department)) return false;
+  }
+  // Une visibilité vide (programme historique) reste dans le périmètre géographique déjà vérifié.
+  if (program.visibility && !PROGRAM_VISIBILITY_BY_ROLE[user.role].includes(program.visibility)) return false;
+  return true;
 }
 
 function canCreateStructure(user) {
@@ -650,35 +815,19 @@ const canSendFileByMailToYoung = (actor, young) => {
 };
 
 function canViewCohesionCenter(actor: UserDto) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.TRANSPORTER,
-    ROLES.REFERENT_CLASSE,
-    ROLES.ADMINISTRATEUR_CLE,
-  ].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
+// Annuaire par email : seuls les rôles qui composent l'équipe de direction d'un centre
+// (`admin/src/scenes/centersV2/view/Team.tsx`, réservé aux admins et référents dép./rég.) en ont
+// l'usage. La famille chef de centre y avait accès sans jamais en avoir besoin : c'était un oracle
+// national d'existence d'adresse, nom, rôle et territoire (M68).
 function canGetReferentByEmail(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canViewMeetingPoints(actor) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.TRANSPORTER,
-    ROLES.ADMINISTRATEUR_CLE,
-    ROLES.REFERENT_CLASSE,
-  ].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canUpdateMeetingPoint(actor, meetingPoint: PointDeRassemblementType | null = null) {
@@ -706,15 +855,11 @@ function canCreateMeetingPoint(actor) {
 }
 
 function canSearchMeetingPoints(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canViewMeetingPointId(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
-}
-
-function canUpdateInscriptionGoals(actor) {
-  return actor.role === ROLES.ADMIN;
 }
 
 function canViewInscriptionGoals(actor) {
@@ -803,6 +948,7 @@ function canInviteYoung(actor: UserDto, cohort?: CohortDto | null) {
   }
 }
 
+/** Même réserve que `canEditYoung` : matrice de rôles sans périmètre, à composer avec `canEditYoungInScope` côté API. */
 function canSendTemplateToYoung(actor, young) {
   return canEditYoung(actor, young);
 }
@@ -811,27 +957,8 @@ function canCreateOrUpdateDepartmentService(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canChangeYoungCohort(actor, young) {
-  const isAdmin = actor.role === ROLES.ADMIN;
-  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department);
-  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === young.region;
-  const authorized = isAdmin || isReferentDepartmentFromTargetDepartment || isReferentRegionFromTargetRegion;
-  return authorized;
-}
-
 function canViewDepartmentService(actor) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.RESPONSIBLE,
-    ROLES.SUPERVISOR,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.ADMINISTRATEUR_CLE,
-    ROLES.REFERENT_CLASSE,
-  ].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
 function canAssignManually(actor, young, cohort) {
@@ -844,75 +971,33 @@ function canAssignManually(actor, young, cohort) {
 }
 
 function canSearchInElasticSearch(actor, index) {
-  if (index === "mission") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-  } else if (index === "school" || index === "schoolramses") {
-    return [
-      ROLES.ADMIN,
-      ROLES.REFERENT_REGION,
-      ROLES.REFERENT_DEPARTMENT,
-      ROLES.RESPONSIBLE,
-      ROLES.SUPERVISOR,
-      ROLES.HEAD_CENTER,
-      ROLES.HEAD_CENTER_ADJOINT,
-      ROLES.REFERENT_SANITAIRE,
-      ROLES.VISITOR,
-    ].includes(actor.role);
+  const adminOrReferents = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  if (index === "mission" || index === "structure" || index === "application") {
+    return adminOrReferents || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
+  } else if (index === "school" || index === "schoolramses" || index === "referent") {
+    return adminOrReferents || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "young-having-school-in-department") {
     return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young-having-school-in-region") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
-  } else if (index === "cohesionyoung") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (/* legacy and new name */ index === "sessionphase1young" || index === "sessionphase1") {
-    return [
-      ROLES.ADMIN,
-      ROLES.REFERENT_REGION,
-      ROLES.REFERENT_DEPARTMENT,
-      ROLES.HEAD_CENTER,
-      ROLES.HEAD_CENTER_ADJOINT,
-      ROLES.REFERENT_SANITAIRE,
-      ROLES.TRANSPORTER,
-      ROLES.ADMINISTRATEUR_CLE,
-      ROLES.REFERENT_CLASSE,
-    ].includes(actor.role);
-  } else if (index === "structure") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-  } else if (index === "referent") {
-    return [
-      ROLES.ADMIN,
-      ROLES.REFERENT_REGION,
-      ROLES.REFERENT_DEPARTMENT,
-      ROLES.RESPONSIBLE,
-      ROLES.SUPERVISOR,
-      ROLES.HEAD_CENTER,
-      ROLES.HEAD_CENTER_ADJOINT,
-      ROLES.REFERENT_SANITAIRE,
-      ROLES.ADMINISTRATEUR_CLE,
-      ROLES.REFERENT_CLASSE,
-    ].includes(actor.role);
-  } else if (index === "application") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-  } else if (index === "cohesioncenter") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
   } else if (index === "team") {
     return [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (index === "modificationbus") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (index === "young-by-school") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (index === "young") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (index === "aggregate-status") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (index === "lignebus") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
-  } else if (index === "classe") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(actor.role);
-  } else if (index === "youngCle") {
-    return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
-  } else if (index === "etablissement") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  } else if (
+    [
+      "cohesionyoung",
+      "sessionphase1young",
+      "sessionphase1",
+      "cohesioncenter",
+      "modificationbus",
+      "young-by-school",
+      "young",
+      "aggregate-status",
+      "lignebus",
+      "classe",
+      "etablissement",
+    ].includes(index)
+  ) {
+    return adminOrReferents;
   }
   return false;
 }
@@ -922,33 +1007,7 @@ function canSendTutorTemplate(actor) {
 }
 
 function canShareSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
-    actor.role,
-  );
-}
-
-function canEditTableDeRepartitionDepartment(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
-function canEditTableDeRepartitionRegion(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
-function canViewSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
-}
-
-function canCreateSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
-function canEditSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
-function canDeleteSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE].includes(actor.role);
 }
 
 function canUpdateLigneBus(actor) {
@@ -976,16 +1035,14 @@ function canDeleteLigneBus(actor) {
 }
 
 function canSearchLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
-    actor.role,
-  );
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canExportLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 function canExportConvoyeur(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canEditLigneBusTeam(actor) {
@@ -1009,9 +1066,7 @@ function ligneBusCanCreateDemandeDeModification(actor) {
 }
 
 function ligneBusCanViewDemandeDeModification(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
-    actor.role,
-  );
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function ligneBusCanSendMessageDemandeDeModification(actor) {
@@ -1039,26 +1094,23 @@ export function isSuperAdmin(actor) {
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
 
+// Réponse discriminante sur l'existence d'un compte : réservée aux rôles qui administrent les
+// comptes d'un territoire. Un superviseur y trouvait un oracle d'énumération des emails (audit
+// 2026-09-21, M70) ; un doublon à l'invitation lui est signalé par le 409 de signup_invite.
 function canCheckIfRefExist(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor?.role);
 }
 
 function canSeeDashboardSejourInfo(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canSeeDashboardSejourHeadCenter(actor) {
-  return [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
-}
-
 function canSeeDashboardInscriptionInfo(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canSeeDashboardInscriptionDetail(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
-    actor.role,
-  );
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canSeeDashboardEngagementInfo(actor) {
@@ -1080,43 +1132,16 @@ function canCreateClasse(actor) {
   return [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
-function canUpdateClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateReferentClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateClasseStay(actor) {
-  return [ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
 function canViewClasse(actor) {
-  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateEtablissement(actor) {
-  return (
-    (actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement) ||
-    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role)
-  );
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canViewEtablissement(actor) {
-  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canSearchStudent(actor) {
-  return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canWithdrawClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
-}
-
-function canDeleteClasse(actor) {
-  return [ROLES.ADMIN].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canAllowSNU(actor) {
@@ -1142,19 +1167,8 @@ function canEditTotalSeats(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats);
 }
 
-function canNotifyAdminCleForVerif(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
-}
-function canVerifyClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
 function canManageMig(user: ReferentDto) {
   return ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role);
-}
-
-function canCreateEtablissement(user: UserDto) {
-  return [ROLES.ADMIN].includes(user.role);
 }
 
 //CLE
@@ -1162,22 +1176,17 @@ function canValidateMultipleYoungsInClass(actor: UserDto) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role);
 }
 
+// Pas d'entrée pour la phase 1 : son statut ne se modifie plus manuellement, y compris par l'ADMIN (GOO-65).
 const phaseStatusOptionsByRole = {
   0: { DEFAULT: [] },
-  1: {
-    [ROLES.ADMIN]: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-    DEFAULT: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-  },
   2: { DEFAULT: [YOUNG_STATUS_PHASE2.WAITING_REALISATION, YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.VALIDATED] },
   3: { DEFAULT: [YOUNG_STATUS_PHASE3.WAITING_REALISATION, YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED] },
 };
 
-function getPhaseStatusOptions(actor: UserDto, phase: number) {
-  const phaseStatusOptions = phaseStatusOptionsByRole[phase][actor.role] || phaseStatusOptionsByRole[phase].DEFAULT || [];
-  if (phase === 1 && isSuperAdmin(actor) && !phaseStatusOptions.includes(YOUNG_STATUS_PHASE1.AFFECTED)) {
-    phaseStatusOptions.push(YOUNG_STATUS_PHASE1.AFFECTED);
-  }
-  return phaseStatusOptions;
+// Renvoie une copie : la matrice est partagée entre les appels (PL23, audit production 2026-09-25).
+function getPhaseStatusOptions(actor: UserDto, phase: number): string[] {
+  const phaseStatusOptions = phaseStatusOptionsByRole[phase]?.[actor.role] || phaseStatusOptionsByRole[phase]?.DEFAULT || [];
+  return [...phaseStatusOptions];
 }
 
 export function canValidateYoungToLP(actor: UserDto, cohort?: Pick<CohortType, "instructionEndDate" | "youngHTSBasculeLPDisabled">) {
@@ -1286,6 +1295,9 @@ export {
   ROLES,
   SUB_ROLES,
   ROLES_LIST,
+  DECOMMISSIONED_ROLES,
+  ASSIGNABLE_ROLES_LIST,
+  isDecommissionedRole,
   SUB_ROLES_LIST,
   SUPPORT_ROLES,
   SUPPORT_ROLES_LIST,
@@ -1298,6 +1310,8 @@ export {
   REFERENT_DEPARTMENT_SUBROLE,
   REFERENT_REGION_SUBROLE,
   ADMINISTRATEUR_CLE_SUBROLE,
+  SUB_ROLES_BY_ROLE,
+  isSubRoleAllowedForRole,
   canInviteUser,
   canDeleteYoung,
   canEditYoung,
@@ -1307,7 +1321,6 @@ export {
   canViewReferent,
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
-  canCreateOrUpdateCohesionCenter,
   canCreateOrUpdateSessionPhase1,
   canViewSessionPhase1,
   isSessionEditionOpen,
@@ -1337,7 +1350,6 @@ export {
   canCreateMeetingPoint,
   canSearchMeetingPoints,
   canViewMeetingPointId,
-  canUpdateInscriptionGoals,
   canViewInscriptionGoals,
   canViewTicketTags,
   canGetYoungByEmail,
@@ -1352,18 +1364,13 @@ export {
   canViewDepartmentService,
   canSearchInElasticSearch,
   canRefuseMilitaryPreparation,
-  canChangeYoungCohort,
   canSendTutorTemplate,
   canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canEditTableDeRepartitionDepartment,
-  canEditTableDeRepartitionRegion,
-  canViewSchemaDeRepartition,
-  canCreateSchemaDeRepartition,
-  canEditSchemaDeRepartition,
-  canDeleteSchemaDeRepartition,
   canViewNotes,
+  canViewYoungHealthData,
+  canViewYoungIdentityFiles,
   canUpdateLigneBus,
   canCreateLigneBus,
   canDeleteLigneBus,
@@ -1392,26 +1399,16 @@ export {
   canSeeDashboardInscriptionDetail,
   canSeeDashboardEngagementInfo,
   canSeeDashboardEngagementStatus,
-  canSeeDashboardSejourHeadCenter,
   canUpdateMyself,
   canCreateClasse,
-  canUpdateClasse,
-  canUpdateClasseStay,
   canViewClasse,
-  canUpdateEtablissement,
   canViewEtablissement,
   canSearchStudent,
-  canDeleteClasse,
-  canWithdrawClasse,
   canAllowSNU,
   canEditSanitaryEmailContact,
   canEditEstimatedSeats,
   canEditTotalSeats,
-  canNotifyAdminCleForVerif,
-  canVerifyClasse,
   canManageMig,
-  canUpdateReferentClasse,
-  canCreateEtablissement,
   canValidateMultipleYoungsInClass,
   getPhaseStatusOptions,
   canModifyDirectionCenterTeam,

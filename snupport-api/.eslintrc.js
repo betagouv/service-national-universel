@@ -4,7 +4,7 @@ module.exports = {
     commonjs: true,
     es2021: true,
   },
-  extends: ["eslint:recommended", "prettier"],
+  extends: ["eslint:recommended", "plugin:jest/recommended", "prettier"],
   overrides: [],
   parserOptions: {
     ecmaVersion: "latest",
@@ -12,6 +12,7 @@ module.exports = {
   rules: {
     "prettier/prettier": ["warn"],
     "no-unused-vars": "warn",
+    "jest/no-conditional-expect": "warn",
   },
-  plugins: ["prettier"],
+  plugins: ["prettier", "jest"],
 };

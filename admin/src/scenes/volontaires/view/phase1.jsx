@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import ModalConfirm from "@/components/modals/ModalConfirm";
@@ -9,7 +8,6 @@ import { YOUNG_STATUS_PHASE1, translate } from "@/utils";
 import Loader from "@/components/Loader";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 
-import { isYoungCheckIsOpen } from "../utils";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import DocumentPhase1 from "../components/phase1/DocumentPhase1";
 import Phase1Header from "../components/phase1/Phase1Header";
@@ -17,16 +15,13 @@ import General from "../components/phase1/General";
 import Details from "../components/phase1/Details";
 
 export default function Phase1(props) {
-  const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
   const [pointDeRassemblement, setPointDeRassemblement] = useState();
-  const [young, setYoung] = useState(props.young);
+  const [young] = useState(props.young);
   const [cohesionCenter, setCohesionCenter] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   // new useState
-  const [values, setValues] = useState(props.young);
-  const cohort = useSelector((state) => state.Cohorts).find((c) => young?.cohortId === c._id);
-  const isCheckIsOpen = isYoungCheckIsOpen(user, cohort);
+  const [values] = useState(props.young);
 
   useEffect(() => {
     if (!young?.sessionPhase1Id) return;
@@ -60,10 +55,10 @@ export default function Phase1(props) {
             }.`}
           />
         ) : null}
-        <Phase1Header young={young} setYoung={setYoung} user={user} />
-        <General young={young} setYoung={setYoung} values={values} setValues={setValues} isCheckIsOpen={isCheckIsOpen} user={user} />
+        <Phase1Header young={young} />
+        <General young={young} values={values} />
         <div className="w-[50%]">
-          <Details young={young} setYoung={setYoung} cohesionCenter={cohesionCenter} cohort={cohort} user={user} />
+          <Details young={young} cohesionCenter={cohesionCenter} />
         </div>
 
         {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED}

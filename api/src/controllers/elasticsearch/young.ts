@@ -1,77 +1,133 @@
 import passport from "passport";
 import express, { Response } from "express";
-import { addMonths } from "date-fns";
 import Joi from "joi";
 import { Router } from "express";
-import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto, COHORT_STATUS } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto, COHORT_STATUS, getYoungFieldsHiddenFrom } from "snu-lib";
 import { capture } from "../../sentry";
 import esClient from "../../es";
 import { ERRORS } from "../../utils";
 import { allRecords } from "../../es/utils";
-import { buildNdJson, buildRequestBody, joiElasticSearch, getResponsibleCenterField } from "./utils";
+import { buildNdJson, buildRequestBody, joiElasticSearch } from "./utils";
 
 import { serializeYoungs } from "../../utils/es-serializer";
 import { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel, CohortModel } from "../../models";
-import { getCohortNamesEndAfter } from "../../utils/cohort";
+import { NOT_A_PROPOSAL } from "../../application/applicationProposal";
 import { populateYoungExport } from "./populate/populateYoung";
 import { UserRequest } from "../request";
 
-function getYoungsFilters(user: UserDto): string[] {
-  return [
-    "cohort.keyword",
-    "originalCohort.keyword",
-    "status.keyword",
-    "country.keyword",
-    "academy.keyword",
-    "region.keyword",
-    "department.keyword",
-    "hasNotes.keyword",
-    "grade.keyword",
-    "gender.keyword",
-    user.role === ROLES.REFERENT_DEPARTMENT ? "schoolName.keyword" : null,
-    "situation.keyword",
-    "ppsBeneficiary.keyword",
-    "paiBeneficiary.keyword",
-    "isRegionRural.keyword",
-    "qpv.keyword",
-    "handicap.keyword",
-    "allergies.keyword",
-    "specificAmenagment.keyword",
-    "reducedMobilityAccess.keyword",
-    "imageRight.keyword",
-    "CNIFileNotValidOnStart.keyword",
-    "statusPhase1.keyword",
-    "hasMeetingInformation.keyword",
-    "handicapInSameDepartment.keyword",
-    "youngPhase1Agreement.keyword",
-    "cohesionStayPresence.keyword",
-    "presenceJDM.keyword",
-    "departInform.keyword",
-    "departSejourMotif.keyword",
-    "cohesionStayMedicalFileReceived.keyword",
-    "ligneId.keyword",
-    "isTravelingByPlane.keyword",
-    "statusPhase2.keyword",
-    "phase2ApplicationStatus.keyword",
-    "statusPhase2Contract.keyword",
-    "statusMilitaryPreparationFiles.keyword",
-    "phase2ApplicationFilesType.keyword",
-    "status_equivalence.keyword",
-    "statusPhase3.keyword",
-    "schoolDepartment.keyword",
-    "parentAllowSNU.keyword",
-    "sessionPhase1Id.keyword",
-    "source.keyword",
-    "classeId.keyword",
-    "etablissementId.keyword",
-    "psc1Info.keyword",
-    "roadCodeRefund.keyword",
-    "frenchNationality.keyword",
-  ].filter(Boolean) as string[];
+/** Univers complet des filtres/agrégations ES sur l'index `young`, avant restriction par rôle. */
+const YOUNG_FILTER_FIELDS: string[] = [
+  "cohort.keyword",
+  "originalCohort.keyword",
+  "status.keyword",
+  "country.keyword",
+  "academy.keyword",
+  "region.keyword",
+  "department.keyword",
+  "hasNotes.keyword",
+  "grade.keyword",
+  "gender.keyword",
+  "schoolName.keyword",
+  "situation.keyword",
+  "ppsBeneficiary.keyword",
+  "paiBeneficiary.keyword",
+  "isRegionRural.keyword",
+  "qpv.keyword",
+  "handicap.keyword",
+  "allergies.keyword",
+  "specificAmenagment.keyword",
+  "reducedMobilityAccess.keyword",
+  "imageRight.keyword",
+  "CNIFileNotValidOnStart.keyword",
+  "statusPhase1.keyword",
+  "hasMeetingInformation.keyword",
+  "handicapInSameDepartment.keyword",
+  "youngPhase1Agreement.keyword",
+  "cohesionStayPresence.keyword",
+  "presenceJDM.keyword",
+  "departInform.keyword",
+  "departSejourMotif.keyword",
+  "cohesionStayMedicalFileReceived.keyword",
+  "ligneId.keyword",
+  "isTravelingByPlane.keyword",
+  "statusPhase2.keyword",
+  "phase2ApplicationStatus.keyword",
+  "statusPhase2Contract.keyword",
+  "statusMilitaryPreparationFiles.keyword",
+  "phase2ApplicationFilesType.keyword",
+  "status_equivalence.keyword",
+  "statusPhase3.keyword",
+  "schoolDepartment.keyword",
+  "parentAllowSNU.keyword",
+  "sessionPhase1Id.keyword",
+  "source.keyword",
+  "classeId.keyword",
+  "etablissementId.keyword",
+  "psc1Info.keyword",
+  "roadCodeRefund.keyword",
+  "frenchNationality.keyword",
+];
+
+/**
+ * Filtres/agrégations ES exposés à `user`, dérivés des mêmes champs que `serializeYoung`
+ * (`getYoungFieldsHiddenFrom`) : un champ masqué de la fiche (santé, pièces d'identité) ne doit pas
+ * non plus permettre de filtrer ou d'agréger dessus, sous peine de le révéler par un autre chemin
+ * (constat PH9, audit production 2026-09-25). `schoolName` reste par ailleurs réservé au référent
+ * départemental, sans rapport avec GOO-11. `hasNotes` est absent de `getYoungFieldsHiddenFrom` (ce
+ * n'est pas le contenu de la note) : extension de politique volontaire, la seule présence d'une
+ * note interne n'a pas à être filtrable par une structure d'accueil.
+ */
+export function getYoungsFilters(user: UserDto): string[] {
+  const hidden = getYoungFieldsHiddenFrom(user);
+  return YOUNG_FILTER_FIELDS.filter((field) => {
+    if (field === "schoolName.keyword") return user.role === ROLES.REFERENT_DEPARTMENT;
+    const mongoField = field.replace(/\.keyword$/, "");
+    if (mongoField === "hasNotes") return !hidden.includes("notes");
+    return !hidden.includes(mongoField);
+  });
 }
 
-async function buildYoungContext(user: UserDto, showAffectedToRegionOrDep = false): Promise<any> {
+/**
+ * `joiElasticSearch` retire silencieusement (`stripUnknown`) un filtre absent de `filterFields` :
+ * impossible ensuite de distinguer un filtre explicitement masqué pour ce rôle d'un filtre inconnu
+ * ou mal orthographié. Un filtre masqué doit être refusé (400), pas ignoré (constat PH9).
+ */
+function hasMaskedFilter(body: any, allowedFields: string[]): boolean {
+  const requested = Object.keys(body?.filters ?? {});
+  const allowedKeys = allowedFields.map((field) => field.replace(/\.keyword$/, ""));
+  const allKeys = YOUNG_FILTER_FIELDS.map((field) => field.replace(/\.keyword$/, ""));
+  return requested.some((key) => allKeys.includes(key) && !allowedKeys.includes(key));
+}
+
+/**
+ * Rôles pour lesquels `buildYoungContext` sait construire un périmètre.
+ * Un rôle absent de cette liste n'obtiendrait AUCUN filtre : il verrait l'index
+ * `young` complet. La fonction refuse donc par défaut (cf. C9).
+ * ADMIN est national par conception.
+ *
+ * Volontairement absents : `transporter`, `administrateur_cle`, `referent_classe`,
+ * `head_center`, `head_center_adjoint` et `referent_sanitaire`, qui n'existent
+ * plus sur la plateforme. Des comptes résiduels peuvent encore porter ces rôles
+ * en base : ils sont refusés.
+ *
+ * `visitor` est aussi absent : l'admin ne lui ouvre que le tableau de bord et
+ * l'annuaire des établissements, et le modèle de permissions (`canSearchInElasticSearch`)
+ * lui refuse l'index `young`. Il exportait pourtant les dossiers complets des
+ * volontaires de sa région par `/elasticsearch/young/export` (cf. FH8).
+ */
+const YOUNG_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
+
+interface YoungContextOptions {
+  showAffectedToRegionOrDep?: boolean;
+}
+
+export async function buildYoungContext(user: UserDto, options: YoungContextOptions = {}): Promise<any> {
+  const { showAffectedToRegionOrDep = false } = options;
   const contextFilters: any[] = [];
+
+  if (!YOUNG_CONTEXT_SCOPED_ROLES.includes(user.role)) {
+    return { youngContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+  }
 
   if (user.role !== ROLES.ADMIN)
     contextFilters.push({
@@ -81,28 +137,10 @@ async function buildYoungContext(user: UserDto, showAffectedToRegionOrDep = fals
   // Open in progress inscription to referent
   if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) contextFilters[0].terms["status.keyword"].push("IN_PROGRESS");
 
-  // A head center can only see youngs of their session.
-  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-    const field = getResponsibleCenterField(user.role);
-    // @ts-ignore
-    const sessionPhase1 = await SessionPhase1Model.find({ [field]: user._id });
-    if (!sessionPhase1.length) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    contextFilters.push(
-      { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } },
-      { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
-    );
-    const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
-    if (visibleCohorts.length > 0) {
-      contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
-    } else {
-      // Tried that to specify when there's just no data or when the head center has no longer access
-      return { youngContextError: { status: 404, body: { ok: true, code: "no cohort available" } } };
-    }
-  }
-  // A responsible can only see youngs in application of their structure.
+  // A responsible can only see youngs in application of their structure (une proposition non acceptée n'est pas une candidature).
   if (user.role === ROLES.RESPONSIBLE) {
     if (!user.structureId) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
-    const applications = await ApplicationModel.find({ structureId: user.structureId });
+    const applications = await ApplicationModel.find({ structureId: user.structureId, ...NOT_A_PROPOSAL });
     contextFilters.push({ terms: { _id: applications.map((e) => e.youngId) } });
   }
 
@@ -110,7 +148,7 @@ async function buildYoungContext(user: UserDto, showAffectedToRegionOrDep = fals
   if (user.role === ROLES.SUPERVISOR) {
     if (!user.structureId) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     const structures = await StructureModel.find({ $or: [{ networkId: String(user.structureId) }, { _id: String(user.structureId) }] });
-    const applications = await ApplicationModel.find({ structureId: { $in: structures.map((e) => e._id.toString()) } });
+    const applications = await ApplicationModel.find({ structureId: { $in: structures.map((e) => e._id.toString()) }, ...NOT_A_PROPOSAL });
     contextFilters.push({ terms: { _id: applications.map((e) => e.youngId) } });
   }
 
@@ -133,7 +171,12 @@ async function buildYoungContext(user: UserDto, showAffectedToRegionOrDep = fals
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
-  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
+  // PH10 (25/09/2026) : ce bloc portait la même condition `!showAffectedToRegionOrDep` que celui du
+  // dessus (copié-collé), jamais la branche symétrique de REFERENT_REGION (ci-dessus,
+  // showAffectedToRegionOrDep=true). Un référent départemental n'avait donc plus AUCUN filtre
+  // département sur /in-bus, /by-point-de-rassemblement et /by-point-de-rassemblement/aggs, qui
+  // passent tous `showAffectedToRegionOrDep: true` : accès nationnal aux jeunes de n'importe quel bus.
+  if (user.role === ROLES.REFERENT_DEPARTMENT && showAffectedToRegionOrDep) {
     const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
     if (sessionPhase1.length === 0) {
       contextFilters.push({ terms: { "department.keyword": user.department } });
@@ -149,12 +192,14 @@ async function buildYoungContext(user: UserDto, showAffectedToRegionOrDep = fals
     }
   }
 
-  // Visitors are limited to their region.
-  if (user.role === ROLES.VISITOR) {
-    contextFilters.push({ term: { "region.keyword": user.region } });
-  }
   return { youngContextFilters: contextFilters };
 }
+
+/**
+ * Rôles dont l'appartenance à la session est vérifiée dans la route
+ * `/by-session/:sessionId/:action`. ADMIN est national par conception.
+ */
+const BY_SESSION_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
 
 const router: Router = express.Router();
 
@@ -165,7 +210,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
     const searchFields = ["email", "firstName", "lastName", "city", "zip"];
     const filterFields = ["meetingPointId.keyword", "meetingPointName.keyword", "meetingPointCity.keyword", "region.keyword", "department.keyword"];
     const sortFields: string[] = [];
-    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, { showAffectedToRegionOrDep: true });
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
     }
@@ -210,10 +255,10 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
     });
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeYoungs(response.body));
+      return res.status(200).send(serializeYoungs(response.body, req.user));
     }
   } catch (error) {
     capture(error);
@@ -226,7 +271,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
     const { queryFilters, error }: any = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, { showAffectedToRegionOrDep: true });
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
     }
@@ -256,7 +301,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
     };
 
     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, bodyQuery) });
-    return res.status(200).send(response.body);
+    return res.status(200).send(serializeYoungs(response.body, req.user));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -274,7 +319,7 @@ router.post(
       const filterFields = ["cohort.keyword", "region.keyword", "sessionPhase1Id.keyword", "sessionPhase1Name", "sessionPhase1City", "department.keyword", "ligneId.keyword"];
       const sortFields: string[] = [];
 
-      const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+      const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, { showAffectedToRegionOrDep: true });
       if (youngContextError) {
         return res.status(youngContextError.status).send(youngContextError.body);
       }
@@ -319,10 +364,10 @@ router.post(
       });
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+        return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(serializeYoungs(response.body));
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -370,6 +415,10 @@ router.post(
       const sortFields: string[] = [];
 
       if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      // L'appartenance à la session n'est vérifiée que pour les rôles ci-dessous
+      // (blocs dédiés plus bas). Tout autre rôle lirait n'importe quelle session,
+      // les identifiants étant énumérables via /elasticsearch/sessionphase1 (cf. H27).
+      if (!BY_SESSION_SCOPED_ROLES.includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       // Context filters
       const contextFilters = [
@@ -378,23 +427,6 @@ router.post(
         req.params.action === "exportBus" ? { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } } : null,
       ].filter(Boolean);
 
-      if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-        const field = getResponsibleCenterField(user.role);
-        // @ts-ignore
-        const sessionsPhase1 = await SessionPhase1Model.find({ [field]: user._id });
-        if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
-        if (visibleCohorts.length > 0) {
-          // @ts-ignore
-          contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
-        } else {
-          // Tried that to specify when there's just no data or when the head center has no longer access
-          return res.status(200).send({ ok: true, data: "no cohort available" });
-        }
-        if (!sessionsPhase1.map((e) => e._id.toString()).includes(req.params.sessionId)) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        }
-      }
       if (user.role === ROLES.REFERENT_REGION) {
         const centers = await CohesionCenterModel.find({ region: user.region, deletedAt: { $exists: false } });
         const sessionsPhase1 = await SessionPhase1Model.find({ cohesionCenterId: { $in: centers.map((e) => e._id.toString()) } });
@@ -440,10 +472,10 @@ router.post(
             all = data.map((item: any) => ({ ...item, esSchool: schools.find((e: any) => e._id === item.schoolId) }));
           }
 
-          response = { ok: true, data: serializeYoungs(all) };
+          response = { ok: true, data: serializeYoungs(all, req.user) };
         } else {
           const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-          return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+          return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
         }
       }
 
@@ -451,7 +483,7 @@ router.post(
         return res.status(200).send(response);
       } else {
         const esResponse = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        response = serializeYoungs(esResponse.body);
+        response = serializeYoungs(esResponse.body, req.user);
         return res.status(200).send(response);
       }
     } catch (error) {
@@ -473,6 +505,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
     }
+    if (hasMaskedFilter(body, filterFields)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { error: errorQuery, value: query } = Joi.object({
       tab: Joi.string().trim().valid("volontaire"),
@@ -503,12 +536,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         exportFields.push("email");
       }
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      let data = serializeYoungs(response);
-      data = await populateYoungExport(data, exportFields);
+      let data = serializeYoungs(response, req.user);
+      data = await populateYoungExport(data, exportFields, user);
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeYoungs(response.body, req.user));
     }
   } catch (error) {
     capture(error);
@@ -527,6 +560,13 @@ router.post(
       const filterFields = getYoungsFilters(user);
 
       const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
+
+      // Authorization : seuls ces rôles ont un périmètre défini ci-dessous. Tout
+      // autre rôle n'aurait aucun filtre d'établissement et verrait l'index complet.
+      if (!canSearchInElasticSearch(user, "young-having-school-in-department") && !canSearchInElasticSearch(user, "young-having-school-in-region")) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+      if (hasMaskedFilter(body, filterFields)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
       const { error: errorQuery, value: query } = Joi.object({
         tab: Joi.string().trim().valid("volontaire"),
@@ -556,7 +596,7 @@ router.post(
 
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        let data = serializeYoungs(response);
+        let data = serializeYoungs(response, req.user);
         //School
         if (exportFields?.includes("schoolId")) {
           const schoolIds = [...new Set(data.map((item: any) => item.schoolId).filter(Boolean))];
@@ -567,7 +607,7 @@ router.post(
         return res.status(200).send({ ok: true, data });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(response.body);
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -655,10 +695,10 @@ router.post(
       }
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+        return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(response.body);
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -700,18 +740,6 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     // Context filters
     const contextFilters: any[] = [];
 
-    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-      const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
-      if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
-      if (visibleCohorts.length > 0) {
-        contextFilters.push({ terms: { "cohort.keyword": visibleCohorts } });
-      } else {
-        // Tried that to specify when there's just no data or when the head center has no longer access
-        return res.status(200).send({ ok: true, data: "no cohort available" });
-      }
-      contextFilters.push({ terms: { "sessionPhase1Id.keyword": [sessionsPhase1.map((e) => e._id.toString())] } });
-    }
     if (user.role === ROLES.REFERENT_REGION) {
       contextFilters.push({ terms: { "region.keyword": [user.region] } });
     }
@@ -734,7 +762,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     });
 
     const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-    const data = aggregateStatus(serializeYoungs(response));
+    const data = aggregateStatus(serializeYoungs(response, req.user));
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

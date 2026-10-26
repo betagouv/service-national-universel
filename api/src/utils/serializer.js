@@ -1,3 +1,4 @@
+const { getYoungFieldsHiddenFrom, omitYoungFields } = require("snu-lib");
 const { isYoung } = require(".");
 
 function serializeApplication(application) {
@@ -31,8 +32,14 @@ function serializeCohesionCenter(center, user) {
 function serializeSessionPhase1(session, user) {
   const raw = typeof session.toObject === "function" ? session.toObject() : session;
 
+  // PM34 (25/09/2026, résiduel de M59) : team, adjointsIds et sanitaryContactEmail donnent l'état
+  // civil, l'email et le téléphone de l'équipe d'encadrement — un volontaire n'y a pas droit, sur le
+  // modèle de serializeLigneBusForYoung (H48) qui retire déjà `team` d'une ligne de bus.
   if (isYoung(user)) {
     delete raw.waitingList;
+    delete raw.team;
+    delete raw.adjointsIds;
+    delete raw.sanitaryContactEmail;
   }
 
   return raw;
@@ -56,12 +63,17 @@ function serializeYoung(young, user) {
       delete ret.invitationToken;
       delete ret.invitationExpires;
       delete ret.phase3Token;
+      // Anciens jetons du parcours des représentants légaux (décommissionné) : secrets, jamais exposés.
+      delete ret.parent1Inscription2023Token;
+      delete ret.parent2Inscription2023Token;
       delete ret.loginAttempts;
       delete ret.__v;
       if (isYoung(user)) {
         delete ret.qpv;
       }
-      return ret;
+      // Notes internes, santé et pièces d'identité selon le rôle : l'interface les masquait
+      // déjà, l'API les renvoyait quand même (audit des fronts 2026-09-23, FH6/FH10).
+      return omitYoungFields(ret, getYoungFieldsHiddenFrom(user));
     },
   });
 }
@@ -110,20 +122,20 @@ function serializeEmail(email) {
   return email.toObject();
 }
 
-function serializeContract(contract, user, withTokens = true) {
-  if (!withTokens || isYoung(user)) {
-    return contract.toObject({
-      transform: (_doc, ret) => {
-        delete ret.parent1Token;
-        delete ret.projectManagerToken;
-        delete ret.structureManagerToken;
-        delete ret.parent2Token;
-        delete ret.youngContractToken;
-        return ret;
-      },
-    });
-  }
-  return contract.toObject();
+// Les jetons de signature ne sortent jamais de l'API : ils ne circulent que dans les emails
+// envoyés à chaque signataire. Un référent qui les lisait pouvait signer à la place des parents
+// ou de l'État.
+function serializeContract(contract) {
+  return contract.toObject({
+    transform: (_doc, ret) => {
+      delete ret.parent1Token;
+      delete ret.projectManagerToken;
+      delete ret.structureManagerToken;
+      delete ret.parent2Token;
+      delete ret.youngContractToken;
+      return ret;
+    },
+  });
 }
 
 function serializeArray(arr, user, serialize) {

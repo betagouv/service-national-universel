@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const TemplateModel = require("../models/template");
 const  { agentGuard } = require("../middlewares/authenticationGuards");
+const { requireRole } = require("../middlewares/userRoleGuards");
 const { ERRORS } = require("../errors");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const Joi = require("joi");
@@ -9,7 +10,13 @@ const { SCHEMA_ID } = require("../schemas");
 
 router.use(agentGuard);
 
-router.post("/", 
+// Les modèles de tickets sont un outil interne du support : ils préremplissent le sujet, le message
+// et le destinataire des tickets envoyés aux usagers. Seuls les agents du support les administrent,
+// c'est déjà le seul rôle auquel le front expose l'écran « Modèles de tickets », mais rien ne
+// l'imposait côté API — tout agent authentifié, référent SNU synchronisé compris, pouvait créer,
+// réécrire ou supprimer ces modèles.
+router.post("/",
+  requireRole("AGENT"),
   validateBody(Joi.object({
     name: Joi.string().trim(),
     description: Joi.string().trim(),
@@ -26,6 +33,7 @@ router.post("/",
 );
 
 router.patch("/:id",
+  requireRole("AGENT"),
   validateParams(idSchema),
   validateBody(Joi.object({
     name: Joi.string().trim(),
@@ -50,6 +58,7 @@ router.patch("/:id",
 );
 
 router.delete("/:id",
+  requireRole("AGENT"),
   validateParams(idSchema),
   async (req, res) => {
     await TemplateModel.findOneAndDelete({ _id: req.cleanParams.id });
@@ -57,9 +66,16 @@ router.delete("/:id",
   }
 );
 
+// La lecture reste ouverte à tout agent : l'écran de création de ticket, accessible aux référents,
+// propose les modèles. On ne peuple en revanche que les champs affichés par le front, pour ne plus
+// renvoyer la fiche agent complète (email, département, rôle, jetons) de l'auteur et du destinataire.
 router.get("/",
   async (req, res) => {
-    const templates = await TemplateModel.find({}).populate(["createdBy", "tags", "attributedTo"]);
+    const templates = await TemplateModel.find({}).populate([
+      { path: "createdBy", select: "firstName lastName" },
+      { path: "tags" },
+      { path: "attributedTo", select: "firstName lastName" },
+    ]);
     return res.status(200).send({ ok: true, data: templates });
   }
 );

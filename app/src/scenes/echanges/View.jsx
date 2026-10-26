@@ -19,7 +19,7 @@ import FileUpload, { useFileUpload } from "@/components/FileUpload";
 
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
-import { formatMessageForReadingInnerHTML, htmlCleaner } from "snu-lib";
+import { formatMessageForReadingInnerHTML, htmlCleaner, detectMimeTypeFromBytes, getSafeDownloadFileName } from "snu-lib";
 
 const updateHeightElement = (e) => {
   e.style.height = "inherit";
@@ -31,7 +31,10 @@ const download = async (file) => {
     const s3Id = file.path.split("/")[1];
     const { ok, data } = await API.get(`/SNUpport/s3file/${s3Id}`);
     if (!ok) throw new Error("Le fichier n'a pas pu être téléchargé");
-    FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
+    // Le type n'est pas renvoyé : il est déduit du contenu, et l'extension du nom en découle.
+    const bytes = new Uint8Array(data.data);
+    const mimeType = detectMimeTypeFromBytes(bytes);
+    FileSaver.saveAs(new Blob([bytes], { type: mimeType || "application/octet-stream" }), getSafeDownloadFileName(file.name, mimeType));
   } catch (e) {
     capture(e);
     toastr.error("Le fichier n'a pas pu être téléchargé");

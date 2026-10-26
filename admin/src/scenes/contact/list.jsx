@@ -301,11 +301,11 @@ const Hit = ({ hit }) => {
       </td>
       <td className="w-[17%]" onClick={() => history.push(`/mission/${hit._id}`)}>
         <p className="text-sm leading-none text-gray-900">{dayjs(hit.createdAt).format("DD/MM/YYYY")}</p>
-        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.createdAt).format("hh:mm")}</p>
+        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.createdAt).format("HH:mm")}</p>
       </td>
       <td className="w-[18%]">
         <p className="text-sm leading-none text-gray-900">{dayjs(hit.lastLoginAt).format("DD/MM/YYYY")}</p>
-        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.lastLoginAt).format("hh:mm")}</p>
+        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.lastLoginAt).format("HH:mm")}</p>
       </td>
       <td className="flex w-[5%] flex-col gap-2">
         <DropdownButton

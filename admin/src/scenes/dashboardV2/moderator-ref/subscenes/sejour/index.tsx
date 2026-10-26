@@ -3,7 +3,6 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 
 import api from "@/services/api";
-import plausibleEvent from "@/services/plausible";
 import { getNewLink } from "@/utils";
 import { filterCurrentAndNextCohorts, getCohortNameList } from "@/services/cohort.service";
 import { Page, Header, DropdownButton } from "@snu/ds/admin";
@@ -220,7 +219,6 @@ export default function Index() {
             </p>
           ),
           action: () => {
-            plausibleEvent("Dashboard/CTA - Exporter statistiques séjour");
             print();
           },
         },

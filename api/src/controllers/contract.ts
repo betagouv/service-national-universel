@@ -6,6 +6,7 @@ import {
   ROLES,
   UserDto,
   ContractType,
+  YoungType,
   isAuthorized,
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
@@ -15,9 +16,10 @@ import {
   ReferentStatus,
 } from "snu-lib";
 import { capture } from "../sentry";
-import { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } from "../models";
-import { ERRORS } from "../utils";
+import { ContractModel, ContractDocument, YoungModel, ApplicationModel, ReferentModel } from "../models";
+import { ERRORS, isYoung } from "../utils";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { config } from "../config";
 import { logger } from "../logger";
 import { validateId, validateContract, validateOptionalId, idSchema } from "../utils/validator";
@@ -31,12 +33,14 @@ import { accessControlMiddleware } from "../middlewares/accessControlMiddleware"
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { isContractInUserScope } from "../services/contractAccess";
+import { isStructureActor, isUnacceptedProposal } from "../application/applicationProposal";
+import { toErrorCode } from "../utils/errorCode";
 
 async function createContract(data: any, fromUser: UserDto): Promise<ContractType> {
   const { sendMessage } = data;
   const contract = await ContractModel.create(data);
-  const age = getAge(contract.youngBirthdate);
-  const isYoungAdult = age !== "?" && age >= 18;
+  const isYoungAdult = contract.isYoungAdult === "true";
 
   contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
   contract.projectManagerStatus = "WAITING_VALIDATION";
@@ -80,8 +84,7 @@ async function updateContract(id: string, data: any, fromUser: UserDto): Promise
   contract.set(data);
   await contract.save({ fromUser });
 
-  const age = getAge(contract.youngBirthdate);
-  const isYoungAdult = age !== "?" && age >= 18;
+  const isYoungAdult = contract.isYoungAdult === "true";
 
   if (previous.invitationSent !== "true" || previous.projectManagerStatus === "VALIDATED" || previous.projectManagerEmail !== contract.projectManagerEmail) {
     contract.projectManagerStatus = "WAITING_VALIDATION";
@@ -112,6 +115,23 @@ async function updateContract(id: string, data: any, fromUser: UserDto): Promise
   if (sendMessage) contract.invitationSent = "true";
   await contract.save({ fromUser });
   return contract;
+}
+
+/**
+ * Les signataires protégés (jeune majeur ou représentants légaux) et la majorité qui décide
+ * lesquels sont sollicités viennent du dossier du jeune, jamais du corps de la requête :
+ * sinon l'auteur du contrat pourrait recevoir lui-même un lien de signature, ou déclarer
+ * majeur un mineur pour se passer de l'accord de ses représentants légaux (PH4).
+ */
+function getSignatoriesFromYoung(young: YoungType) {
+  const age = young.birthdateAt ? getAge(young.birthdateAt) : "?";
+  return {
+    isYoungAdult: age !== "?" && age >= 18 ? "true" : "false",
+    youngBirthdate: young.birthdateAt ? new Date(young.birthdateAt).toISOString().split("T")[0] : "",
+    youngEmail: young.email || "",
+    parent1Email: young.parent1Email || "",
+    parent2Email: young.parent2Email || "",
+  };
 }
 
 async function sendProjectManagerContractEmail(contract: ContractType, isValidateAgainMail?: boolean): Promise<void> {
@@ -204,9 +224,9 @@ async function sendContractEmail(
       template = SENDINBLUE_TEMPLATES.VALIDATE_CONTRACT;
     }
     const params = {
-      toName: options.name,
-      youngName: `${contract.youngFirstName} ${contract.youngLastName}`,
-      missionName: contract.missionName,
+      toName: sanitizeEmailText(options.name),
+      youngName: sanitizeEmailText(`${contract.youngFirstName} ${contract.youngLastName}`),
+      missionName: sanitizeEmailText(contract.missionName),
       cta: `${config.APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
     };
     const emailTo = [{ name: options.name, email: options.email! }];
@@ -243,49 +263,56 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      let previousStructureId, currentStructureId;
+      let existing: ContractDocument | null = null;
       if (id) {
         if (!isWriteAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user })) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
-        const contract = await ContractModel.findById(id);
-        if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        previousStructureId = contract.structureId;
-        currentStructureId = data.structureId || contract.structureId;
-      } else {
-        if (!isCreateAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user })) {
+        existing = await ContractModel.findById(id);
+        if (!existing) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        // La permission CONTRACT_FULL est seedée sans policy : le périmètre est vérifié ici.
+        if (!(await isContractInUserScope(req.user, existing.toJSON()))) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
-        previousStructureId = data.structureId;
-        currentStructureId = data.structureId;
-      }
-      if (req.user.role === ROLES.RESPONSIBLE) {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (previousStructureId.toString() !== req.user.structureId.toString() || currentStructureId.toString() !== req.user.structureId.toString()) {
+        // Un contrat reste attaché à sa candidature et à son jeune.
+        if ((data.applicationId && data.applicationId !== existing.applicationId) || (data.youngId && data.youngId !== existing.youngId)) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
-      }
-      if (req.user.role === ROLES.SUPERVISOR) {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-        if (!structures.map((e) => e._id.toString()).includes(previousStructureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
+      } else if (!isCreateAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user })) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
-      const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
-      const application = await ApplicationModel.findById(contract.applicationId);
+      // Candidature et jeune sont résolus et rapprochés AVANT toute écriture.
+      const applicationId = existing?.applicationId || data.applicationId;
+      const youngId = existing?.youngId || data.youngId;
+      const application = applicationId ? await ApplicationModel.findById(applicationId) : null;
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const young = youngId ? await YoungModel.findById(youngId) : null;
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const structureId = data.structureId || existing?.structureId || application.structureId;
+      if (String(application.youngId) !== String(young._id) || String(application.structureId) !== String(structureId)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (!(await isContractInUserScope(req.user, { structureId, applicationId: application._id.toString(), youngId: young._id.toString() }))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      // Pas de contrat sur une proposition que le volontaire n'a pas acceptée : il reprendrait l'identité du volontaire
+      // et de ses représentants légaux.
+      if (isStructureActor(req.user) && isUnacceptedProposal(application)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const contractData = { ...data, structureId, ...getSignatoriesFromYoung(young) };
+      const contract = id ? await updateContract(id, contractData, req.user) : await createContract(contractData, req.user);
       application.contractId = contract._id;
       application.missionDuration = contract.missionDuration;
       await application.save({ fromUser: req.user });
 
-      const young = await YoungModel.findById(contract.youngId);
-      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       await updateYoungStatusPhase2Contract(young, req.user);
       await updateYoungPhase2StatusAndHours(young, req.user);
 
-      return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
+      return res.status(200).send({ ok: true, data: serializeContract(contract) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -315,18 +342,19 @@ router.post(
       if (!isWriteAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user, context: { contract: contract.toJSON() } })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
-      if (req.user.role === ROLES.RESPONSIBLE) {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (contract.structureId?.toString() !== req.user.structureId.toString()) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
+      // Ces mails contiennent les liens de signature : le périmètre doit être vérifié pour tous
+      // les rôles, la permission étant seedée sans policy.
+      if (!(await isContractInUserScope(req.user, contract.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
-      if (req.user.role === ROLES.SUPERVISOR) {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-        if (!structures.map((e) => e._id.toString()).includes(contract.structureId?.toString())) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
+
+      if (["parent1", "parent2", "young"].includes(type)) {
+        // Contrats antérieurs à PH4 : les adresses stockées ont pu être saisies librement.
+        const young = await YoungModel.findById(contract.youngId);
+        if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const { youngEmail, parent1Email, parent2Email } = getSignatoriesFromYoung(young);
+        contract.set({ youngEmail, parent1Email, parent2Email });
+        await contract.save({ fromUser: req.user });
       }
 
       if (type === "projectManager") await sendProjectManagerContractEmail(contract, false);
@@ -364,7 +392,12 @@ router.get(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
-      return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
+      // La permission des référents est seedée sans policy : le périmètre est contrôlé ici.
+      if (!isYoung(req.user) && !(await isContractInUserScope(req.user, data.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      return res.status(200).send({ ok: true, data: serializeContract(data) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -388,28 +421,41 @@ router.get(
       const contract = await ContractModel.findById(id);
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const contractPatches = await patches.get(req, ContractModel);
+      if (!(await isContractInUserScope(req.user, contract.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const contractPatches = await patches.get(req, ContractModel, contract);
       if (!contractPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       return res.status(200).send({ ok: true, data: contractPatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );
+
+// Champs liés à chaque signataire : un jeton ne peut valider que sa propre signature.
+const CONTRACT_SIGNATURES = [
+  { tokenField: "youngContractToken", statusField: "youngContractStatus", dateField: "youngContractValidationDate" },
+  { tokenField: "parent1Token", statusField: "parent1Status", dateField: "parent1ValidationDate" },
+  { tokenField: "parent2Token", statusField: "parent2Status", dateField: "parent2ValidationDate" },
+  { tokenField: "projectManagerToken", statusField: "projectManagerStatus", dateField: "projectManagerValidationDate" },
+  { tokenField: "structureManagerToken", statusField: "structureManagerStatus", dateField: "structureManagerValidationDate" },
+] as const;
+
+const contractTokenFilter = (token: string) => ({ $or: CONTRACT_SIGNATURES.map(({ tokenField }) => ({ [tokenField]: token })) });
 
 // Get a contract by its token.
 router.get("/token/:token", async (req: UserRequest, res: Response) => {
   try {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await ContractModel.findOne({
-      $or: [{ youngContractToken: token }, { parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
-    });
+    const data = await ContractModel.findOne(contractTokenFilter(token));
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data: serializeContract(data, null, false) });
+    return res.status(200).send({ ok: true, data: serializeContract(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -421,39 +467,32 @@ router.post("/token/:token", async (req: UserRequest, res: Response) => {
   try {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await ContractModel.findOne({
-      $or: [{ youngContractToken: token }, { parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
-    });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const contract = await ContractModel.findOne(contractTokenFilter(token));
+    if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (token === data.parent1Token) {
-      data.parent1Status = "VALIDATED";
-      data.parent1ValidationDate = new Date();
-    }
-    if (token === data.parent2Token) {
-      data.parent2Status = "VALIDATED";
-      data.parent2ValidationDate = new Date();
-    }
-    if (token === data.projectManagerToken) {
-      data.projectManagerStatus = "VALIDATED";
-      data.projectManagerValidationDate = new Date();
-    }
-    if (token === data.structureManagerToken) {
-      data.structureManagerStatus = "VALIDATED";
-      data.structureManagerValidationDate = new Date();
-    }
-    if (token === data.youngContractToken) {
-      data.youngContractStatus = "VALIDATED";
-      data.youngContractValidationDate = new Date();
-    }
+    const signature = CONTRACT_SIGNATURES.find(({ tokenField }) => contract[tokenField] === token);
+    if (!signature) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Écriture atomique et conditionnelle : elle ne porte que sur la signature du porteur du jeton,
+    // ce qui évite d'écraser une signature concurrente, et elle ne s'applique qu'une fois, ce qui
+    // rend le rejeu du jeton sans effet (ni réécriture du contrat, ni nouvel envoi de mail).
+    // `new: false` : on récupère le document d'avant mise à jour, `null` signifiant que la
+    // signature était déjà validée (rejeu ou double soumission) — il n'y a alors rien à refaire.
+    const avantSignature = await ContractModel.findOneAndUpdate(
+      { _id: contract._id, [signature.tokenField]: token, [signature.statusField]: { $ne: "VALIDATED" } },
+      { $set: { [signature.statusField]: "VALIDATED", [signature.dateField]: new Date() } },
+      { fromUser: req.user },
+    );
+    if (!avantSignature) return res.status(200).send({ ok: true });
+
+    const data = await ContractModel.findById(contract._id);
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const application = await ApplicationModel.findById(data.applicationId);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const young = await YoungModel.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    await data.save({ fromUser: req.user });
 
     await updateYoungStatusPhase2Contract(young, req.user);
 
@@ -475,7 +514,7 @@ router.post("/token/:token", async (req: UserRequest, res: Response) => {
       await sendTemplate(SENDINBLUE_TEMPLATES.young.CONTRACT_VALIDATED, {
         emailTo,
         params: {
-          missionName: data.missionName,
+          missionName: sanitizeEmailText(data.missionName),
           cta: `${config.APP_URL}/candidature?utm_campaign=transactionnel+contrat+engagement+signe&utm_source=notifauto&utm_medium=mail+183+telecharger`,
         },
       });
@@ -510,6 +549,11 @@ router.post(
           context: { contract: contract.toJSON() },
         })
       ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      // La permission des référents est seedée sans policy : le périmètre est contrôlé ici.
+      if (!isYoung(req.user) && !(await isContractInUserScope(req.user, contract.toJSON()))) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 

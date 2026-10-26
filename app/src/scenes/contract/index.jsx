@@ -9,18 +9,20 @@ import Loader from "../../components/Loader";
 import { Box } from "../../components/box";
 import { VioletButton } from "../../components/Content";
 import Badge from "../../components/Badge";
-import { APPLICATION_STATUS_COLORS, formatDateFRTimezoneUTC, htmlCleaner } from "../../utils";
+import { APPLICATION_STATUS_COLORS, formatDateFRTimezoneUTC } from "../../utils";
 
 export default function Index() {
   const [context, setContext] = useState(null);
   const history = useHistory();
-  const token = new URLSearchParams(window.location.search).get("token");
+  // Jeton inséré dans des chemins d'API : format vérifié avant tout appel (FL5).
+  const rawToken = new URLSearchParams(window.location.search).get("token");
+  const token = rawToken && /^[A-Za-z0-9_-]+$/.test(rawToken) ? rawToken : null;
 
   useEffect(() => {
     if (!token) return;
     (async () => {
       try {
-        const { ok, data } = await api.get(`/contract/token/${token}`);
+        const { ok, data } = await api.get(`/contract/token/${encodeURIComponent(token)}`);
         if (!ok) return toastr.error("Impossible charger le contrat d'engagement");
         setContext(data);
       } catch (e) {
@@ -465,7 +467,7 @@ export default function Index() {
           <VioletButton
             onClick={async () => {
               try {
-                const { ok } = await api.post(`/contract/token/${token}`);
+                const { ok } = await api.post(`/contract/token/${encodeURIComponent(token)}`);
                 if (!ok) return toastr.error("Impossible de mettre à jour le contrat d'engagement");
               } catch (e) {
                 return toastr.error("Impossible de mettre à jour le contrat d'engagement");
@@ -924,7 +926,7 @@ export default function Index() {
         <VioletButton
           onClick={async () => {
             try {
-              const { ok } = await api.post(`/contract/token/${token}`);
+              const { ok } = await api.post(`/contract/token/${encodeURIComponent(token)}`);
               if (!ok) return toastr.error("Impossible de mettre à jour le contrat d'engagement");
             } catch (e) {
               return toastr.error("Impossible de mettre à jour le contrat d'engagement");
@@ -987,7 +989,9 @@ const ContractField = ({ name, context, type }) => {
   return (
     <span>
       {" "}
-      <SuperSpan dangerouslySetInnerHTML={{ __html: htmlCleaner(context[name]) }} />{" "}
+      {/* Champs saisis en texte libre par la structure : affichés comme du texte, jamais comme du HTML
+          (un lien injecté serait présenté au signataire sur la page officielle de signature). */}
+      <SuperSpan>{context[name]}</SuperSpan>{" "}
     </span>
   );
 };

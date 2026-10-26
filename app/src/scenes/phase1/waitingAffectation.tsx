@@ -11,9 +11,7 @@ import TestimonialsSection from "./components/TestimonialsSection";
 import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import useAuth from "@/services/useAuth";
-import { RiInformationFill } from "react-icons/ri";
 import useCohort from "@/services/useCohort";
-import plausibleEvent from "@/services/plausible";
 import { HiArrowRight } from "react-icons/hi";
 import Notice from "@/components/ui/alerts/Notice";
 
@@ -25,14 +23,14 @@ export default function WaitingAffectation() {
     ? "Votre affectation vous sera communiquée par votre établissement scolaire."
     : "Votre affectation vous sera communiquée dans les semaines qui précèdent le départ par mail. En attendant, commencez à préparer votre fiche sanitaire ci-dessous !";
 
-  function handleClick() {
-    plausibleEvent("CLE attente affectation - desistement");
-  }
-
   return (
     <HomeContainer>
       <HomeHeader title={title} img={hero}>
-        <Link to="/changer-de-sejour">
+        <Link
+          to={{
+            pathname: "/changer-de-sejour/se-desister",
+            state: { backlink: "/phase1" },
+          }}>
           <p className="mt-3 text-sm text-blue-600">
             Je ne suis plus disponible <HiArrowRight className="inline-block" />
           </p>
@@ -43,23 +41,6 @@ export default function WaitingAffectation() {
           <p className="font-bold">Vous êtes en attente d'affectation à un centre</p>
           <p>{text}</p>
         </Notice>
-        {isCLE && (
-          <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2">
-            <div>
-              <RiInformationFill className="text-xl text-blue-400 inline-block mr-2 align-bottom" />
-              <span className="text-blue-800 font-semibold">Vous n’êtes plus disponible ?</span>
-            </div>
-            <Link
-              to={{
-                pathname: "/changer-de-sejour/se-desister",
-                state: { backlink: "/phase1" },
-              }}
-              className="text-blue-600 underline underline-offset-2"
-              onClick={handleClick}>
-              Se désister du SNU.
-            </Link>
-          </div>
-        )}
       </HomeHeader>
       <br />
       <br />

@@ -4,7 +4,7 @@ import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
 import hero from "../../assets/hero/home.png";
 import JDMA from "@/components/JDMA";
-import EngagementPrograms from "../preinscription/components/EngagementPrograms";
+import EngagementPrograms from "@/components/engagement/EngagementPrograms";
 
 export default function EnAttente() {
   const { young } = useAuth();

@@ -1,7 +1,10 @@
 import dayjs from "@/utils/dayjs.utils";
 import * as FileSaver from "file-saver";
 import React, { useEffect, useState } from "react";
+import { toastr } from "react-redux-toastr";
 import * as XLSX from "xlsx";
+import { safeAoaToSheet } from "@/utils/file";
+import { capture } from "@/sentry";
 import LoadingButton from "../../../buttons/LoadingButton";
 import LoadingButtonV2 from "../../../buttons/LoadingButtonV2";
 import ModalConfirm from "../../../modals/ModalConfirm";
@@ -28,6 +31,7 @@ interface ExportComponentProps {
 
 interface LoadingProps {
   onFinish: () => void;
+  onError: () => void;
   loading: boolean;
   exportTitle: string;
   transform?: (data: any[]) => Promise<any[]>;
@@ -85,6 +89,7 @@ export default function ExportComponent({
           setExporting(false);
           if (setIsOpen) setIsOpen(false);
         }}
+        onError={() => setExporting(false)}
         route={route}
         exportTitle={exportTitle}
         transform={transform}
@@ -129,13 +134,19 @@ export default function ExportComponent({
   );
 }
 
-function Loading({ onFinish, loading, exportTitle, transform, selectedFilters, route, searchType, fieldsToExport, customCss }: LoadingProps) {
+function Loading({ onFinish, onError, loading, exportTitle, transform, selectedFilters, route, searchType, fieldsToExport, customCss }: LoadingProps) {
   const STATUS_LOADING = "Récupération des données";
   const STATUS_TRANSFORM = "Mise en forme";
   const STATUS_EXPORT = "Création du fichier";
   const [status, setStatus] = useState<string | null>(null);
   const [data, setData] = useState<any[]>([]);
   const [run, setRun] = useState(false);
+
+  const handleExportError = (error: unknown) => {
+    capture(error, { extra: { route } });
+    toastr.error("Une erreur est survenue lors de l'export", "Veuillez réessayer. Si le problème persiste, contactez le support.");
+    onError();
+  };
 
   useEffect(() => {
     if (loading === false) setRun(true);
@@ -147,20 +158,23 @@ function Loading({ onFinish, loading, exportTitle, transform, selectedFilters, r
     if (!status) {
       setStatus(STATUS_LOADING);
     } else if (status === STATUS_LOADING) {
-      getAllResults(route, selectedFilters, searchType, fieldsToExport).then((results) => {
-        setData(results);
-        setStatus(STATUS_TRANSFORM);
-      });
+      getAllResults(route, selectedFilters, searchType, fieldsToExport)
+        .then((results) => {
+          setData(results);
+          setStatus(STATUS_TRANSFORM);
+        })
+        .catch(handleExportError);
     } else if (status === STATUS_TRANSFORM) {
-      toArrayOfArray(data, transform).then((results) => {
-        setData(results);
-        setStatus(STATUS_EXPORT);
-      });
+      toArrayOfArray(data, transform)
+        .then((results) => {
+          setData(results);
+          setStatus(STATUS_EXPORT);
+        })
+        .catch(handleExportError);
     } else if (status === STATUS_EXPORT) {
       const fileName = `${exportTitle}_${dayjs().format("YYYY-MM-DD_HH[h]mm[m]ss[s]")}`;
 
-      exportData(fileName, data);
-      onFinish();
+      exportData(fileName, data).then(onFinish).catch(handleExportError);
     }
   }, [run, status]);
 
@@ -190,12 +204,13 @@ async function getAllResults(route: string, selectedFilters: { [key: string]: Fi
     throw new Error("Not implemented");
     // TODO ......
   } else {
-    const { data } = await api.post(route, {
+    const { ok, code, data } = await api.post(route, {
       filters: Object.entries(selectedFilters).reduce((e, [key, value]) => {
         return { ...e, [key]: value.filter };
       }, {}),
       exportFields: fieldsToExport,
     });
+    if (ok === false) throw new Error(code || "Impossible de récupérer les données à exporter");
     if (!data?.length) return [];
     return data;
   }
@@ -204,7 +219,7 @@ async function getAllResults(route: string, selectedFilters: { [key: string]: Fi
 async function exportData(fileName: string, csv: any[][]): Promise<void> {
   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileExtension = ".xlsx";
-  const ws = XLSX.utils.aoa_to_sheet(csv);
+  const ws = safeAoaToSheet(csv);
   const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const resultData = new Blob([excelBuffer], { type: fileType });

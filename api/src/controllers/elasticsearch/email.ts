@@ -8,6 +8,7 @@ import { joiElasticSearch, buildNdJson, buildRequestBody } from "./utils";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { UserRequest } from "../request";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+import { isEmailInUserScope } from "../../email/emailNotificationScope";
 
 interface SearchParams {
   queryFilters: any;
@@ -27,7 +28,7 @@ const router: Router = express.Router();
 router.post(
   "/:email/:action(search|export)",
   authMiddleware(["referent"]),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.USER_NOTIFICATIONS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.USER_NOTIFICATIONS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       // Configuration
@@ -36,6 +37,13 @@ router.post(
       const sortFields: string[] = [];
 
       const { user, body, params } = req;
+
+      // L'adresse est prise telle quelle dans l'URL : sans ce contrôle, l'historique d'envoi de
+      // n'importe quelle adresse est consultable hors périmètre (audit 2026-09-21, M15), ce qui
+      // fournit aussi les `_id` nécessaires à l'exploitation de GET /email/:id (C12).
+      if (!(await isEmailInUserScope(user, params.email))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
 
       // Body params validation
       const { queryFilters, page, sort, error }: SearchParams = joiElasticSearch({ filterFields, sortFields, body });

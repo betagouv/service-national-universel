@@ -81,6 +81,7 @@ export interface YoungDto {
   inscriptionStep2023?: string;
   inscriptionStep?: string;
   inscriptionDoneDate?: Date;
+  parentConsentRelanceSentAt?: Date;
   cohesion2020Step?: string;
   inscriptionCorrectionMessage?: string;
   inscriptionRefusedMessage?: string;
@@ -175,6 +176,7 @@ export interface YoungDto {
   parent1Location?: { lat?: number; lon?: number };
   parent1FromFranceConnect?: string;
   parent1Inscription2023Token?: string;
+  parent1Inscription2023TokenExpiresAt?: Date;
   parent1DataVerified?: string;
   parent1AddressVerified?: string;
   parent1AllowCovidAutotest?: string;
@@ -199,6 +201,7 @@ export interface YoungDto {
   parent2Location?: { lat?: number; lon?: number };
   parent2FromFranceConnect?: string;
   parent2Inscription2023Token?: string;
+  parent2Inscription2023TokenExpiresAt?: Date;
   parent2AllowImageRights?: string;
   parent2AllowImageRightsReset?: string;
   parent2ContactPreference?: string;

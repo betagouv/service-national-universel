@@ -435,18 +435,6 @@ const getDepartmentForEligibility = (
   return dep;
 };
 
-export const getDepartmentForInscriptionGoal = (
-  young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "schoolCountry" | "zip"> & { _id?: YoungType["_id"] },
-) => {
-  let dep = young?.department || getDepartmentByZip(young?.zip);
-  if (dep && (!isNaN(dep) || ["2A", "2B", "02A", "02B"].includes(dep))) {
-    if (dep.substring(0, 1) === "0" && dep.length === 3) dep = departmentLookUp[dep.substring(1)];
-    else dep = departmentLookUp[dep];
-  }
-  if (!dep) dep = "Etranger";
-  return dep;
-};
-
 const isFromMetropole = (young: YoungType) => {
   const region = getRegionForEligibility(young);
   return region2zone[region] === "A" || region2zone[region] === "B" || region2zone[region] === "C";

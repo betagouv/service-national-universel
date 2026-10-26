@@ -31,7 +31,7 @@ export class ContactConsumer extends WorkerHost {
                 case ContactType.REFERENT: {
                     for (const referent of job.data) {
                         this.logger.log(
-                            `Synchronizing referent: ${referent.email} - ${referent.id} - ${referent.operation}`,
+                            `Synchronizing referent: ${referent.id} - ${referent.operation}`,
                             ContactConsumer.name,
                         );
                         await this.contactProvider.syncReferent(referent);
@@ -45,7 +45,7 @@ export class ContactConsumer extends WorkerHost {
             return ConsumerResponse.SUCCESS;
         } catch (error: any) {
             this.logger.error(
-                `Error synchronizing user type ${job.name} for email ${error.email} - ${error.code} - ${error.message}`,
+                `Error synchronizing user type ${job.name} - ${error.code} - ${error.message}`,
                 ContactConsumer.name,
             );
             throw ConsumerResponse.FAILURE;

@@ -7,6 +7,7 @@ import {
     formatDateFRTimezoneUTC,
     formatLongDateFR,
     formatLongDateUTC,
+    htmlToPlainText,
     MIME_TYPES,
     missionCandidatureExportFields,
     MissionType,
@@ -74,7 +75,16 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
 
         this.logger.log(`missions count: ${missions.hits.length}`, ExporterMissionCanditatures.name);
 
-        const excelData = await this.generateRapport(missions.hits, fields, filters, auteur);
+        // Le périmètre est rejoué ici, côté worker : les filtres du client ne peuvent pas l'élargir.
+        const perimetreCandidatures = this.exportMissionService.perimetreCandidatures(auteur, referent);
+
+        const excelData = await this.generateRapport(
+            missions.hits,
+            fields,
+            this.exportMissionService.filtrerFiltresExport(filters),
+            auteur,
+            perimetreCandidatures,
+        );
 
         this.logger.log(`Generate excel`, ExporterMissionCanditatures.name);
         // création du fichier excel de rapport
@@ -115,6 +125,7 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
         selectedFields: string[],
         filters: Record<string, string | string[]>,
         auteur: ExportMissionCandidaturesTaskParameters["auteur"],
+        perimetreCandidatures: { youngDepartment?: string[] } = {},
     ) {
         if (missions.length === 0) {
             return {
@@ -141,16 +152,19 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
                 ...new Set(missions.map((mission) => mission._id.toString()).filter((missionId) => missionId)),
             ];
 
+            const champsCandidature = missionCandidatureExportFields.find((f) => f.id === "application")?.fields;
             const candidatures = await this.searchApplicationGateway.searchApplication({
-                filters: { missionId: missionIds, status: filters.applicationStatus },
-                sourceFields: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
+                filters: { missionId: missionIds, status: filters.applicationStatus, ...perimetreCandidatures },
+                // Le marqueur d'une proposition non acceptée sert à l'écarter de l'export d'une structure.
+                sourceFields: champsCandidature && [...champsCandidature, "proposalNotAccepted"],
                 full: true,
             });
+            const candidaturesExportables = this.exportMissionService.ecarterPropositions(auteur, candidatures.hits);
 
-            this.logger.log(`candidatures count: ${candidatures.hits.length}`, ExporterMissionCanditatures.name);
+            this.logger.log(`candidatures count: ${candidaturesExportables.length}`, ExporterMissionCanditatures.name);
 
-            if (candidatures?.hits?.length) {
-                updatedMissions = await this.populateCandidatures(updatedMissions, candidatures.hits);
+            if (candidaturesExportables.length) {
+                updatedMissions = await this.populateCandidatures(updatedMissions, candidaturesExportables);
             } else {
                 updatedMissions = updatedMissions.map((item) => ({ ...item, candidatures: [] }));
             }
@@ -225,7 +239,8 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
                 // @ts-ignore
                 mission.candidatures = mission.candidatures.map((candidature) => ({
                     ...candidature,
-                    young: youngsById[candidature.youngId!.toString()],
+                    // L'anonymisation d'un volontaire supprime le youngId de ses candidatures.
+                    young: candidature.youngId ? youngsById[candidature.youngId.toString()] : undefined,
                 }));
             }
             return mission;
@@ -344,7 +359,7 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
                 "Statut juridique de la structure": mission.structure?.legalStatus || "",
                 "Type de structure": mission.structure?.types?.toString() || "",
                 "Sous-type de structure": mission.structure?.sousType || "",
-                "Présentation de la structure": mission.structure?.description || "",
+                "Présentation de la structure": htmlToPlainText(mission.structure?.description) || "",
             },
             structureLocation: {
                 "Adresse de la structure": mission.structure?.address || "",

@@ -11,6 +11,7 @@ import API from "../../services/api";
 import { Icon, Spacer, TextEditorButton, Toolbar } from "./components";
 import { deserialize, serialize } from "./importHtml";
 import { AddLinkButton, isLink, RemoveLinkButton, wrapLink } from "./links";
+import { sanitizeImageUrl, sanitizeLinkUrl, sanitizeVideoUrl } from "../../utils/safeUrl";
 
 const HOTKEYS = {
   "mod+b": "bold",
@@ -61,6 +62,7 @@ const TextEditor = ({
   resetCount,
   className = "",
   macroSlateContent,
+  allowImages = true,
 }) => {
   const draftMessageSlate = new DOMParser().parseFromString(draftMessageHtml, "text/html");
   const deserialized = deserialize(draftMessageSlate.body).filter((a) => a.type);
@@ -75,7 +77,7 @@ const TextEditor = ({
   const arrowUpPressed = useKeyPress("ArrowUp");
   const arrowDownPressed = useKeyPress("ArrowDown");
   const [selected, setSelected] = useState(0);
-  if (!editorRef.current) editorRef.current = withPlugins(withHistory(withReact(createEditor())));
+  if (!editorRef.current) editorRef.current = withPlugins(withHistory(withReact(createEditor())), allowImages);
   const editor = editorRef.current;
 
   useEffect(() => {
@@ -293,7 +295,12 @@ const TextEditor = ({
   );
 };
 
-const withPlugins = (editor) => {
+// `allowImages` : coller ou déposer une image publie systématiquement le fichier en accès public
+// (`/knowledge-base/picture`, ACL public-read) avant même l'envoi du message, réservé à l'éditeur de
+// la base de connaissance. Dans l'éditeur de réponse d'un ticket, l'image collée n'est jamais
+// transmise au contact (importHtml.js retire le nœud image de serialize()), et le fichier reste
+// public en permanence à l'insu de l'agent qui la croit envoyée (PM54) : l'insertion y est refusée.
+const withPlugins = (editor, allowImages = true) => {
   const { insertData, isVoid, insertText, isInline } = editor;
 
   editor.isVoid = (element) => {
@@ -324,12 +331,20 @@ const withPlugins = (editor) => {
       const [mime] = file.type.split("/");
 
       if (mime === "image") {
+        if (!allowImages) {
+          toast.error("L'insertion d'image n'est pas autorisée ici : joignez plutôt le fichier au message.");
+          return;
+        }
         const [imageUrl, imageAlt] = await uploadImage(files);
         if (!!imageUrl && !!imageAlt) insertImage(editor, imageUrl, imageAlt);
       }
       return;
     }
     if (text && isImageUrl(text)) {
+      if (!allowImages) {
+        toast.error("L'insertion d'image n'est pas autorisée ici : joignez plutôt le fichier au message.");
+        return;
+      }
       const imageAlt = await new Promise((resolve) => {
         const alt = window.prompt("Veuillez saisir la description de l'image (accessibilité personne mal-voyante) :");
         resolve(alt);
@@ -357,7 +372,9 @@ const withPlugins = (editor) => {
   return editor;
 };
 
-const insertImage = (editor, url, alt) => {
+const insertImage = (editor, rawUrl, alt) => {
+  const url = sanitizeImageUrl(rawUrl);
+  if (!url) return;
   const text = { text: "" };
   const image = { type: "image", url, alt, children: [text] };
   Transforms.insertNodes(editor, image);
@@ -371,13 +388,19 @@ const InlineChromiumBugfix = () => (
   </span>
 );
 
+// Les nœuds viennent aussi de signatures, modules de texte et brouillons écrits par d'autres
+// comptes : l'URL est filtrée au rendu, et l'href réel est exposé pour être vérifiable au survol (FH12).
 const LinkComponent = ({ attributes, children, element }) => {
   const selected = useSelected();
+  const url = sanitizeLinkUrl(element.url);
   return (
     <a
+      href={url ?? undefined}
+      title={url ?? "Lien invalide"}
+      rel="noopener noreferrer"
       onClick={(e) => {
         e.preventDefault();
-        window.open(element.url, "_blank");
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
       }}
       {...attributes}
       className={`${selected ? "border-2" : ""} inline text-blue-900 underline`}
@@ -497,7 +520,7 @@ const Image = ({ attributes, children, element, readOnly }) => {
     <div {...attributes}>
       <div contentEditable={false}>
         <img
-          src={element.url}
+          src={sanitizeImageUrl(element.url) ?? undefined}
           alt={element.alt}
           onMouseEnter={() => setShowDelete(true)}
           onMouseLeave={() => setShowDelete(false)}
@@ -543,11 +566,17 @@ const Image = ({ attributes, children, element, readOnly }) => {
 const VideoElement = ({ attributes, children, element, readOnly }) => {
   const editor = useSlateStatic();
   const { url } = element;
+  // Une iframe s'exécute sans clic : seul le lecteur Vimeo est rendu.
+  const videoUrl = sanitizeVideoUrl(url);
   return (
     <div {...attributes}>
       <div contentEditable={false}>
         <div className="relative h-0 pb-[56.25%]">
-          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
+          {videoUrl ? (
+            <iframe src={`${videoUrl}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
+          ) : (
+            <p className="absolute top-0 left-0 text-sm text-gray-500">Vidéo non affichée : seules les vidéos player.vimeo.com sont autorisées.</p>
+          )}
         </div>
         {!readOnly && (
           <MetaDataInput

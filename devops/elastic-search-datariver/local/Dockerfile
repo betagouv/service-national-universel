@@ -2,13 +2,14 @@
 FROM rwynn/monstache:6.7.14
 
 COPY collections.csv .
+COPY sensitive-fields.csv .
 COPY generate_config.sh .
 
 ARG MONGO_DB_NAME
 ENV MONSTACHE_ES_URLS=
 ENV MONSTACHE_MONGO_URL=
 
-RUN sh generate_config.sh $MONGO_DB_NAME collections.csv > monstache.toml
+RUN sh generate_config.sh $MONGO_DB_NAME collections.csv sensitive-fields.csv > monstache.toml
 RUN sed -i -e '/^workers =/d' -e '/^cluster-name =/d' monstache.toml
 
 EXPOSE 8080

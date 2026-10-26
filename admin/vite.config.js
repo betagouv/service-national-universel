@@ -21,11 +21,14 @@ export const VitePluginWatchPackages = async (config) => {
   };
 };
 
-// eslint-disable-next-line no-unused-vars
 export default defineConfig(({ command, mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
+  // Sans VITE_ENVIRONMENT, le bundle retombait sur « development » : Sentry coupé et contrôles réservés à la production désactivés.
+  if (command === "build" && !env.VITE_ENVIRONMENT) {
+    throw new Error("VITE_ENVIRONMENT est obligatoire pour construire l'application (production, staging, ci, custom…)");
+  }
 
   const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
 
@@ -44,6 +47,10 @@ export default defineConfig(({ command, mode }) => {
             env: mode,
           },
         },
+        // Sourcemaps envoyées à Sentry, jamais publiées avec le build
+        sourcemaps: {
+          filesToDeleteAfterUpload: ["./build/**/*.map"],
+        },
         validate: true,
         reactComponentAnnotation: { enabled: true },
 
@@ -58,12 +65,16 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     build: {
-      sourcemap: mode !== "development",
+      // "hidden" : pas de commentaire sourceMappingURL dans les bundles publiés
+      sourcemap: mode !== "development" ? "hidden" : false,
       outDir: "build",
       port: 8082,
       rollupOptions: {
         output: {
           manualChunks(id) {
+            // @sentry/* et @sentry-internal/* s'importent mutuellement depuis que @sentry/core n'est plus
+            // dupliqué (8.55) : séparés, les deux chunks forment un cycle et l'admin plante au chargement.
+            if (id.includes("node_modules/@sentry")) return "@sentry";
             const HugeLibraries = [
               "xlsx",
               "date-fns",

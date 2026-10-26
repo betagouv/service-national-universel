@@ -31,7 +31,6 @@ import IconDomain from "./components/IconDomain";
 import ModalPJ from "./components/ModalPJ";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
-import plausibleEvent from "@/services/plausible";
 import { apiEngagement } from "./utils";
 import ApplicationStatusBadge from "../phase2/components/ApplicationStatusBadge";
 import useUpdateMPStatus from "../militaryPreparation/lib/useUpdateMPStatus";
@@ -92,12 +91,7 @@ export default function ViewMobile() {
     return tags;
   };
 
-  const handleClick = (mission) => {
-    if (mission.isMilitaryPreparation === "true") {
-      plausibleEvent("Phase 2/CTA - PM - Candidater");
-    } else {
-      plausibleEvent("Phase2/CTA missions - Candidater");
-    }
+  const handleClick = () => {
     setModal("APPLY");
   };
 
@@ -167,7 +161,7 @@ export default function ViewMobile() {
                 canManageApplications={canManageApplications}
               />
             ) : (
-              <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
+              <ApplyButton mission={mission} onClick={handleClick} />
             )}
           </div>
         </div>
@@ -651,7 +645,7 @@ const InfoStructure = ({ title, structure }) => {
       <div className="text-sm font-normal leading-5">
         {rest ? (
           <div className="my-2">
-            <div dangerouslySetInnerHTML={{ __html: preview + (expandNote ? rest : " ...") + " " }} />
+            <div dangerouslySetInnerHTML={{ __html: htmlCleaner(preview + (expandNote ? rest : " ...")) + " " }} />
             <div className="see-more" onClick={toggleNote}>
               {expandNote ? "  VOIR MOINS" : "  VOIR PLUS"}
             </div>

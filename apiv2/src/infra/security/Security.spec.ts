@@ -1,0 +1,225 @@
+import { Body, Controller, INestApplication, Post } from "@nestjs/common";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { Test } from "@nestjs/testing";
+import * as express from "express";
+import * as request from "supertest";
+import * as zlib from "zlib";
+import * as basicAuth from "express-basic-auth";
+import { MemoryStore } from "express-rate-limit";
+
+import { hostGuard, hotesAutorises } from "./HostGuard";
+import { RATE_LIMITS, estRouteCouteuse, jetonCookieAdmin, normaliserIp, rateLimiter } from "./RateLimit";
+import { bullBoardIpAllowlist, masquerSecrets } from "./BullBoardSecurity";
+import { parseursSansDecompression } from "./ParseursCorps";
+
+describe("HostGuard (L46)", () => {
+    const app = express();
+    app.use(hostGuard(hotesAutorises("https://api.snu.gouv.fr/v2", "api-bis.snu.gouv.fr")));
+    app.use((_req, res) => res.json({ ok: true }));
+
+    it("accepte l'hôte de APIV2_URL, avec ou sans port", async () => {
+        await request(app).get("/v2/referent").set("Host", "api.snu.gouv.fr").expect(200);
+        await request(app).get("/v2/referent").set("Host", "API.snu.gouv.fr:443").expect(200);
+    });
+
+    it("accepte les hôtes supplémentaires", async () => {
+        await request(app).post("/v2/jeune/export").set("Host", "api-bis.snu.gouv.fr").expect(200);
+    });
+
+    it("refuse l'origine Clever Cloud en 421", async () => {
+        const res = await request(app).get("/v2/referent").set("Host", "app-1234.cleverapps.io").expect(421);
+        expect(res.body.code).toBe("MISDIRECTED_REQUEST");
+    });
+
+    it("laisse passer les sondes de disponibilité", async () => {
+        await request(app).get("/").set("Host", "127.0.0.1:3001").expect(200);
+        await request(app).get("/v2/health").set("Host", "127.0.0.1:3001").expect(200);
+        await request(app).post("/").set("Host", "127.0.0.1:3001").expect(421);
+    });
+});
+
+describe("RateLimit (M80)", () => {
+    it("identifie les routes coûteuses", () => {
+        const req = (method: string, path: string) => ({ method, path }) as express.Request;
+        expect(estRouteCouteuse(req("POST", "/v2/jeune/export"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/inscription/export/scolarises"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/affectation/abc/simulation/hts"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/affectation/abc/simulation/t1/valider/cle"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/referentiel/import/ROUTES"))).toBe(true);
+        expect(estRouteCouteuse(req("GET", "/v2/phase1/abc/simulations"))).toBe(false);
+        expect(estRouteCouteuse(req("POST", "/v2/plan-marketing/import/webhook"))).toBe(false);
+        expect(estRouteCouteuse(req("POST", "/v2/mission/exporter-quelque-chose"))).toBe(false);
+    });
+
+    it("PM40 : identifie une route coûteuse quelle que soit la casse du chemin", () => {
+        const req = (method: string, path: string) => ({ method, path }) as express.Request;
+        expect(estRouteCouteuse(req("POST", "/v2/jeune/Export"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/jeune/EXPORT"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/affectation/abc/Simulation/hts"))).toBe(true);
+        expect(estRouteCouteuse(req("POST", "/v2/referentiel/Import/ROUTES"))).toBe(true);
+    });
+
+    it("PM26 : normaliserIp regroupe une IPv6 par /64, laisse une IPv4 inchangée", () => {
+        // Deux adresses du même bloc /64 doivent produire la même clé.
+        expect(normaliserIp("2001:db8:1234:5678:aaaa:bbbb:cccc:0001")).toBe(normaliserIp("2001:db8:1234:5678:1:2:3:4"));
+        // Un bloc /64 différent produit une clé différente.
+        expect(normaliserIp("2001:db8:1234:5679::1")).not.toBe(normaliserIp("2001:db8:1234:5678::1"));
+        // Formes compressées équivalentes.
+        expect(normaliserIp("::1")).toBe(normaliserIp("0:0:0:0:0:0:0:1"));
+        // IPv4 et IPv4-mappée : inchangées / réduites à l'IPv4.
+        expect(normaliserIp("203.0.113.5")).toBe("203.0.113.5");
+        expect(normaliserIp("::ffff:203.0.113.5")).toBe("203.0.113.5");
+    });
+
+    it("PM41 : jetonCookieAdmin lit jwt_ref seulement depuis l'origine admin", () => {
+        const URL_ADMIN = "https://admin.snu.gouv.fr";
+        const avecCookie = (origin?: string) => ({ headers: { origin, cookie: "jwt_ref=le-jeton; autre=x" } });
+
+        expect(jetonCookieAdmin(avecCookie(URL_ADMIN), URL_ADMIN)).toBe("le-jeton");
+        expect(jetonCookieAdmin(avecCookie("https://attaquant.example.org"), URL_ADMIN)).toBeUndefined();
+        expect(jetonCookieAdmin(avecCookie(undefined), URL_ADMIN)).toBeUndefined();
+        expect(jetonCookieAdmin({ headers: { origin: URL_ADMIN, cookie: undefined } }, URL_ADMIN)).toBeUndefined();
+    });
+
+    it("renvoie 429 au-delà du quota des routes coûteuses, sans brider les autres", async () => {
+        const app = express();
+        app.use(
+            rateLimiter({
+                store: new MemoryStore(),
+                ...RATE_LIMITS.couteux,
+                skip: (req) => !estRouteCouteuse(req),
+            }),
+        );
+        app.use((_req, res) => res.json({ ok: true }));
+
+        for (let i = 0; i < RATE_LIMITS.couteux.limit; i++) {
+            await request(app).post("/v2/jeune/export").expect(200);
+        }
+        const res = await request(app).post("/v2/jeune/export").expect(429);
+        expect(res.body.code).toBe("TOO_MANY_REQUESTS");
+        await request(app).get("/v2/referent").expect(200);
+    });
+
+    it("compte par clé : un autre utilisateur n'est pas bridé", async () => {
+        const app = express();
+        app.use(
+            rateLimiter({
+                store: new MemoryStore(),
+                windowMs: 60_000,
+                limit: 1,
+                keyGenerator: (req) => String(req.headers["x-user"]),
+            }),
+        );
+        app.use((_req, res) => res.json({ ok: true }));
+
+        await request(app).get("/").set("x-user", "a").expect(200);
+        await request(app).get("/").set("x-user", "a").expect(429);
+        await request(app).get("/").set("x-user", "b").expect(200);
+    });
+});
+
+describe("Bull Board (M79)", () => {
+    it("masque les jetons des liens et les clés secrètes dans les données de job", () => {
+        const data = {
+            to: [{ email: "prof@example.org", name: "Prof" }],
+            invitationUrl: "https://admin.snu.gouv.fr/creer-mon-compte?token=abc-123&x=1",
+            nested: { invitationToken: "abc-123", apiKey: "k" },
+            urls: ["https://admin.snu.gouv.fr/verifier-mon-compte?token=def"],
+        };
+        expect(masquerSecrets(data)).toEqual({
+            to: [{ email: "prof@example.org", name: "Prof" }],
+            invitationUrl: "https://admin.snu.gouv.fr/creer-mon-compte?token=[masqué]&x=1",
+            nested: { invitationToken: "[masqué]", apiKey: "[masqué]" },
+            urls: ["https://admin.snu.gouv.fr/verifier-mon-compte?token=[masqué]"],
+        });
+    });
+
+    function bullBoardApp(ips: string, ouvert: boolean) {
+        const app = express();
+        app.use(
+            "/queues",
+            bullBoardIpAllowlist(ips, ouvert),
+            rateLimiter({ store: new MemoryStore(), ...RATE_LIMITS.bullBoard, skipSuccessfulRequests: true }),
+            basicAuth({ challenge: true, users: { admin: "secret" } }),
+            (_req: express.Request, res: express.Response) => res.send("board"),
+        );
+        return app;
+    }
+
+    it("ferme le tableau de bord sans liste d'IP sur un environnement déployé", async () => {
+        await request(bullBoardApp("", false)).get("/queues").auth("admin", "secret").expect(404);
+    });
+
+    it("n'accepte que les IP de la liste", async () => {
+        await request(bullBoardApp("10.0.0.1", false)).get("/queues").auth("admin", "secret").expect(404);
+        await request(bullBoardApp("127.0.0.1, ::1", false)).get("/queues").auth("admin", "secret").expect(200);
+    });
+
+    it("bloque la force brute de l'auth basique, sans compter les succès", async () => {
+        const app = bullBoardApp("", true);
+        for (let i = 0; i < 3; i++) {
+            await request(app).get("/queues").auth("admin", "secret").expect(200);
+        }
+        for (let i = 0; i < RATE_LIMITS.bullBoard.limit; i++) {
+            await request(app).get("/queues").auth("admin", `mauvais-${i}`).expect(401);
+        }
+        await request(app).get("/queues").auth("admin", "secret").expect(429);
+    });
+});
+
+describe("Parseurs de corps sans décompression (CVE-2026-111497)", () => {
+    @Controller()
+    class EchoController {
+        @Post("echo")
+        echo(@Body() body: unknown) {
+            return body;
+        }
+    }
+
+    let app: INestApplication;
+
+    beforeAll(async () => {
+        const moduleRef = await Test.createTestingModule({ controllers: [EchoController] }).compile();
+        app = moduleRef.createNestApplication<NestExpressApplication>({ bodyParser: false, logger: false });
+        parseursSansDecompression(app as NestExpressApplication);
+        await app.init();
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    const json = Buffer.from(JSON.stringify({ a: 1 }));
+
+    it.each([
+        ["br", zlib.brotliCompressSync(json)],
+        ["gzip", zlib.gzipSync(json)],
+        ["deflate", zlib.deflateSync(json)],
+    ])("refuse en 415 un corps JSON compressé en %s, sans le décompresser", async (encoding, corps) => {
+        await request(app.getHttpServer())
+            .post("/echo")
+            .set("Content-Type", "application/json")
+            .set("Content-Encoding", encoding)
+            .send(corps)
+            .expect(415);
+    });
+
+    it("refuse en 415 un corps urlencoded compressé", async () => {
+        await request(app.getHttpServer())
+            .post("/echo")
+            .set("Content-Type", "application/x-www-form-urlencoded")
+            .set("Content-Encoding", "br")
+            .send(zlib.brotliCompressSync(Buffer.from("a=1")))
+            .expect(415);
+    });
+
+    it("lit toujours un corps JSON non compressé", async () => {
+        const res = await request(app.getHttpServer()).post("/echo").send({ a: 1 }).expect(201);
+        expect(res.body).toEqual({ a: 1 });
+    });
+
+    it("lit toujours un corps urlencoded imbriqué (extended, comme le parseur par défaut de Nest)", async () => {
+        const res = await request(app.getHttpServer()).post("/echo").type("form").send("a[b]=1").expect(201);
+        expect(res.body).toEqual({ a: { b: "1" } });
+    });
+});

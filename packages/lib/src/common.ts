@@ -1,6 +1,8 @@
 import sanitizeHtml from "sanitize-html";
 
-import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ACADEMIQUE_DOMAINS, YOUNG_SOURCE } from "./constants/constants";
+import { SAFE_LINK_PROTOCOLS } from "./utils/safeUrl";
+
+import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ACADEMIQUE_DOMAINS } from "./constants/constants";
 import translation from "./translation";
 import { ROLES } from "./roles";
 
@@ -125,47 +127,6 @@ function canUserUpdateYoungStatus(actor) {
   }
 }
 
-const SESSIONPHASE1ID_CANCHANGESESSION = ["627cd8b873254d073af93147", "6274e6359ea0ba074acf6557"];
-
-const youngCanChangeSession = ({
-  statusPhase1,
-  status,
-  sessionPhase1Id,
-  source,
-  departSejourMotif,
-}: {
-  statusPhase1: string;
-  status: string;
-  sessionPhase1Id?: string;
-  source: string;
-  departSejourMotif?: string;
-}) => {
-  if (source === YOUNG_SOURCE.CLE) return false;
-  if (departSejourMotif === "Exclusion") return false;
-  if (
-    [
-      YOUNG_STATUS.IN_PROGRESS,
-      YOUNG_STATUS.REINSCRIPTION,
-      YOUNG_STATUS.WAITING_LIST,
-      YOUNG_STATUS.WAITING_VALIDATION,
-      YOUNG_STATUS.WAITING_CORRECTION,
-      YOUNG_STATUS.ABANDONED,
-    ].includes(status as any)
-  ) {
-    return true;
-  }
-  if (
-    [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN].includes(status as any) &&
-    [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.NOT_DONE].includes(statusPhase1 as any)
-  ) {
-    return true;
-  }
-  if ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE].includes(statusPhase1 as any) && SESSIONPHASE1ID_CANCHANGESESSION.includes(sessionPhase1Id as any)) {
-    return true;
-  }
-  return false;
-};
-
 const youngCanWithdraw = (young) => {
   if (
     ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1) && [YOUNG_STATUS_PHASE2.VALIDATED].includes(young.statusPhase2)) ||
@@ -174,10 +135,6 @@ const youngCanWithdraw = (young) => {
     return false;
   }
   return true;
-};
-
-const isYoungInReinscription = (young) => {
-  return young.hasStartedReinscription || false;
 };
 
 const formatPhoneNumberFR = (tel) => {
@@ -200,13 +157,68 @@ const validateEmailAcademique = (email) => {
   return ACADEMIQUE_DOMAINS.includes(domain);
 };
 
+/**
+ * Schémas acceptés dans les liens d'un HTML assaini : ceux du filtre d'URL partagé (`safeUrl.ts`), plus
+ * `tel` pour les numéros des descriptions de structures et de missions. Sans `:` final, au format de
+ * sanitize-html.
+ */
+const HTML_LINK_SCHEMES = [...SAFE_LINK_PROTOCOLS.map((protocol) => protocol.slice(0, -1)), "tel"];
+
+/**
+ * Configuration sanitize-html de référence des fronts (GOO-19). Liens : schémas web uniquement, jamais
+ * relatifs au protocole, et `rel` imposé pour qu'une page ouverte dans un nouvel onglet ne puisse pas
+ * rediriger l'onglet d'origine (reverse tabnabbing, audit fronts 2026-09-23 : FM12, FL7). Pas
+ * d'attribut `style` ni d'image : une variante qui en a besoin (snupport-app) part de cette base.
+ */
+const HTML_CLEANER_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
+  allowedAttributes: {
+    a: ["href", "target", "rel"],
+  },
+  allowedSchemes: HTML_LINK_SCHEMES,
+  allowProtocolRelative: false,
+  transformTags: {
+    a: (tagName, attribs) => ({ tagName, attribs: { ...attribs, rel: "noopener noreferrer" } }),
+  },
+};
+
 const htmlCleaner = (text) => {
-  return sanitizeHtml(text, {
-    allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
-    allowedAttributes: {
-      a: ["href", "target", "rel"],
-    },
-  });
+  return sanitizeHtml(text, HTML_CLEANER_OPTIONS);
+};
+
+/**
+ * Assainit un texte stocké qui peut contenir du balisage (descriptions de structures et de missions
+ * saisies dans l'admin ou reprises de JeVeuxAider). Un texte sans balise est rendu tel quel, pour ne
+ * pas transformer ses « & » ou ses « < » en entités dans les champs de saisie. Un « < » ne peut
+ * ouvrir une balise, un commentaire ou une déclaration que suivi d'une lettre, de « / », « ! » ou
+ * « ? » : « âge < 16 ans » reste du texte.
+ */
+const MARKUP_START = /<[a-z/!?]/i;
+
+const sanitizeStoredHtml = <T extends string | null | undefined>(text: T): T => {
+  if (!text || !MARKUP_START.test(text)) return text;
+  return htmlCleaner(text) as T;
+};
+
+/**
+ * Texte lisible d'un champ stocké en HTML assaini (descriptions, actions, contraintes, fréquence de
+ * mission ; description de structure), pour les contextes qui n'affichent pas de HTML : exports,
+ * panneaux en texte brut (GOO-44). Les fins de paragraphe, d'item et `<br>` deviennent des retours à la
+ * ligne, les balises disparaissent, et les entités que sanitize-html réencode (`&amp;`, `&lt;`, `&gt;`,
+ * `&quot;`) sont décodées. Le résultat est du texte : il ne doit jamais être réinjecté comme HTML.
+ */
+const HTML_LINE_BREAK = /<br\s*\/?>|<\/(?:p|li|h[1-6]|div)\s*>/gi;
+
+const htmlToPlainText = <T extends string | null | undefined>(html: T): T => {
+  if (!html) return html;
+  const text = sanitizeHtml(html.replace(HTML_LINE_BREAK, "\n"), { allowedTags: [], allowedAttributes: {} })
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return text as T;
 };
 
 const formatMessageForReadingInnerHTML = (content) => {
@@ -224,12 +236,14 @@ export {
   getLabelWithdrawnReason,
   canUpdateYoungStatus,
   canUserUpdateYoungStatus,
-  youngCanChangeSession,
   youngCanWithdraw,
-  isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
   patternEmailAcademy,
+  HTML_CLEANER_OPTIONS,
+  HTML_LINK_SCHEMES,
   htmlCleaner,
+  htmlToPlainText,
+  sanitizeStoredHtml,
   validateEmailAcademique,
 };

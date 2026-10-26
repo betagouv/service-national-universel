@@ -12,14 +12,40 @@ function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallbac
     return undefined;
 }
 
+const KNOWN_ENVIRONMENTS = ["production", "staging", "ci", "custom", "test", "development"];
+// Recettes éphémères : devops/scripts/cc-environment-name.sh fabrique "env-" + nom de branche.
+const RECETTE_ENVIRONMENT_PATTERN = /^env-[a-z0-9-]+$/;
+
+function isKnownEnvironment(value: unknown): value is string {
+    return typeof value === "string" && (KNOWN_ENVIRONMENTS.includes(value) || RECETTE_ENVIRONMENT_PATTERN.test(value));
+}
+
 // NODE_ENV environment variable is used by :
 // - jest : unit test (NODE_ENV == "test")
-const defaultEnv = process.env.NODE_ENV === "test" ? "test" : "development";
+// PM7 (25/09/2026) : un repli silencieux sur "development" exposait le secret JWT public
+// "dev-secret" (et désactivait les garde-fous de production) sur tout déploiement qui aurait
+// oublié de positionner ENVIRONMENT. Seul jest a droit à un défaut implicite (via NODE_ENV) ;
+// partout ailleurs, y compris le poste des développeurs, ENVIRONMENT doit être déclaré (.env).
+// Même correctif que api/src/config.ts.
+const defaultEnv = process.env.NODE_ENV === "test" ? "test" : undefined;
 const environment = _env(envStr, "ENVIRONMENT", defaultEnv);
+
+if (!isKnownEnvironment(environment)) {
+    throw new Error(`Missing or invalid required environment variable ENVIRONMENT (received: ${JSON.stringify(environment)})`);
+}
+
+// Les recettes (devops/scripts/cc-create-environment.sh) ne positionnent pas NODE_ENV de façon
+// fiable : n'exiger qu'une absence, ou une égalité stricte avec ENVIRONMENT.
+if (process.env.NODE_ENV && process.env.NODE_ENV !== environment) {
+    throw new Error(`NODE_ENV (${process.env.NODE_ENV}) is inconsistent with ENVIRONMENT (${environment})`);
+}
+
 const jwtSecret =
     environment === "development" || environment === "test"
         ? _env(envStr, "JWT_SECRET", "dev-secret")
         : _env(envStr, "JWT_SECRET");
+
+const isDeployedEnvironment = ["production", "staging", "ci", "custom"].includes(environment ?? "");
 
 const configuration = () => ({
     environment,
@@ -31,6 +57,13 @@ const configuration = () => ({
     },
     httpServer: {
         port: _env(envInt, "PORT", 8086),
+        // Même réglage que la v1 (api/src/config.ts) : sans lui, req.ip désigne le reverse proxy
+        // et le rate limiting compterait toutes les requêtes sur une seule IP.
+        trustProxyHops: _env(envInt, "TRUST_PROXY_HOPS", isDeployedEnvironment ? 1 : 0),
+        // Contrôle d'hôte : actif sur les environnements déployés. L'hôte de APIV2_URL est
+        // toujours accepté ; ALLOWED_HOSTS ajoute des hôtes (liste séparée par des virgules).
+        enforceHost: isDeployedEnvironment,
+        allowedHosts: _env(envStr, "ALLOWED_HOSTS", ""),
     },
     database: {
         url: _env(envStr, "DATABASE_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"), // MONGO_URL in v1
@@ -40,6 +73,9 @@ const configuration = () => ({
         queuePrefix: _env(envStr, "BROKER_QUEUE_PREFIX", environment), // TASK_QUEUE_PREFIX in v1
         monitorUser: _env(envStr, "BROKER_MONITOR_USER"),
         monitorSecret: _env(envStr, "BROKER_MONITOR_SECRET"),
+        // Bull Board : IP autorisées (liste séparée par des virgules). Sur un environnement
+        // déployé, une liste vide ferme le tableau de bord.
+        monitorAllowedIps: _env(envStr, "BROKER_MONITOR_ALLOWED_IPS", ""),
     },
     email: {
         provider: _env(envStr, "EMAIL_PROVIDER", "mock"), // MAIL_TRANSPORT in v1
@@ -78,7 +114,9 @@ const configuration = () => ({
 
 const config = configuration();
 
-if (["production", "staging", "ci", "custom"].includes(config.environment ?? "") && !config.auth.jwtSecret) {
+// PM7 : couvre aussi les recettes (env-*) — l'ancienne liste fermée les laissait démarrer sans
+// JWT_SECRET, dev-secret n'étant lui-même réservé qu'à development/test.
+if (config.environment !== "development" && config.environment !== "test" && !config.auth.jwtSecret) {
     throw new Error("Missing required environment variable JWT_SECRET");
 }
 

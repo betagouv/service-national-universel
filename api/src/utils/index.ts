@@ -3,18 +3,13 @@ import https from "https";
 import http from "http";
 import passwordValidator from "password-validator";
 import sanitizeHtml from "sanitize-html";
-import { YoungModel, ReferentModel, ContractModel, PlanTransportModel, MeetingPointModel, ApplicationModel, SessionPhase1Model, MissionEquivalenceModel } from "../models";
+import { YoungModel, ReferentModel, ContractModel, ApplicationModel, MissionEquivalenceModel } from "../models";
 
-import { sendEmail, sendTemplate } from "../brevo";
-import path from "path";
-import fs from "fs";
-import { addDays } from "date-fns";
+import { sendTemplate } from "../brevo";
 import { config } from "../config";
-import { logger } from "../logger";
 import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS, ReferentStatus } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
 import dayjs from "dayjs";
-import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 
 // Timeout a promise in ms
 export const timeout = (prom, time) => {
@@ -25,6 +20,9 @@ export const timeout = (prom, time) => {
 export function sanitizeAll(text) {
   return sanitizeHtml(text || "", { allowedTags: ["li", "br", "b"], allowedAttributes: {} });
 }
+
+// Même contrat que sanitizeEmailText (email/emailInput) : importer ce module ici ferait un cycle utils <-> emailInput.
+const sanitizeEmailText = (value) => (value ? sanitizeAll(value) : value);
 
 export function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
@@ -192,285 +190,104 @@ export function validatePassword(password) {
   return schema.validate(password);
 }
 
-export const updatePlacesCenter = async (center, fromUser) => {
-  try {
-    const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-    const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
-    const placesLeft = Math.max(0, center.placesTotal - placesTaken);
-    if (center.placesLeft !== placesLeft) {
-      logger.debug(`Center ${center.id}: total ${center.placesTotal}, left from ${center.placesLeft} to ${placesLeft}`);
-      center.set({ placesLeft });
-      await center.save({ fromUser });
-    }
-  } catch (e) {
-    capture(e);
-  }
-  return center;
-};
-
-// first iteration
-// duplicate of updatePlacesCenter
-// we'll remove the updatePlacesCenter function once the migration is done
-export const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
-  try {
-    const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
-    const placesTaken = youngs.filter(
-      (young) => ["AFFECTED", "DONE"].includes(young.statusPhase1) && young.cohesionStayPresence !== "false" && young.status === "VALIDATED",
-    ).length;
-    const placesLeft = Math.max(0, sessionPhase1.placesTotal - placesTaken);
-    if (sessionPhase1.placesLeft !== placesLeft) {
-      logger.debug(`sessionPhase1 ${sessionPhase1.id}: total ${sessionPhase1.placesTotal}, left from ${sessionPhase1.placesLeft} to ${placesLeft}`);
-      sessionPhase1.set({ placesLeft });
-      await sessionPhase1.save({ fromUser });
-    }
-  } catch (e) {
-    capture(e);
-  }
-  return sessionPhase1;
-};
-
-export const placesTakenSessionPhase1 = async (sessionPhase1) => {
-  const placesTaken = await YoungModel.countDocuments({
-    sessionPhase1Id: sessionPhase1._id,
-    status: "VALIDATED",
-    statusPhase1: { $in: ["AFFECTED", "DONE"] },
-    cohesionStayPresence: { $ne: "false" },
-  });
-  return placesTaken;
-};
-
-export const updateCenterDependencies = async (center, fromUser) => {
-  const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-  youngs.forEach(async (young) => {
-    young.set({
-      cohesionCenterName: center.name,
-      cohesionCenterZip: center.zip,
-      cohesionCenterCity: center.city,
-    });
-    await young.save({ fromUser });
-  });
-  const referents = await ReferentModel.find({ cohesionCenterId: center._id });
-  referents.forEach(async (referent) => {
-    referent.set({ cohesionCenterName: center.name });
-    await referent.save({ fromUser });
-  });
-  const sessions = await SessionPhase1Model.find({ cohesionCenterId: center._id });
-  for (let i = 0; i < sessions.length; i++) {
-    sessions[i].set({
-      department: center.department,
-      region: center.region,
-      codeCentre: center.code2022,
-      nameCentre: center.name,
-      zipCentre: center.zip,
-      cityCentre: center.city,
-    });
-    await sessions[i].save({ fromUser });
-  }
-  const plansDeTransport = await PlanTransportModel.find({ centerId: center._id });
-  plansDeTransport.forEach(async (planDeTransport) => {
-    planDeTransport.set({
-      centerDepartment: center.department,
-      centerRegion: center.region,
-      centerZip: center?.zip,
-      centerAddress: center?.address,
-      centerCode: center.code2022,
-      centerName: center.name,
-    });
-    await planDeTransport.save({ fromUser });
-  });
-};
-
-export const deleteCenterDependencies = async (center, fromUser) => {
-  const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-  youngs.forEach(async (young) => {
-    young.set({
-      cohesionCenterId: undefined,
-      cohesionCenterName: undefined,
-      cohesionCenterZip: undefined,
-      cohesionCenterCity: undefined,
-    });
-    await young.save({ fromUser });
-  });
-  const referents = await ReferentModel.find({ cohesionCenterId: center._id });
-  referents.forEach(async (referent) => {
-    referent.set({ cohesionCenterId: undefined, cohesionCenterName: undefined });
-    await referent.save({ fromUser });
-  });
-  const meetingPoints = await MeetingPointModel.find({ centerId: center._id });
-  meetingPoints.forEach(async (meetingPoint) => {
-    meetingPoint.set({ centerId: undefined, centerCode: undefined });
-    await meetingPoint.save({ fromUser });
-  });
-};
-
-export const updatePlacesBus = async (bus) => {
-  try {
-    const meetingPoints = await MeetingPointModel.find({ busId: bus.id, cohort: bus.cohort });
-    if (!meetingPoints?.length) {
-      logger.warn("meetingPoints not found");
-      return;
-    }
-    const idsMeetingPoints = meetingPoints.map((e) => e._id);
-    const youngs = await YoungModel.find({
-      status: "VALIDATED",
-      meetingPointId: {
-        $in: idsMeetingPoints,
-      },
-    });
-    const placesTaken = youngs.filter(
-      (young) => (["AFFECTED", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp!)) && young.status === "VALIDATED",
-    ).length;
-    const placesLeft = Math.max(0, bus.capacity - placesTaken);
-    if (bus.placesLeft !== placesLeft) {
-      logger.debug(`Bus ${bus.id}: total ${bus.capacity}, left from ${bus.placesLeft} to ${placesLeft}`);
-      bus.set({ placesLeft });
-      await bus.save();
-    }
-  } catch (e) {
-    capture(e);
-  }
-  return bus;
-};
-
-export async function updateSeatsTakenInBusLine(busline) {
-  try {
-    const seatsTaken = await YoungModel.countDocuments({
-      $and: [
-        {
-          status: "VALIDATED",
-          ligneId: busline._id.toString(),
-        },
-        {
-          $or: [{ statusPhase1: { $in: ["AFFECTED", "DONE"] } }, { statusPhase1Tmp: { $in: ["AFFECTED", "DONE"] } }],
-        },
-      ],
-    });
-    if (busline.youngSeatsTaken !== seatsTaken) {
-      busline.set({ youngSeatsTaken: seatsTaken });
-      await busline.save();
-
-      // Do the same update with planTransport
-      const planTransport = await PlanTransportModel.findById(busline._id);
-      if (!planTransport) throw new Error("PlanTransport not found");
-      planTransport.set({ youngSeatsTaken: seatsTaken, lineFillingRate: planTransport.youngCapacity && Math.floor((seatsTaken / planTransport.youngCapacity) * 100) });
-      await planTransport.save();
-    }
-  } catch (e) {
-    capture(e);
-  }
-  return busline;
-}
-
-export const sendAutoCancelMeetingPoint = async (young) => {
-  const cc: { email: string }[] = [];
-  if (young.parent1Email) cc.push({ email: young.parent1Email });
-  if (young.parent2Email) cc.push({ email: young.parent2Email });
-  await sendEmail(
-    {
-      name: `${young.firstName} ${young.lastName}`,
-      email: young.email,
-    } as any,
-    "Sélection de votre point de rassemblement - Action à faire",
-    fs
-      .readFileSync(path.resolve(__dirname, "../templates/autoCancelMeetingPoint.html"))
-      .toString()
-      .replace(/{{firstName}}/, sanitizeAll(young.firstName))
-      .replace(/{{lastName}}/, sanitizeAll(young.lastName))
-      .replace(/{{cta}}/g, sanitizeAll(`${config.APP_URL}/auth/login?redirect=phase1`)),
-    { cc },
-  );
-};
-
 export async function updateYoungPhase2StatusAndHours(young, fromUser) {
   try {
-    // Récupération des applications et équivalences pertinentes
-    const applications = await ApplicationModel.find({ youngId: young._id });
-    const equivalences = await MissionEquivalenceModel.find({
-      youngId: young._id,
-      status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
-    });
-
-    // Calcul des heures effectuées
-    const totalHoursDone =
-      applications.reduce((acc, application) => {
-        if (application.status === "DONE") {
-          return acc + Number(application.missionDuration || 0);
-        }
-        return acc;
-      }, 0) +
-      equivalences.reduce((acc, equivalence) => {
-        if (equivalence.status === "VALIDATED") {
-          return acc + (equivalence.missionDuration || 0);
-        }
-        return acc;
-      }, 0);
-
-    // Calcul des heures estimées
-    const totalHoursEstimated =
-      applications.reduce((acc, application) => {
-        if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
-          return acc + Number(application.missionDuration || 0);
-        }
-        return acc;
-      }, 0) +
-      equivalences.reduce((acc, equivalence) => {
-        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status!)) {
-          return acc + (equivalence.missionDuration || 0);
-        }
-        return acc;
-      }, 0);
-
-    // Mise à jour des heures dans le modèle young
-    young.set({
-      phase2NumberHoursDone: String(totalHoursDone),
-      phase2NumberHoursEstimated: String(totalHoursEstimated),
-      statusPhase2UpdatedAt: Date.now(),
-    });
-
-    // Mise à jour du statut de la phase 2
-    const activeApplication = applications.filter((a) => ["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS", "WAITING_VERIFICATION"].includes(a.status));
-    const pendingApplication = applications.filter((a) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(a.status));
-
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
-      // Ne pas changer le statut si déjà VALIDATED ou WITHDRAWN
-      young.set({ statusPhase2ValidatedAt: Date.now() });
-      await cancelPendingApplications(pendingApplication, fromUser);
-    } else if (Number(young.phase2NumberHoursDone) >= 84) {
-      // Valider la phase 2 si 84 heures effectuées
-      young.set({
-        statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
-        statusPhase2ValidatedAt: Date.now(),
-        "files.militaryPreparationFilesIdentity": [],
-        "files.militaryPreparationFilesCensus": [],
-        "files.militaryPreparationFilesAuthorization": [],
-        "files.militaryPreparationFilesCertificate": [],
-        statusMilitaryPreparationFiles: undefined,
-      });
-      await cancelPendingApplications(pendingApplication, fromUser);
-      let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
-        },
-        cc,
-      });
-    } else if (activeApplication.length) {
-      // Mettre le statut en IN_PROGRESS si une application est active
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
-    } else {
-      // Sinon, attendre la réalisation
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
-    }
-
-    // Mise à jour des statuts des applications
-    young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-    // Sauvegarde du modèle young
-    await young.save({ fromUser });
+    await recomputeYoungPhase2StatusAndHours(young, fromUser);
   } catch (e) {
     capture(e);
   }
+}
+
+/**
+ * Recalcule les heures et le statut de phase 2 du volontaire. Contrairement à
+ * `updateYoungPhase2StatusAndHours`, les erreurs remontent à l'appelant (lot D : L1).
+ */
+export async function recomputeYoungPhase2StatusAndHours(young, fromUser) {
+  // Récupération des applications et équivalences pertinentes
+  const applications = await ApplicationModel.find({ youngId: young._id });
+  const equivalences = await MissionEquivalenceModel.find({
+    youngId: young._id,
+    status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
+  });
+
+  // Calcul des heures effectuées
+  const totalHoursDone =
+    applications.reduce((acc, application) => {
+      if (application.status === "DONE") {
+        return acc + Number(application.missionDuration || 0);
+      }
+      return acc;
+    }, 0) +
+    equivalences.reduce((acc, equivalence) => {
+      if (equivalence.status === "VALIDATED") {
+        return acc + (equivalence.missionDuration || 0);
+      }
+      return acc;
+    }, 0);
+
+  // Calcul des heures estimées
+  const totalHoursEstimated =
+    applications.reduce((acc, application) => {
+      if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
+        return acc + Number(application.missionDuration || 0);
+      }
+      return acc;
+    }, 0) +
+    equivalences.reduce((acc, equivalence) => {
+      if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status!)) {
+        return acc + (equivalence.missionDuration || 0);
+      }
+      return acc;
+    }, 0);
+
+  // Mise à jour des heures dans le modèle young
+  young.set({
+    phase2NumberHoursDone: String(totalHoursDone),
+    phase2NumberHoursEstimated: String(totalHoursEstimated),
+    statusPhase2UpdatedAt: Date.now(),
+  });
+
+  // Mise à jour du statut de la phase 2
+  const activeApplication = applications.filter((a) => ["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS", "WAITING_VERIFICATION"].includes(a.status));
+  const pendingApplication = applications.filter((a) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(a.status));
+
+  if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
+    // Ne pas changer le statut si déjà VALIDATED ou WITHDRAWN
+    young.set({ statusPhase2ValidatedAt: Date.now() });
+    await cancelPendingApplications(pendingApplication, fromUser);
+  } else if (Number(young.phase2NumberHoursDone) >= 84) {
+    // Valider la phase 2 si 84 heures effectuées
+    young.set({
+      statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+      statusPhase2ValidatedAt: Date.now(),
+      "files.militaryPreparationFilesIdentity": [],
+      "files.militaryPreparationFilesCensus": [],
+      "files.militaryPreparationFilesAuthorization": [],
+      "files.militaryPreparationFilesCertificate": [],
+      statusMilitaryPreparationFiles: undefined,
+    });
+    await cancelPendingApplications(pendingApplication, fromUser);
+    let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
+    let cc = getCcOfYoung({ template, young });
+    await sendTemplate(template, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: {
+        cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
+      },
+      cc,
+    });
+  } else if (activeApplication.length) {
+    // Mettre le statut en IN_PROGRESS si une application est active
+    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
+  } else {
+    // Sinon, attendre la réalisation
+    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
+  }
+
+  // Mise à jour des statuts des applications
+  young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+  // Sauvegarde du modèle young
+  await young.save({ fromUser });
 }
 
 export async function updateYoungPhase2Hours(young, fromUser) {
@@ -611,34 +428,39 @@ export const checkStatusContract = (contract) => {
 
 export const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   try {
-    const contracts = await ContractModel.find({ youngId: young._id });
-
-    // on récupère toutes les candidatures du volontaire
-    const applications = await ApplicationModel.find({ _id: { $in: contracts?.map((c) => c.applicationId) } });
-
-    // on filtre sur les candidatures pour lesquelles le contrat est "actif"
-    const applicationsThatContractIsActive = applications.filter((application) => ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status));
-
-    //on filtre les contrats liés à ces candidatures filtrée précédement
-    const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
-
-    const arrayContract: string[] = [];
-    for (const contract of activeContracts) {
-      const status = checkStatusContract(contract);
-      const application = await ApplicationModel.findById(contract.applicationId);
-      application!.contractStatus = status;
-      await application!.save({ fromUser });
-      arrayContract.push(status);
-    }
-
-    young.set({
-      statusPhase2Contract: arrayContract,
-    });
-
-    await young.save({ fromUser });
+    await recomputeYoungStatusPhase2Contract(young, fromUser);
   } catch (e) {
     capture(e);
   }
+};
+
+/** Variante de `updateYoungStatusPhase2Contract` dont les erreurs remontent à l'appelant (lot D : L1). */
+export const recomputeYoungStatusPhase2Contract = async (young, fromUser) => {
+  const contracts = await ContractModel.find({ youngId: young._id });
+
+  // on récupère toutes les candidatures du volontaire
+  const applications = await ApplicationModel.find({ _id: { $in: contracts?.map((c) => c.applicationId) } });
+
+  // on filtre sur les candidatures pour lesquelles le contrat est "actif"
+  const applicationsThatContractIsActive = applications.filter((application) => ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status));
+
+  //on filtre les contrats liés à ces candidatures filtrée précédement
+  const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
+
+  const arrayContract: string[] = [];
+  for (const contract of activeContracts) {
+    const status = checkStatusContract(contract);
+    const application = await ApplicationModel.findById(contract.applicationId);
+    application!.contractStatus = status;
+    await application!.save({ fromUser });
+    arrayContract.push(status);
+  }
+
+  young.set({
+    statusPhase2Contract: arrayContract,
+  });
+
+  await young.save({ fromUser });
 };
 
 export async function cancelPendingApplications(pendingApplication, fromUser) {
@@ -663,9 +485,9 @@ export async function sendNotificationApplicationClosedBecausePhase2Validated(ap
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION_PHASE_2_VALIDATED, {
         emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
         params: {
-          missionName: application.missionName,
-          youngFirstName: application.youngFirstName,
-          youngLastName: application.youngLastName,
+          missionName: sanitizeEmailText(application.missionName),
+          youngFirstName: sanitizeEmailText(application.youngFirstName),
+          youngLastName: sanitizeEmailText(application.youngLastName),
         },
       });
   }
@@ -705,14 +527,6 @@ export async function notifDepartmentChange(department, template, young, extraPa
       },
     });
   }
-}
-
-export async function addingDayToDate(days, dateStart) {
-  const startDate = new Date(dateStart);
-  const newDate = addDays(startDate, days);
-  const formattedValidationDate = newDate.toISOString();
-
-  return formattedValidationDate;
 }
 
 export const getReferentManagerPhase2 = async (department) => {
@@ -792,23 +606,6 @@ export const updateYoungApplicationFilesType = async (application, user) => {
   } catch (e) {
     capture(e);
   }
-};
-
-export const updateHeadCenter = async (headCenterId, user) => {
-  const headCenter = await ReferentModel.findById(headCenterId);
-  if (!headCenter) return;
-  const sessions = await SessionPhase1Model.find({ headCenterId }, { cohort: 1 });
-  const cohorts = new Set(sessions.map((s) => s.cohort!));
-  const cohortIds = await getCohortIdsFromCohortName([...cohorts]);
-  headCenter.set({ cohorts: [...cohorts], cohortIds: cohortIds });
-  await headCenter.save({ fromUser: user });
-};
-
-export const getTransporter = async () => {
-  let toReferent = await ReferentModel.find({
-    role: ROLES.TRANSPORTER,
-  });
-  return toReferent;
 };
 
 // TODO: move to snu-lib

@@ -7,18 +7,20 @@ import TagsEditor from "../../../../components/TagEditor";
 import Thread from "../Thread";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTicket } from "../../../../redux/ticketPreview/actions";
-import { getStatusColor, roleInitial, sourceToIcon, translateState } from "../../../../utils";
+import { getStatusColor, roleInitial, sanitizeHttpsUrl, sourceToIcon, translateState } from "../../../../utils";
 import { STATUS } from "../../../../constants";
 import { capture } from "../../../../sentry";
 import { serializeTicketUpdate } from "../../service";
+import { isTicketPreviewLoaded } from "../../../../utils/ticketPreviewCache";
 
 const TicketPreview = ({ isOpen, openInNewTab, toggleOpen, onClose, ticketId, user }) => {
   const dispatch = useDispatch();
   const [isHeaderOpen, setHeaderOpen] = useState(true);
   const [isStatusPickerOpen, setIsStatusPickerOpen] = useState(false);
-  const { ticket, tags, signature, messages } = useSelector((state) => {
+  const ticketPreview = useSelector((state) => {
     return state.TicketPreview.tickets.find(({ ticket }) => ticket._id === ticketId);
   });
+  const { ticket, tags, signature, messages } = ticketPreview;
 
   useEffect(() => {
     getData();
@@ -47,7 +49,7 @@ const TicketPreview = ({ isOpen, openInNewTab, toggleOpen, onClose, ticketId, us
         const response = await API.get({ path: `/shortcut`, query: { signatureDest: data.ticket.contactGroup } });
         dispatch(updateTicket(ticketId, { ticket: data.ticket, tags: data.tags, signature: response.data?.content }));
       } else {
-        dispatch(updateTicket({ ticket: data.ticket, tags: data.tags }));
+        dispatch(updateTicket(ticketId, { ticket: data.ticket, tags: data.tags }));
       }
     } catch (e) {
       toast.error("Une error est survenue");
@@ -71,6 +73,20 @@ const TicketPreview = ({ isOpen, openInNewTab, toggleOpen, onClose, ticketId, us
     dispatch(updateTicket(ticketId, { messages }));
   };
 
+  // Aperçu réhydraté depuis le localStorage : seuls ses champs d'en-tête y sont gardés, le reste arrive avec getData().
+  if (!isTicketPreviewLoaded(ticketPreview)) {
+    return (
+      <div className="w-[260px] rounded-t-lg shadow-xl">
+        <div className="flex h-[44px] items-center justify-between rounded-t-lg bg-snu-purple-200 pl-3 text-sm font-semibold text-white">
+          <span className="flex-1 truncate">Chargement…</span>
+          <button onClick={onClose} className="h-full pl-1 pr-3">
+            <HiX color="#C7D2FE" size={20} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   const { contactFirstName, contactLastName, contactEmail, contactDepartment, contactRegion, subject, status, contactGroup, contactAttributes, canal } = ticket;
 
   const contactProfile = contactAttributes.filter((contactAttribute) => contactAttribute?.name === "lien vers profil");
@@ -85,7 +101,8 @@ const TicketPreview = ({ isOpen, openInNewTab, toggleOpen, onClose, ticketId, us
               className="cursor-pointer truncate text-sm font-semibold text-white underline"
               onClick={(e) => {
                 e.stopPropagation();
-                window.open(`${contactProfile[0].value}`, "_blank");
+                const profileUrl = sanitizeHttpsUrl(contactProfile[0].value);
+                if (profileUrl) window.open(profileUrl, "_blank", "noopener,noreferrer");
               }}
             >
               {contactFirstName && contactLastName ? `${contactFirstName} ${contactLastName.toUpperCase()}` : contactEmail}

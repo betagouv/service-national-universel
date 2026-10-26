@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useParams } from "react-router-dom";
+import { sanitizeLinkUrl } from "snu-lib";
 import { fetchProgram } from "../../engagement.repository";
 import Loader from "@/components/Loader";
 import { HiExternalLink } from "react-icons/hi";
@@ -16,7 +17,7 @@ export default function Program() {
   if (error) return <div>Erreur lors du chargement du programme.</div>;
 
   const imgSrc = `https://snu-bucket-prod.cellar-c2.services.clever-cloud.com/programmes-engagement/${data.imageString}`;
-  const url = data.urlPhaseEngagement || data.url;
+  const url = sanitizeLinkUrl(data.urlPhaseEngagement || data.url) ?? undefined;
   return (
     <Container title={data.name} subtitle="Trouver un engagement" imgSrc={imgSrc}>
       <div className="max-w-4xl mx-auto px-[1rem] md:px-[2.5rem]">

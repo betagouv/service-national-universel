@@ -2,9 +2,9 @@ import passport from "passport";
 import express, { Response } from "express";
 import { capture } from "../../sentry";
 import esClient from "../../es";
-import { ERRORS } from "../../utils";
+import { ERRORS, isYoung } from "../../utils";
 import { allRecords } from "../../es/utils";
-import { joiElasticSearch, buildNdJson, buildRequestBody, buildMissionContext } from "./utils";
+import { joiElasticSearch, buildNdJson, buildRequestBody, buildMissionContext, YOUNG_MISSION_SEARCH_MAX_PAGE, YOUNG_MISSION_SEARCH_MAX_SIZE } from "./utils";
 import { serializeMissions } from "../../utils/es-serializer";
 import Joi from "joi";
 import { UserRequest } from "../request";
@@ -16,6 +16,10 @@ interface ExportFields {
   tutorId?: boolean;
   structureId?: boolean;
 }
+
+// Champs réellement utilisés par les exports admin : on ne renvoie jamais le document ES brut du tuteur / de la structure.
+const TUTOR_EXPORT_FIELDS = ["firstName", "lastName", "email", "mobile", "phone"];
+const STRUCTURE_EXPORT_FIELDS = ["name", "legalStatus", "types", "sousType", "description", "address", "zip", "city", "department", "region"];
 
 interface CustomQuery {
   (query: any, value: any): any;
@@ -40,6 +44,12 @@ router.post(
   async (req: UserRequest, res: Response) => {
     try {
       const { user, body } = req;
+
+      // L'export est une fonctionnalité d'administration : un volontaire passe par /elasticsearch/mission/young/search.
+      if (req.params.action === "export" && isYoung(user)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       // Configuration
       const searchFields = ["name", "structureName", "city", "zip"] as const;
       const filterFields = [
@@ -220,7 +230,7 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
     });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { missionContextFilters, missionContextError } = await buildMissionContext(user);
+    const { missionContextFilters, missionContextError } = await buildMissionContext(user, { referentNationalScope: true });
     if (missionContextError) {
       return res.status(missionContextError.status).send(missionContextError.body);
     }
@@ -298,16 +308,18 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
         toDate: Joi.date(),
         hebergement: Joi.boolean(),
       }),
+      // `size` et `page` n'étaient pas bornés : un jeune pouvait demander 10 000 missions
+      // par appel (L13). On plafonne sans rejeter, et `from + size` reste sous la fenêtre
+      // de résultats d'Elasticsearch.
       page: Joi.number()
         .integer()
         .default(0)
-        .custom((value, helpers) => {
-          if (value < 0) {
-            return 0;
-          }
-          return value;
-        }),
-      size: Joi.number().integer().min(0).default(20),
+        .custom((value) => Math.min(Math.max(value, 0), YOUNG_MISSION_SEARCH_MAX_PAGE)),
+      size: Joi.number()
+        .integer()
+        .min(0)
+        .default(20)
+        .custom((value) => Math.min(value, YOUNG_MISSION_SEARCH_MAX_SIZE)),
       sort: Joi.string().allow("geo", "recent", "short", "long").default("geo"),
     });
     const { error, value } = schema.validate(req.body, { stripUnknown: true });
@@ -329,7 +341,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
           ],
         },
       },
-      from: page * 20,
+      from: page * size,
       size,
       sort: [],
     };
@@ -470,14 +482,14 @@ const fillMissions = async (missions: MissionType[], exportFields: ExportFields 
   if (needsTutor) {
     const tutorIds = [...new Set(missions.map((item) => item.tutorId).filter((e) => e))];
     if (tutorIds.length > 0) {
-      const tutors = await allRecords("referent", { bool: { must: [{ ids: { values: tutorIds } }] } });
+      const tutors = await allRecords("referent", { bool: { must: [{ ids: { values: tutorIds } }] } }, esClient, TUTOR_EXPORT_FIELDS);
       missions = missions.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
     }
   }
   if (needsStructure) {
     const structureIds = [...new Set(missions.map((item) => item.structureId).filter((e) => e))];
     if (structureIds.length > 0) {
-      const structures = await allRecords("structure", { bool: { must: [{ ids: { values: structureIds } }] } });
+      const structures = await allRecords("structure", { bool: { must: [{ ids: { values: structureIds } }] } }, esClient, STRUCTURE_EXPORT_FIELDS);
       missions = missions.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
     }
   }

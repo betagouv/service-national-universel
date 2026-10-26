@@ -8,7 +8,6 @@ import Modal from "@/components/ui/modals/Modal";
 import Input from "@/components/forms/inputs/Input";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { setYoung } from "@/redux/auth/actions";
-import plausibleEvent from "@/services/plausible";
 
 interface ActivationCodeModalContentProps {
   onSuccess: () => void;
@@ -55,7 +54,6 @@ const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail, openDidNotR
       setError("");
       setEmailValidationToken("");
       setLoading(false);
-      plausibleEvent("Successful email update");
       onSuccess();
     } catch (e) {
       capture(e);

@@ -1,0 +1,348 @@
+/**
+ * Lot H2 de l'audit sécurité du 21/09/2026 : statuts et drapeaux que le volontaire fixait lui-même
+ * (M41, M44, M45, M49, L24) et actions de masse phase 1 sans rattachement de la session (M50).
+ * Les routes phase 1 (M49, M50) ont été supprimées le 2026-09-24 : voir phase1-ecritures-supprimees.test.ts.
+ */
+import request from "supertest";
+import { addDays, addYears } from "date-fns";
+import { department2region, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE3 } from "snu-lib";
+
+import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
+import { dbConnect, dbClose } from "./helpers/db";
+import getNewYoungFixture from "./fixtures/young";
+import { createYoungHelper, getYoungByIdHelper } from "./helpers/young";
+import { createCohortHelper } from "./helpers/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
+
+jest.mock("../brevo", () => ({
+  ...jest.requireActual("../brevo"),
+  sendEmail: () => Promise.resolve(),
+  sendTemplate: jest.fn(() => Promise.resolve()),
+  sync: () => Promise.resolve(),
+  unsync: () => Promise.resolve(),
+}));
+
+jest.mock("../geo", () => ({
+  ...jest.requireActual("../geo"),
+  getQPV: () => Promise.resolve(undefined),
+  getDensity: () => Promise.resolve(undefined),
+}));
+
+jest.mock("../utils", () => ({
+  ...jest.requireActual("../utils"),
+  notifDepartmentChange: () => Promise.resolve(),
+}));
+
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});
+afterAll(dbClose);
+afterEach(resetAppAuth);
+
+describe("PUT /young/account/address (M41)", () => {
+  const newAddress = (department: string) => ({
+    addressVerified: "true",
+    country: "France",
+    city: "Lyon",
+    zip: "69001",
+    address: "1 rue de la République",
+    department,
+    // La route exige une région cohérente avec le département (PM20).
+    region: department2region[department],
+  });
+
+  async function createEligibleCohort(department: string) {
+    return createCohortHelper(
+      getNewCohortFixture({
+        inscriptionStartDate: addDays(new Date(), -10),
+        inscriptionEndDate: addDays(new Date(), 10),
+        eligibility: {
+          zones: [department],
+          schoolLevels: ["2ndeGT"],
+          bornAfter: addYears(new Date(), -30),
+          bornBefore: addYears(new Date(), 1),
+        },
+      }),
+    );
+  }
+
+  it("ne promeut pas en VALIDATED un jeune en liste complémentaire qui l'envoie avec sa nouvelle adresse", async () => {
+    const cohort = await createEligibleCohort("Rhône");
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        department: "Ain",
+        source: "VOLONTAIRE",
+        grade: "2ndeGT",
+        status: YOUNG_STATUS.WAITING_LIST,
+        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+        cohort: cohort.name,
+        cohortId: cohort._id.toString(),
+      }),
+    );
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put("/young/account/address")
+      .send({ ...newAddress("Rhône"), status: YOUNG_STATUS.VALIDATED, cohort: "une autre cohorte" });
+
+    expect(res.status).toBe(200);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.department).toBe("Rhône");
+    expect(updated?.status).toBe(YOUNG_STATUS.WAITING_LIST);
+    expect(updated?.cohort).toBe(cohort.name);
+  });
+
+  // GOO-65 : le changement d'adresse ne recalcule plus le statut à partir de l'éligibilité au séjour ni des
+  // objectifs d'inscription, et n'est plus bloqué par l'affectation.
+  it("ne recalcule plus le statut quand aucun séjour n'est ouvert à la nouvelle adresse", async () => {
+    const cohort = await createEligibleCohort("Ain");
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        department: "Ain",
+        source: "VOLONTAIRE",
+        grade: "2ndeGT",
+        status: YOUNG_STATUS.VALIDATED,
+        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+        cohort: cohort.name,
+        cohortId: cohort._id.toString(),
+      }),
+    );
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put("/young/account/address")
+      .send({ ...newAddress("Nord"), status: YOUNG_STATUS.NOT_ELIGIBLE });
+
+    expect(res.status).toBe(200);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.department).toBe("Nord");
+    expect(updated?.status).toBe(YOUNG_STATUS.VALIDATED);
+  });
+
+  it("accepte le changement d'adresse d'un jeune affecté sans toucher à son affectation", async () => {
+    const cohort = await createEligibleCohort("Ain");
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        department: "Ain",
+        status: YOUNG_STATUS.VALIDATED,
+        statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+        cohort: cohort.name,
+        cohortId: cohort._id.toString(),
+      }),
+    );
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put("/young/account/address")
+      .send(newAddress("Rhône"));
+
+    expect(res.status).toBe(200);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.department).toBe("Rhône");
+    expect(updated?.statusPhase1).toBe(YOUNG_STATUS_PHASE1.AFFECTED);
+  });
+
+  it("ignore le statut envoyé quand le département ne change pas", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ department: "Ain", status: YOUNG_STATUS.WAITING_LIST, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put("/young/account/address")
+      .send({ ...newAddress("Ain"), status: YOUNG_STATUS.VALIDATED });
+
+    expect(res.status).toBe(200);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.status).toBe(YOUNG_STATUS.WAITING_LIST);
+  });
+});
+
+describe("PUT /young/account/address (PM20)", () => {
+  const adresse = (fields: Record<string, any>) => ({
+    addressVerified: "true",
+    country: "France",
+    city: "Lille",
+    zip: "59000",
+    address: "1 place du Général de Gaulle",
+    department: "Nord",
+    region: "Hauts-de-France",
+    ...fields,
+  });
+
+  it("refuse un département hors de la liste officielle", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ department: "Ain", region: "Auvergne-Rhône-Alpes" }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put("/young/account/address")
+      .send(adresse({ department: 'Nord <a href="https://snu-gouv.example.org">reconnectez-vous</a>' }));
+
+    expect(res.status).toBe(400);
+    expect((await getYoungByIdHelper(young._id))?.department).toBe("Ain");
+  });
+
+  it("refuse une région qui ne correspond pas au département", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ department: "Ain", region: "Auvergne-Rhône-Alpes" }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put("/young/account/address")
+      .send(adresse({ region: "Bretagne" }));
+
+    expect(res.status).toBe(400);
+  });
+
+  it("plafonne les changements d'adresse d'un même volontaire", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ department: "Ain", region: "Auvergne-Rhône-Alpes" }));
+    const app = await getAppHelperWithAcl(young);
+
+    const statuts: number[] = [];
+    for (let i = 0; i < 11; i++) {
+      const departement = i % 2 ? "Ain" : "Nord";
+      statuts.push(
+        (
+          await request(app)
+            .put("/young/account/address")
+            .send(adresse({ department: departement, region: department2region[departement] }))
+        ).status,
+      );
+    }
+
+    expect(statuts.slice(0, 10).every((statut) => statut === 200)).toBe(true);
+    expect(statuts[10]).toBe(429);
+  });
+});
+describe("validation de la phase 3 par le tuteur (M44)", () => {
+  it("GET /young/validate_phase3 ne renvoie au porteur du lien que la vue tuteur", async () => {
+    const token = `token-${Date.now()}`;
+    const young = await createYoungHelper(getNewYoungFixture({ phase3Token: token, phase3StructureName: "Association", statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION }));
+
+    const res = await request(await getAppHelperWithAcl()).get(`/young/validate_phase3/${young._id}/${token}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.firstName).toBe(young.firstName);
+    expect(res.body.data.phase3StructureName).toBe("Association");
+    for (const field of ["email", "phone", "address", "parent1Email", "parent1Phone", "handicap", "phase3Token", "imageRightFiles", "birthdateAt"]) {
+      expect(res.body.data).not.toHaveProperty(field);
+    }
+  });
+
+  it("PUT /young/validate_phase3 n'écrit que le statut et la note du tuteur", async () => {
+    const token = `token-${Date.now()}`;
+    const young = await createYoungHelper(getNewYoungFixture({ phase3Token: token, status: YOUNG_STATUS.VALIDATED, statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION }));
+
+    const res = await request(await getAppHelperWithAcl())
+      .put(`/young/validate_phase3/${young._id}/${token}`)
+      .send({ phase3TutorNote: "RAS", phase3MissionDescription: "réécrite", status: YOUNG_STATUS.WITHDRAWN });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data).not.toHaveProperty("email");
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.statusPhase3).toBe(YOUNG_STATUS_PHASE3.VALIDATED);
+    expect(updated?.phase3TutorNote).toBe("RAS");
+    expect(updated?.phase3MissionDescription).toBe(young.phase3MissionDescription);
+    expect(updated?.status).toBe(YOUNG_STATUS.VALIDATED);
+  });
+
+  it("efface le jeton à la validation : le lien du tuteur ne sert qu'une fois", async () => {
+    const token = `token-${Date.now()}`;
+    const young = await createYoungHelper(getNewYoungFixture({ phase3Token: token, statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION }));
+
+    const validation = await request(await getAppHelperWithAcl())
+      .put(`/young/validate_phase3/${young._id}/${token}`)
+      .send({ phase3TutorNote: "RAS" });
+    expect(validation.status).toBe(200);
+    expect((await getYoungByIdHelper(young._id))?.phase3Token).toBe("");
+
+    const relecture = await request(await getAppHelperWithAcl()).get(`/young/validate_phase3/${young._id}/${token}`);
+    expect(relecture.status).toBe(404);
+
+    const revalidation = await request(await getAppHelperWithAcl())
+      .put(`/young/validate_phase3/${young._id}/${token}`)
+      .send({ phase3TutorNote: "réécrite" });
+    expect(revalidation.status).toBe(404);
+    expect((await getYoungByIdHelper(young._id))?.phase3TutorNote).toBe("RAS");
+  });
+});
+
+describe("PUT /young/:id/validate-mission-phase3 (M45)", () => {
+  it("ignore le statusPhase3 envoyé par le jeune et fixe WAITING_VALIDATION", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put(`/young/${young._id}/validate-mission-phase3`)
+      .send({ phase3StructureName: "Association", phase3TutorEmail: "tuteur@example.org", statusPhase3: YOUNG_STATUS_PHASE3.VALIDATED });
+
+    expect(res.status).toBe(200);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.statusPhase3).toBe(YOUNG_STATUS_PHASE3.WAITING_VALIDATION);
+    expect(updated?.phase3StructureName).toBe("Association");
+  });
+
+  it("n'écrit aucun champ hors du formulaire phase 3", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.WAITING_LIST, statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put(`/young/${young._id}/validate-mission-phase3`)
+      .send({ phase3TutorEmail: "tuteur@example.org", status: YOUNG_STATUS.VALIDATED, imageRight: "true" });
+
+    expect(res.status).toBe(200);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.status).toBe(YOUNG_STATUS.WAITING_LIST);
+    expect(updated?.imageRight).toBe(young.imageRight);
+  });
+
+  it("refuse un email de tuteur invalide", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put(`/young/${young._id}/validate-mission-phase3`)
+      .send({ phase3TutorEmail: "pas-un-email" });
+
+    expect(res.status).toBe(400);
+  });
+
+  it("refuse de réécrire une mission déjà validée", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.VALIDATED, phase3StructureName: "Attestée" }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put(`/young/${young._id}/validate-mission-phase3`)
+      .send({ phase3StructureName: "Autre", phase3TutorEmail: "tuteur@example.org" });
+
+    expect(res.status).toBe(403);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.phase3StructureName).toBe("Attestée");
+  });
+
+  it("refuse un phase3TutorEmail identique à l'email du volontaire (PM19)", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put(`/young/${young._id}/validate-mission-phase3`)
+      .send({ phase3TutorEmail: young.email.toUpperCase() });
+
+    expect(res.status).toBe(403);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.statusPhase3).toBe(YOUNG_STATUS_PHASE3.WAITING_REALISATION);
+    expect(updated?.phase3TutorEmail).toBeFalsy();
+  });
+
+  it.each(["parent1Email", "parent2Email"] as const)("refuse un phase3TutorEmail identique au %s (PM19)", async (parentField) => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION, [parentField]: "parent@example.org" } as any));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put(`/young/${young._id}/validate-mission-phase3`)
+      .send({ phase3TutorEmail: "parent@example.org" });
+
+    expect(res.status).toBe(403);
+    const updated = await getYoungByIdHelper(young._id);
+    expect(updated?.statusPhase3).toBe(YOUNG_STATUS_PHASE3.WAITING_REALISATION);
+  });
+
+  it("limite le nombre de soumissions de mission phase 3 par le volontaire (429 au-delà de 10 par heure, PM19)", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: YOUNG_STATUS_PHASE3.WAITING_REALISATION }));
+    const app = await getAppHelperWithAcl(young);
+    const url = `/young/${young._id}/validate-mission-phase3`;
+
+    for (let i = 0; i < 10; i++) {
+      const res = await request(app).put(url).send({ phase3TutorEmail: "tuteur@example.org" });
+      expect(res.status).toBe(200);
+    }
+
+    const res = await request(app).put(url).send({ phase3TutorEmail: "tuteur@example.org" });
+    expect(res.status).toBe(429);
+  });
+});

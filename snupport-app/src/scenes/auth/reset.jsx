@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { Redirect } from "react-router-dom";
 
 import API from "../../services/api";
+import { translateAttributesSNU } from "../../utils";
 
 export default ({ location }) => {
   const [redirect, setRedirect] = useState(false);
@@ -34,7 +35,8 @@ export default ({ location }) => {
                 setRedirect(true);
               } catch (e) {
                 console.log("e", e);
-                toast.error(e.message || e.error || e.code);
+                if (e.code === "PASSWORD_NOT_VALIDATED") toast.error(translateAttributesSNU(e.code));
+                else toast.error(e.message || e.error || e.code);
               }
               actions.setSubmitting(false);
             }}
@@ -46,6 +48,7 @@ export default ({ location }) => {
                     <div>
                       <label className="input-label">Mot de passe</label>
                       <Field name="password" type="password" value={values.password} onChange={handleChange} className="input-field" placeholder="Entrez le nouveau mot de passe" />
+                      <p className="mt-1 text-xs text-gray-500">Au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.</p>
                     </div>
                     <div>
                       <label className="input-label">Répétez le mot de passe</label>

@@ -1,4 +1,8 @@
 import { ConfigService } from "@nestjs/config";
+import { PlanMarketingWebhookService } from "../service/PlanMarketingWebhook.service";
+
+// L'URL de rappel remise à Brevo porte le jeton qui authentifie le webhook (H77).
+const URL_WEBHOOK_SIGNEE = "https://api.test/v2/plan-marketing/import/webhook?token=jeton-signe";
 import { Test } from "@nestjs/testing";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { TaskName, TaskStatus } from "snu-lib";
@@ -39,6 +43,10 @@ describe("ImporterEtCreerListeDiffusion", () => {
                 { provide: TaskGateway, useValue: mocks.taskGateway },
                 { provide: FileGateway, useValue: mocks.fileGateway },
                 { provide: ConfigService, useValue: mocks.configService },
+                {
+                    provide: PlanMarketingWebhookService,
+                    useValue: { construireUrlWebhook: () => URL_WEBHOOK_SIGNEE },
+                },
             ],
         }).compile();
 
@@ -75,7 +83,7 @@ describe("ImporterEtCreerListeDiffusion", () => {
             nomListe,
             fileContent,
             "folder123",
-            "http://api.test/plan-marketing/import/webhook",
+            URL_WEBHOOK_SIGNEE,
         );
         expect(taskGateway.create).toHaveBeenCalledWith({
             name: TaskName.PLAN_MARKETING_IMPORT_CONTACTS_ET_CREER_LISTE,

@@ -15,7 +15,7 @@ export function setYoung(young?: YoungType) {
     dispatch({ type: authActions.SETYOUNG, young });
 
     // Side effects
-    if (young) Sentry.setUser({ id: young._id, email: young.email, username: `${young.firstName} ${young.lastName}` });
+    if (young) Sentry.setUser({ id: young._id });
     else Sentry.setUser(null);
 
     const newCohortId = young?.cohortId;

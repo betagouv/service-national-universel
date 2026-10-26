@@ -2,19 +2,28 @@ import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
 
-import { SENDINBLUE_TEMPLATES, ERRORS, canSendTemplateToYoung } from "snu-lib";
+import { SENDINBLUE_TEMPLATES, ERRORS } from "snu-lib";
 
 import { capture } from "../../sentry";
 import { UserRequest } from "../../controllers/request";
 
 import { isReferent, isYoung } from "../../utils";
 import { YoungModel } from "../../models";
+import { canEditYoungInScope } from "../youngScope";
+import { isTrustedEmailLink, sanitizeEmailText } from "../../email/emailInput";
+import { userRateLimiter } from "../../middlewares/rateLimit";
 
 import { sendEmailToYoung } from "./youngEmailService";
 
 const router = express.Router();
 
-router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+// GOO-198 : un volontaire n'envoie plus jamais de gabarit depuis cette route (refus systématique
+// ci-dessous). Le limiteur reste en défense en profondeur et compte aussi les tentatives refusées.
+// Les référents envoient depuis l'admin : ils ne sont pas limités ici.
+const youngEmailLimiter = userRateLimiter({ prefix: "young-email-template", windowMs: 60 * 60 * 1000, limit: 10 });
+const limitYoung = (req: UserRequest, res: Response, next) => (isYoung(req.user) ? youngEmailLimiter(req, res, next) : next());
+
+router.post("/:id/email/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), limitYoung, async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -42,21 +51,37 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    // GOO-198 : la phase 1 n'existe plus, donc plus de fiche sanitaire à transmettre. Un volontaire
+    // ne peut plus déclencher aucun gabarit sur cette route (l'ancienne exception sur young.LINK tombe).
+    if (isYoung(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
+    // Le mail part de l'expéditeur officiel du SNU : seuls les liens du service y sont admis,
+    // faute de quoi la route est un hameçonnage clé en main (constat M74).
+    if (!isTrustedEmailLink(link) || !isTrustedEmailLink(cta)) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
     // The young must exist.
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // If actor is a young it must be the same as the young.
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
     // If actor is a referent it must be allowed to send template.
-    if (isReferent(req.user) && !canSendTemplateToYoung(req.user, young)) {
+    if (isReferent(req.user) && !(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    await sendEmailToYoung(template, young, { message, missionName, structureName, cta, type_document, object, link });
+    // Les textes libres sont recopiés dans le corps du mail : on en retire tout balisage.
+    await sendEmailToYoung(template, young, {
+      message: sanitizeEmailText(message),
+      missionName: sanitizeEmailText(missionName),
+      structureName: sanitizeEmailText(structureName),
+      cta,
+      type_document: sanitizeEmailText(type_document),
+      object: sanitizeEmailText(object),
+      link,
+    });
 
     return res.status(200).send({ ok: true });
   } catch (error) {

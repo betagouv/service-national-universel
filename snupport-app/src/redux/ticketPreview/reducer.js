@@ -57,6 +57,8 @@ export default function reducer(state = initState, action) {
         expandedTicketIds: state.expandedTicketIds.filter((id) => !ticketIdsToClose.includes(id)),
       };
     }
+    case ticketPreviewActions.RESET:
+      return initState;
     default:
       return state;
   }

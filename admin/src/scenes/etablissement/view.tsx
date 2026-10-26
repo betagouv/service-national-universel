@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { useHistory, useParams } from "react-router-dom";
-import { HiPlus } from "react-icons/hi";
+import { useParams } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import { Page, Header, Button } from "@snu/ds/admin";
-import { ROLES, translate, isCoordinateurEtablissement, isChefEtablissement, isReferentOrAdmin, ReferentDto, EtablissementType } from "snu-lib";
+import { Page, Header } from "@snu/ds/admin";
+import { ROLES, translate, EtablissementType, ReferentDto } from "snu-lib";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 import Loader from "@/components/Loader";
@@ -16,7 +15,6 @@ import GeneralInfos from "./components/GeneralInfos";
 import FirstLoginAdminChef from "./components/modale/FirstLoginAdminChef";
 import FirstLoginAdminCoordinator from "./components/modale/FirstLoginAdminCoordinator";
 import FirstLoginRefClasse from "./components/modale/FirstLoginRefClasse";
-import ButtonAddCoordinator from "./components/ButtonAddCoordinator";
 
 export default function View() {
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -24,8 +22,6 @@ export default function View() {
   const [classeId, setClasseId] = useState("");
   const [etablissement, setEtablissement] = useState<EtablissementType | null>(null);
   const [contacts, setContacts] = useState<ReferentDto[]>([]);
-
-  const history = useHistory();
 
   const loadEtablissement = async () => {
     try {
@@ -64,14 +60,11 @@ export default function View() {
 
   return (
     <Page>
-      <Header
-        title={etablissement.name}
-        breadcrumb={breadcrumb}
-        actions={[]}
-      />
+      <Header title={etablissement.name} breadcrumb={breadcrumb} actions={[]} />
 
+      <Contact contacts={contacts} user={user} />
 
-      <GeneralInfos etablissement={etablissement} onUpdateEtab={setEtablissement} user={user} />
+      <GeneralInfos etablissement={etablissement} user={user} />
 
       {/* First login ADMINISTRATEUR_CLE referent-etablissement */}
       <FirstLoginAdminChef user={user} etablissement={etablissement} />

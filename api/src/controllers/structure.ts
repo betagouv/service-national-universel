@@ -6,11 +6,11 @@ import { logger } from "../logger";
 import { StructureModel, MissionModel, ReferentModel, ApplicationModel } from "../models";
 import { ERRORS } from "../utils";
 import {
-  ROLES,
   canDeleteStructure,
   canViewStructureChildren,
   isSupervisor,
   isAdmin,
+  isResponsibleOrSupervisor,
   SENDINBLUE_TEMPLATES,
   StructureType,
   UserDto,
@@ -18,7 +18,7 @@ import {
   PERMISSION_ACTIONS,
   isReadAuthorized,
   isWriteAuthorized,
-  isResponsible,
+  getPolicyMongoFilter,
 } from "snu-lib";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
@@ -30,11 +30,37 @@ import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddl
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { toErrorCode } from "../utils/errorCode";
 
 const setAndSave = async (data: any, keys: Record<string, any>, fromUser?: UserDto): Promise<void> => {
   data.set({ ...keys });
   await data.save({ fromUser });
 };
+
+// Listes d'identification (affiliation, antennes) : aucune coordonnée du représentant, ni adresse, ni SIRET.
+const STRUCTURE_LIGHT_PROJECTION = "_id name networkName isNetwork region department";
+
+/** Normalise le drapeau « tête de réseau » (absent en base sur d'anciennes structures) pour comparer deux états. */
+const isNetworkFlag = (value?: string | null): "true" | "false" => (value === "true" ? "true" : "false");
+
+/**
+ * Le drapeau « préparation militaire » ouvre aux responsables les pièces PM de leurs candidats
+ * (isYoungInMilitaryPreparationStructureScope) : un responsable ou un superviseur ne le pose ni ne le retire.
+ * Renvoie false (refus) si la valeur reçue change le drapeau, sinon retire le champ du corps.
+ * `currentFlag` vaut la valeur en base ; absent à la création (une structure naît « non PM »).
+ */
+function applyMilitaryPreparationRule(user: UserDto, checkedStructure: Record<string, any>, currentFlag?: string | null): boolean {
+  if (!isResponsibleOrSupervisor(user)) return true;
+  if (checkedStructure.isMilitaryPreparation !== undefined && (checkedStructure.isMilitaryPreparation === "true") !== (currentFlag === "true")) return false;
+  delete checkedStructure.isMilitaryPreparation;
+  return true;
+}
+
+/** Applique la policy STRUCTURE (lecture ou écriture) de l'utilisateur à une structure chargée. */
+function isStructureAuthorized(user: UserDto, structure: { toJSON: () => any }, action: typeof PERMISSION_ACTIONS.READ | typeof PERMISSION_ACTIONS.WRITE): boolean {
+  const check = action === PERMISSION_ACTIONS.WRITE ? isWriteAuthorized : isReadAuthorized;
+  return check({ user, resource: PERMISSION_RESOURCES.STRUCTURE, context: { structure: structure.toJSON() } });
+}
 
 const populateWithMissions = async (structures: StructureType[]): Promise<StructureType[]> => {
   const structureIds = [...new Set(structures.map((item) => item._id))].filter(Boolean);
@@ -90,19 +116,6 @@ async function updateMissionStructureName(structure: StructureType, fromUser?: U
   }
 }
 
-async function updateResponsibleAndSupervisorRole(structure: StructureType, fromUser?: UserDto): Promise<void> {
-  try {
-    const referents = await ReferentModel.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
-    if (!referents?.length) {
-      logger.debug(`no referents edited for structure ${structure._id}`);
-      return;
-    }
-    for (const referent of referents) await setAndSave(referent, { role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE }, fromUser);
-  } catch (error) {
-    capture(error);
-  }
-}
-
 const router = express.Router();
 
 router.post(
@@ -118,13 +131,16 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
 
+      if (!applyMilitaryPreparationRule(req.user, checkedStructure)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       if (isSupervisor(req.user)) {
         checkedStructure.networkId = req.user.structureId;
       }
 
       const data = await StructureModel.create(checkedStructure);
       await updateNetworkName(data, req.user);
-      await updateResponsibleAndSupervisorRole(data, req.user);
       sendTemplate(SENDINBLUE_TEMPLATES.referent.STRUCTURE_REGISTERED, {
         emailTo: [{ name: `${req.user.firstName} ${req.user.lastName}`, email: `${req.user.email}` }],
       });
@@ -147,33 +163,40 @@ router.put(
     try {
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (
-        !isWriteAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.WRITE)) {
         return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
       if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-      // un responsable ne peux pas passer en tête de réseau la structure
-      if (isResponsible(req.user) && checkedStructure && structure.isNetwork !== "true" && checkedStructure.isNetwork === "true") {
+      // Le rattachement réseau (tête de réseau, structure mère) ouvre un périmètre d'accès : seul un ADMIN peut le modifier.
+      if (!isAdmin(req.user)) {
+        if (checkedStructure.isNetwork !== undefined && isNetworkFlag(checkedStructure.isNetwork) !== isNetworkFlag(structure.isNetwork)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
+        delete checkedStructure.isNetwork;
+        delete checkedStructure.networkId;
+      }
+
+      // Seuls l'administrateur et les référents du territoire posent ou retirent le drapeau PM (GOO-59, PH13), à la création comme à la modification.
+      if (!applyMilitaryPreparationRule(req.user, checkedStructure, structure.isMilitaryPreparation)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
-      // Only admin user can change the networkId of a structure
-      if (!isAdmin(req.user)) {
-        delete checkedStructure.networkId;
+
+      // La géographie de la structure fixe le périmètre des référents qui l'instruisent (GOO-5) : un
+      // responsable ne la déplace pas hors de leur territoire, un référent la garde dans le sien.
+      const geographyChanged = (["department", "region"] as const).some((key) => key in checkedStructure && (checkedStructure[key] || "") !== (structure[key] || ""));
+      if (!isAdmin(req.user) && geographyChanged) {
+        if (isResponsibleOrSupervisor(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        const moved = new StructureModel({ ...structure.toJSON(), ...checkedStructure });
+        if (!isStructureAuthorized(req.user, moved, PERMISSION_ACTIONS.WRITE)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       structure.set(checkedStructure);
       await structure.save({ fromUser: req.user });
       await updateNetworkName(structure, req.user);
       await updateMissionStructureName(structure, req.user);
-      await updateResponsibleAndSupervisorRole(structure, req.user);
       return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
     } catch (error) {
       capture(error);
@@ -188,9 +211,10 @@ router.get(
   [permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }])],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
-      const data = await StructureModel.find({ isNetwork: "true" }).sort("name");
       if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
+      // Liste d'affiliation : seuls les champs d'identification sont nécessaires (pas de coordonnées du représentant).
+      const data = await StructureModel.find({ isNetwork: "true" }).select(STRUCTURE_LIGHT_PROJECTION).sort("name").lean();
+      return res.status(200).send({ ok: true, data });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -214,8 +238,18 @@ router.get(
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const data = await StructureModel.find({ networkId: structure._id });
-      return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
+      // Le réseau parent doit être dans le périmètre de lecture de l'utilisateur.
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.READ)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      // Les antennes renvoyées sont elles aussi limitées au périmètre de lecture (un référent départemental
+      // autorisé sur une tête de réseau de son département ne voit pas les antennes des autres départements).
+      const scope = getPolicyMongoFilter({ user: req.user, resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ });
+      if (scope === undefined) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const filter = scope ? { $and: [{ networkId: structure._id }, scope] } : { networkId: structure._id };
+      const data = await StructureModel.find(filter).select(STRUCTURE_LIGHT_PROJECTION).lean();
+      return res.status(200).send({ ok: true, data });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -234,9 +268,15 @@ router.get(
   ],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
-      const missions = await MissionModel.find({ structureId: req.validatedParams.id });
-      if (!missions) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const structure = await StructureModel.findById(req.validatedParams.id);
+      if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+      // La structure doit être dans le périmètre de lecture de l'utilisateur (policy STRUCTURE).
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.READ)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const missions = await MissionModel.find({ structureId: req.validatedParams.id });
       return res.status(200).send({ ok: true, data: missions.map(serializeMission) });
     } catch (error) {
       capture(error);
@@ -256,16 +296,30 @@ router.get(
   ],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
+      // Vérification dupliquée intentionnellement : reproduit en amont le contrôle fait par patches.get, afin de
+      // répondre 403 (et non 500) aux rôles sans droit d'historique, avant même de charger la structure.
+      // Comme sur GET /:id et PUT /:id, un rôle qui a ce droit obtient ensuite 404 (inconnue) ou 403 (hors périmètre).
+      if (
+        !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.USER_HISTORY, ignorePolicy: true }) &&
+        !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.PATCH, ignorePolicy: true })
+      ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const structurePatches = await patches.get(req, StructureModel);
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.READ)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const structurePatches = await patches.get(req, StructureModel, structure);
       if (!structurePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       return res.status(200).send({ ok: true, data: structurePatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );
@@ -336,7 +390,11 @@ router.get(
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
-      const data = await StructureModel.find({});
+      // Périmètre issu des policies de l'ACL : null = aucune restriction (admin), undefined = aucun accès exploitable.
+      const scope = getPolicyMongoFilter({ user: req.user, resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ });
+      if (scope === undefined) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const data = await StructureModel.find(scope ?? {});
       return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
     } catch (error) {
       capture(error);
@@ -406,13 +464,7 @@ router.post(
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      if (
-        !isWriteAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.WRITE)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
@@ -439,13 +491,7 @@ router.delete(
     try {
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (
-        !isWriteAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.WRITE)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 

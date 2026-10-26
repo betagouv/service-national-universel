@@ -10,20 +10,15 @@ import { Header, Page } from "@snu/ds/admin";
 
 import { useHistory, useParams } from "react-router-dom";
 
-import ModalRattacherCentre from "./components/ModalRattacherCentre";
-
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters } from "../../components/filters-system-v2";
 import { getCohortGroups } from "@/services/cohort.service";
 import { getDefaultCohort } from "@/utils/session";
 
 export default function List() {
-  const user = useSelector((state) => state.Auth.user);
   const cohorts = useSelector((state) => state.Cohorts);
 
   const history = useHistory();
   const { currentTab } = useParams();
-
-  const [modalVisible, setModalVisible] = useState(false);
 
   React.useEffect(() => {
     const listTab = ["liste-centre"];
@@ -44,7 +39,6 @@ export default function List() {
           <div className="flex w-full flex-col pt-4">{currentTab === "liste-centre" && <ListCenter firstSession={firstSession} />}</div>
         </div>
       </div>
-      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
     </Page>
   );
 }

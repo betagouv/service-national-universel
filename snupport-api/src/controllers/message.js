@@ -9,16 +9,45 @@ const { matchVentilationRule } = require("../utils/ventilation");
 
 const { getFile, deleteFile, uploadAttachment, getHoursDifference, getSignedUrl, sendResponseTicket } = require("../utils");
 const { decrypt, encrypt } = require("../utils/crypto");
-const { getS3Path } = require("../utils/file");
+const { getS3Path, getAttachmentFileName } = require("../utils/file");
 const { agentGuard } = require("../middlewares/authenticationGuards");
+const { forbidReadOnlyRoles } = require("../middlewares/userRoleGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
+const { canAccessTicket } = require("../utils/ticketScope");
+const { inspectAttachment } = require("../utils/attachments");
+const { scanBuffer } = require("../utils/virusScanner");
+const { isKnownThreadParticipant, normalizeEmail } = require("../utils/ticketParticipants");
+const { sanitizeMessageHtml } = require("../utils/messageHtml");
+const { attachmentUpload, MAX_ATTACHMENTS_PER_MESSAGE } = require("../middlewares/attachmentUpload");
 
 router.use(agentGuard);
 
+// Destinataires en copie d'une réponse (M88) : l'historique et les pièces jointes déchiffrées du ticket
+// peuvent partir avec. On n'accepte que les participants du fil et les comptes du support (agents,
+// référents), jamais une adresse arbitraire.
+async function areAllowedCopyRecipients(ticket, recipients) {
+  const unknown = (recipients || []).map(normalizeEmail).filter((email) => email && !isKnownThreadParticipant(ticket, email));
+  if (!unknown.length) return true;
+  const distinct = [...new Set(unknown)];
+  const agents = await AgentModel.find({ email: { $in: distinct } }).select("email");
+  return agents.length === distinct.length;
+}
+
+// Un attachment n'a pas de ticketId direct : il faut d'abord retrouver le message qui le
+// référence (dans `files` ou `attachments`, alimentés par des flux différents) pour remonter
+// à son ticket et vérifier le périmètre.
+async function ticketForAttachmentPath(path) {
+  const message = await MessageModel.findOne({ $or: [{ "files.path": path }, { "attachments.path": path }] });
+  if (!message) return null;
+  return TicketModel.findById(message.ticketId);
+}
+
+// Le rôle DG est en lecture seule : il n'écrit ni ne supprime aucun message (FH11, GOO-13).
 router.post(
   "/",
+  forbidReadOnlyRoles,
   validateBody(
     Joi.object({
       message: Joi.string(),
@@ -34,6 +63,19 @@ router.post(
     const user = req.user;
     let ticket = await TicketModel.findById(ticketId);
     if (!ticket) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    if (!canAccessTicket(user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Avec messageHistory="all", la réponse emporte tout l'historique du ticket et ses pièces
+    // jointes déchiffrées : le destinataire doit appartenir au fil, pas être une adresse
+    // arbitraire passée en paramètre.
+    if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!(await areAllowedCopyRecipients(ticket, copyRecipient))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // messageHistory cite un message précis en plus du dernier, dans l'email envoyé à dest : sans ce
+    // contrôle, un agent pouvait faire citer le contenu d'un message d'un AUTRE ticket, hors de son
+    // périmètre (PH25).
+    if (messageHistory && messageHistory !== "all" && !(await MessageModel.findOne({ _id: messageHistory, ticketId: ticket._id })))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // Le HTML de l'éditeur est rendu chez le jeune et part dans l'email officiel du support (M88, M92).
+    const messageHtml = sanitizeMessageHtml(message);
 
     const messageCount = await MessageModel.find({ ticketId: ticket._id }).countDocuments();
     if (ticket.messageCount === 1) {
@@ -44,7 +86,7 @@ router.post(
     ticket.updatedAt = new Date();
     ticket.messageDraft = "";
     ticket.status = "OPEN";
-    ticket.textMessage.push(message);
+    ticket.textMessage.push(messageHtml);
     ticket.lastUpdateAgent = req.user._id;
     if (user.role === "AGENT") {
       ticket.agentId = user._id;
@@ -83,13 +125,13 @@ router.post(
       authorId: req.user._id,
       authorLastName: req.user.lastName,
       authorFirstName: req.user.firstName,
-      text: message,
+      text: messageHtml,
       slateContent,
       copyRecipient,
       fromEmail: "contact@mail-support.snu.gouv.fr",
       toEmail: dest,
     });
-    ticket.textMessage.push(message);
+    ticket.textMessage.push(messageHtml);
 
     await sendResponseTicket({ ticket, copyRecipient: dataMessage.copyRecipient, dest, messageHistory, lastMessageId: dataMessage._id, attachment: [] });
 
@@ -105,6 +147,9 @@ router.get(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
+    const ticket = await TicketModel.findById(req.cleanQuery.ticketId);
+    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await MessageModel.find(req.cleanQuery);
     return res.status(200).send({ ok: true, data });
   }
@@ -119,6 +164,9 @@ router.post(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
+    const ticket = await ticketForAttachmentPath(req.cleanBody.path);
+    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const file = await getFile(req.cleanBody.path);
     const buffer = decrypt(file.Body);
     return res.status(200).send({ ok: true, data: buffer });
@@ -134,18 +182,27 @@ router.post(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
+    const ticket = await ticketForAttachmentPath(req.cleanBody.path);
+    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const file = await getFile(req.cleanBody.path);
+    const data = decrypt(file.Body);
+    // Le Content-Type stocké peut venir d'un expéditeur de mail : le resservir tel quel
+    // laissait un SVG ou un HTML s'exécuter dans l'onglet de l'agent. On repart des magic
+    // numbers, et un contenu non identifiable devient un binaire opaque.
+    const { mime } = await inspectAttachment(data);
     // decrypt and upload the file to a temp private folder (deleted after 1 day)
     const tempPath = req.cleanBody.path.replace("message", "temp");
-    await uploadAttachment(tempPath, { mimetype: file.ContentType, data: decrypt(file.Body) });
-    // get a temp public url
-    const url = await getSignedUrl(tempPath);
+    await uploadAttachment(tempPath, { mimetype: mime ?? "application/octet-stream", data });
+    // get a temp public url — en pièce jointe, jamais rendue dans la page
+    const url = await getSignedUrl(tempPath, { download: true });
     return res.status(200).send({ ok: true, data: url });
   }
 );
 
 router.delete(
   "/s3file/:id",
+  forbidReadOnlyRoles,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -153,16 +210,32 @@ router.delete(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
-    await deleteFile(req.cleanBody.path);
     const message = await MessageModel.findById(req.cleanParams.id);
+    if (!message) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const ticket = await TicketModel.findById(message.ticketId);
+    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Le chemin supprimé doit être une pièce jointe de CE message : sinon un agent effaçait n'importe
+    // quel objet du bucket support, hors de son périmètre (M87).
+    if (!(message.files || []).some((file) => file.path === req.cleanBody.path)) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    await deleteFile(req.cleanBody.path);
     message.files = message.files.filter((file) => file.path !== req.cleanBody.path);
     await message.save();
     return res.status(200).send({ ok: true });
   }
 );
 
+const SEND_EMAIL_FILE_SCHEMA = Joi.object({
+  message: Joi.string().allow("").required(),
+  copyRecipient: Joi.array().items(SCHEMA_EMAIL).default([]),
+  dest: SCHEMA_EMAIL.optional(),
+  messageHistory: SCHEMA_ID.allow(null, "all").optional(),
+}).unknown();
+
 router.post(
   "/sendEmailFile/:id",
+  forbidReadOnlyRoles,
+  attachmentUpload,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -173,6 +246,7 @@ router.post(
     const id = req.cleanParams.id;
     let ticket = await TicketModel.findById(id);
     if (!ticket) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let parsedBody;
 
     try {
@@ -192,15 +266,36 @@ router.post(
       return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST, error: "Invalid request format" });
     }
 
-    const { message: messageHtml, copyRecipient, dest, messageHistory } = parsedBody;
-    const files = Object.keys(req.files || {}).map((e) => req.files[e]);
-    // If multiple file with same names are provided, file is an array. We just take the latest.
+    // Le corps arrive en JSON dans un champ multipart : il échappe à validateBody, on le valide ici.
+    const { error: bodyError, value: body } = SEND_EMAIL_FILE_SCHEMA.validate(parsedBody);
+    if (bodyError) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    const { copyRecipient, dest, messageHistory } = body;
+    // Même règle que POST /message : la réponse peut emporter tout l'historique et les pièces
+    // jointes déchiffrées du ticket.
+    if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    if (!(await areAllowedCopyRecipients(ticket, copyRecipient))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    // messageHistory scopé au ticket courant (PH25), voir POST / plus haut.
+    if (messageHistory && messageHistory !== "all" && !(await MessageModel.findOne({ _id: messageHistory, ticketId: ticket._id })))
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const messageHtml = sanitizeMessageHtml(body.message);
 
-    const mailFormatFiles = [];
-    for (let file of files) {
-      let base64content = file.data.toString("base64");
-      mailFormatFiles.push({ content: base64content, name: file.name });
+    // If multiple file with same names are provided, file is an array: every entry is kept and checked.
+    const files = Object.values(req.files || {}).flat();
+    if (files.length > MAX_ATTACHMENTS_PER_MESSAGE) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+
+    // Pièces jointes (L50) : le type est déduit des magic numbers, jamais du nom ni du mimetype envoyés
+    // par le client, et l'extension stockée vient du type détecté.
+    const inspectedFiles = [];
+    for (const file of files) {
+      const { mime, accepted } = await inspectAttachment(file.data);
+      if (!accepted) return res.status(400).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+      // PM49 : la pièce jointe part telle quelle vers un contact externe, scan antivirus avant envoi.
+      const { infected } = await scanBuffer(file.data, file.name);
+      if (infected) return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+      inspectedFiles.push({ name: getAttachmentFileName(file.name, mime), data: file.data, mime });
     }
+
+    const mailFormatFiles = inspectedFiles.map((file) => ({ content: file.data.toString("base64"), name: file.name }));
 
     const message = await MessageModel.create({
       ticketId: ticket._id,
@@ -211,11 +306,11 @@ router.post(
       copyRecipient,
     });
     await sendResponseTicket({ ticket, copyRecipient, dest, attachment: mailFormatFiles, messageHistory, lastMessageId: message._id });
-    for (let file of files) {
-      const { name, data, mimetype } = file;
-      const path = getS3Path(name);
+    for (const file of inspectedFiles) {
+      const { name, data, mime } = file;
+      const path = getS3Path(name, mime);
       const encryptedBuffer = encrypt(data);
-      const encryptedFile = { mimetype, encoding: "7bit", data: encryptedBuffer };
+      const encryptedFile = { mimetype: mime, encoding: "7bit", data: encryptedBuffer };
       const url = await uploadAttachment(path, encryptedFile);
       if (url) {
         message.files.push({ name: file.name, path, url });

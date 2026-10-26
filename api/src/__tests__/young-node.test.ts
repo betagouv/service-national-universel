@@ -42,7 +42,9 @@ describe("Young Note Controller", () => {
     });
 
     it("should return 400 if the request body is invalid", async () => {
-      const res = await request(getAppHelper()).post(`/young/note/${new ObjectId().toString()}`).send({
+      // L'appartenance est contrôlée avant la validation du corps : le volontaire doit exister.
+      const young = await createYoungHelper(getNewYoungFixture());
+      const res = await request(getAppHelper()).post(`/young/note/${young._id}`).send({
         note: "Test note",
         phase: "INVALID_PHASE",
       });

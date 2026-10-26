@@ -4,7 +4,6 @@ import { HiArrowLeft, HiOutlineSearch } from "react-icons/hi";
 import useAuth from "@/services/useAuth";
 import { Link, useHistory } from "react-router-dom";
 import CheckCircle from "../../assets/icons/CheckCircle";
-import plausibleEvent from "../../services/plausible";
 import usePermissions from "@/hooks/usePermissions";
 import DocumentsPM from "./components/DocumentsPM";
 import { RiInformationLine } from "react-icons/ri";
@@ -92,7 +91,6 @@ export default function HomeMobile() {
         {canViewMissions ? (
           <Link
             to='/mission?MILITARY_PREPARATION="true"'
-            onClick={() => plausibleEvent("Phase2/CTA - PM - TrouvezPM")}
             className="group mt-4 flex items-center gap-1 rounded-[10px] border-[1px] bg-blue-600 py-2.5 px-3 hover:border-blue-600 hover:bg-white">
             <HiOutlineSearch className="mr-2 text-[#ffffff] group-hover:text-blue-600" />
             <div className="flex-1 text-sm text-[#ffffff] group-hover:text-blue-600">Trouver une préparation militaire</div>

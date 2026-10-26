@@ -38,9 +38,6 @@ import { initDB } from "../mongo";
     case "check-coherence":
       await require("./checkCoherence").handler();
       break;
-    case "autoValidatePhase1":
-      await require("./autoValidatePhase1").handler();
-      break;
     case "missions-jva":
       await require("./missionsJVA/JeVeuxAiderDaily").handler();
       break;

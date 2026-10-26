@@ -7,6 +7,7 @@ import { DepartmentServiceModel, ReferentModel, CohortModel } from "../models";
 import { DepartmentServiceRoutes, MIME_TYPES } from "snu-lib";
 import { ERRORS, isYoung, isReferent } from "../utils";
 import { validateDepartmentService } from "../utils/validator";
+import { isDepartmentInUserScope } from "../services/departmentServiceScope";
 import { serializeDepartmentService, serializeArray } from "../utils/serializer";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
@@ -24,6 +25,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isDepartmentInUserScope(req.user, checkedDepartementService.department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     let service = await DepartmentServiceModel.findOne({ department: checkedDepartementService.department });
 
@@ -60,6 +62,7 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isDepartmentInUserScope(req.user, departmentService.department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const newContact = {
       cohort: value.cohort,
@@ -83,7 +86,7 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
       //... if yes, we update it
       contacts[contactIndex] = newContact;
     }
-    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, upsert: true, useFindAndModify: false });
+    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, useFindAndModify: false });
     return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData) });
   } catch (error) {
     capture(error);
@@ -105,6 +108,7 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isDepartmentInUserScope(req.user, departmentService.department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // checking if the contact for this cohort already exists...
     let contacts: any[] = [...departmentService.contacts];
@@ -114,7 +118,7 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
 
     contacts = contacts.filter((contact) => contact._id.toString() !== value.contactId);
 
-    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, upsert: true, useFindAndModify: false });
+    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, useFindAndModify: false });
     return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData) });
   } catch (error) {
     capture(error);
@@ -255,6 +259,7 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
     if (!canCreateOrUpdateDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const departmentService = await DepartmentServiceModel.findById(value.id);
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isDepartmentInUserScope(req.user, departmentService.department)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const newRepresentant = {
       firstName: value.firstName,
@@ -264,7 +269,7 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
       role: value.role,
     };
 
-    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { representantEtat: newRepresentant }, { new: true, upsert: true, useFindAndModify: false });
+    const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { representantEtat: newRepresentant }, { new: true, useFindAndModify: false });
     return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData) });
   } catch (error) {
     capture(error);

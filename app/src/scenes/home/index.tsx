@@ -1,12 +1,10 @@
 import React from "react";
-import { Redirect } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { YOUNG_STATUS, hasCompletedPhase1, isDoingPhase1 } from "../../utils";
 import useCohort from "@/services/useCohort";
 import InscriptionClosedCLE from "./InscriptionClosedCLE";
 import HomePhase2 from "./HomePhase2";
 import Phase1NotDone from "./Phase1NotDone";
-import WaitingReinscription from "./WaitingReinscription";
 import Default from "./default";
 import RefusedV2 from "./refusedV2";
 import HomePhase1 from "./HomePhase1";
@@ -17,9 +15,6 @@ import useAuth from "@/services/useAuth";
 import { EQUIVALENCE_STATUS, isCohortArchived, YOUNG_STATUS_PHASE3, APPLICATION_STATUS } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
-import useReinscription from "../changeSejour/lib/useReinscription";
-import { shouldRedirectToReinscription } from "@/utils/navigation";
-import usePermissions from "@/hooks/usePermissions";
 import NonEligibleBanner from "./components/NonEligibleBanner";
 
 export default function Home() {
@@ -35,11 +30,8 @@ function HomeContent() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const { cohort } = useCohort();
-  const { hasAccessToReinscription } = usePermissions();
 
-  const { data: isReinscriptionOpen, isLoading: isReinscriptionOpenLoading } = useReinscription();
-
-  if (!young || !cohort || isReinscriptionOpenLoading) return <Loader />;
+  if (!young || !cohort) return <Loader />;
 
   // Je ne peux plus participer au SNU (exclu, refusé) :
   if (wasYoungExcluded(young)) return <Excluded />;
@@ -68,13 +60,6 @@ function HomeContent() {
       return <Default />;
     }
     return <HomePhase2 />;
-  }
-
-  if (hasAccessToReinscription && isReinscriptionOpen && !shouldRedirectToReinscription(young)) {
-    return <WaitingReinscription />;
-  }
-  if (hasAccessToReinscription) {
-    return <Redirect to="/reinscription" />;
   }
 
   // Ma phase 1 est en cours, soit en cours d'inscription, soit en plein parcours

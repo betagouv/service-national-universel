@@ -1,20 +1,21 @@
 import express from "express";
 import passport from "passport";
-import { config } from "../../config";
 import Joi from "joi";
 
-import { PointDeRassemblementModel, SchemaDeRepartitionModel, LigneBusModel, YoungModel, LigneToPointModel, PlanTransportModel, CohortModel } from "../../models";
-import { SENDINBLUE_TEMPLATES, canViewMeetingPoints, canUpdateMeetingPoint, canDeleteMeetingPoint, canDeleteMeetingPointSession, isPdrEditionOpen } from "snu-lib";
+import { PointDeRassemblementModel, SchemaDeRepartitionModel, LigneBusModel, YoungModel, LigneToPointModel } from "../../models";
+import { canViewMeetingPoints } from "snu-lib";
 import { ERRORS, isYoung } from "../../utils";
 import { capture } from "../../sentry";
 import { validateId } from "../../utils/validator";
 import { getCohesionCenterFromSession } from "../../controllers/planDeTransport/commons";
-import { getTransporter } from "../../utils";
-import { sendTemplate } from "../../brevo";
-import { getCohortIdsFromCohortName } from "../../cohort/cohortService";
 import { UserRequest } from "../../controllers/request";
+import { isCohesionCenterInUserScope, isPointDeRassemblementInUserScope, serializeLigneBus, serializeLigneBusList } from "../../services/sejourAccess";
 
 const router = express.Router();
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 /**
  * Récupère les points de rassemblements (avec horaire de passage) pour un jeune affecté.
@@ -119,7 +120,9 @@ router.get("/center/:centerId/cohort/:cohort", passport.authenticate("referent",
 
     const { centerId, cohort } = value;
 
-    if (!canViewMeetingPoints(req.user)) {
+    // `canViewMeetingPoints` ne teste que le rôle : un référent de classe ou un chef de centre
+    // quelconque listait les lignes et les accompagnateurs de n'importe quel centre de France.
+    if (!(await isCohesionCenterInUserScope(req.user, centerId))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -130,234 +133,7 @@ router.get("/center/:centerId/cohort/:cohort", passport.authenticate("referent",
 
     const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints } });
 
-    return res.status(200).send({ ok: true, data: { meetingPoints, ligneBus } });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-// router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-//   try {
-//     const { error, value } = Joi.object({
-//       cohort: Joi.string().required(),
-//       name: Joi.string().required(),
-//       matricule: Joi.string().required(),
-//       address: Joi.string().required(),
-//       complementAddress: Joi.string().allow(null, ""),
-//       city: Joi.string().required(),
-//       zip: Joi.string().required(),
-//       department: Joi.string().required(),
-//       region: Joi.string().required(),
-//       location: Joi.object({
-//         lat: Joi.number().required(),
-//         lon: Joi.number().required(),
-//       })
-//         .default({
-//           lat: undefined,
-//           lon: undefined,
-//         })
-//         .allow({}, null),
-//     }).validate(req.body);
-
-//     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-//     if (!canCreateMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
-
-//     const { cohort, name, address, complementAddress, city, zip, department, region, location } = value;
-
-//     const pointDeRassemblement = await PointDeRassemblementModel.create({
-//       // @ts-expect-error nanoid type not sync with lib v2
-//       code: nanoid(),
-//       cohorts: [cohort],
-//       name,
-//       address,
-//       complementAddress: {
-//         complement: complementAddress,
-//         cohort: cohort,
-//       },
-//       city,
-//       zip,
-//       department,
-//       region,
-//       location,
-//     });
-
-//     return res.status(200).send({ ok: true, data: pointDeRassemblement });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-//   }
-// });
-
-// router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-//   try {
-//     const { error, value } = Joi.object({
-//       id: Joi.string().required(),
-//       name: Joi.string().required(),
-//       address: Joi.string().required(),
-//       city: Joi.string().required(),
-//       zip: Joi.string().required(),
-//       department: Joi.string().required(),
-//       region: Joi.string().required(),
-//       location: Joi.object({
-//         lat: Joi.number().required(),
-//         lon: Joi.number().required(),
-//       })
-//         .default({
-//           lat: undefined,
-//           lon: undefined,
-//         })
-//         .allow({}, null),
-//     }).validate({ ...req.body, id: req.params.id });
-
-//     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-//     const { id, name, address, city, zip, department, region, location } = value;
-
-//     // * Update slave PlanTransport
-//     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
-//     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-//     if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-//     pointDeRassemblement.set({ name, address, city, zip, department, region, location });
-//     await pointDeRassemblement.save({ fromUser: req.user });
-
-//     const planDeTransport = await PlanTransportModel.find({ "pointDeRassemblements.meetingPointId": id });
-
-//     for await (const p of planDeTransport) {
-//       const meetingPoint = p.pointDeRassemblements.find((meetingPoint) => {
-//         return meetingPoint.meetingPointId === id;
-//       });
-//       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-//       meetingPoint.set({ ...meetingPoint, name, address, city, zip, department, region, location });
-//       await p.save({ fromUser: req.user });
-//     }
-
-//     const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts, dateEnd: { $gt: new Date().getTime() } }, [
-//       "name",
-//       "repartitionSchemaDownloadAvailability",
-//       "dateStart",
-//     ]);
-
-//     if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
-//       // @ts-ignore
-//       const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
-//       const referentTransport = await getTransporter();
-//       if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-//       let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
-//       const mail = await sendTemplate(template, {
-//         emailTo: referentTransport.map((referent) => ({
-//           name: `${referent.firstName} ${referent.lastName}`,
-//           email: referent.email,
-//         })),
-//         params: {
-//           trigger: "pdr_changed",
-//           pdr_id: pointDeRassemblement.name,
-//           cta: `${config.ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
-//         },
-//       });
-//     }
-
-//     // * End update slave PlanTransport
-
-//     //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
-
-//     return res.status(200).send({ ok: true, data: pointDeRassemblement });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-//   }
-// });
-
-router.put("/cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      cohort: Joi.string().required(),
-      complementAddress: Joi.string().allow(null, ""),
-    }).validate({ ...req.body, id: req.params.id });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    const { id, cohort, complementAddress } = value;
-
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
-    if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const cohortData = await CohortModel.findOne({ name: cohort });
-    if (!cohortData) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!isPdrEditionOpen(req.user, cohortData)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    let cohortsToUpdate = pointDeRassemblement.cohorts;
-    if (!cohortsToUpdate.includes(cohort)) cohortsToUpdate.push(cohort);
-
-    let complementAddressToUpdate = pointDeRassemblement.complementAddress;
-    complementAddressToUpdate = complementAddressToUpdate.filter((c) => c.cohort !== cohort);
-    complementAddressToUpdate.push({ cohort, complement: complementAddress });
-
-    const cohortIds = await getCohortIdsFromCohortName(cohortsToUpdate);
-    pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate, cohortIds: cohortIds });
-    await pointDeRassemblement.save({ fromUser: req.user });
-
-    const IsSchemaDownloadIsTrue = await CohortModel.find({ name: pointDeRassemblement.cohorts }, ["name", "repartitionSchemaDownloadAvailability", "dateStart"]);
-
-    if (IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).length) {
-      // @ts-ignore
-      const firstSession = IsSchemaDownloadIsTrue.filter((item) => item.repartitionSchemaDownloadAvailability === true).sort((a, b) => a.dateStart - b.dateStart);
-      const referentTransport = await getTransporter();
-      if (!referentTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      let template = SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.MODIFICATION_SCHEMA;
-      const mail = await sendTemplate(template, {
-        emailTo: referentTransport.map((referent) => ({
-          name: `${referent.firstName} ${referent.lastName}`,
-          email: referent.email,
-        })),
-        params: {
-          trigger: "pdr_changed",
-          pdr_id: pointDeRassemblement.name,
-          cta: `${config.ADMIN_URL}/schema-repartition?cohort=${firstSession[0].name}`,
-        },
-      });
-    }
-
-    //si jeunes affecté à ce point de rassemblement et ce sejour --> notification
-
-    return res.status(200).send({ ok: true, data: pointDeRassemblement });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/delete/cohort/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      cohort: Joi.string().required(),
-    }).validate({ ...req.body, id: req.params.id });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    if (!canDeleteMeetingPointSession(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { id, cohort } = value;
-
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
-    if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const youngs = await YoungModel.find({ meetingPointId: id, cohort: cohort });
-    if (youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    let cohortsToUpdate = pointDeRassemblement.cohorts.filter((c) => c !== cohort);
-    let complementAddressToUpdate = pointDeRassemblement.complementAddress.filter((c) => c.cohort !== cohort);
-
-    pointDeRassemblement.set({ cohorts: cohortsToUpdate, complementAddress: complementAddressToUpdate });
-    await pointDeRassemblement.save({ fromUser: req.user });
-
-    return res.status(200).send({ ok: true, data: pointDeRassemblement });
+    return res.status(200).send({ ok: true, data: { meetingPoints, ligneBus: serializeLigneBusList(ligneBus, req.user) } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -402,13 +178,19 @@ router.get("/fullInfo/:pdrId/:busId", passport.authenticate(["referent", "young"
     const pointDeRassemblement = await PointDeRassemblementModel.findById(pdrId);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // La branche référent n'avait aucun contrôle : tout compte référent lisait n'importe quelle ligne.
+    if (!isYoung(req.user) && !isPointDeRassemblementInUserScope(req.user, pointDeRassemblement)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const bus = await LigneBusModel.findById(busId);
     if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const ligneToPoint = await LigneToPointModel.findOne({ meetingPointId: pdrId, lineId: busId });
     if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data: { pointDeRassemblement, bus, ligneToPoint } });
+    // `team` = état civil, date de naissance, email et téléphone des accompagnateurs : jamais pour un jeune.
+    return res.status(200).send({ ok: true, data: { pointDeRassemblement, bus: serializeLigneBus(bus, req.user), ligneToPoint } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -432,7 +214,14 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
     });
     if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { filter } = valueQuery;
-    const regex = new RegExp(".*" + filter ? filter : "" + ".*", "gi");
+
+    // Cette route n'avait aucun contrôle au-delà de l'authentification référent.
+    if (!(await isCohesionCenterInUserScope(req.user, centerId))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // `filter` était injecté tel quel dans un RegExp évalué par Mongo (ReDoS).
+    const regex = new RegExp(".*" + escapeRegex(filter || "") + ".*", "i");
 
     const ligneDeBus = await LigneBusModel.find({ cohort: cohort, centerId: centerId });
     const ligneToPoint = await LigneToPointModel.find({ lineId: { $in: ligneDeBus.map((l) => l._id) } });
@@ -451,7 +240,7 @@ router.get("/ligneToPoint/:cohort/:centerId", passport.authenticate("referent", 
 
       // filter uniquement sur les bus avec des places dispos
       if (meetingPointFiltered && ligneBusFiltered && ligneBusFiltered.youngSeatsTaken < ligneBusFiltered.youngCapacity)
-        data.push({ meetingPoint: meetingPointFiltered, ligneToPoint: ligne, ligneBus: ligneBusFiltered });
+        data.push({ meetingPoint: meetingPointFiltered, ligneToPoint: ligne, ligneBus: serializeLigneBus(ligneBusFiltered, req.user) });
     });
 
     return res.status(200).send({ ok: true, data });
@@ -467,52 +256,25 @@ router.get("/:id/bus/:cohort", passport.authenticate("referent", { session: fals
     const { error: errorCohort, value: checkedCohort } = Joi.string().required().validate(req.params.cohort);
 
     if (errorId || errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const data = await PointDeRassemblementModel.findOne({ _id: checkedId });
 
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Périmètre du point de rassemblement, au lieu du seul contrôle de rôle `canViewMeetingPoints`.
+    if (!isPointDeRassemblementInUserScope(req.user, data)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const lignes = await LigneBusModel.find({ cohort: checkedCohort, meetingPointsIds: checkedId });
     if (!lignes.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const meetingPointsDetail = await LigneToPointModel.find({ lineId: { $in: lignes.map((l) => l._id) }, meetingPointId: checkedId });
 
-    return res.status(200).send({ ok: true, data: { bus: lignes, meetingPoint: data, meetingPointsDetail } });
+    return res.status(200).send({ ok: true, data: { bus: serializeLigneBusList(lignes, req.user), meetingPoint: data, meetingPointsDetail } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-// router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-//   try {
-//     const { error, value: checkedId } = validateId(req.params.id);
-//     if (error) {
-//       capture(error);
-//       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-//     }
-
-//     if (!canDeleteMeetingPoint(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-//     const pointDeRassemblement = await PointDeRassemblementModel.findById(checkedId);
-//     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-//     const youngs = await YoungModel.find({ meetingPointId: checkedId });
-//     if (youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-//     const now = new Date();
-//     pointDeRassemblement.set({ deletedAt: now });
-//     await pointDeRassemblement.save({ fromUser: req.user });
-
-//     // ! What we do here if the point de rassemblement is link to ligneToPoint ? lingneToBus ? planDeTransport ?
-
-//     return res.status(200).send({ ok: true });
-//   } catch (error) {
-//     capture(error);
-//     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-//   }
-// });
 
 //check if meetingPoint is in a schema
 router.get("/:id/in-schema", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {

@@ -2,7 +2,7 @@ import { ArgumentsHost, Catch, ExceptionFilter, HttpException, HttpStatus, Logge
 import { HttpArgumentsHost } from "@nestjs/common/interfaces";
 import { HttpAdapterHost } from "@nestjs/core";
 import * as Sentry from "@sentry/nestjs";
-import { Router } from "express";
+import { redactString, redactUrl, redactValue } from "@snu/log-redaction";
 import { HttpError } from "snu-lib";
 import { FunctionalException } from "../core/FunctionalException";
 import { CustomRequest } from "./CustomRequest";
@@ -36,24 +36,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
         const currentRoute = this.getCurrentRoute(request);
 
+        // Ni `request.headers` (Authorization porteur d'un JWT de session encore valide, cookies)
+        // ni `request.body` (mots de passe, PII de jeunes, contacts plan marketing) ne sont transmis :
+        // une simple 403 de garde suffisait à faire remonter un jeton réutilisable chez un tiers.
+        // Les paramètres de route et de requête, utiles au diagnostic, passent par la redaction.
         Sentry.captureMessage(`💥 HTTP ${httpStatus} ${request.method} ${currentRoute} ${exception.name}`, {
             level: "error",
             contexts: {
-                params: request.params,
-                query: request.query,
-                route: request.route,
-                payload: request.body,
+                params: redactValue({ ...request.params }),
+                query: redactValue({ ...request.query }),
+                route: { path: request.route?.path },
             },
             extra: {
                 request: {
                     auth: request.user?.id,
-                    headers: request.headers,
                     method: request.method,
-                    params: request.params,
-                    originalUrl: request.originalUrl,
+                    params: redactValue({ ...request.params }),
+                    originalUrl: redactUrl(request.originalUrl),
                     path: request.path,
-                    payload: request.body,
-                    route: request.route,
+                    route: request.route?.path,
                     correlationId: request.correlationId,
                 },
             },
@@ -90,27 +91,12 @@ export class AllExceptionsFilter implements ExceptionFilter {
                 exception.description || ""
             } - ${stack}`;
         }
-        this.logger.error(log, caller);
+        this.logger.error(redactString(log), caller);
     }
 
-    private getCurrentRoute(request: CustomRequest) {
-        try {
-            const router = request.app._router as Router;
-            const currentRoute = router.stack
-                .filter((layer) => {
-                    if (layer.route) {
-                        const path = layer.route?.path;
-                        const method = layer.route?.stack[0].method;
-                        const isMatchingPath = !!request.originalUrl.match(layer.regexp);
-                        return method === request.method && isMatchingPath;
-                    }
-                    return false;
-                })
-                .map((layer) => layer.route?.path)?.[0];
-            return currentRoute || request.originalUrl;
-        } catch (error) {
-            return request.originalUrl;
-        }
+    private getCurrentRoute(request: CustomRequest): string {
+        const routePath = request.route?.path;
+        return routePath !== undefined ? String(routePath) : redactUrl(request.originalUrl ?? "", request.params);
     }
 
     private getCallerClassMethod = (error: Error) => {

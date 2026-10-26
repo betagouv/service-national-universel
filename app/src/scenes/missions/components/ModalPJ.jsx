@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as FileSaver from "file-saver";
+import { getSafeDownloadFileName } from "snu-lib";
 import { Modal } from "reactstrap";
 import DndFileInput from "../../../components/dndFileInput";
 import api from "../../../services/api";
@@ -86,7 +87,7 @@ export default function ModalPJ({ isOpen, onCancel, onSave, onSend, name, young,
                         onDownload={async (file) => {
                           try {
                             const f = await api.get(`/application/${application._id}/file/${type}/${getFileName(file[0])}`);
-                            FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
+                            FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), getSafeDownloadFileName(f.fileName, f.mimeType));
                           } catch (e) {
                             toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
                           }

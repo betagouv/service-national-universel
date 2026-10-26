@@ -4,6 +4,7 @@ import { ApplicationModel, CohortModel, StructureModel, YoungModel } from "../mo
 import { SENDINBLUE_TEMPLATES, APPLICATION_STATUS, COHORT_STATUS } from "snu-lib";
 import { config } from "../config";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailParams } from "../email/emailInput";
 import { getCcOfYoung } from "../utils";
 
 const clean = async () => {
@@ -64,11 +65,14 @@ const notify1Week = async () => {
       let cc = getCcOfYoung({ template: emailTemplate, young });
       await sendTemplate(emailTemplate, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          missionName: application?.missionName,
-          structureName: structure?.name,
-          cta: `${config.APP_URL}/mission/${application?.missionId}`,
-        },
+        params: sanitizeEmailParams(
+          {
+            missionName: application?.missionName,
+            structureName: structure?.name,
+            cta: `${config.APP_URL}/mission/${application?.missionId}`,
+          },
+          ["missionName", "structureName"],
+        ),
         cc,
       });
     }
@@ -114,11 +118,14 @@ const notify13Days = async () => {
       let cc = getCcOfYoung({ template: emailTemplate, young });
       await sendTemplate(emailTemplate, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          missionName: application?.missionName,
-          structureName: structure?.name,
-          cta: `${config.APP_URL}/mission/${application?.missionId}`,
-        },
+        params: sanitizeEmailParams(
+          {
+            missionName: application?.missionName,
+            structureName: structure?.name,
+            cta: `${config.APP_URL}/mission/${application?.missionId}`,
+          },
+          ["missionName", "structureName"],
+        ),
         cc,
       });
     }

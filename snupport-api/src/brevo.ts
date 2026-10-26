@@ -23,8 +23,7 @@ const api = async (path, options: any = {}, force?: boolean) => {
 
     if (!config.SENDINBLUEKEY) {
       captureMessage("NO SENDINBLUE KEY");
-      logger.debug(options);
-      logger.debug("Mail was not sent.");
+      logger.debug(`Mail was not sent (${options.method || "GET"} ${path}).`);
       return;
     }
 
@@ -40,9 +39,28 @@ const api = async (path, options: any = {}, force?: boolean) => {
     // Sometimes, sendinblue returns a 204 with an empty body
     return true;
   } catch (e) {
-    capture(e, { extra: { path, options } });
+    // `options.body` porte le contenu des emails (lien de réinitialisation, réponse de ticket) : ne jamais l'envoyer à Sentry
+    capture(e, { extra: { path, method: options.method } });
   }
 };
+
+// Le corps transmis à Brevo porte le contenu des emails : lien de réinitialisation de mot de passe
+// (controllers/agent.js) et réponses de tickets (utils/index.js). Il ne doit jamais partir vers
+// Sentry ni vers les logs : on ne remonte que de quoi diagnostiquer un échec d'envoi.
+type BrevoResponse = { code?: string; message?: string };
+type MailBody = { templateId?: number; to?: unknown[]; cc?: unknown[]; bcc?: unknown[]; attachment?: unknown[] };
+
+function mailDiagnostic(body: MailBody = {}, mail?: BrevoResponse) {
+  return {
+    templateId: body.templateId,
+    recipientCount: body.to?.length ?? 0,
+    ccCount: body.cc?.length ?? 0,
+    bccCount: body.bcc?.length ?? 0,
+    attachmentCount: body.attachment?.length ?? 0,
+    brevoCode: mail?.code,
+    brevoMessage: mail?.message,
+  };
+}
 
 // https://developers.sendinblue.com/reference#sendtransacemail
 export async function sendEmail(to: Email[], subject: string, htmlContent, { params, attachment, cc, bcc }: Omit<SendMailParameters, "emailTo"> = {}) {
@@ -68,9 +86,10 @@ export async function sendEmail(to: Email[], subject: string, htmlContent, { par
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
     if (!mail || mail?.code) {
-      captureMessage("Error sending an email", { extra: { mail, body } });
+      captureMessage("Error sending an email", { extra: mailDiagnostic(body, mail) });
     }
-    if (config.ENVIRONMENT !== "production") {
+    // le contenu complet reste visible en local uniquement, jamais sur un environnement déployé
+    if (config.ENVIRONMENT === "development") {
       logger.debug("", { body, mail });
     }
   } catch (e) {
@@ -174,10 +193,11 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
 
     if (!mail || mail?.code) {
-      captureMessage("Error sending a template", { extra: { mail, body } });
+      captureMessage("Error sending a template", { extra: mailDiagnostic(body, mail) });
       return;
     }
-    if (config.ENVIRONMENT !== "production" || options.force) {
+    // le contenu complet reste visible en local uniquement, jamais sur un environnement déployé
+    if (config.ENVIRONMENT === "development") {
       logger.debug("", { body, mail });
     }
     return mail;

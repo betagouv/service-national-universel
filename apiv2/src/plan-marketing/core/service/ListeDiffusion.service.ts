@@ -28,6 +28,9 @@ export class ListeDiffusionService {
             ...existingListeDiffusion,
             ...listeDiffusion,
             type: existingListeDiffusion.type,
+            isArchived: existingListeDiffusion.isArchived,
+            createdAt: existingListeDiffusion.createdAt,
+            updatedAt: existingListeDiffusion.updatedAt,
             id,
         });
 

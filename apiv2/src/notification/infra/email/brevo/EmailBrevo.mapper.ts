@@ -4,7 +4,6 @@ import {
     EmailTestParams,
     EmailWithMessage,
     EmailTemplate,
-    InviterReferentClasseParams,
     SupprimerClasseEngageeParams,
     VerifierClasseEmailAdminCleParams,
     VerifierClasseEmailReferentDepRegParams,
@@ -27,11 +26,6 @@ export class EmailBrevoMapper {
                     emailParams as VerifierClasseEmailAdminCleParams,
                 );
             }
-            case EmailTemplate.INVITER_REFERENT_CLASSE_TO_INSCRIPTION:
-            case EmailTemplate.INVITER_REFERENT_CLASSE_TO_CONFIRMATION: {
-                return this.mapInviterReferentClasse(template, emailParams as InviterReferentClasseParams);
-            }
-            case EmailTemplate.SUPPRIMER_REFERENT_CLASSE:
             case EmailTemplate.IMPORT_REFERENTIEL_GENERIQUE:
                 return this.mapGenericEmailToBrevo(template, emailParams);
             case EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE:
@@ -122,24 +116,6 @@ export class EmailBrevoMapper {
         };
     }
 
-    static mapInviterReferentClasse(
-        template: EmailTemplate,
-        inviterReferent: InviterReferentClasseParams,
-    ): EmailProviderInviterReferentClasse {
-        return {
-            to: inviterReferent.to,
-            params: {
-                toName: inviterReferent.to[0].name,
-                class_code: inviterReferent.classeCode,
-                class_name: inviterReferent.classeNom,
-                cta: inviterReferent.invitationUrl,
-                name_school: inviterReferent.etablissementNom,
-                emailEtablissement: inviterReferent.etablissementEmail,
-            },
-            templateId: Number(template),
-        };
-    }
-
     static mapSupprimerClasseEngagee(
         template: EmailTemplate,
         supprimerClasseEngagee: SupprimerClasseEngageeParams,
@@ -185,17 +161,6 @@ export interface EmailProviderVerifierClasseReferentDepReg extends EmailProvider
         class_name?: string;
         class_code: string;
         cta: string;
-    };
-}
-
-export interface EmailProviderInviterReferentClasse extends EmailProviderParams {
-    params: {
-        toName: string;
-        class_name?: string;
-        class_code: string;
-        cta: string;
-        name_school: string;
-        emailEtablissement: string;
     };
 }
 

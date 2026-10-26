@@ -1,25 +1,14 @@
 import React from "react";
 import { Link } from "react-router-dom";
 
-import Refresh from "@/assets/icons/Refresh";
 import { Label, Button } from "@snu/ds/admin";
-import { COHORT_TYPE, CohesionCenterType, CohortDto, formatNameAndAddress } from "snu-lib";
-
-type ModalAffectationsType = {
-  isOpen: boolean;
-  center: CohesionCenterType | null;
-  sessionId: string;
-};
+import { CohesionCenterType, formatNameAndAddress } from "snu-lib";
 
 interface Props {
   cohesionCenter: CohesionCenterType;
-  cohort: CohortDto;
-  setModalAffectation: (modalAffectations: ModalAffectationsType) => void;
-  modalAffectations: ModalAffectationsType;
-  isOpenForAffectation: boolean;
 }
 
-export default function CohesionCenterInfos({ cohesionCenter, cohort, setModalAffectation, modalAffectations, isOpenForAffectation }: Props) {
+export default function CohesionCenterInfos({ cohesionCenter }: Props) {
   return (
     <div className="flex flex-col w-full">
       <Label title="Centre de cohésion" name="cohesionCenter" />

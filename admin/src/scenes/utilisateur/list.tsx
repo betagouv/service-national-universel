@@ -34,7 +34,6 @@ import ModalConfirm from "../../components/modals/ModalConfirm";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
-import plausibleEvent from "../../services/plausible";
 import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
@@ -105,11 +104,15 @@ export default function List() {
   useEffect(() => {
     (async () => {
       if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) return;
-      const structures = await apiv2.post<StructureRoutes["FindAll"]["response"]>("/structure", {
-        fields: ["id", "name", "region", "department", "networkId"],
-      });
+      try {
+        const structures = await apiv2.post<StructureRoutes["FindAll"]["response"]>("/structure", {
+          fields: ["id", "name", "region", "department", "networkId"],
+        });
 
-      setStructures(structures);
+        setStructures(structures);
+      } catch {
+        setStructures([]);
+      }
     })();
     (async () => {
       const { data, ok } = await api.get(`/department-service`);
@@ -275,13 +278,13 @@ const Hit = ({ hit, onClick, user, structure }) => {
       </td>
       <td className="w-[17%]">
         <p className="text-sm leading-none text-gray-900">{dayjs(hit.createdAt).format("DD/MM/YYYY")}</p>
-        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.createdAt).format("hh:mm")}</p>
+        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.createdAt).format("HH:mm")}</p>
       </td>
       <td className="w-[18%]">
         {hit.lastLoginAt ? (
           <>
             <p className="text-sm leading-none text-gray-900">{dayjs(hit.lastLoginAt).format("DD/MM/YYYY")}</p>
-            <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.lastLoginAt).format("hh:mm")}</p>
+            <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.lastLoginAt).format("HH:mm")}</p>
           </>
         ) : (
           <p className="text-sm leading-none text-gray-500 mt-2"></p>
@@ -328,7 +331,6 @@ const Action = ({ hit, structure }: ActionProps) => {
     try {
       if (handleImpersonateLoading) return;
       setHandleImpersonateLoading(true);
-      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", hit._id);
       dispatch(setUser(data));
       history.push("/dashboard");

@@ -1,12 +1,10 @@
 import React from "react";
 import { useHistory } from "react-router-dom";
-import plausibleEvent from "@/services/plausible";
 
 export default function ButtonInscriptionManuelle({ id }) {
   const history = useHistory();
 
   const onManualInscription = () => {
-    plausibleEvent("CLE/CTA - Inscription manuelle");
     history.push(`/classes/${id}/inscription-manuelle`);
   };
 

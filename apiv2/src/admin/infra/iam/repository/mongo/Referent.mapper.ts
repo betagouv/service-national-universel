@@ -3,18 +3,13 @@ import {
     ReferentMetadataModel,
     ReferentModel,
     ReferentModelLight,
-    ReferentPasswordModel,
 } from "@admin/core/iam/Referent.model";
-import { ReferentType } from "snu-lib";
+import { ReferentStatus, ReferentType } from "snu-lib";
 import { ReferentDocument } from "../../provider/ReferentMongo.provider";
 
 export class ReferentMapper {
     static toModels(referentDocuments: ReferentDocument[]): ReferentModel[] {
         return referentDocuments.map((referentDocument) => this.toModel(referentDocument));
-    }
-
-    static toModelWithPassword(referentDocument: ReferentDocument): ReferentPasswordModel {
-        return { ...this.toModel(referentDocument), password: referentDocument.password };
     }
 
     static toModel(referentDocument: ReferentDocument): ReferentModel {
@@ -42,6 +37,7 @@ export class ReferentMapper {
             acceptCGU: referentDocument.acceptCGU === "true" ? true : false,
             lastLogoutAt: referentDocument.lastLogoutAt,
             passwordChangedAt: referentDocument.passwordChangedAt, // required by jwt_token v1
+            status: referentDocument.status as ReferentStatus | undefined,
 
             // used by usecase or frontend ?
             // lastLoginAt: referentDocument.lastLoginAt,
@@ -61,11 +57,6 @@ export class ReferentMapper {
             createdAt: referentDocument.createdAt,
             updatedAt: referentDocument.updatedAt,
         };
-    }
-
-    static toModelWithoutPassword(referentPasswordModel: ReferentPasswordModel): ReferentModel {
-        const { password, ...referentModel } = referentPasswordModel;
-        return referentModel;
     }
 
     static toEntityCreate(referentModel: CreateReferentModel): Omit<ReferentType, "_id"> {

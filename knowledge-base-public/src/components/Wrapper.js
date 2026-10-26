@@ -5,6 +5,7 @@ import SeeAsContext from "../contexts/seeAs";
 import { translateRoleBDC } from "../utils/constants";
 import Header from "./Header";
 import Footer from "./Footer";
+import ClosureBanner from "./ClosureBanner";
 
 const Wrapper = ({ home, children }) => {
   const { user: originalUser } = useUser();
@@ -37,6 +38,7 @@ const Wrapper = ({ home, children }) => {
   return (
     <>
       <Header home={home} withSeeAs={withSeeAsPublicAndYoung} />
+      <ClosureBanner />
       {!!seeAs && withSeeAs && user?.role !== seeAs && (
         <div className="bg-blue-50 flex items-center justify-center gap-4 p-4 w-full">
           <AiOutlineInfoCircle className="text-blue-500 text-xl flex-none" />

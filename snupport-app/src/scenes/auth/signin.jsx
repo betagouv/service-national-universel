@@ -34,8 +34,7 @@ export default () => {
                   actions.setSubmitting(false);
                   return;
                 }
-                const { user, organisation, token } = response;
-                if (token) API.setToken(token);
+                const { user, organisation } = response;
                 if (organisation) dispatch(setOrganisation(organisation));
                 if (user) dispatch(setUser(user));
 

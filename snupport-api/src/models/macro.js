@@ -48,7 +48,7 @@ const Schema = new mongoose.Schema({
     role: {
       type: String,
       required: true,
-      enum: ["AGENT", "ADMIN", "REFERENT_DEPARTMENT", "REFERENT_REGION"],
+      enum: ["AGENT", "REFERENT_DEPARTMENT", "REFERENT_REGION"],
     },
   }),
 });

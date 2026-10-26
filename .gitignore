@@ -29,5 +29,8 @@ dump
 emails*.json
 # Import remboursement code de la route (PII)
 road-code-refund-*.csv
+.worktrees
+.playwright-cli/
+CLAUDE.md
 
 vitrine/.htpasswd

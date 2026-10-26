@@ -15,7 +15,6 @@ import VolontairesStatutsDePhase from "./components/VolontairesStatutsDePhase";
 import VolontairesStatutsDivers from "./components/VolontairesStatutsDivers";
 import SectionStructures from "./components/SectionStructures";
 import SectionMissions from "./components/SectionMissions";
-import plausibleEvent from "../../../../../services/plausible";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import ExportEngagementReport from "./components/ExportEngagementReport";
 import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
@@ -171,7 +170,6 @@ export default function Index() {
             </p>
           ),
           action: () => {
-            plausibleEvent("Dashboard/CTA - Exporter statistiques engagement");
             print();
           },
         },
@@ -212,7 +210,6 @@ export default function Index() {
             title: `${loading ? `Téléchargement ${loadingText}` : "Confirmer"}`,
             disabled: loading,
             onClick: () => {
-              plausibleEvent("Dashboard/CTA - Exporter rapport Engagement");
               ExportEngagementReport({ filter: selectedFilters, user, setLoading, setLoadingText });
             },
           },

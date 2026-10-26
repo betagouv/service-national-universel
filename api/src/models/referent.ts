@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import bcrypt from "bcryptjs";
 
-import { ReferentSchema, ReferentType, UserDto, MONGO_COLLECTION, getVirtualUser, buildPatchUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
+import { ReferentSchema, ReferentStatus, ReferentType, UserDto, MONGO_COLLECTION, getVirtualUser, buildPatchUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 
 import * as brevo from "../brevo";
 import anonymize from "../anonymization/referent";
@@ -30,6 +30,12 @@ schema.pre<SchemaExtended>("save", async function (next) {
   if (this.isModified("password")) {
     const hashedPassword = await bcrypt.hash(this.password, 10);
     this.password = hashedPassword;
+  }
+  // La désactivation d'un compte révoque son invitation en cours : le jeton restait sinon
+  // utilisable pour activer le compte après coup (FM17, audit des fronts du 23/09/2026).
+  if (!this.isNew && this.isModified("status") && this.status === ReferentStatus.INACTIVE && this.invitationToken) {
+    this.invitationToken = "";
+    this.invitationExpires = undefined;
   }
   return next();
 });

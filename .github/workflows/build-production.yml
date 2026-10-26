@@ -1,0 +1,97 @@
+name: Build de production
+
+# Rejoue sur chaque PR vers main le build que Clever Cloud lance au déploiement :
+# `devops/build/build.sh <application>`, soit `turbo prune` puis `npm ci` et `turbo run build`
+# dans l'arbre élagué. Les tests tournent dans le monorepo complet, où toutes les dépendances
+# de tous les workspaces sont installées : une dépendance implicite entre workspaces (un type
+# fourni par la devDependency d'une autre application, un paquet atteint seulement par une
+# peerDependency) y passe, et ne casse qu'en production. Deux builds de production ont échoué
+# ainsi en octobre 2026 sans qu'aucun job ne le signale.
+#
+# `pull_request` et non `pull_request_target` : le build exécute le code de la PR, il ne reçoit
+# ni secret ni jeton en écriture.
+on:
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: build (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      # Chaque application est construite jusqu'au bout : un échec n'en masque pas un autre.
+      fail-fast: false
+      matrix:
+        include:
+          # `paths` : ce qui, en plus des chemins communs, entre dans le build de l'application.
+          - app: api
+            paths: api patches
+          - app: apiv2
+            paths: apiv2 patches
+          - app: app
+            paths: app tsconfig.front.json
+          - app: admin
+            paths: admin tsconfig.front.json
+          - app: snupport-api
+            paths: snupport-api
+          - app: snupport-app
+            paths: snupport-app
+
+    steps:
+      # Sur une PR, la référence extraite est le commit de fusion de la PR dans main : l'état que
+      # la fusion produirait. Profondeur 2 : le commit de fusion et ses deux parents.
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Fichiers modifiés
+        id: changes
+        env:
+          EVENT: ${{ github.event_name }}
+          APP: ${{ matrix.app }}
+          APP_PATHS: ${{ matrix.paths }}
+        run: |
+          # Chemins communs : manifeste et lockfile (dont la version de turbo), configuration
+          # turbo, scripts de build, paquets du workspace, et ce workflow.
+          read -ra paths <<< "package.json package-lock.json turbo.json devops/build packages .github/workflows/build-production.yml $APP_PATHS"
+          if [ "$EVENT" = "pull_request" ]; then
+            # HEAD^1 est la pointe de main : on compare ce que la PR y apporte. Si git échoue
+            # (historique absent), l'étape échoue avec lui au lieu de sauter le build.
+            changed=$(git diff --name-only HEAD^1 HEAD -- "${paths[@]}")
+            if [ -z "$changed" ]; then
+              echo "::notice::La PR ne touche aucun chemin du build de $APP : build non lancé."
+              echo "build=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "$changed"
+          fi
+          echo "build=true" >> "$GITHUB_OUTPUT"
+
+      # Node 20 comme l'image Clever Cloud (engines ^20.17 : dernière 20.x).
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: steps.changes.outputs.build == 'true'
+        with:
+          node-version: "20"
+
+      # build.sh installe globalement la version de turbo du lockfile : le runner est éphémère.
+      # CC_DEPLOYMENT_ID n'est pas défini : le script ne vide pas le répertoire de travail.
+      # VITE_ENVIRONMENT est obligatoire pour les fronts. Sans SENTRY_AUTH_TOKEN, le plugin
+      # Sentry de vite n'envoie rien. `npm ci` y exécute les scripts d'installation, comme au
+      # déploiement : le job exécute de toute façon le code de la PR, sans secret.
+      - name: Build de production
+        if: steps.changes.outputs.build == 'true'
+        env:
+          APP: ${{ matrix.app }}
+          VITE_ENVIRONMENT: ci
+        run: devops/build/build.sh "$APP" "/tmp/build-$APP"

@@ -25,7 +25,6 @@ import EngagementIcon from "./icons/Engagement";
 import InscriptionIcon from "./icons/Inscription";
 import SejourIcon from "./icons/Sejour";
 import VolontaireIcon from "./icons/Volontaire";
-import SchemaIcon from "./icons/Schema";
 import MapIcon from "./icons/Map";
 import FlagIcon from "./icons/Flag";
 import GlobeIcon from "./icons/Globe";
@@ -114,16 +113,6 @@ const SideBar = ({ sessionsList }) => {
     <SimpleNavItem sideBarOpen={open} Icon={InscriptionIcon} title="Inscriptions" link="/inscription" active={path === "inscription"} setCurrentOpen={setDropDownOpen} />
   );
   const Utilisateurs = () => <SimpleNavItem sideBarOpen={open} Icon={AdminIcon} title="Utilisateurs" link="/user" active={path === "user"} setCurrentOpen={setDropDownOpen} />;
-  const Schema = () => (
-    <SimpleNavItem
-      sideBarOpen={open}
-      Icon={SchemaIcon}
-      title="Schéma de répartition"
-      link="/schema-repartition"
-      active={path === "schema-repartition"}
-      setCurrentOpen={setDropDownOpen}
-    />
-  );
   const Candidature = () => (
     <SimpleNavItem sideBarOpen={open} Icon={VolontaireIcon} title="Candidatures" link="/volontaire/list/all" active={path === "volontaire"} setCurrentOpen={setDropDownOpen} />
   );
@@ -246,7 +235,7 @@ const SideBar = ({ sessionsList }) => {
   }
   const refItems = [Dashboard, Volontaire, Inscriptions, SejoursRef, Engagement, Admisnistrateur];
   const headCenterItems = [Dashboard, VolontaireHeadCenter, CentresHeadCenter, PlanDeTransport, Contenus, Utilisateurs];
-  const transporteurItems = [Point, Centre, Schema, PlanDeTransport];
+  const transporteurItems = [Point, Centre, PlanDeTransport];
   const responsableItems = [Dashboard, Candidature, Structure, Missions];
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];
   const visitorItems = [Dashboard];

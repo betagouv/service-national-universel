@@ -3,9 +3,8 @@ import { toastr } from "react-redux-toastr";
 import { Link, useHistory, useParams } from "react-router-dom";
 
 import api from "../../../../services/api";
-import { appURL } from "../../../../config";
 import { capture } from "../../../../sentry";
-import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition, copyToClipboard } from "../../../../utils";
+import { SENDINBLUE_TEMPLATES, translate, translateApplication, translateAddFilePhase2WithoutPreposition } from "../../../../utils";
 import downloadPDF from "../../../../utils/download-pdf";
 import ReactLoading from "react-loading";
 
@@ -278,7 +277,6 @@ export default function Phase2Application({ young, onChange }) {
                         target="projectManager"
                         contract={contract}
                         status={contract?.projectManagerStatus}
-                        token={contract?.projectManagerToken}
                         validationDate={contract?.projectManagerValidationDate}
                       />
                       <StatusContractPeople
@@ -289,13 +287,11 @@ export default function Phase2Application({ young, onChange }) {
                         target="structureManager"
                         contract={contract}
                         status={contract?.structureManagerStatus}
-                        token={contract?.structureManagerToken}
                         validationDate={contract?.structureManagerValidationDate}
                       />
                       {contract?.isYoungAdult === "true" ? (
                         <StatusContractPeople
                           value={contract?.youngContractStatus}
-                          token={contract?.youngContractToken}
                           description="Volontaire"
                           firstName={contract?.youngFirstName}
                           lastName={contract?.youngLastName}
@@ -314,7 +310,6 @@ export default function Phase2Application({ young, onChange }) {
                             target="parent1"
                             contract={contract}
                             status={contract?.parent1Status}
-                            token={contract?.parent1Token}
                             validationDate={contract?.parent1ValidationDate}
                           />
                           {contract?.parent2Email && (
@@ -326,7 +321,6 @@ export default function Phase2Application({ young, onChange }) {
                               target="parent2"
                               contract={contract}
                               status={contract?.parent2Status}
-                              token={contract?.parent2Token}
                               validationDate={contract?.parent2ValidationDate}
                             />
                           )}
@@ -463,7 +457,7 @@ export default function Phase2Application({ young, onChange }) {
   );
 }
 
-const StatusContractPeople = ({ value, description, firstName, lastName, token, contract, target }) => (
+const StatusContractPeople = ({ value, description, firstName, lastName, contract, target }) => (
   <div className="space-y-1">
     <div className="flex items-center gap-2" data-tip data-for={`${firstName}${lastName}-validation`}>
       <div className="w-8">
@@ -483,14 +477,6 @@ const StatusContractPeople = ({ value, description, firstName, lastName, token, 
     </div>
     {value !== "VALIDATED" ? (
       <div className="mt-2">
-        <div
-          className="cursor-pointer text-xs text-blue-600"
-          onClick={() => {
-            copyToClipboard(`${appURL}/validate-contract?token=${token}`);
-            toastr.success("Le lien a été copié dans le presse papier.");
-          }}>
-          Copier le lien de validation
-        </div>
         <SendContractLink contract={contract} target={target} />
       </div>
     ) : null}

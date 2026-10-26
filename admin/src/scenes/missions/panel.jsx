@@ -4,7 +4,7 @@ import { Link, useHistory } from "react-router-dom";
 import styled from "styled-components";
 
 import { useSelector } from "react-redux";
-import { ROLES } from "snu-lib";
+import { ROLES, htmlToPlainText } from "snu-lib";
 import Badge from "../../components/Badge";
 import Panel, { Details, Info } from "../../components/Panel";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -140,11 +140,11 @@ export default function PanelView({ onChange, mission }) {
         <Details title="Dép." value={mission.department} />
         <Details title="Région" value={mission.region} />
         <Details title="Format" value={translate(mission.format)} />
-        <Details title="Fréquence" value={mission.frequence} />
+        <Details title="Fréquence" value={htmlToPlainText(mission.frequence)} />
         <Details title="Périodes" value={mission.period.map((p) => translate(p)).join(", ")} />
-        <Details title="Objectifs" value={mission.description} />
-        <Details title="Actions" value={mission.actions} />
-        <Details title="Contraintes" value={mission.contraintes} />
+        <Details title="Objectifs" value={htmlToPlainText(mission.description)} />
+        <Details title="Actions" value={htmlToPlainText(mission.actions)} />
+        <Details title="Contraintes" value={htmlToPlainText(mission.contraintes)} />
       </Info>
       <ModalConfirm
         isOpen={modal?.isOpen}

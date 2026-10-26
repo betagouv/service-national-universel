@@ -15,9 +15,24 @@ const { sendTemplate } = require("./brevo");
 const { capture } = require("./sentry");
 const { sendNotif, SENDINBLUE_TEMPLATES } = require("./utils/");
 const { encrypt } = require("./utils/crypto");
-const { getS3Path } = require("./utils/file");
+const { getS3Path, getAttachmentFileName } = require("./utils/file");
+const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
+const { inspectAttachment } = require("./utils/attachments");
+const { scanBuffer } = require("./utils/virusScanner");
+const { sanitizeMessageHtml } = require("./utils/messageHtml");
+const { resolveUnverifiedContact } = require("./utils/contactVerification");
 
 const regex = /\[#(\w+)\]/i;
+
+// Un email légitime avec pièces jointes encodées en base64 tient large dedans ; au-delà, rien ne
+// protégeait auparavant la mémoire du processus HTTP (partagé avec l'API agents) contre un corps
+// de message forgé (PM50, audit du 25/09/2026).
+const MAX_MESSAGE_SIZE = 25 * 1024 * 1024;
+// Bornes de la relève : un groupe de messages téléchargés ensemble, leur budget d'octets cumulé
+// (>= MAX_MESSAGE_SIZE : un message acceptable tient toujours seul) et les analyses simultanées.
+const MAX_BATCH_MESSAGES = 10;
+const MAX_BATCH_BYTES = 50 * 1024 * 1024;
+const PARSE_CONCURRENCY = 3;
 
 cron.schedule("*/30 * * * *", () => {
   try {
@@ -32,11 +47,14 @@ cron.schedule("*/30 * * * *", () => {
 
 async function addMessage(mail) {
   try {
-    const isSupportClosed = isDateInRange(new Date(), weekendRanges);
-
-    // create contact if it doesnt exist yet
-    let contact = await ContactModel.findOne({ email: mail.fromAddress.toLowerCase() });
-    if (!contact) contact = await ContactModel.create({ firstName: mail.fromName, lastName: "", email: mail.fromAddress.toLowerCase() });
+    // Le From d'un mail entrant n'est jamais authentifié (ni SPF/DKIM vérifié) : rattacher
+    // silencieusement le ticket à la fiche d'un contact déjà connu permettrait d'usurper son
+    // identité (référent, admin, jeune) par le seul choix de l'adresse d'expédition (PM48).
+    const { identity: contact, identityVerified } = await resolveUnverifiedContact({
+      ContactModel,
+      email: mail.fromAddress,
+      createAttrs: { firstName: mail.fromName, lastName: "" },
+    });
 
     let ticket = null;
 
@@ -57,6 +75,14 @@ async function addMessage(mail) {
     //check if ticket exists with subject regex
     if (mail.ticketNumber && !ticket) {
       ticket = await TicketModel.findOne({ number: mail.ticketNumber });
+    }
+
+    // Le numéro de ticket et l'en-tête References sont fournis par l'expéditeur : on ne rejoint
+    // un fil existant que si l'expéditeur en fait déjà partie, sinon n'importe qui pourrait
+    // s'insérer dans le ticket d'un autre. À défaut, un nouveau ticket est créé plus bas.
+    if (ticket && !canSenderJoinTicket(ticket, mail.fromAddress)) {
+      console.log(`imap: mail ${mail.messageId} non rattaché au ticket ${ticket.number} (expéditeur hors du fil)`);
+      ticket = null;
     }
 
     if (ticket) ticket.status = "OPEN";
@@ -82,25 +108,29 @@ async function addMessage(mail) {
       obj.imapEmail = mail?.toAdress === "inscription@mail-support.snu.gouv.fr" ? "inscription@mail-support.snu.gouv.fr" : "contact@mail-support.snu.gouv.fr";
       obj.createdHourAt = new Date().getHours();
       obj.createdDayAt = weekday[new Date().getDay()];
+      obj.identityVerified = identityVerified;
 
-      if (mail.copyRecipient) obj.copyRecipient = mail.copyRecipient;
+      // Les To/Cc du premier mail entrant sont choisis par l'expéditeur, jamais authentifiés : les
+      // enregistrer ici en ferait des "participants connus du fil" pour toujours (ticketParticipants.js),
+      // capables de recevoir toutes les réponses futures et leurs pièces jointes déchiffrées (PM48).
       ticket = await TicketModel.create(obj);
       ticket = await matchVentilationRule(ticket);
-      if (!isSupportClosed) {
-        await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: mail.text, attachment: [] });
-      }
+      // Canal toujours non authentifié : l'accusé de réception officiel ne recopie plus le texte
+      // choisi par l'expéditeur (PM52).
+      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: undefined, attachment: [] });
     }
 
     // create message
     const message = {};
     message.messageId = mail.messageId;
-    message.text = mail.html ?? "";
+    // Le HTML d'un mail entrant est choisi par l'expéditeur : il est assaini avant d'être stocké, rendu
+    // aux agents et renvoyé dans l'historique des réponses (M97).
+    message.text = sanitizeMessageHtml(mail.html ?? "");
     message.ticketId = ticket._id;
     message.authorFirstName = contact.firstName;
     message.authorLastName = contact.lastName;
     message.authorId = contact._id;
     message.rawText = mail.text;
-    message.rawHtml = mail.textHtml;
     message.fromEmail = contact.email;
     message.toEmail = mail.toAdress;
     message.subject = mail.subject;
@@ -110,24 +140,23 @@ async function addMessage(mail) {
     if (mail.attachments?.length) {
       createdMessage.files = [];
       for (let attachment of mail.attachments) {
-        if (
-          attachment.contentType.includes("image") ||
-          attachment.contentType.includes("pdf") ||
-          attachment.contentType.includes("xls") ||
-          attachment.contentType.includes("application/vnd.ms-excel") ||
-          attachment.contentType.includes("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet") ||
-          attachment.contentType.includes("application/vnd.openxmlformats-officedocument.wordprocessingml.document") ||
-          attachment.contentType.includes("application/vnd.oasis.opendocument.spreadsheet") ||
-          attachment.contentType.includes("application/vnd.oasis.opendocument.text") ||
-          attachment.contentType.includes("application/vnd.oasis.opendocument.presentation") ||
-          attachment.filename?.includes("doc")
-        ) {
-          const encryptedBuffer = encrypt(attachment.content);
-          const path = getS3Path(attachment.filename);
-          const url = await uploadAttachment(path, { data: encryptedBuffer, mimetype: attachment.contentType, encoding: "7bit" });
-          if (url) {
-            createdMessage.files.push({ name: attachment.filename, path, url });
-          }
+        // Le type est déduit des magic numbers du contenu, jamais du Content-Type ni du nom
+        // de fichier fournis par l'expéditeur, et c'est le type détecté qui est stocké.
+        const { mime, accepted } = await inspectAttachment(attachment.content);
+        if (!accepted) {
+          console.log(`imap: pièce jointe « ${attachment.filename} » écartée (détecté: ${mime ?? "inconnu"}, annoncé: ${attachment.contentType})`);
+          continue;
+        }
+        const { infected } = await scanBuffer(attachment.content, attachment.filename);
+        if (infected) {
+          console.log(`imap: pièce jointe « ${attachment.filename} » écartée (antivirus)`);
+          continue;
+        }
+        const encryptedBuffer = encrypt(attachment.content);
+        const path = getS3Path(attachment.filename, mime);
+        const url = await uploadAttachment(path, { data: encryptedBuffer, mimetype: mime, encoding: "7bit" });
+        if (url) {
+          createdMessage.files.push({ name: getAttachmentFileName(attachment.filename, mime), path, url });
         }
       }
       await createdMessage.save();
@@ -138,14 +167,17 @@ async function addMessage(mail) {
     ticket.updatedAt = new Date();
     await ticket.save();
 
-    if (isSupportClosed) {
+    if (isDateInRange(new Date(), weekendRanges)) {
       const templateId = SENDINBLUE_TEMPLATES.SNUPPORT_CLOSED;
       await sendTemplate(templateId, {
         emailTo: [{ email: contact.email }],
       });
     }
   } catch (e) {
-    console.log("error fetching mail : ", mail);
+    // PL20 : mail porte le sujet, le corps texte/HTML, les pièces jointes et les adresses
+    // from/to/cc du mail entrant — jamais dans les logs. Seul messageId, un identifiant sans PII,
+    // est utile au diagnostic ici.
+    console.log("error fetching mail : ", mail?.messageId);
     capture(e);
   }
 }
@@ -154,24 +186,40 @@ const Module = {
   async fetch() {
     try {
       const organisation = await OrganisationModel.findOne({ name: "SNU" });
-      console.log("fetch");
       const imapArray = organisation.imapConfig;
       for (let i = 0; i < imapArray.length; i++) {
         imapArray[i].keepalive = false;
 
-        console.log(formatMailDate(imapArray[i].lastFetch));
-        let search = ["ALL", ["SINCE", formatMailDate(imapArray[i].lastFetch)]];
-        const lastFetch = imapArray[i].lastFetch;
-        let messages = await readMails(imapArray[i], "INBOX", search);
-        //   messages = messages.filter((message) => message.date.getTime() > step.last_fetch_at.getTime());
-        for (let message of messages) {
-          if (message.subject) {
-            const messageData = extractMailData(message);
-            if (!organisation.spamEmails.includes(messageData.fromAddress)) await addMessage(messageData, lastFetch);
-          }
-        }
+        // Une boîte IMAP en échec (connexion, openBox, recherche) ne doit plus empêcher les
+        // autres boîtes d'être relevées, ni empêcher la persistance des lastFetch déjà avancés
+        // dans les itérations précédentes (PM50, audit du 25/09/2026).
+        try {
+          const search = ["ALL", ["SINCE", formatMailDate(imapArray[i].lastFetch)]];
+          const lastFetch = imapArray[i].lastFetch;
+          await readMailsInBatches(imapArray[i], "INBOX", search, async (batch) => {
+            for (const mail of batch) {
+              // Un email mal formé ne doit jamais arrêter la relève ni empêcher lastFetch d'avancer :
+              // seul messageId (sans PII) est journalisé.
+              try {
+                if (!mail.subject) continue;
+                const messageData = extractMailData(mail);
+                if (!messageData) {
+                  console.log("mail ignoré (expéditeur absent ou invalide) : ", mail.messageId);
+                  continue;
+                }
+                if (!organisation.spamEmails.includes(messageData.fromAddress)) await addMessage(messageData, lastFetch);
+              } catch (e) {
+                console.log("error processing mail : ", mail?.messageId);
+                capture(e);
+              }
+            }
+          });
 
-        imapArray[i].lastFetch = new Date();
+          imapArray[i].lastFetch = new Date();
+        } catch (e) {
+          console.log("error fetching mail for imap config", imapArray[i]?.user);
+          capture(e);
+        }
       }
       organisation.set({ imapConfig: imapArray });
       await organisation.save();
@@ -189,6 +237,9 @@ function formatMailDate(date = new Date()) {
 }
 
 function extractMailData(message) {
+  const fromAddress = message.from?.value?.[0]?.address;
+  if (!fromAddress) return null;
+
   const data = {};
   if (message.subject.match(regex)) data.ticketNumber = message.subject.match(regex)[1];
   data.subject = message.subject;
@@ -198,20 +249,22 @@ function extractMailData(message) {
   data.textHtml = message.textHtml;
   data.text = message.text;
   data.references = message.references || [];
-  data.fromName = message.from.value[0]?.name;
-  data.fromAddress = message.from.value[0].address;
+  data.fromName = message.from.value[0].name;
+  data.fromAddress = fromAddress;
 
   data.messageId = message.messageId;
   data.inReplyTo = message.inReplyTo;
 
   data.attachments = message.attachments;
 
-  data.toName = message.to?.value[0]?.name;
-  data.toAdress = message.to?.value[0].address;
+  data.toName = message.to?.value?.[0]?.name;
+  data.toAdress = message.to?.value?.[0]?.address;
   data.date = message.date;
   data.copyRecipient = message.cc?.value?.map((recipient) => recipient.address);
   if (data.copyRecipient === undefined) data.copyRecipient = [];
-  data.copyRecipient = data.copyRecipient.concat(message.to?.value?.map((recipient) => recipient.address).filter((recipient) => recipient !== "contact@mail-support.snu.gouv.fr"));
+  data.copyRecipient = data.copyRecipient.concat(
+    (message.to?.value ?? []).map((recipient) => recipient.address).filter((recipient) => recipient !== "contact@mail-support.snu.gouv.fr")
+  );
   return data;
 }
 
@@ -236,66 +289,142 @@ function extractMailData(message) {
 //   return result;
 // }
 
-function readMails(imapConfig, box, searchs = []) {
-  try {
-    return new Promise((resolve) => {
-      const imap = new IMAP(imapConfig);
-      imap.once("ready", () => {
-        imap.openBox(box, true, (err) => {
-          if (err) return console.error(err);
+// Relève par groupes : au plus MAX_BATCH_MESSAGES messages et MAX_BATCH_BYTES octets de corps en
+// mémoire à la fois, analyse à concurrence limitée, et chaque groupe est remis à onBatch (et traité)
+// avant de télécharger le suivant. Avant, tous les corps du cycle étaient empilés puis analysés
+// ensemble : la mémoire du processus HTTP (partagé avec l'API agents) n'était bornée que par message.
+function readMailsInBatches(imapConfig, box, searchs = [], onBatch = async () => {}) {
+  return new Promise((resolve, reject) => {
+    // openBox/search passaient une erreur en argument sans jamais résoudre ni rejeter la promesse
+    // (une recherche en échec résolvait même silencieusement []) : fetch() restait bloqué à vie sur
+    // une coupure IMAP, et lastFetch n'avançait donc plus jamais pour cette boîte (PM50).
+    let settled = false;
+    const settleResolve = (value) => {
+      if (settled) return;
+      settled = true;
+      resolve(value);
+    };
+    const settleReject = (err) => {
+      if (settled) return;
+      settled = true;
+      reject(err);
+    };
 
-          imap.search(searchs, (err, results) => {
-            if (!results || !results.length) return resolve([]);
+    let imap;
+    try {
+      imap = new IMAP(imapConfig);
+    } catch (e) {
+      return settleReject(e);
+    }
 
-            const fetchResults = imap.fetch(results, { bodies: "", struct: true });
-            const messages = [];
+    imap.once("ready", () => {
+      imap.openBox(box, true, (err) => {
+        if (err) return settleReject(err);
 
-            // fetch messages:
-            fetchResults.on("message", (message, seqno) => {
-              const messageObj = { message, seqno };
-              let headers, body;
-              // fetch and parse message headers
-              message.on("body", async (stream) => {
-                let buffer = "";
+        imap.search(searchs, (err, results) => {
+          if (err) return settleReject(err);
+          if (!results || !results.length) return settleResolve();
+
+          const ids = results;
+
+          const finish = () => {
+            imap.closeBox(() => imap.end());
+            settleResolve();
+          };
+
+          const fetchGroup = (start) => {
+            const group = { entries: [], bytes: 0, deferring: false };
+            const fetchResults = imap.fetch(ids.slice(start, start + MAX_BATCH_MESSAGES), { bodies: "", struct: true });
+
+            fetchResults.on("message", (message) => {
+              const entry = { body: "", bytes: 0, oversized: false, deferred: group.deferring, mail: null };
+              message.on("body", (stream) => {
                 stream.on("data", (chunk) => {
-                  buffer += chunk.toString("utf8");
-                });
-                stream.once("end", () => {
-                  body = buffer.toString("utf8");
+                  if (entry.oversized || entry.deferred) return;
+                  if (entry.bytes + chunk.length > MAX_MESSAGE_SIZE) {
+                    entry.oversized = true;
+                    group.bytes -= entry.bytes;
+                    entry.body = "";
+                    return;
+                  }
+                  if (group.bytes + chunk.length > MAX_BATCH_BYTES) {
+                    entry.deferred = true;
+                    group.deferring = true;
+                    group.bytes -= entry.bytes;
+                    entry.body = "";
+                    return;
+                  }
+                  entry.bytes += chunk.length;
+                  group.bytes += chunk.length;
+                  entry.body += chunk.toString("utf8");
                 });
               });
               message.once("end", () => {
-                messageObj.headers = headers;
-                messageObj.body = body;
-                messages.push(messageObj);
+                group.entries.push(entry);
               });
             });
+
+            fetchResults.once("error", (err) => settleReject(err));
 
             fetchResults.once("end", async () => {
-              const promises = messages.map((message) => {
-                return simpleParser(message.body);
-              });
-              const mails = await Promise.all(promises);
-              imap.closeBox(() => {
-                // imap.destroy();
-                imap.end();
-              });
-              resolve(mails);
+              try {
+                const treated = group.entries.filter((entry) => !entry.deferred);
+                const parsable = treated.filter((entry) => {
+                  if (entry.oversized) capture(new Error(`readMails: message IMAP ignoré, corps > ${MAX_MESSAGE_SIZE} octets`));
+                  return !entry.oversized;
+                });
+
+                // Chaque mail est analysé indépendamment (allSettled) : avant, un seul email forgé
+                // faisant rejeter simpleParser perdait tout le lot via Promise.all, y compris les
+                // messages sains reçus au même cycle (PM51).
+                for (let i = 0; i < parsable.length; i += PARSE_CONCURRENCY) {
+                  const slice = parsable.slice(i, i + PARSE_CONCURRENCY);
+                  const parsed = await Promise.allSettled(slice.map((entry) => simpleParser(entry.body, { skipTextToHtml: true })));
+                  parsed.forEach((result, j) => {
+                    slice[j].body = "";
+                    if (result.status === "fulfilled") slice[j].mail = result.value;
+                    else capture(result.reason);
+                  });
+                }
+
+                await onBatch(treated.filter((entry) => entry.mail).map((entry) => entry.mail));
+
+                // Les messages différés (budget d'octets du groupe atteint) sont repris dans le même
+                // cycle, en tête du groupe suivant : un message acceptable tient toujours seul.
+                const consumed = treated.length < group.entries.length ? treated.length : MAX_BATCH_MESSAGES;
+                if (consumed === 0) throw new Error("readMails: aucun message du groupe n'a pu être téléchargé dans le budget d'octets");
+                if (start + consumed < ids.length) return fetchGroup(start + consumed);
+                finish();
+              } catch (e) {
+                settleReject(e);
+              }
             });
-          });
+          };
+
+          fetchGroup(0);
         });
       });
-
-      imap.once("error", (err) => {
-        console.log("Unable to connect to IMAP, address: " + imap._config.user);
-        console.log(err);
-        imap.destroy();
-      });
-
-      imap.connect();
     });
-  } catch (e) {
-    capture(e);
-  }
+
+    imap.once("error", (err) => {
+      console.log("Unable to connect to IMAP, address: " + imapConfig?.user);
+      imap.destroy();
+      settleReject(err);
+    });
+
+    imap.connect();
+  });
+}
+
+async function readMails(imapConfig, box, searchs = []) {
+  const mails = [];
+  await readMailsInBatches(imapConfig, box, searchs, async (batch) => {
+    mails.push(...batch);
+  });
+  return mails;
 }
 module.exports = Module;
+// Exporté pour les tests : addMessage porte la logique de rattachement d'un mail entrant à un ticket.
+module.exports.addMessage = addMessage;
+// Exporté pour les tests : readMails porte la résilience de la relève IMAP (PM50, PM51).
+module.exports.readMails = readMails;

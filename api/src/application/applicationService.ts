@@ -22,6 +22,7 @@ import { ReferentModel } from "../models";
 import { Email, sendTemplate } from "../brevo";
 import { config } from "../config";
 import { getCcOfYoung } from "../utils";
+import { sanitizeEmailText } from "../email/emailInput";
 import { getTutorName } from "../services/mission";
 import { capture } from "../sentry";
 import { logger } from "../logger";
@@ -131,10 +132,11 @@ export const updateApplicationStatus = async (mission, fromUser) => {
 
         await sendTemplate(sendinblueTemplate, {
           emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
+          // Nom et commentaire de statut sont saisis par le responsable de la mission (constats PM2, PM4).
           params: {
             cta,
-            missionName: mission.name,
-            message: mission.statusComment,
+            missionName: sanitizeEmailText(mission.name),
+            message: sanitizeEmailText(mission.statusComment),
           },
           cc,
         });
@@ -245,41 +247,46 @@ export async function getReferentsPhase2(department: string): Promise<ReferentDo
 
 export async function updateMission(app, fromUser) {
   try {
-    const mission = await MissionModel.findById(app.missionId);
-    if (!mission) return;
-
-    // Get all applications for the mission
-    const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
-    const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
-    if (mission.placesLeft !== placesLeft) {
-      mission.set({ placesLeft });
-    }
-
-    if (placesLeft === 0) {
-      mission.set({ placesStatus: "FULL" });
-    } else if (placesLeft === mission.placesTotal) {
-      mission.set({ placesStatus: "EMPTY" });
-    } else {
-      mission.set({ placesStatus: "ONE_OR_MORE" });
-    }
-
-    // On met à jour le nb de candidatures en attente.
-    const pendingApplications = await ApplicationModel.countDocuments({
-      missionId: mission._id,
-      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
-    });
-
-    if (mission.pendingApplications !== pendingApplications) {
-      mission.set({ pendingApplications });
-    }
-
-    const allApplications = await ApplicationModel.find({ missionId: mission._id });
-    mission.set({ applicationStatus: allApplications.map((e) => e.status) });
-
-    await mission.save({ fromUser });
+    await recomputeMissionPlaces(app.missionId, fromUser);
   } catch (e) {
     capture(e);
   }
+}
+
+/** Recalcule places et candidatures en attente de la mission. Les erreurs remontent à l'appelant (lot D : L1). */
+export async function recomputeMissionPlaces(missionId, fromUser) {
+  const mission = await MissionModel.findById(missionId);
+  if (!mission) return;
+
+  // Get all applications for the mission
+  const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
+  const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
+  if (mission.placesLeft !== placesLeft) {
+    mission.set({ placesLeft });
+  }
+
+  if (placesLeft === 0) {
+    mission.set({ placesStatus: "FULL" });
+  } else if (placesLeft === mission.placesTotal) {
+    mission.set({ placesStatus: "EMPTY" });
+  } else {
+    mission.set({ placesStatus: "ONE_OR_MORE" });
+  }
+
+  // On met à jour le nb de candidatures en attente.
+  const pendingApplications = await ApplicationModel.countDocuments({
+    missionId: mission._id,
+    status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
+  });
+
+  if (mission.pendingApplications !== pendingApplications) {
+    mission.set({ pendingApplications });
+  }
+
+  const allApplications = await ApplicationModel.find({ missionId: mission._id });
+  mission.set({ applicationStatus: allApplications.map((e) => e.status) });
+
+  await mission.save({ fromUser });
 }
 
 interface EmailTemplate {
@@ -316,9 +323,9 @@ function getEmailTemplatesForStatus(status: string): EmailTemplate[] {
 
 function getEmailParamsForStatus(status: string, application: ApplicationType, mission: MissionType): EmailParams {
   const baseParams: EmailParams = {
-    youngFirstName: application.youngFirstName || "",
-    youngLastName: application.youngLastName || "",
-    missionName: mission.name,
+    youngFirstName: sanitizeEmailText(application.youngFirstName) || "",
+    youngLastName: sanitizeEmailText(application.youngLastName) || "",
+    missionName: sanitizeEmailText(mission.name),
   };
 
   switch (status) {

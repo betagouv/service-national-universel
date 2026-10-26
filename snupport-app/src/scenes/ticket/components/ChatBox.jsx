@@ -8,7 +8,8 @@ import CreateTicketModal from "./CreateTicketModal";
 
 import Avatar from "../../../components/Avatar";
 import API from "../../../services/api";
-import { classNames, htmlCleaner } from "../../../utils";
+import { classNames, hasHiddenRemoteImages, htmlCleaner, revealRemoteImages } from "../../../utils";
+import { detectMimeTypeFromBytes, getSafeDownloadFileName } from "../../../utils/downloadFileName";
 import { useSelector } from "react-redux";
 import Loader from "../../../components/Loader";
 
@@ -40,8 +41,13 @@ export default function ChatBox({
 
   const [publicUrl, setPublicUrl] = useState("");
   const [isPublicUrlLoading, setPublicUrlLoading] = useState(false);
+  // PL25 : les images distantes d'un message entrant (pixel de suivi) sont neutralisées par
+  // htmlCleaner tant que l'agent ne les affiche pas explicitement.
+  const [imagesRevealed, setImagesRevealed] = useState(false);
 
-  const clean = htmlCleaner(text);
+  const cleaned = htmlCleaner(text);
+  const hasHiddenImages = hasHiddenRemoteImages(cleaned);
+  const clean = imagesRevealed && hasHiddenImages ? revealRemoteImages(cleaned) : cleaned;
   //remove /n from text
   const textClean = clean.replaceAll(/\n/g, "");
   const user = useSelector((state) => state.Auth.user);
@@ -82,7 +88,10 @@ export default function ChatBox({
   const downloadFileFromS3 = async (file) => {
     try {
       const { data } = await API.post({ path: `/message/s3file`, body: { path: file.path } });
-      FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
+      // Le type n'est pas renvoyé : il est déduit du contenu, et l'extension du nom en découle.
+      const bytes = new Uint8Array(data.data);
+      const mimeType = detectMimeTypeFromBytes(bytes);
+      FileSaver.saveAs(new Blob([bytes], { type: mimeType || "application/octet-stream" }), getSafeDownloadFileName(file.name, mimeType));
     } catch (e) {
       toast.error(e, "Erreur");
     }
@@ -156,6 +165,18 @@ export default function ChatBox({
               style={{ whiteSpace: "pre-wrap" }}
             ></p>
           </pre>
+        )}
+        {hasHiddenImages && !imagesRevealed && (
+          <button
+            type="button"
+            className={classNames(sender || isSimplified ? "" : "ml-[52px]", "mt-1 text-xs text-gray-500 underline hover:text-indigo-500")}
+            onClick={(e) => {
+              e.stopPropagation();
+              setImagesRevealed(true);
+            }}
+          >
+            Afficher les images
+          </button>
         )}
         {files.map((file) => {
           return (

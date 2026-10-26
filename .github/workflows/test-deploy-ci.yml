@@ -9,54 +9,104 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
       test_matrix: ${{ steps.config.outputs.test }}
+      has_tests: ${{ steps.config.outputs.has_tests }}
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
 
       - name: Get matrices configuration
         id: config
+        env:
+          BEFORE: ${{ github.event.before }}
+          AFTER: ${{ github.sha }}
         run: |
           # TEST MATRIX
+          # Le contenu poussé sur main a déjà été testé sur sa branche, mais jamais
+          # dans cet état-là : le squash-merge produit un commit neuf. On rejoue donc
+          # les tests, en se limitant aux apps que le merge touche réellement --
+          # chaque entrée de matrice occupe un slot de runner à elle seule.
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ] \
+             || ! git cat-file -e "${BEFORE}^{commit}" 2>/dev/null; then
+            # Premier push, force-push ou historique tronqué : le diff n'est pas
+            # exploitable, on retombe sur la matrice complète.
+            RANGE=""
+          else
+            RANGE="${BEFORE}..${AFTER}"
+          fi
+          echo "Plage analysée : ${RANGE:-<complète>}"
+
+          # Vide si le merge n'a touché aucun des chemins de l'app ; l'entrée est
+          # alors retirée de la matrice et aucun runner n'est mobilisé pour elle.
+          touched() {
+            if [ -z "$RANGE" ]; then echo "full"; return; fi
+            git log --max-count=1 --format=%h "$RANGE" -- "$@"
+          }
+
           echo "[]" \
-          | jq  '. + [{name:"api"}]' \
-          | jq  '. + [{name:"apiv2"}]' \
-          | jq  '. + [{name:"app"}]' \
-          | jq  '. + [{name:"admin"}]' \
-          | jq  '. + [{name:"lib"}]' > test.json
+          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(touched api packages/lib package-lock.json .github/actions/run-tests-api .github/actions/setup-workspace)" \
+          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(touched apiv2 packages/lib package-lock.json .github/actions/run-tests-apiv2 .github/actions/setup-workspace)" \
+          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(touched app packages package-lock.json .github/actions/run-tests-app .github/actions/setup-workspace)" \
+          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(touched admin packages package-lock.json .github/actions/run-tests-admin .github/actions/setup-workspace)" \
+          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(touched packages package-lock.json .github/actions/run-tests-lib .github/actions/setup-workspace)" \
+          | jq  '[.[] | select(.run_test != "")]' > test.json
 
           echo "Test matrix"
           cat test.json
           echo "test=$(jq -c < test.json)" >> $GITHUB_OUTPUT
+          echo "has_tests=$(jq 'length > 0' < test.json)" >> $GITHUB_OUTPUT
 
   test:
     needs: prepare
+    # Une matrice vide fait échouer le job : quand le merge ne touche aucune app
+    # (documentation, devops, workflows), on saute le job entier.
+    if: needs.prepare.outputs.has_tests == 'true'
     runs-on: ubuntu-latest
     strategy:
       matrix:
         app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Run tests
-        uses: jenseng/dynamic-uses@v1
+        uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
+          with: '{"branch_name": ${{ toJSON(github.ref_name) }}}'
 
   deploy:
-    needs: test
+    needs: [prepare, test]
+    # "skipped" est un résultat acceptable (aucune app touchée), "failure" non.
+    if: ${{ !cancelled() && needs.prepare.result == 'success' && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    # Seul job à pousser : il force la branche deploy-ci.
+    permissions:
+      contents: write
+    # Porte les secrets Clever de l'environnement GitHub « ci ».
+    environment: ci
     runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
 
+      # clever-tools 5 exige Node 24+ : on ne dépend pas du Node (ou de son absence) du runner.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
       - name: Install clever-tools
-        run: npm install -g clever-tools
+        run: npm install --global --ignore-scripts clever-tools@5.0.2
 
       - name: Merge main in deploy-ci
         run: git push --force origin HEAD:deploy-ci

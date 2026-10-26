@@ -3,6 +3,9 @@ export default () => ({
     release: "test",
     httpServer: {
         port: 8086,
+        trustProxyHops: 0,
+        enforceHost: false,
+        allowedHosts: "",
     },
     database: {
         url: "mongodb://localhost:27017/snu_dev",

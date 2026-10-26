@@ -17,7 +17,6 @@ router.use("/email", require("./email").default);
 router.use("/application", require("./application").default);
 router.use("/referent", require("./referent").default);
 router.use("/dashboard", require("./dashboard/index"));
-router.use("/association", require("./association").default);
 router.use("/cle", require("./cle"));
 
 export default router;

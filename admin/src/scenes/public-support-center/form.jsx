@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Col } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import styled from "styled-components";
@@ -8,7 +8,6 @@ import close from "../../assets/cancel.png";
 import api from "../../services/api";
 import { translate, departmentList, department2region } from "../../utils";
 import LoadingButton from "../../components/buttons/LoadingButton";
-import FileUpload, { useFileUpload } from "../../components/FileUpload";
 import ErrorMessage, { requiredMessage } from "../../components/errorMessage";
 import { SelectTag, step1Public, step2TechnicalPublic, step2QuestionPublic } from "../support-center/ticket/workflow";
 import { capture } from "../../sentry";
@@ -17,13 +16,6 @@ const tags = [`EMETTEUR_Exterieur`, `CANAL_Formulaire`, `AGENT_Startup_Support`]
 
 export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fromPage }) {
   const [loading, setLoading] = useState(false);
-  const { files, addFiles, deleteFile, error } = useFileUpload();
-
-  useEffect(() => {
-    if (error) {
-      toastr.error(error, "");
-    }
-  }, [error]);
 
   return (
     <Form>
@@ -34,16 +26,8 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fr
         validateOnBlur={false}
         onSubmit={async (values) => {
           try {
-            let uploadedFiles;
+            // Pas de pièce jointe sans être connecté : le dépôt de fichiers exige une session.
             setLoading(true);
-            if (files.length > 0) {
-              const filesResponse = await api.uploadFiles("/SNUpport/upload", files);
-              if (!filesResponse.ok) {
-                const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
-                return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
-              }
-              uploadedFiles = filesResponse.data;
-            }
             const { message, subject, firstName, lastName, email, step1, step2, department } = values;
             const response = await api.post("/SNUpport/ticket/form", {
               message,
@@ -57,7 +41,6 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fr
               region: department2region[department],
               role: "admin exterior",
               fromPage,
-              files: uploadedFiles,
             });
             setOpen(false);
             if (!response.ok) return toastr.error("Une erreur s'est produite lors de la création de ce ticket :", translate(response.code));
@@ -183,12 +166,10 @@ export default function PublicSupportCenterForm({ setOpen, setSuccessMessage, fr
               touched={touched}
               rows="5"
             />
-            <FileUpload disabled={loading} className="p-[15px]" files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
             <div className="mt-[15px] ml-[15px] flex flex-col items-start md:flex-row">
               <LoadingButton loading={loading} type="submit" className="w-[105px] shrink-0" onClick={handleSubmit} disabled={isSubmitting}>
                 Envoyer
               </LoadingButton>
-              {loading && files.length > 0 && <div className="mt-2 text-sm text-gray-500 md:ml-4 md:mt-0">{translate("UPLOAD_IN_PROGRESS")}</div>}
             </div>
           </>
         )}

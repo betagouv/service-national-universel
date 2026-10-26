@@ -1,7 +1,7 @@
 import { apiURL } from "@/config";
 import API from "@/services/api";
 import * as FileSaver from "file-saver";
-import { ProgramType } from "snu-lib";
+import { ProgramType, getSafeDownloadFileName } from "snu-lib";
 
 export async function fetchPrograms() {
   const res = await fetch(`${apiURL}/program/public/engagements`);
@@ -56,7 +56,7 @@ export async function deleteEquivalence(youngId, id) {
 
 export async function fetchEquivalenceFile(youngId, fileName) {
   const f = await API.get(`/young/${youngId}/phase2/equivalence/file/${fileName}`);
-  FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
+  FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), getSafeDownloadFileName(f.fileName, f.mimeType));
 }
 
 export async function fetchAttestation(youngId, template, sendEmail) {

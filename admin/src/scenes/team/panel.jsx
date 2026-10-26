@@ -14,7 +14,6 @@ import { Info, Details } from "../../components/Panel";
 import PanelV2 from "../../components/PanelV2";
 
 import ModalConfirm from "../../components/modals/ModalConfirm";
-import plausibleEvent from "../../services/plausible";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import { captureEvent } from "@sentry/react";
 import styled from "styled-components";
@@ -33,7 +32,6 @@ export default function UserPanel({ onChange, value }) {
     try {
       if (handleImpersonateLoading) return;
       setHandleImpersonateLoading(true);
-      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", value._id);
       dispatch(setUser(data));
       setHandleImpersonateLoading(false);

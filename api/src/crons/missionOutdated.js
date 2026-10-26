@@ -7,6 +7,7 @@ const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS, MISSION_STATUS, ReferentStatus
 const { config } = require("../config");
 const { logger } = require("../logger");
 const { getCcOfYoung } = require("../utils");
+const { sanitizeEmailText } = require("../email/emailInput");
 const fileName = path.basename(__filename, ".js");
 
 const clean = async () => {
@@ -31,7 +32,7 @@ const clean = async () => {
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED, {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
           params: {
-            missionName: mission.name,
+            missionName: sanitizeEmailText(mission.name),
             cta: `${config.ADMIN_URL}/mission/${mission._id}/youngs`,
           },
         });
@@ -58,7 +59,7 @@ const notify1Week = async () => {
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED_1_WEEK_NOTICE, {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
           params: {
-            missionName: mission.name,
+            missionName: sanitizeEmailText(mission.name),
             ctaMission: `${config.ADMIN_URL}/mission/${mission._id}`,
             ctaYoungMission: `${config.ADMIN_URL}/mission/${mission._id}/youngs`,
           },
@@ -102,8 +103,8 @@ const cancelApplications = async (mission) => {
         emailTo: [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }],
         params: {
           cta: `${config.APP_URL}/phase2`,
-          missionName: mission.name,
-          message: mission.statusComment,
+          missionName: sanitizeEmailText(mission.name),
+          message: sanitizeEmailText(mission.statusComment),
         },
         cc,
       });

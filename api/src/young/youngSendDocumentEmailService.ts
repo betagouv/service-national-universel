@@ -4,8 +4,20 @@ import { ContractDto } from "snu-lib";
 
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 import { sendTemplate } from "../brevo";
+import { sanitizeEmailText } from "../email/emailInput";
 import { ERRORS, getCcOfYoung } from "../utils";
 import { YoungModel, ContractModel } from "../models";
+
+// Documents que `getMailParams` sait envoyer. La convocation au séjour de cohésion n'est plus générée
+// depuis la fermeture de la phase 1 (GOO-51).
+const EMAIL_DOCUMENTS: Record<string, string[]> = {
+  certificate: ["1", "2", "3", "snu"],
+  contract: ["2"],
+};
+
+export function isDocumentEmailAvailable(type: string, template: string): boolean {
+  return Object.hasOwn(EMAIL_DOCUMENTS, type) && EMAIL_DOCUMENTS[type].includes(template);
+}
 
 function getMailParams(type: string, template: string, young: YoungDto, contract?: ContractDto | null) {
   if (type === "certificate" && template === "1")
@@ -30,15 +42,9 @@ function getMailParams(type: string, template: string, young: YoungDto, contract
     };
   if (type === "contract" && template === "2" && contract)
     return {
-      object: `Contrat de la mission ${contract.missionName}`,
-      message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${contract.missionName}.`,
+      object: `Contrat de la mission ${sanitizeEmailText(contract.missionName)}`,
+      message: `Vous trouverez en pièce-jointe de ce mail le contract de la mission ${sanitizeEmailText(contract.missionName)}.`,
     };
-  if (type === "convocation" && template === "cohesion") {
-    return {
-      object: `Convocation au séjour de cohésion de ${young.firstName} ${young.lastName}`,
-      message: "Vous trouverez en pièce-jointe de ce mail votre convocation au séjour de cohésion à présenter à votre arrivée au point de rassemblement.",
-    };
-  }
   throw new Error(ERRORS.NOT_FOUND);
 }
 

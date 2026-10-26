@@ -263,7 +263,7 @@ export default function List() {
 
   const handleClick = async (application) => {
     if (!application?.youngId) {
-      captureMessage("Error with application :", { extra: { application } });
+      captureMessage("Error with application :", { extra: { applicationId: application?._id } });
       return;
     }
     const { ok, data } = await api.get(`/referent/young/${application.youngId}`);
@@ -543,7 +543,7 @@ export default function List() {
                     {data.map((hit) => {
                       const mission = missions.find((m) => m._id.toString() === hit.missionId.toString());
                       if (!mission) {
-                        captureMessage("Error with application / No missionId :", { extra: { hit, missions } });
+                        captureMessage("Error with application / No missionId :", { extra: { applicationId: hit._id, missionId: hit.missionId } });
                         return null;
                       }
 

@@ -14,12 +14,6 @@ interface GetCohortGroupRoute extends BasicRoute {
   response: RouteResponseBody<CohortGroupType[]>;
 }
 
-interface GetOpenCohortGroupRoute extends BasicRoute {
-  method: "GET";
-  path: "/cohort-group/open";
-  response: RouteResponseBody<CohortGroupType[]>;
-}
-
 interface PutCohortGroupRoute extends BasicRoute {
   method: "PUT";
   path: "/cohort-group/:id";
@@ -37,7 +31,6 @@ interface DeleteCohortGroupRoute extends BasicRoute {
 
 export type CohortGroupRoutes = {
   Get: GetCohortGroupRoute;
-  GetOpen: GetOpenCohortGroupRoute;
   Post: PostCohortGroupRoute;
   Put: PutCohortGroupRoute;
   Delete: DeleteCohortGroupRoute;

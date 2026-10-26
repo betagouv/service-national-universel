@@ -34,7 +34,6 @@ export default function getNewYoungFixture(fields: Partial<YoungType> = {}): Par
     inscriptionStep: "PROFIL",
     cohesion2020Step: "JDC",
     historic: [],
-    password: faker.internet.password(),
     cniFiles: [],
     cohesionStayPresence: "true",
     presenceJDM: "true",

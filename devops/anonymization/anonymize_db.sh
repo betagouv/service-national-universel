@@ -128,7 +128,7 @@ db_name=$(ls -1 $dump_dir | head -n 1)
 
 echo "Export existing admin referents"
 admin_users=$(uuidgen)
-mongoexport --quiet --query='{"email":{"$regex":"@beta.gouv.fr|@example.org|@selego.co|@snu.gouv.fr"},"role":"admin"}' --collection=referents $dst_db_uri > $admin_users
+mongoexport --quiet --query='{"email":{"$regex":"@beta.gouv.fr|@example.org|@snu.gouv.fr"},"role":"admin"}' --collection=referents $dst_db_uri > $admin_users
 
 
 echo "Drop collections"

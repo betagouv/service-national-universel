@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useAddress, translate, PERMISSION_RESOURCES, isWriteAuthorized } from "snu-lib";
+import { useAddress, translate, PERMISSION_RESOURCES, isWriteAuthorized, htmlToPlainText } from "snu-lib";
+import { STRUCTURE_HTML_FIELDS, warnIfHtmlSanitized } from "@/utils/sanitizedFields";
 import { AddressForm } from "@snu/ds/common";
 import { useDebounce } from "@uidotdev/usehooks";
 import API from "../../../services/api";
@@ -94,6 +95,7 @@ function StructureForm({ structure, setStructure }) {
         return toastr.error("Oups, une erreur est survenue pendant la mise à jour de la structure :", translate(code));
       }
       toastr.success("Structure mise à jour avec succès");
+      warnIfHtmlSanitized(data, resData, STRUCTURE_HTML_FIELDS);
       setData(resData);
       setStructure(resData);
       setIsEditing(false);
@@ -137,7 +139,8 @@ function StructureForm({ structure, setStructure }) {
             <Field
               name="description"
               label="Précisez les informations complémentaires à préciser au volontaire. "
-              value={data.description || ""}
+              // Stockée en HTML assaini : lisible hors édition, source en édition (GOO-44).
+              value={(isEditing ? data.description : htmlToPlainText(data.description)) || ""}
               type="textarea"
               handleChange={(e) => setData({ ...data, description: e.target.value })}
               readOnly={!isEditing}

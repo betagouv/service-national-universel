@@ -1,5 +1,6 @@
 import { config } from "../../config";
 import { capture } from "../../sentry";
+import { logger } from "../../logger";
 
 type Response = {
   ok: boolean;
@@ -20,16 +21,30 @@ export async function fetchMissions(skip = 0): Promise<Response> {
     });
 }
 
+const JVA_ORGANISATION_URL = "https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations";
+
+// Clé en en-tête : en query string, elle finit dans les journaux des proxys et du serveur JVA (L28 de l'audit
+// du 21/09/2026). JVA n'a pas confirmé accepter l'en-tête : en cas de refus, repli sur la query, journalisé
+// pour pouvoir retirer le repli une fois l'en-tête validé en production.
 export async function fetchStructureById(id: number) {
-  return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${config.JVA_API_KEY}`, {
-    method: "GET",
-    redirect: "follow",
-  })
-    .then((response) => response.json())
-    .catch((error) => {
-      capture(error);
-      return null;
+  try {
+    const response = await fetch(`${JVA_ORGANISATION_URL}/${id}`, {
+      headers: { apikey: config.JVA_API_KEY },
+      method: "GET",
+      redirect: "follow",
     });
+    if (response.status !== 401 && response.status !== 403) return await response.json();
+
+    logger.warn(`JVA a refusé la clé d'API en en-tête (HTTP ${response.status}) : repli sur la query string`);
+    const fallback = await fetch(`${JVA_ORGANISATION_URL}/${id}?apikey=${encodeURIComponent(config.JVA_API_KEY)}`, {
+      method: "GET",
+      redirect: "follow",
+    });
+    return await fallback.json();
+  } catch (error) {
+    capture(error);
+    return null;
+  }
 }
 
 export type JeVeuxAiderMission = {

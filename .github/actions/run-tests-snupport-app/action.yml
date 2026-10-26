@@ -1,0 +1,31 @@
+name: Snupport App - Run Tests
+
+inputs:
+  branch_name:
+    description: "Branch name"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/setup-workspace
+      with:
+        branch_name: ${{ inputs.branch_name }}
+        # snupport-app importe @snu/log-redaction : sans son dist a jour, check-types echoue
+        # et les tests tournent contre un comportement de redaction perime.
+        build: log-redaction
+
+    - name: Check types
+      working-directory: snupport-app
+      shell: bash
+      run: npm run check-types
+
+    - name: Lint code
+      working-directory: snupport-app
+      shell: bash
+      run: npm run lint
+
+    - name: Run tests
+      working-directory: snupport-app
+      shell: bash
+      run: npm run test

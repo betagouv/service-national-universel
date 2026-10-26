@@ -7,7 +7,7 @@ import * as AWS from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
 import { Injectable, Logger } from "@nestjs/common";
 
-import { cleanFileNamePath, ERRORS } from "snu-lib";
+import { cleanFileNamePath, ERRORS, neutralizeSpreadsheetRow, toSheetCellValue } from "snu-lib";
 import { CsvOptions, FileGateway } from "@shared/core/File.gateway";
 
 import { TechnicalException, TechnicalExceptionType } from "./TechnicalException";
@@ -24,7 +24,14 @@ export class FileProvider implements FileGateway {
     ): Promise<string> {
         this.logger.log(`Generating CSV with ${recordArray.length} rows with column names:${options.headers}`);
 
-        return writeToString(recordArray, { ...options, quote: '"', alwaysWriteHeaders: true });
+        // Neutralise les cellules `=`, `+`, `-`, `@`… qu'un tableur lirait comme des formules (L36).
+        // Les writers XLSX ci-dessous n'en ont pas besoin : une chaîne y est stockée en cellule
+        // texte, jamais en formule.
+        return writeToString(recordArray.map(neutralizeSpreadsheetRow), {
+            ...options,
+            quote: '"',
+            alwaysWriteHeaders: true,
+        });
     }
 
     async readFile(filePath: string): Promise<Buffer> {
@@ -64,7 +71,11 @@ export class FileProvider implements FileGateway {
     async generateExcel(excelSheets: { [sheet: string]: any[] }): Promise<Buffer> {
         const wb = XLSX.utils.book_new();
         for (const sheetName of Object.keys(excelSheets)) {
-            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(excelSheets[sheetName]), sheetName);
+            // Voir `toSheetCellValue` (snu-lib) : aucune valeur brute (tableau, objet) n'atteint SheetJS.
+            const rows = excelSheets[sheetName].map((row) =>
+                Object.fromEntries(Object.entries(row ?? {}).map(([key, value]) => [key, toSheetCellValue(value)])),
+            );
+            XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(rows), sheetName);
         }
         return XLSX.write(wb, { bookType: "xlsx", type: "buffer" });
     }
@@ -79,7 +90,8 @@ export class FileProvider implements FileGateway {
         sheetName: string;
     }): Promise<Buffer> {
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([columnsName, ...values]), sheetName);
+        const rows = [columnsName, ...values].map((row) => row.map(toSheetCellValue));
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(rows), sheetName);
         return XLSX.write(wb, { bookType: "xlsx", type: "buffer" });
     }
 

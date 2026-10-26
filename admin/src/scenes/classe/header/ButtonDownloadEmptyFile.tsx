@@ -1,13 +1,11 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
 
-import plausibleEvent from "@/services/plausible";
 import { ClasseFileKeys } from "snu-lib";
 import { CDN_BASE_URL } from "@/utils";
 
 export default function ButtonDownloadEmptyFile({ title, type, setIsLoading }) {
   const getFile = async (type) => {
-    plausibleEvent(`Téléchargement Formulaire classe - Formulaire ${type}`);
     try {
       setIsLoading(true);
 

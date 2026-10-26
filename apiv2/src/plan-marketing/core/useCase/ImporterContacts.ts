@@ -1,5 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { PlanMarketingWebhookService } from "../service/PlanMarketingWebhook.service";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -22,6 +23,7 @@ export class ImporterContacts implements UseCase<void> {
         @Inject(ListeDiffusionGateway) private readonly listeDiffusionGateway: ListeDiffusionGateway,
         @Inject(CryptoGateway) private readonly cryptoGateway: CryptoGateway,
         private readonly config: ConfigService,
+        private readonly planMarketingWebhookService: PlanMarketingWebhookService,
     ) {}
     async execute(
         campagneId: string,
@@ -41,7 +43,7 @@ export class ImporterContacts implements UseCase<void> {
             nomListe,
             contacts,
             this.config.get("marketing.folderId")!,
-            `${this.config.get("urls.apiv2")}/plan-marketing/import/webhook`,
+            this.planMarketingWebhookService.construireUrlWebhook(),
         );
 
         const planMarketingTaskModel: PlanMarketingCreateTaskModel = {

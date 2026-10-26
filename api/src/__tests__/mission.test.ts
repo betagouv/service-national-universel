@@ -249,9 +249,17 @@ describe("Mission", () => {
 
   describe("GET /mission/:id/application", () => {
     it("should return empty array when mission has no application", async () => {
-      const res = await request(await getAppHelperWithAcl()).get("/mission/" + notExisitingMissionId + "/application");
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const res = await request(await getAppHelperWithAcl()).get("/mission/" + mission._id + "/application");
       expect(res.body.data).toStrictEqual([]);
       expect(res.status).toBe(200);
+      await deleteMissionByIdHelper(mission._id);
+    });
+    // La mission est désormais chargée pour vérifier le périmètre de l'acteur : une mission inconnue répond 404,
+    // comme les autres routes du contrôleur.
+    it("should return 404 when mission does not exist", async () => {
+      const res = await request(await getAppHelperWithAcl()).get("/mission/" + notExisitingMissionId + "/application");
+      expect(res.status).toBe(404);
     });
     it("should return applications", async () => {
       const young = await createYoungHelper(getNewYoungFixture());

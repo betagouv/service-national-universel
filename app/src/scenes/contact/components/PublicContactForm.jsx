@@ -7,7 +7,6 @@ import { capture } from "@/sentry";
 import { categories, departmentOptions, getClasseIdFromLink, getClasseMessage, roleOptions } from "../contact.service";
 
 import Button from "@/components/dsfr/ui/buttons/Button";
-import FileUpload, { useFileUpload } from "@/components/FileUpload";
 import Input from "@/components/dsfr/forms/input";
 import SearchableSelect from "@/components/dsfr/forms/SearchableSelect";
 import Select from "@/components/dsfr/forms/Select";
@@ -18,7 +17,6 @@ import useClass from "@/scenes/cle/useClass";
 
 export default function PublicContactForm({ category, question }) {
   const history = useHistory();
-  const { files, addFiles, deleteFile, error } = useFileUpload();
 
   const [loading, setLoading] = useState(false);
   const [link, setLink] = useState("");
@@ -48,17 +46,7 @@ export default function PublicContactForm({ category, question }) {
     e.preventDefault();
     try {
       setLoading(true);
-      let uploadedFiles;
-      if (files.length > 0) {
-        const filesResponse = await API.uploadFiles("/SNUpport/upload", files);
-        if (!filesResponse?.ok) {
-          setLoading(false);
-          const translationKey = filesResponse.code === "FILE_SCAN_DOWN" ? "FILE_SCAN_DOWN_SUPPORT" : filesResponse.code;
-          return toastr.error("Une erreur s'est produite lors de l'upload des fichiers :", translate(translationKey), { timeOut: 5000 });
-        }
-        uploadedFiles = filesResponse.data;
-      }
-
+      // Pas de pièce jointe sans être connecté : le dépôt de fichiers exige une session.
       const response = await API.post("/SNUpport/ticket/form", {
         message: classe ? getClasseMessage(classe) : message,
         subject: `${categories.find((e) => e.value === category)?.label} - ${question.label}`,
@@ -71,7 +59,6 @@ export default function PublicContactForm({ category, question }) {
         subjectStep2: question.value,
         region: department2region[department],
         fromPage: new URLSearchParams(window.location.search).get("from "),
-        files: uploadedFiles,
         classeId: classe?.id,
       });
 
@@ -128,8 +115,6 @@ export default function PublicContactForm({ category, question }) {
       <SearchableSelect label="Département" options={departmentOptions} value={department} onChange={setDepartment} required />
 
       <Textarea label="Votre message" value={classe ? getClasseMessage(classe) : message} onChange={(e) => setMessage(e.target.value)} readOnly={!!classeId} />
-      <FileUpload disabled={loading} files={files} addFiles={addFiles} deleteFile={deleteFile} filesAccepted={["jpeg", "png", "pdf", "word", "excel"]} />
-      <ErrorMessage error={error} />
       <hr />
       <Button type="submit" className="my-8 ml-auto" disabled={disabled()}>
         Envoyer

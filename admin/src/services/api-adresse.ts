@@ -36,6 +36,6 @@ export const apiAdress = async (
     });
     return await res.json();
   } catch (e) {
-    capture(e, { extra: { url: url } });
+    capture(e);
   }
 };

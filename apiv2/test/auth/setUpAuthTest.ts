@@ -1,5 +1,5 @@
 import configuration from "@config/testConfiguration";
-import { Logger, ValidationPipe } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ClsModule } from "nestjs-cls";
@@ -15,6 +15,7 @@ import { RoleGateway } from "@auth/core/Role.gateway";
 import { roleMongoProviders } from "@auth/infra/provider/Role.provider";
 import { permissionMongoProviders } from "@auth/infra/provider/Permission.provider";
 import { PermissionService } from "@auth/core/Permission.service";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -62,7 +63,7 @@ export const setUpAuthTest = async (setupOptions: SetupOptions = { newContainer:
         .compile();
 
     const app = authTestModule.createNestApplication({ logger: false });
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(...pipesGlobaux());
 
     return { app, testModule: authTestModule };
 };

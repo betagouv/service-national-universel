@@ -6,11 +6,17 @@ import AgentModel from "../models/agent";
 import MessageModel from "../models/message";
 import TagModel from "../models/tag";
 import { agentGuard } from "../middlewares/authenticationGuards";
+import { requireRole, forbidReadOnlyRoles } from "../middlewares/userRoleGuards";
 import { validateParams, validateBody, validateQuery, idSchema } from "../middlewares/validation";
 import { ERRORS } from "../errors";
 import { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_TICKET_STATUS } from "../schemas";
 import { sendEmailWithConditions, weekday, getHoursDifference, sendNotif, SENDINBLUE_TEMPLATES, diacriticSensitiveRegex } from "../utils";
 import { matchVentilationRule } from "../utils/ventilation";
+import { canAccessTicket, scopeTicketQuery } from "../utils/ticketScope";
+import { canAccessContact } from "../utils/contactScope";
+import { getForbiddenTicketUpdateFields, reconcileTicketNotes } from "../utils/ticketUpdate";
+import { sanitizeUserHtml } from "../utils/userContent";
+const { sanitizeMessageHtml } = require("../utils/messageHtml");
 import { UserRequest } from "./request";
 const escapeStringRegexp = require("escape-string-regexp");
 
@@ -50,6 +56,7 @@ const SCHEMA_DATERANGE = Joi.object({
 
 router.post(
   "/",
+  forbidReadOnlyRoles,
   validateBody(
     Joi.object({
       subject: Joi.string().trim(),
@@ -66,11 +73,17 @@ router.post(
     const { subject, contactEmail, canal, tags, message, copyRecipients, files, agentId } = req.cleanBody;
 
     const user = req.user;
+    // PM45 : un référent est borné à son département/sa région. Il ne doit ni voir la fiche d'un
+    // contact jeune hors périmètre, ni pouvoir créer de contact inconnu sur un simple email saisi.
+    const isScopedReferent = user.role === "REFERENT_DEPARTMENT" || user.role === "REFERENT_REGION";
 
     let contact = await ContactModel.findOne({ email: contactEmail });
-    if (!contact) contact = await ContactModel.create({ email: contactEmail });
-
+    if (!contact) {
+      if (isScopedReferent) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      contact = await ContactModel.create({ email: contactEmail });
+    }
     if (!contact) return res.status(402).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    if (isScopedReferent && !canAccessContact(user, contact)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const lastTicket = await TicketModel.find().sort({ number: -1 }).collation({ locale: "en_US", numericOrdering: true }).limit(1);
 
     const ticket: any = {
@@ -93,6 +106,9 @@ router.post(
       createdHourAt: new Date().getHours(),
       createdDayAt: weekday[new Date().getDay()],
       createdBy: req.user.role,
+      // Les destinataires en copie choisis à la création font partie du fil : les réponses suivantes
+      // (dont l'envoi avec pièces jointes) ne peuvent mettre en copie que ceux-là ou des comptes du support.
+      copyRecipient: copyRecipients,
     };
 
     if (user.role === "AGENT") {
@@ -130,7 +146,7 @@ router.post(
     if (files.length === 0) {
       let newMessage = await MessageModel.create({
         ticketId: newTicket._id,
-        text: message,
+        text: sanitizeMessageHtml(message),
         authorId: user._id,
         authorFirstName: user.firstName,
         authorLastName: user.lastName,
@@ -153,7 +169,10 @@ router.post(
       if (!newMessage) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
     }
 
-    return res.status(200).send({ ok: true, data: { ticket: newTicket } });
+    // Un référent hors périmètre ne doit récupérer ni la fiche complète du contact, ni les champs
+    // internes du ticket (agent, ventilation…) : projection minimale (PM45).
+    const responseTicket = isScopedReferent ? { _id: newTicket._id, number: newTicket.number } : newTicket;
+    return res.status(200).send({ ok: true, data: { ticket: responseTicket } });
   }
 );
 
@@ -705,21 +724,20 @@ router.post("/stats/feedback", validateBody(SCHEMA_PERIOD), async (req: UserRequ
 router.get("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
   const ticket = await TicketModel.findById(req.cleanParams.id);
   if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   const tags = await TagModel.find({ _id: { $in: ticket.tagsId }, deletedAt: null });
   return res.status(200).send({ ok: true, data: { ticket, tags } });
 });
 
 router.get("/linkTicket/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
-  let query: any = { contactId: req.cleanParams.id };
-  if (req.user.role === "REFERENT_DEPARTMENT" || req.user.role === "REFERENT_REGION") {
-    query.formSubjectStep1 = "QUESTION";
-  }
+  const query = scopeTicketQuery(req.user, { contactId: req.cleanParams.id });
   const ticket = await TicketModel.find(query);
   return res.status(200).send({ ok: true, data: ticket });
 });
 
 router.patch(
   "/:id",
+  forbidReadOnlyRoles,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -730,7 +748,11 @@ router.patch(
       copyRecipients: Joi.array().items(SCHEMA_EMAIL),
       files: Joi.array().items(Joi.object()),
       status: SCHEMA_TICKET_STATUS,
-      messageDraft: Joi.string().allow(""),
+      // Brouillon et notes sont rendus chez les autres comptes du ticket (référents → agents) : le HTML
+      // est assaini à l'écriture, en plus du filtre au rendu de snupport-app (GOO-6).
+      messageDraft: Joi.string()
+        .allow("")
+        .custom((value) => sanitizeUserHtml(value)),
       feedback: Joi.string().trim(),
       contactGroup: SCHEMA_CONTACT_GROUP,
       contactDepartment: Joi.string().trim(),
@@ -745,7 +767,7 @@ router.patch(
         Joi.object({
           authorName: Joi.string().trim(),
           createdAt: Joi.date(),
-          content: Joi.string(),
+          content: Joi.string().custom((value) => sanitizeUserHtml(value)),
         })
       ),
       agentId: SCHEMA_ID.allow(""),
@@ -768,8 +790,13 @@ router.patch(
 
     let ticket = await TicketModel.findOne({ _id: id });
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (getForbiddenTicketUpdateFields(req.user, req.cleanBody).length) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    ticket.set(req.cleanBody);
+    const update = { ...req.cleanBody };
+    if (update.notes) update.notes = reconcileTicketNotes({ user: req.user, storedNotes: ticket.notes, submittedNotes: update.notes });
+
+    ticket.set(update);
 
     if (req.cleanBody.status === "CLOSED") {
       ticket.closedAt = new Date();
@@ -800,14 +827,19 @@ router.patch(
   }
 );
 
-router.delete("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
+// Suppression et transfert ne sont proposés qu'au support central dans snupport-app (FH11, GOO-13).
+router.delete("/:id", requireRole("AGENT"), validateParams(idSchema), async (req: UserRequest, res: Response) => {
   const id = req.cleanParams.id;
+  const ticket = await TicketModel.findById(id);
+  if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   await TicketModel.findOneAndDelete({ _id: id });
   return res.status(200).send({ ok: true });
 });
 
 router.put(
   "/transfer/:id",
+  requireRole("AGENT"),
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -818,6 +850,7 @@ router.put(
     const id = req.cleanParams.id;
     let ticket = await TicketModel.findById(id);
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await sendEmailWithConditions({ ticket, dest: req.cleanBody.contactEmail, messageHistory: "all", copyRecipient: null, attachment: null, lastMessageId: null });
     const agent = await AgentModel.findById(req.user._id);
     if (!agent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -843,6 +876,7 @@ router.put(
     const id = req.cleanParams.id;
     let ticket = await TicketModel.findById(id);
     if (!ticket) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     ticket.viewingAgent = req.cleanBody.isViewing
       ? [...new Set([...ticket.viewingAgent, { email: req.user.email, lastName: req.user.lastName, firstName: req.user.firstName, role: req.user.role }])]
       : ticket.viewingAgent.filter((agent) => agent.email !== req.user.email);
@@ -855,6 +889,7 @@ router.get("/viewing/:id", validateParams(idSchema), async (req: UserRequest, re
   const id = req.cleanParams.id;
   let ticket = await TicketModel.findById(id);
   if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   return res.status(200).send({ ok: true, data: ticket.viewingAgent });
 });
 

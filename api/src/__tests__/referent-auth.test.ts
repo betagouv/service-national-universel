@@ -1,10 +1,11 @@
 import request from "supertest";
-import { ROLES, SUB_ROLES } from "snu-lib";
+import { ROLES, DECOMMISSIONED_ROLES, ERRORS as SNU_ERRORS, FeatureFlagName } from "snu-lib";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewStructureFixture from "./fixtures/structure";
 import { createReferentHelper, getReferentByIdHelper } from "./helpers/referent";
 import { dbConnect, dbClose } from "./helpers/db";
+import { FeatureFlagModel, ReferentModel, StructureModel } from "../models";
 import { fakerFR as faker } from "@faker-js/faker";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
@@ -17,20 +18,20 @@ jest.mock("../brevo", () => ({
 }));
 
 beforeAll(async () => {
-    await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
 });
 afterAll(async () => {
-    await dbClose();
+  await dbClose();
 });
 afterEach(() => {
-    resetAppAuth();
+  resetAppAuth();
 });
 
 describe("Referent", () => {
   let res;
   describe("POST /referent/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      res = await request(getAppHelper()).post("/referent/signin");
+      res = await request(getAppHelper()).post("/referent/signin").send({});
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/referent/signin").send({ email: "foo@bar.fr" });
@@ -58,99 +59,108 @@ describe("Referent", () => {
       expect(res.status).toBe(200);
       expect(res.body.redirect).toBeUndefined();
     });
-    it("should return 200 with redirect when user is admin cle with reinscription", async () => {
-      const user = await createReferentHelper(
-        getNewReferentFixture({
-          password: "bar",
-          role: ROLES.ADMINISTRATEUR_CLE,
-          subRole: SUB_ROLES.referent_etablissement,
-          invitationToken: "validToken",
-        }),
+    // Rôle décommissionné (GOO-56, lot P24, audit du 25/09/2026) : ADMINISTRATEUR_CLE est décommissionné,
+    // la branche VERIFICATION_REQUIRED (qui renvoyait l'invitationToken en clair, H62) est supprimée.
+    it("should return 401 when user has a decommissioned role, even with a valid password", async () => {
+      for (const role of DECOMMISSIONED_ROLES) {
+        const user = await createReferentHelper(getNewReferentFixture({ password: "bar", role }));
+        const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
+        expect(res.status).toBe(401);
+        expect(res.body.ok).toBe(false);
+        expect(res.body.token).toBeUndefined();
+        expect(res.headers["set-cookie"]).toBeUndefined();
+      }
+    });
+  });
+  describe("POST /referent/signin-2fa", () => {
+    // Rôle décommissionné (GOO-56, P24) : un code 2FA a pu être émis avant la décommission (ou avant
+    // que le compte ne passe INACTIVE) ; il ne doit plus permettre d'ouvrir de session.
+    it("should return 401 for a decommissioned role even with a valid 2FA code", async () => {
+      const referent = await createReferentHelper(
+        getNewReferentFixture({ password: "bar", role: ROLES.HEAD_CENTER, token2FA: "123456", token2FAExpires: new Date(Date.now() + 60000), attempts2FA: 0 }),
       );
+      const res = await request(getAppHelper()).post("/referent/signin-2fa").send({ email: referent.email, token_2fa: "123456", rememberMe: false });
+      expect(res.status).toBe(401);
+      expect(res.body.token).toBeUndefined();
+      expect(res.headers["set-cookie"]).toBeUndefined();
+    });
+  });
+  // Verrouillage temporaire : seuls les référents de `allowedReferentIds` peuvent se connecter.
+  describe("ADMIN_ACCESS_RESTRICTED à la connexion", () => {
+    const activerVerrouillage = (allowedReferentIds: string[]) =>
+      FeatureFlagModel.create({ name: FeatureFlagName.ADMIN_ACCESS_RESTRICTED, description: "verrouillage", enabled: true, allowedReferentIds });
+
+    afterEach(async () => {
+      await FeatureFlagModel.deleteMany({ name: FeatureFlagName.ADMIN_ACCESS_RESTRICTED });
+    });
+
+    it("refuse la connexion d'un référent hors liste, sans ouvrir de session", async () => {
+      const user = await createReferentHelper(getNewReferentFixture({ password: "bar", role: ROLES.ADMIN }));
+      await activerVerrouillage([]);
+
       const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
+
+      expect(res.status).toBe(401);
+      expect(res.body.code).toBe(SNU_ERRORS.ADMIN_ACCESS_RESTRICTED);
+      expect(res.headers["set-cookie"]).toBeUndefined();
+    });
+
+    it("n'oppose pas le code de verrouillage à un mauvais mot de passe", async () => {
+      const user = await createReferentHelper(getNewReferentFixture({ password: "bar", role: ROLES.ADMIN }));
+      await activerVerrouillage([]);
+
+      const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "foo" });
+
+      expect(res.status).toBe(401);
+      expect(res.body.code).not.toBe(SNU_ERRORS.ADMIN_ACCESS_RESTRICTED);
+    });
+
+    it("laisse se connecter un référent de la liste", async () => {
+      const user = await createReferentHelper(getNewReferentFixture({ password: "bar", role: ROLES.ADMIN }));
+      await activerVerrouillage([user._id.toString()]);
+
+      const res = await request(getAppHelper()).post("/referent/signin").send({ email: user.email, password: "bar" });
+
       expect(res.status).toBe(200);
-      expect(res.body.code).toBe("VERIFICATION_REQUIRED");
-      expect(res.body.redirect).toBe(`/verifier-mon-compte?token=${user.invitationToken}`);
+      expect(res.body.ok).toBe(true);
+    });
+
+    it("refuse un code 2FA émis avant le verrouillage pour un référent hors liste", async () => {
+      const referent = await createReferentHelper(
+        getNewReferentFixture({ password: "bar", role: ROLES.ADMIN, token2FA: "123456", token2FAExpires: new Date(Date.now() + 60000), attempts2FA: 0 }),
+      );
+      await activerVerrouillage([]);
+
+      const res = await request(getAppHelper()).post("/referent/signin-2fa").send({ email: referent.email, token_2fa: "123456", rememberMe: false });
+
+      expect(res.status).toBe(401);
+      expect(res.body.code).toBe(SNU_ERRORS.ADMIN_ACCESS_RESTRICTED);
+      expect(res.headers["set-cookie"]).toBeUndefined();
     });
   });
   describe("POST /referent/signup", () => {
     const structureFixture = getNewStructureFixture();
-    it("should return 400 when no email, no password, wrong email, no firstname or no lastname", async () => {
-      res = await request(getAppHelper()).post("/referent/signup");
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: "foo@bar.fr", ...structureFixture });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: "foo", password: "bar", ...structureFixture });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ password: "foo", ...structureFixture });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: "foo@bar.fr", password: "bar", ...structureFixture });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: "foo@bar.fr", password: "bar", firstName: "foo", ...structureFixture });
-      expect(res.status).toBe(400);
-    });
-
-    it("should return 400 when password does not match requirments", async () => {
+    it("should reject public registrations without creating a referent or structure", async () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email?.toLowerCase();
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: "bar", firstName: "foo", lastName: "bar", ...structureFixture });
-      expect(res.status).toBe(400);
-    });
+      const referentCount = await ReferentModel.countDocuments();
+      const structureCount = await StructureModel.countDocuments();
 
-    it("should return 200", async () => {
-      const fixture = getNewReferentFixture();
-      const email = fixture.email?.toLowerCase();
-      const res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606", ...structureFixture });
-      expect(res.status).toBe(200);
-      expect(res.body.token).toBeTruthy();
-    });
+      const [emptyPayloadResponse, validPayloadResponse] = await Promise.all([
+        request(getAppHelper()).post("/referent/signup"),
+        request(getAppHelper())
+          .post("/referent/signup")
+          .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606", ...structureFixture }),
+      ]);
 
-    it("should transform firstName and lastName", async () => {
-      const fixture = getNewReferentFixture();
-      const res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606", ...structureFixture });
-      expect(res.body.user.firstName).toBe("Foo");
-      expect(res.body.user.lastName).toBe("BAR");
-      expect(res.body.user.email).toBe(fixture.email?.toLowerCase());
-    });
-
-    it("should return 409 when user already exists", async () => {
-      const fixture = getNewReferentFixture();
-      const email = fixture.email?.toLowerCase();
-      await createReferentHelper({ ...fixture, email });
-      const res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606", ...structureFixture });
-      expect(res.status).toBe(409);
-    });
-    it("should return 400 when user doesnt specify CGU choice", async () => {
-      const fixture = getNewReferentFixture();
-      const email = fixture.email?.toLowerCase();
-      await createReferentHelper({ ...fixture, email });
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", phone: "0606060606", ...structureFixture });
-      expect(res.status).toBe(400);
+      for (const response of [emptyPayloadResponse, validPayloadResponse]) {
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ ok: false, code: "OPERATION_NOT_ALLOWED" });
+        expect(response.body.token).toBeUndefined();
+        expect(response.headers["set-cookie"]).toBeUndefined();
+      }
+      expect(await ReferentModel.countDocuments()).toBe(referentCount);
+      expect(await StructureModel.countDocuments()).toBe(structureCount);
     });
   });
   describe("POST /referent/logout", () => {
@@ -244,6 +254,15 @@ describe("Referent", () => {
       const young = await createReferentHelper({ ...fixture, email: fixture.email?.toLowerCase() });
       const res = await request(getAppHelper()).post("/referent/forgot_password").send({ email: young.email });
       expect(res.status).toBe(200);
+    });
+    // Rôle décommissionné (GOO-56, P24) : même réponse neutre qu'un compte inexistant/désactivé,
+    // et surtout pas de jeton de réinitialisation émis pour ce compte (M66).
+    it("should return 200 without issuing a reset token for a decommissioned role", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.TRANSPORTER }));
+      const res = await request(getAppHelper()).post("/referent/forgot_password").send({ email: referent.email });
+      expect(res.status).toBe(200);
+      const referentAfter = await getReferentByIdHelper(referent._id);
+      expect(referentAfter?.forgotPasswordResetToken).toBeFalsy();
     });
   });
 

@@ -8,6 +8,7 @@ import Modal from "../Modal";
 import { Button, CancelButton } from "../Buttons";
 import KnowledgeBaseAdminTree from "../KnowledgeBaseAdminTree";
 import KnowledgeBaseContext from "../../contexts/knowledgeBase";
+import { sanitizeLinkUrl } from "../../utils/safeUrl";
 
 export const isLinkActive = (editor) => {
   const [link] = Editor.nodes(editor, {
@@ -18,6 +19,8 @@ export const isLinkActive = (editor) => {
 
 export const isLink = (text) => {
   if (!text) return false;
+  // is-url accepte « javascript://… » : le schéma est vérifié à part (FH17).
+  if (!sanitizeLinkUrl(text)) return false;
   if (text.includes("mailto:")) return isEmail(text.replace("mailto:", ""));
   return isUrl(text);
 };
@@ -34,6 +37,7 @@ export const unwrapLink = (editor) => {
 };
 
 export const wrapLink = (editor, url) => {
+  if (!sanitizeLinkUrl(url)) return;
   const { selection } = editor;
   const isCollapsed = selection && Range.isCollapsed(selection);
   const link = isLinkActive(editor);
@@ -102,7 +106,7 @@ export const AddLinkModal = ({ isOpen, onRequestClose }) => {
       if (!isEmail(url.replace("mailto:", ""))) return "Cet email n'est pas valide";
       return "";
     }
-    if (!isUrl(url)) return "Ce lien n'est pas valide";
+    if (!isUrl(url) || !sanitizeLinkUrl(url)) return "Le lien doit commencer par https:// ou http://";
     return "";
   };
 

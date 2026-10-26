@@ -5,6 +5,7 @@ const mockRedis = {
   connect: jest.fn(() => Promise.resolve()),
   setEx: jest.fn((i, _, v) => (data[i] = v) && Promise.resolve()),
   get: jest.fn((i) => Promise.resolve(data[i])),
+  del: jest.fn((i) => Promise.resolve(delete data[i])),
   disconnect: jest.fn(() => Promise.resolve()),
 };
 

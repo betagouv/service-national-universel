@@ -4,7 +4,7 @@
  * ROUTES
  *   PUT   /young-edition/:id/identite            -> Modifie les données du jeune qui se trouvent dans la première section de la page du jeune (informations générales).
  *   PUT   /young-edition/:id/situationparents    -> Modifie les données du jeune qui se trouvent dans la deuxième section de la page du jeune (Détails).
- *   PUT   /young-edition/:id/phasestatus         -> Permet de modifier le statut du jeune sur une phase.
+ *   PUT   /young-edition/:id/phasestatus         -> Permet de modifier le statut du jeune en phase 2 ou 3 (la phase 1 n'est plus modifiable, GOO-65).
  *   PUT   /young-edition/:id/parent-allow-snu    -> Permet de modifier le consentement d'un parent (utilisé pour l'instant uniquement pour refuser le SNU par le parent 2).
  *   PUT   /young-edition/:id/parent-image-rights-reset
  *                                                -> Remet à undefined le consentement de droit à l'image d'un parent en lui renvoyant une notification pour le redonner.
@@ -17,8 +17,8 @@
 
 import express, { Response } from "express";
 import Joi from "joi";
-import { YoungModel, LigneBusModel, SessionPhase1Model, CohortModel, ApplicationModel } from "../../models";
-import { ERRORS, notifDepartmentChange, updateSeatsTakenInBusLine, updatePlacesSessionPhase1 } from "../../utils";
+import { YoungModel, CohortModel, ApplicationModel } from "../../models";
+import { ERRORS, notifDepartmentChange } from "../../utils";
 import { capture } from "../../sentry";
 import { validateFirstName } from "../../utils/validator";
 import { serializeYoung } from "../../utils/serializer";
@@ -33,12 +33,9 @@ import {
   SENDINBLUE_TEMPLATES,
   canUserUpdateYoungStatus,
   YOUNG_STATUS,
-  canEditYoung,
   canAllowSNU,
   YoungType,
   getPhaseStatusOptions,
-  FUNCTIONAL_ERRORS,
-  YOUNG_SOURCE,
 } from "snu-lib";
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
@@ -47,7 +44,8 @@ import { config } from "../../config";
 import { logger } from "../../logger";
 import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
-import { canEditYoungConsent, updateYoungConsent } from "./youngEditionService";
+import { canEditYoungConsent, notifyPreviousEmailOfChange, revokeAccessAfterEmailChange, updateYoungConsent } from "./youngEditionService";
+import { canEditYoungInScope } from "../youngScope";
 
 const router = express.Router({ mergeParams: true });
 
@@ -115,7 +113,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -161,11 +159,18 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     await Promise.all(updatePromises);
 
+    // Le changement d'adresse email n'est pas une correction comme les autres : il déplace le
+    // point d'entrée du compte (constat M73).
+    const previousEmail = young.email;
+    const emailChanged = !!value.email && value.email !== previousEmail;
+
     young.set(value);
+    if (emailChanged) revokeAccessAfterEmailChange(young);
     await young.save({ fromUser: req.user });
+    if (emailChanged) await notifyPreviousEmailOfChange(young, previousEmail);
 
     // --- result
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     if (err.code === 11000) {
@@ -259,7 +264,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -271,7 +276,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     await young.save({ fromUser: req.user });
 
     // --- result
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -284,22 +289,26 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // --- validate data
-    const bodySchema = Joi.object().keys({
-      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE"), // "WAITING_LIST"
-      statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"),
-      statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"),
-    });
+    // Écritures phase 1 décommissionnées (GOO-65, PL23) : statusPhase1 est refusé explicitement, y compris
+    // pour l'ADMIN. Un dossier historique mal pointé se corrige par script.
+    const bodySchema = Joi.object()
+      .keys({
+        statusPhase1: Joi.forbidden(),
+        statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"),
+        statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"),
+      })
+      .or("statusPhase2", "statusPhase3");
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      logger.debug("joi error: ", error);
+      logger.debug(`joi error: ${error.message}`);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     for (const [key, val] of Object.entries(value)) {
       const phaseNumber = parseInt(key.replace("statusPhase", ""));
       const authorizedStatuses = getPhaseStatusOptions(req.user, phaseNumber);
-      if (!authorizedStatuses.includes(val)) {
+      if (!authorizedStatuses.includes(val as string)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }
@@ -310,49 +319,12 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- update dates
     const now = new Date();
-
-    // reset cohesion/bus/meetingPoint center when new status is WAITING_AFFECTATION
-    let oldSession;
-    let oldBus;
-    if (value.statusPhase1 === "WAITING_AFFECTATION") {
-      if (young?.meetingPointId) oldBus = await LigneBusModel.findById(young.ligneId);
-      if (young?.sessionPhase1Id) {
-        oldSession = await SessionPhase1Model.findById(young.sessionPhase1Id);
-        young.set({
-          cohesionCenterId: undefined,
-          sessionPhase1Id: undefined,
-          meetingPointId: undefined,
-          ligneId: undefined,
-          deplacementPhase1Autonomous: undefined,
-          transportInfoGivenByLocal: undefined,
-          cohesionStayPresence: undefined,
-          presenceJDM: undefined,
-          departInform: undefined,
-          departSejourAt: undefined,
-          departSejourMotif: undefined,
-          departSejourMotifComment: undefined,
-          youngPhase1Agreement: "false",
-          hasMeetingInformation: undefined,
-        });
-      }
-    } else if (value.statusPhase1 === "AFFECTED" && young.statusPhase1 !== "AFFECTED") {
-      if (young.hasMeetingInformation !== "true" || !young.cohesionCenterId || !young.meetingPointId || (young.source === YOUNG_SOURCE.VOLONTAIRE && !young.ligneId)) {
-        return res.status(400).send({
-          ok: false,
-          code: FUNCTIONAL_ERRORS.MISSING_AFFECTATION_INFORMATIONS,
-        });
-      }
-    }
-
-    if (value.statusPhase1 === "DONE" && young.statusPhase1 !== "DONE") {
-      value.statusPhase2OpenedAt = now;
-    }
 
     if (value.statusPhase2) {
       value.statusPhase2UpdatedAt = now;
@@ -379,87 +351,8 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    // --- update statusPhase 1 deendencies
-    // if they had a cohesion center, we check if we need to update the places taken / left
-    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
-
-    // if they had a bus, we check if we need to update the places taken / left in the bus
-    if (oldBus) await updateSeatsTakenInBusLine(oldBus);
-
     // --- result
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (err) {
-    capture(err);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    // --- validate data
-    const bodySchema = Joi.object().keys({
-      parent: Joi.number().valid(1, 2).required(),
-      allow: Joi.boolean().required(),
-    });
-    const result = bodySchema.validate(req.body, { stripUnknown: true });
-    const { error, value } = result;
-    if (error) {
-      logger.debug("joi error: ", error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-
-    // --- get young
-    const young = await YoungModel.findById(id);
-    if (!young) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-
-    if (!canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    let changes = {
-      [`parent${value.parent}AllowSNU`]: value.allow ? "true" : "false",
-    };
-
-    let notification: string | null = null;
-    const futureYoung = { ...young, ...changes } as YoungType;
-    if (futureYoung.parent1AllowSNU === "false" || futureYoung.parent2AllowSNU === "false") {
-      if (young.parentAllowSNU !== "false") {
-        changes.parentAllowSNU = "false";
-        changes.status = YOUNG_STATUS.NOT_AUTORISED;
-        notification = "rejected";
-      }
-    } else if (futureYoung.parent1AllowSNU === "true") {
-      // ici futureYoung.parent2AllowSNU !== false
-      if (young.parentAllowSNU !== "true") {
-        // TODO: on ne traite pas ce cas là pour l'instant la route n'étant appelée QUE pour un rejet du parent2.
-        // body.parentAllowSNU = "true";
-        // notification = "accepted";
-      }
-    }
-    if (value.parent === 2 && value.allow === false) {
-      changes.parent2RejectSNUComment = `Renseigné par ${req.user.firstName} ${req.user.lastName} le ${format(new Date(), "dd/MM/yyyy à HH:mm")}`;
-    }
-
-    // --- update young
-    young.set(changes);
-    await young.save({ fromUser: req.user });
-
-    if (notification === "rejected") {
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PARENT2_DID_NOT_CONSENT, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      });
-    }
-    // else if (notification === "accepted") {
-    //   // on ne traite pas ce cas là pour l'instant la route n'étant appelée QUE pour un rejet du parent2.
-    // }
-
-    // --- result
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -516,7 +409,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      logger.debug("joi error: ", error);
+      logger.debug(`joi error: ${error.message}`);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -533,230 +426,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
     }
     await updateYoungConsent(young, req.user, value);
 
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (err) {
-    capture(err);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.get("/:id/remider/:idParent", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error: error_id, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-    if (error_id) {
-      capture(error_id);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const { error: error_parent_id, value: parentId } = Joi.number().valid(1, 2).required().validate(req.params.idParent, { stripUnknown: true });
-    if (error_parent_id) {
-      capture(error_parent_id);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const young = await YoungModel.findById(id);
-    if (!young) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    if (!young.inscriptionDoneDate) {
-      return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-    }
-
-    // parent 1
-    if (parentId === 1) {
-      if (young.parent1AllowSNU || young.parentAllowSNU) {
-        return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-      }
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-      // parent 2
-    } else {
-      if (
-        !young.parent2Status ||
-        !young.parent1AllowSNU ||
-        young.parent1AllowSNU === "false" ||
-        young.parent2AllowSNU === "false" ||
-        young.parentAllowSNU === "false" ||
-        young.parent1AllowImageRights === "false" ||
-        young.parent2AllowImageRights
-      ) {
-        return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-      }
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
-
-    return res.status(200).send({ ok: true });
-  } catch (err) {
-    capture(err);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    // checks data
-    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
-    if (paramError) {
-      capture(paramError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const youngId = paramValue.id;
-
-    const { error: bodyError, value: bodyValue } = Joi.object({ parentId: Joi.number().valid(1, 2).required() }).validate(req.body, { stripUnknown: true });
-    if (bodyError) {
-      capture(bodyError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const parentId = bodyValue.parentId;
-
-    // --- get young & verify rights
-    const young = await YoungModel.findById(youngId);
-    if (!young) {
-      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    }
-
-    if (!canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    // --- reset parent image rights
-    young[`parent${parentId}AllowImageRights`] = undefined;
-    if (parentId === 2) {
-      young.set({ parent2AllowImageRightsReset: "true" });
-    }
-    await young.save({ fromUser: req.user });
-
-    // --- send notification
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
-      emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/droits-image${parentId === 2 ? "2" : ""}?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
-
-    // --- return updated young
-    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    // checks data
-    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
-    if (paramError) {
-      capture(paramError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const youngId = paramValue.id;
-
-    // --- get young & verify rights
-    const young = await YoungModel.findById(youngId);
-    if (!young) {
-      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    }
-
-    if (!canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    // --- reset parent allow snu
-    young.set({ parentAllowSNU: undefined, parent1AllowSNU: undefined, status: YOUNG_STATUS.IN_PROGRESS, parent1ValidationDate: undefined });
-    // FIXME: parent2Id: legacy
-    // if (young.parent2Id) young.set({ parent2AllowSnu: undefined, parent2ValidationDate: undefined });
-    await young.save({ fromUser: req.user });
-
-    // --- send notification
-    // parent 1
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1%?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
-    // parent 2 FIXME: parent2Id: legacy
-    // if (young.parent2Id) {
-    //   await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
-    //     emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! }],
-    //     params: {
-    //       cta: `${config.APP_URL}/representants-legaux/presentation-parent2?token=${young.parent2Inscription2023Token}`,
-    //       youngFirstName: young.firstName,
-    //       youngName: young.lastName,
-    //     },
-    //   });
-    // }
-
-    // --- return updated young
-    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    // checks data
-    const { error: paramError, value: paramValue } = Joi.object({ id: Joi.string().required() }).validate(req.params, { stripUnknown: true });
-    if (paramError) {
-      capture(paramError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const youngId = paramValue.id;
-
-    const { error: bodyError, value: bodyValue } = Joi.object({ parentId: Joi.number().valid(1, 2).required() }).validate(req.body, { stripUnknown: true });
-    if (bodyError) {
-      capture(bodyError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-
-    const parentId = bodyValue.parentId;
-
-    // --- get young & verify rights
-    const young = await YoungModel.findById(youngId);
-    if (!young) {
-      return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-    }
-
-    if (!canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    // --- Check and resend notification
-    if (young[`parent${parentId}AllowImageRights`] === "true" || young[`parent${parentId}AllowImageRights`] === "false") {
-      return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
-    }
-
-    // --- send notification
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
-      emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/droits-image${parentId === 2 ? "2" : ""}?parent=${parentId}&token=` + young[`parent${parentId}Inscription2023Token`],
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
-
-    return res.status(200).send({ ok: true });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

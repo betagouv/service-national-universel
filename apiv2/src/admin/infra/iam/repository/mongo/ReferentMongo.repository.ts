@@ -1,10 +1,5 @@
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
-import {
-    CreateReferentModel,
-    ReferentModel,
-    ReferentModelLight,
-    ReferentPasswordModel,
-} from "@admin/core/iam/Referent.model";
+import { CreateReferentModel, ReferentModel, ReferentModelLight } from "@admin/core/iam/Referent.model";
 import { Inject, Injectable } from "@nestjs/common";
 import { FilterQuery, ClientSession, Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
@@ -18,6 +13,7 @@ import { Role, SousRole } from "@shared/core/Role";
 import { ContactGateway } from "../../Contact.gateway";
 import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "../../provider/ReferentMongo.provider";
 import { ReferentMapper } from "./Referent.mapper";
+import { escapeRegExp } from "@shared/infra/escapeRegExp";
 import { OperationType } from "@notification/infra/email/Contact";
 import { CLASSE_MONGOOSE_ENTITY, ClasseDocument } from "../../../sejours/cle/classe/provider/ClasseMongo.provider";
 
@@ -83,15 +79,6 @@ export class ReferentRepository implements ReferentGateway {
             return ReferentMapper.toModels(referents);
         });
     }
-    async findReferentPasswordByEmail(email: string): Promise<ReferentPasswordModel> {
-        const referent = await this.referentMongooseEntity.findOne({ email }).select("+password");
-
-        if (!referent) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
-        }
-
-        return ReferentMapper.toModelWithPassword(referent);
-    }
     async findByEmail(email: string): Promise<ReferentModel> {
         const referent = await this.referentMongooseEntity.findOne({ email });
 
@@ -134,36 +121,40 @@ export class ReferentRepository implements ReferentGateway {
 
     async findByRoleAndEtablissement(
         role: string,
-        etablissementId?: string,
+        etablissementId: string,
         search?: string,
     ): Promise<ReferentModelLight[]> {
-        let referentIds: string[] = [];
-        if (etablissementId) {
-            const classesInEtablissement: Pick<ClasseDocument, "_id" | "referentClasseIds">[] =
-                await this.classeMongooseEntity
-                    .find(
-                        {
-                            etablissementId: etablissementId,
-                            deletedAt: { $exists: false },
-                        },
-                        { referentClasseIds: 1 },
-                    )
-                    .lean();
-            referentIds = [...new Set(classesInEtablissement.flatMap((classe) => classe.referentClasseIds))];
+        // Sans établissement la requête porterait sur toute la collection referent.
+        if (!etablissementId) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, "etablissementId is required");
         }
+
+        const classesInEtablissement: Pick<ClasseDocument, "_id" | "referentClasseIds">[] =
+            await this.classeMongooseEntity
+                .find(
+                    {
+                        etablissementId: etablissementId,
+                        deletedAt: { $exists: false },
+                    },
+                    { referentClasseIds: 1 },
+                )
+                .lean();
+        const referentIds = [...new Set(classesInEtablissement.flatMap((classe) => classe.referentClasseIds))];
 
         const query: FilterQuery<ReferentType> = {
             role: role,
+            _id: { $in: referentIds },
+            deletedAt: { $exists: false },
         };
 
-        if (etablissementId) {
-            query._id = { $in: referentIds };
-        }
         if (search) {
+            // `search` vient du client : échappé, sinon c'est une expression régulière arbitraire
+            // (recherche par motif sur les emails, et backtracking catastrophique).
+            const motif = escapeRegExp(search);
             query.$or = [
-                { firstName: { $regex: search, $options: "i" } },
-                { lastName: { $regex: search, $options: "i" } },
-                { email: { $regex: search, $options: "i" } },
+                { firstName: { $regex: motif, $options: "i" } },
+                { lastName: { $regex: motif, $options: "i" } },
+                { email: { $regex: motif, $options: "i" } },
             ];
         }
 

@@ -14,7 +14,6 @@ import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { Info, Details } from "../../components/Panel";
 import styled from "styled-components";
 import ModalConfirm from "../../components/modals/ModalConfirm";
-import plausibleEvent from "../../services/plausible";
 import ModalChangeTutor from "../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
@@ -49,7 +48,6 @@ export default function UserPanel({ onChange, value }) {
     try {
       if (handleImpersonateLoading) return;
       setHandleImpersonateLoading(true);
-      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", value._id);
       dispatch(setUser(data));
       history.push("/dashboard");
@@ -145,7 +143,7 @@ export default function UserPanel({ onChange, value }) {
             ) : null}
 
             {structure ? (
-              <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
+              <Link to={`/structure/${structure._id}`}>
                 <PanelActionButton icon="eye" title="Voir la structure" />
               </Link>
             ) : null}

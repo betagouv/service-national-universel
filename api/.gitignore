@@ -4,6 +4,8 @@
 /src/scripts/
 *scripts*
 /coverage
+/pdf-templates/
+# anciens emplacements des fonds d'attestations (M72) : ne pas commiter les copies restées sur les postes
 /public/images/certificates/
 /public/images/convocation/
 /dist

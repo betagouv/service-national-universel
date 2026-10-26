@@ -173,6 +173,13 @@ export const ApplicationSchema = {
     },
   },
 
+  proposalNotAccepted: {
+    type: Boolean,
+    documentation: {
+      description: "Candidature née d'une proposition de mission que le volontaire n'a pas acceptée (en attente, refusée ou annulée)",
+    },
+  },
+
   //files
   contractAvenantFiles: {
     type: [String],

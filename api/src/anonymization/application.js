@@ -29,6 +29,7 @@ function anonymize(itemToAnonymize) {
     "hidden",
     "status",
     "statusComment",
+    "proposalNotAccepted",
     "contractAvenantFiles",
     "justificatifsFiles",
     "feedBackExperienceFiles",

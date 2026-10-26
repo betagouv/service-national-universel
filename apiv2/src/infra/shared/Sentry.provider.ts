@@ -1,4 +1,5 @@
 import * as Sentry from "@sentry/nestjs";
+import { redactSentryEvent } from "@snu/log-redaction";
 import { ConfigService } from "@nestjs/config";
 import { Provider } from "@nestjs/common";
 
@@ -32,6 +33,12 @@ export const SentryProvider: Provider = {
                 release: sentryRelease,
                 tracesSampleRate: sentryTracingSampleRate,
                 normalizeDepth: 16,
+                // Filet global : tout événement (y compris ceux capturés hors du filtre d'exception)
+                // passe par la redaction des secrets avant de quitter le service.
+                beforeSend: redactSentryEvent,
+                // PH18 : les transactions de performance ne passent pas par beforeSend — sans ce hook
+                // dédié, chaque requête /v2/* échantillonnée partait avec cookies, en-têtes et corps en clair.
+                beforeSendTransaction: redactSentryEvent,
             });
             console.log("Sentry initialized successfully");
         }

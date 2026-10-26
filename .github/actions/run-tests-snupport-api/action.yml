@@ -1,0 +1,30 @@
+name: Snupport API - Run Tests
+
+inputs:
+  branch_name:
+    description: "Branch name"
+    required: true
+
+runs:
+  using: "composite"
+  steps:
+    - uses: ./.github/actions/setup-workspace
+      with:
+        branch_name: ${{ inputs.branch_name }}
+        # snupport-api importe snu-lib (ex. hasAsfSignature dans src/utils/attachments.js, GOO-64) :
+        # sans son dist construit, toute suite qui charge attachments.js/message.js echoue au chargement
+        # du module avec "Cannot find module 'snu-lib'", avant meme d'atteindre un test.
+        # Il importe aussi @snu/log-redaction (redaction avant envoi a Sentry, cf. src/sentry.js) :
+        # sans son dist a jour, les tests de redaction (PH18/PM36) passent a tort sur l'ancien
+        # comportement fige dans un dist perime.
+        build: lib log-redaction
+
+    - name: Lint code
+      working-directory: snupport-api
+      shell: bash
+      run: npm run lint
+
+    - name: Run tests
+      working-directory: snupport-api
+      shell: bash
+      run: npm run test

@@ -13,6 +13,7 @@ jest.mock("../brevo", () => ({
 
 jest.mock("../utils", () => ({
   getCcOfYoung: jest.fn(),
+  sanitizeAll: (value: string) => value,
 }));
 
 jest.mock("../sentry", () => ({

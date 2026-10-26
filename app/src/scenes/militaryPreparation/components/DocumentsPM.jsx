@@ -7,7 +7,6 @@ import FileCard from "./FileCard";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
 import useUpdateMPStatus from "../lib/useUpdateMPStatus";
-import plausibleEvent from "@/services/plausible";
 
 export const theme = {
   background: {
@@ -33,7 +32,6 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
   const { mutate, isPending } = useUpdateMPStatus();
 
   function handleCorrection() {
-    plausibleEvent("Phase2/CTA - PM - Corriger mon dossier");
     mutate("WAITING_VERIFICATION");
   }
 

@@ -32,6 +32,31 @@ export function formatCsvFileName(input: string): string {
 }
 
 
+/**
+ * Neutralise l'injection de formule dans un fichier CSV (CWE-1236).
+ *
+ * Un tableur qui ouvre un CSV interprète toute cellule commençant par `=`, `+`,
+ * `-`, `@`, une tabulation ou un retour chariot comme une formule : un champ
+ * saisi par un tiers (nom, message, adresse…) peut alors exécuter du code ou
+ * exfiltrer des données à l'ouverture de l'export. On préfixe ces valeurs d'une
+ * apostrophe, qui force le tableur à les lire comme du texte.
+ *
+ * Seules les chaînes sont concernées : un nombre négatif reste un nombre.
+ */
+const SPREADSHEET_FORMULA_PREFIX = /^[=+\-@\t\r]/;
+
+export function neutralizeSpreadsheetFormula<T>(value: T): T | string {
+  if (typeof value !== "string" || !SPREADSHEET_FORMULA_PREFIX.test(value)) return value;
+  return `'${value}`;
+}
+
+/** Applique `neutralizeSpreadsheetFormula` à chaque cellule d'une ligne (objet ou tableau). */
+export function neutralizeSpreadsheetRow<T>(row: T): T {
+  if (Array.isArray(row)) return row.map((cell) => neutralizeSpreadsheetFormula(cell)) as T;
+  if (!row || typeof row !== "object") return neutralizeSpreadsheetFormula(row) as T;
+  return Object.fromEntries(Object.entries(row).map(([key, cell]) => [key, neutralizeSpreadsheetFormula(cell)])) as T;
+}
+
 export const generateCsvBuffer = async <T extends Record<string, any>>(
   data: T[],
   fileName: string,
@@ -49,7 +74,7 @@ export const generateCsvBuffer = async <T extends Record<string, any>>(
       excelBOM: true
     };
 
-    const csv = await json2csv(data, options);
+    const csv = await json2csv(data.map(neutralizeSpreadsheetRow), options);
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
     const fullFileName = `${formatCsvFileName(fileName)}_${timestamp}.csv`;
 

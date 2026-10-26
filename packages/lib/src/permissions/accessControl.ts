@@ -2,6 +2,7 @@ import { PermissionType } from "../mongoSchema";
 import { UserDto } from "../dto";
 import { PERMISSION_ACTIONS } from "./constantes/actions";
 import { HasPermissionParams } from "./types";
+import { getMatchingPermissions, hasUnrestrictedPermission } from "./utils";
 
 export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ, context, ignorePolicy = false }: HasPermissionParams): boolean {
   if (!user) {
@@ -12,16 +13,15 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
     console.warn(`user ${user._id} has no acl`);
     return false;
   }
-  const permissions = user.acl.filter((acl) => acl.resource === resource && [action, PERMISSION_ACTIONS.FULL].includes(acl.action));
+  const permissions = getMatchingPermissions(user, resource, action);
   if (permissions?.length) {
     if (ignorePolicy) {
       return true;
     }
-    const permissionWithpolicies = permissions.filter((acl) => acl.policy?.length);
-    if (permissions.length > permissionWithpolicies.length) {
-      // au moins une permission sans policy
+    if (hasUnrestrictedPermission(permissions)) {
       return true;
     }
+    const permissionWithpolicies = permissions.filter((acl) => acl.policy?.length);
     const contextUpdated = { referent: user, ...context };
     const authorized: boolean[] = [];
     for (const permission of permissionWithpolicies) {
@@ -29,15 +29,23 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
         if (policy.where?.length) {
           for (const where of policy.where) {
             const contextResource = where.resource || resource;
+            const contextValue = contextUpdated[contextResource]?.[where.field];
+            // fail-closed : une valeur absente ne peut jamais matcher
+            if (contextValue === undefined || contextValue === null || contextValue === "") {
+              authorized.push(false);
+              continue;
+            }
             if (where.source) {
               const userValue = user[where.source];
               if (Array.isArray(userValue)) {
-                authorized.push(userValue.includes(String(contextUpdated[contextResource]?.[where.field])));
+                authorized.push(userValue.filter(Boolean).map(String).includes(String(contextValue)));
+              } else if (userValue === undefined || userValue === null || userValue === "") {
+                authorized.push(false);
               } else {
-                authorized.push(String(contextUpdated[contextResource]?.[where.field]) === String(userValue));
+                authorized.push(String(contextValue) === String(userValue));
               }
             } else if (where.value) {
-              authorized.push(String(contextUpdated[contextResource]?.[where.field]) === String(where.value));
+              authorized.push(String(contextValue) === String(where.value));
             } else {
               authorized.push(false);
             }

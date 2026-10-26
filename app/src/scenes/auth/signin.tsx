@@ -1,16 +1,16 @@
-import plausibleEvent from "@/services/plausible";
 import { Link } from "react-router-dom";
 import queryString from "query-string";
 import React, { useState, useEffect } from "react";
 import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { formatToActualTime, isValidRedirectUrl } from "snu-lib";
+import { formatToActualTime, ERRORS } from "snu-lib";
 import RightArrow from "../../assets/icons/RightArrow";
 import Error from "../../components/error";
-import { capture, captureMessage } from "../../sentry";
+import { capture } from "../../sentry";
 import api from "../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 import { Input, InputPassword, Button } from "@snu/ds/dsfr";
 
 interface ErrorState {
@@ -37,7 +37,6 @@ const Signin: React.FC = () => {
       const { user: young, code } = await api.post(`/young/signin`, { email, password });
 
       if (code === "2FA_REQUIRED") {
-        plausibleEvent("2FA demandée");
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
 
@@ -45,23 +44,9 @@ const Signin: React.FC = () => {
         return;
       }
 
-      plausibleEvent("Connexion réussie");
       await login(young);
 
-      if (!redirect) {
-        history.push("/");
-        return;
-      }
-
-      const redirectionApproved = isValidRedirectUrl(redirect);
-
-      if (!redirectionApproved) {
-        captureMessage("Invalid redirect url", { extra: { redirect } });
-        toastr.error("Erreur", "Url de redirection invalide : " + redirect);
-        return history.push("/");
-      }
-
-      history.push(redirect);
+      redirectAfterSignin(history, redirect);
     } catch (e) {
       setPassword("");
       if (e.code === "TOO_MANY_REQUESTS") {
@@ -70,10 +55,15 @@ const Signin: React.FC = () => {
           text: "Vous avez atteint le maximum de tentatives de connexion autorisées.",
           subText: `Votre accès est bloqué jusqu'à ${date !== "-" ? `à ${date}.` : "demain."}. Revenez d'ici quelques minutes.`,
         });
+      } else if (e.code === ERRORS.PASSWORD_RESET_REQUIRED) {
+        setError({
+          text: "Votre mot de passe doit être réinitialisé.",
+          subText: "Par mesure de sécurité, un e-mail contenant le lien de réinitialisation vient de vous être envoyé.",
+        });
       } else {
         setError({
           text: "E-mail et/ou mot de passe incorrect(s)",
-          subText: "",
+          subText: "Après plusieurs échecs consécutifs, la connexion est temporairement suspendue. Réessayez dans quelques minutes.",
         });
       }
     }

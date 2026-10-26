@@ -14,10 +14,13 @@ ChartJS.register(ArcElement, Tooltip, Legend, LinearScale);
 import store from "./redux/store";
 
 import App from "./app";
+import { reloadAfterPreloadError } from "./utils/preloadErrorReload";
 
+// Import dynamique en échec (build remplacé, bascule d'instances) : la page est rechargée (garde-fou dans le module)
 window.addEventListener("vite:preloadError", (event) => {
-  captureMessage("Preloading Error", event);
-  window.location.reload();
+  // Contexte Sentry en objet simple : passé tel quel, l'Event était ignoré et le module en échec perdu
+  captureMessage("Preloading Error", { extra: { error: String(event.payload) } });
+  reloadAfterPreloadError();
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(

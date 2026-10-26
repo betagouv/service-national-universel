@@ -4,44 +4,26 @@ import Joi from "joi";
 import mongoose from "mongoose";
 import { config } from "../../config";
 import {
-  canEditLigneBusTeam,
-  canEditLigneBusGeneralInfo,
-  canEditLigneBusPointDeRassemblement,
-  isBusEditionOpen,
-  ROLES,
   formatStringLongDate,
   isIsoDate,
   translateBusPatchesField,
   canExportConvoyeur,
   isAdmin,
   SENDINBLUE_TEMPLATES,
-  isTeamLeaderOrSupervisorEditable,
-  hasPermission,
-  ACTIONS,
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
   isReadAuthorized,
 } from "snu-lib";
-import {
-  LigneBusModel,
-  LigneToPointModel,
-  PlanTransportModel,
-  PointDeRassemblementModel,
-  CohesionCenterModel,
-  SchemaDeRepartitionModel,
-  ReferentModel,
-  CohortModel,
-  SessionPhase1Model,
-} from "../../models";
+import { LigneBusModel, LigneToPointModel, PointDeRassemblementModel, CohesionCenterModel, SchemaDeRepartitionModel, ReferentModel, CohortModel } from "../../models";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
-import { getInfoBus, updatePDRForLine, updateSessionForLine } from "./ligneDeBusService";
-import { notifyTransporteurLineWasUpdated } from "./ligneDeBusNotificationService";
+import { getInfoBus } from "./ligneDeBusService";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+import { getCenterIdsInUserScope, isLigneBusInUserScope, serializeLigneBus, serializeLigneBusList, canViewConvoyeurTeam } from "../../services/sejourAccess";
 
 const router = express.Router();
 
@@ -51,16 +33,19 @@ const router = express.Router();
 router.get(
   "/all",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
-      const ligneBus = await LigneBusModel.find({ deletedAt: { $exists: false } });
+      // Sans périmètre, cette route renvoyait le plan de transport national complet.
+      const centerIds = await getCenterIdsInUserScope(req.user);
+      const scopeFilter = centerIds === null ? {} : { centerId: { $in: centerIds } };
+      const ligneBus = await LigneBusModel.find({ deletedAt: { $exists: false }, ...scopeFilter });
       let arrayMeetingPoints = [];
       // @ts-ignore
       ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
       const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints }, deletedAt: { $exists: false } });
       const ligneToPoints = await LigneToPointModel.find({ lineId: { $in: ligneBus.map((l) => l._id) } });
-      return res.status(200).send({ ok: true, data: { ligneBus, meetingPoints, ligneToPoints } });
+      return res.status(200).send({ ok: true, data: { ligneBus: serializeLigneBusList(ligneBus, req.user), meetingPoints, ligneToPoints } });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -73,7 +58,7 @@ router.get(
 router.get(
   "/cohort/:cohort",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
@@ -84,12 +69,14 @@ router.get(
 
       const { cohort } = value;
 
-      const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false } });
+      const centerIds = await getCenterIdsInUserScope(req.user);
+      const scopeFilter = centerIds === null ? {} : { centerId: { $in: centerIds } };
+      const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false }, ...scopeFilter });
       let arrayCenter = [];
       // @ts-ignore
       ligneBus.map((l) => (arrayCenter = arrayCenter.concat(l.centerId)));
       const centers = await CohesionCenterModel.find({ _id: { $in: arrayCenter } });
-      return res.status(200).send({ ok: true, data: { ligneBus, centers } });
+      return res.status(200).send({ ok: true, data: { ligneBus: serializeLigneBusList(ligneBus, req.user), centers } });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -97,486 +84,10 @@ router.get(
   },
 );
 
-router.put("/:id/info", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      busId: Joi.string().required(),
-      departuredDate: Joi.date().required(),
-      returnDate: Joi.date().required(),
-      youngCapacity: Joi.number().required(),
-      totalCapacity: Joi.number().required(),
-      followerCapacity: Joi.number().required(),
-      travelTime: Joi.string().required(),
-      lunchBreak: Joi.boolean().required(),
-      lunchBreakReturn: Joi.boolean().required(),
-      delayedForth: Joi.string(),
-      delayedBack: Joi.string(),
-    }).validate({ ...req.params, ...req.body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    let { id, busId, departuredDate, returnDate, youngCapacity, totalCapacity, followerCapacity, travelTime, lunchBreak, lunchBreakReturn, delayedForth, delayedBack } = value;
-
-    const ligne = await LigneBusModel.findById(id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const cohort = await CohortModel.find({ name: ligne.cohort });
-    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (req.user.role === ROLES.TRANSPORTER) {
-      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else {
-      if (!canEditLigneBusGeneralInfo(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    youngCapacity = parseInt(youngCapacity);
-    totalCapacity = parseInt(totalCapacity);
-    followerCapacity = parseInt(followerCapacity);
-
-    if (totalCapacity < youngCapacity + followerCapacity) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    const planDeTransport = await PlanTransportModel.findById(id);
-    if (!planDeTransport) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-
-    //add some checks
-
-    ligne.set({
-      busId,
-      departuredDate,
-      returnDate,
-      youngCapacity,
-      totalCapacity,
-      followerCapacity,
-      travelTime,
-      lunchBreak,
-      lunchBreakReturn,
-      delayedForth,
-      delayedBack,
-    });
-
-    await ligne.save({ fromUser: req.user });
-
-    // * Update slave PlanTransport
-    // ! Gerer logique si il y a deja des inscrits
-    planDeTransport.set({
-      busId,
-      departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
-      returnString: returnDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
-      lineFillingRate: youngCapacity && Math.floor((planDeTransport.youngSeatsTaken / youngCapacity) * 100),
-      youngCapacity,
-      totalCapacity,
-      followerCapacity,
-      travelTime,
-      lunchBreak,
-      lunchBreakReturn,
-      delayedForth,
-      delayedBack,
-    });
-    await planDeTransport.save({ fromUser: req.user });
-    // * End update slave PlanTransport
-
-    const infoBus = await getInfoBus(ligne);
-
-    await notifyTransporteurLineWasUpdated(ligne, "Informations générales");
-
-    return res.status(200).send({ ok: true, data: infoBus });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      role: Joi.string().required(),
-      idTeam: Joi.string(),
-      lastname: Joi.string().required(),
-      firstname: Joi.string().required(),
-      birthdate: Joi.date().required(),
-      phone: Joi.string().required(),
-      mail: Joi.string().required(),
-      forth: Joi.boolean().required(),
-      back: Joi.boolean().required(),
-    }).validate({ ...req.params, ...req.body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    const ligne = await LigneBusModel.findById(value.id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const cohort = await CohortModel.find({ name: ligne.cohort });
-    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (req.user.role === ROLES.TRANSPORTER) {
-      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else {
-      if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const NewMember = {
-      role: value.role,
-      lastName: value.lastname,
-      firstName: value.firstname,
-      birthdate: value.birthdate,
-      phone: value.phone,
-      mail: value.mail,
-      forth: value.forth,
-      back: value.back,
-    };
-
-    const memberToDelete = ligne.team.id(value.idTeam);
-    if (!memberToDelete) {
-      ligne.team.push(NewMember);
-    } else {
-      memberToDelete.set({
-        role: value.role,
-        lastName: value.lastname,
-        firstName: value.firstname,
-        birthdate: value.birthdate,
-        phone: value.phone,
-        mail: value.mail,
-        forth: value.forth,
-        back: value.back,
-      });
-    }
-    await ligne.save({ fromUser: req.user });
-
-    const infoBus = await getInfoBus(ligne);
-
-    await notifyTransporteurLineWasUpdated(ligne, "Équipe");
-
-    return res.status(200).send({ ok: true, data: infoBus });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/teamDelete", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      idTeam: Joi.string().required(),
-      role: Joi.string().required(),
-      lastname: Joi.string().required(),
-      firstname: Joi.string().required(),
-      birthdate: Joi.date().required(),
-      phone: Joi.string().required(),
-      mail: Joi.string().required(),
-      forth: Joi.boolean().required(),
-      back: Joi.boolean().required(),
-    }).validate({ ...req.params, ...req.body });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const ligne = await LigneBusModel.findById(value.id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const cohort = await CohortModel.find({ name: ligne.cohort });
-    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (req.user.role === ROLES.TRANSPORTER) {
-      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else {
-      if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const memberToDelete = ligne.team.id(value.idTeam);
-    if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    await memberToDelete.deleteOne();
-    await ligne.save({ fromUser: req.user });
-
-    const infoBus = await getInfoBus(ligne);
-
-    await notifyTransporteurLineWasUpdated(ligne, "Équipe");
-
-    res.status(200).send({ ok: true, data: infoBus });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/centre", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      centerArrivalTime: Joi.string().required(),
-      centerDepartureTime: Joi.string().required(),
-      sessionId: Joi.string(),
-      sendCampaign: Joi.boolean(),
-    }).validate({ ...req.params, ...req.body });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    let { id, centerArrivalTime, centerDepartureTime, sessionId, sendCampaign } = value;
-
-    const ligne = await LigneBusModel.findById(id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const cohort = await CohortModel.findOne({ name: ligne.cohort });
-    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const sessionHasChanged = sessionId && sessionId !== ligne.sessionId;
-    const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
-
-    const canUpdateSessionId = hasPermission(req.user, ACTIONS.TRANSPORT.UPDATE_SESSION_ID, { cohort });
-    const canUpdateCenterSchedule = hasPermission(req.user, ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE, { cohort });
-    const canSendNotifications = hasPermission(req.user, ACTIONS.TRANSPORT.SEND_NOTIFICATION, { cohort });
-
-    if ((sessionHasChanged && !canUpdateSessionId) || (scheduleHasChanged && !canUpdateCenterSchedule) || (sendCampaign && !canSendNotifications)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    if (scheduleHasChanged) {
-      ligne.set({
-        centerArrivalTime,
-        centerDepartureTime,
-      });
-
-      await ligne.save({ fromUser: req.user });
-
-      const planDeTransport = await PlanTransportModel.findById(id);
-      if (!planDeTransport) {
-        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      }
-      planDeTransport.set({
-        centerArrivalTime,
-        centerDepartureTime,
-      });
-
-      await planDeTransport.save({ fromUser: req.user });
-    }
-
-    if (sessionHasChanged) {
-      const session = await SessionPhase1Model.findById(sessionId);
-      if (!session) throw new Error(ERRORS.NOT_FOUND);
-      await updateSessionForLine({
-        ligne,
-        session,
-        user: req.user,
-        sendCampaign,
-      });
-    }
-
-    const infoBus = await getInfoBus(ligne);
-
-    await notifyTransporteurLineWasUpdated(ligne, "Centre de cohésion");
-
-    return res.status(200).send({ ok: true, data: infoBus });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      transportType: Joi.string().required(),
-      meetingHour: Joi.string().required(),
-      busArrivalHour: Joi.string().required(),
-      departureHour: Joi.string().required(),
-      returnHour: Joi.string().required(),
-      meetingPointId: Joi.string().required(),
-      newMeetingPointId: Joi.string().required(),
-    }).validate({ ...req.params, ...req.body });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId } = value;
-
-    const ligne = await LigneBusModel.findById(id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const cohort = await CohortModel.find({ name: ligne.cohort });
-    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (req.user.role === ROLES.TRANSPORTER) {
-      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else {
-      if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
-    if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(req.user.role)) {
-      ligneToPoint.set({
-        transportType,
-        meetingHour,
-        busArrivalHour,
-        departureHour,
-        returnHour,
-        ...(meetingPointId !== newMeetingPointId && { meetingPointId: newMeetingPointId }),
-      });
-
-      await ligneToPoint.save({ fromUser: req.user });
-
-      if (meetingPointId !== newMeetingPointId) {
-        const meetingPointsIds = ligne.meetingPointsIds.filter((id) => id !== meetingPointId);
-        meetingPointsIds.push(newMeetingPointId);
-        ligne.set({ meetingPointsIds });
-        await ligne.save({ fromUser: req.user });
-      }
-    } else {
-      ligneToPoint.set({
-        transportType,
-        meetingHour,
-      });
-      await ligneToPoint.save({ fromUser: req.user });
-    }
-
-    // * Update slave PlanTransport
-    const planDeTransport = await PlanTransportModel.findById(id);
-    if (!planDeTransport) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(new mongoose.Types.ObjectId(newMeetingPointId));
-    if (!pointDeRassemblement) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    const meetingPoint = planDeTransport.pointDeRassemblements.find((meetingPoint) => {
-      return meetingPoint.meetingPointId === meetingPointId;
-    });
-    if (!meetingPoint) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    meetingPoint.set({
-      meetingPointId: newMeetingPointId,
-      ...pointDeRassemblement._doc,
-      busArrivalHour: ligneToPoint.busArrivalHour,
-      meetingHour: ligneToPoint.meetingHour,
-      departureHour: ligneToPoint.departureHour,
-      returnHour: ligneToPoint.returnHour,
-      transportType: ligneToPoint.transportType,
-    });
-
-    await planDeTransport.save({ fromUser: req.user });
-    // * End update slave PlanTransport
-
-    const infoBus = await getInfoBus(ligne);
-
-    await notifyTransporteurLineWasUpdated(ligne, "Point de rassemblement");
-
-    return res.status(200).send({ ok: true, data: infoBus });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error: errorId, value: lineId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const { error, value } = Joi.object({
-      transportType: Joi.string(),
-      meetingHour: Joi.string(),
-      busArrivalHour: Joi.string(),
-      departureHour: Joi.string(),
-      returnHour: Joi.string(),
-      meetingPointId: Joi.string(),
-      newMeetingPointId: Joi.string(),
-      sendEmailCampaign: Joi.boolean(),
-    }).validate(req.body);
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    const updatedLigneBus = await updatePDRForLine(lineId, value, req.user);
-
-    const infoBus = await getInfoBus(updatedLigneBus);
-    return res.status(200).send({ ok: true, data: infoBus });
-  } catch (error) {
-    if (error.message === ERRORS.NOT_FOUND) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    if (error.message === ERRORS.INVALID_BODY) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    if (error.message === ERRORS.INVALID_PARAMS) {
-      return res.status(400).send({ ok: false, code: error.message });
-    }
-    if (error.message === ERRORS.OPERATION_UNAUTHORIZED) {
-      return res.status(403).send({ ok: false, code: error.message });
-    }
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      meetingPointId: Joi.string().required(),
-    }).validate({ ...req.params, ...req.body });
-
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    if (req.user.role !== "admin") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const { id, meetingPointId } = value;
-
-    const ligne = await LigneBusModel.findById(id);
-    if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
-    if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    let ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
-    if (ligneToPoint) {
-      ligneToPoint.set({ deletedAt: undefined });
-      await ligneToPoint.save({ fromUser: req.user });
-    } else {
-      ligneToPoint = await LigneToPointModel.create({
-        lineId: ligne._id.toString(),
-        meetingPointId: meetingPoint._id.toString(),
-        transportType: "bus",
-        returnHour: "00:00",
-        meetingHour: "00:00",
-        departureHour: "00:00",
-        busArrivalHour: "00:00",
-      });
-    }
-
-    ligne.set({ meetingPointsIds: [...ligne.meetingPointsIds, meetingPoint._id.toString()] });
-    await ligne.save({ fromUser: req.user });
-
-    // * Update slave PlanTransport
-    const planDeTransport = await PlanTransportModel.findById(id);
-    if (!planDeTransport) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(new mongoose.Types.ObjectId(meetingPoint._id));
-    if (!pointDeRassemblement) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    planDeTransport.pointDeRassemblements.push({
-      meetingPointId: meetingPoint._id,
-      ...pointDeRassemblement._doc,
-      busArrivalHour: ligneToPoint.busArrivalHour,
-      meetingHour: ligneToPoint.meetingHour,
-      departureHour: ligneToPoint.departureHour,
-      returnHour: ligneToPoint.returnHour,
-      transportType: ligneToPoint.transportType,
-    });
-
-    await planDeTransport.save({ fromUser: req.user });
-    // * End update slave PlanTransport
-
-    const infoBus = await getInfoBus(ligne);
-
-    return res.status(200).send({ ok: true, data: infoBus });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.get(
   "/:id",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
@@ -590,8 +101,12 @@ router.get(
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
       const infoBus = await getInfoBus(ligneBus);
-      return res.status(200).send({ ok: true, data: infoBus });
+      return res.status(200).send({ ok: true, data: serializeLigneBus(infoBus, req.user) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -602,7 +117,7 @@ router.get(
 router.get(
   "/:id/availablePDRByRegion",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res) => {
     try {
       const { error, value } = Joi.object({
@@ -615,6 +130,10 @@ router.get(
 
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       if (!ligneBus.meetingPointsIds.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -634,7 +153,7 @@ router.get(
 router.get(
   "/:id/availablePDR",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res) => {
     try {
       const { error, value } = Joi.object({
@@ -647,6 +166,10 @@ router.get(
 
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const listGroup = await SchemaDeRepartitionModel.find({ centerId: ligneBus.centerId });
 
@@ -672,7 +195,7 @@ router.get(
 router.get(
   "/:id/ligne-to-points",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
@@ -685,6 +208,10 @@ router.get(
 
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const ligneToPoints = await LigneToPointModel.find({ lineId: id, meetingPointId: { $in: ligneBus.meetingPointsIds }, deletedAt: { $exists: false } });
 
@@ -705,7 +232,7 @@ router.get(
 router.get(
   "/:id/data-for-check",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value: id } = validateId(req.params.id);
@@ -714,6 +241,10 @@ router.get(
 
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       //Get all youngs for this ligne and by meeting point
       const queryYoung = [
         { $match: { _id: ligneBus._id } },
@@ -796,7 +327,7 @@ router.get(
 router.get(
   "/cohort/:cohort/hasValue",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
@@ -819,6 +350,8 @@ router.get(
 
 const PATCHES_COUNT_PER_PAGE = 20;
 const HIDDEN_FIELDS = ["/missionsInMail", "/historic", "/uploadedAt", "/sessionPhase1Id", "/correctedAt", "/lastStatusAt", "/token", "/Token"];
+/** Les patches `team/...` portent l'état civil, la date de naissance, l'email et le téléphone des accompagnateurs. */
+const isConvoyeurTeamPath = (path: string) => typeof path === "string" && path.startsWith("/team");
 const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
 
 /**
@@ -826,26 +359,42 @@ const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
  */
 router.get("/patches/filter-options", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
+    // Même garde que /patches/:cohort : les auteurs (email, rôle, département) étaient
+    // lisibles par tout compte référent, et sur tout le territoire.
+    if (!isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user: req.user! })) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    const scopedCenterIds = await getCenterIdsInUserScope(req.user);
+    if (scopedCenterIds !== null && scopedCenterIds.length === 0) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    let busLineFilter = {};
+    let lineToPointFilter = {};
+    if (scopedCenterIds !== null) {
+      const lines = await LigneBusModel.find({ centerId: { $in: scopedCenterIds } }, { _id: 1 });
+      const lineIds = lines.map((line) => line._id);
+      const lineToPoints = await LigneToPointModel.find({ lineId: { $in: lineIds.map((id) => id.toString()) } }, { _id: 1 });
+      busLineFilter = { ref: { $in: lineIds } };
+      lineToPointFilter = { ref: { $in: lineToPoints.map((ltp) => ltp._id) } };
+    }
+
     const db = mongoose.connection.db;
     const busline = {
-      op: await db.collection("lignebus_patches").distinct("ops.op"),
-      path: await db.collection("lignebus_patches").distinct("ops.path"),
-      user: await db.collection("lignebus_patches").distinct("user"),
+      op: await db.collection("lignebus_patches").distinct("ops.op", busLineFilter),
+      path: await db.collection("lignebus_patches").distinct("ops.path", busLineFilter),
+      user: await db.collection("lignebus_patches").distinct("user", busLineFilter),
     };
     const lineToPoint = {
-      op: await db.collection("lignetopoint_patches").distinct("ops.op"),
-      path: await db.collection("lignetopoint_patches").distinct("ops.path"),
-      user: await db.collection("lignetopoint_patches").distinct("user"),
+      op: await db.collection("lignetopoint_patches").distinct("ops.op", lineToPointFilter),
+      path: await db.collection("lignetopoint_patches").distinct("ops.path", lineToPointFilter),
+      user: await db.collection("lignetopoint_patches").distinct("user", lineToPointFilter),
     };
-    // const modifications = {
-    //   op: await db.collection("modificationbus_patches").distinct("ops.op"),
-    //   path: await db.collection("modificationbus_patches").distinct("ops.path"),
-    //   user: await db.collection("modificationbus_patches").distinct("user"),
-    // };
 
-    const op = mergeArrayItems([...busline.op, ...lineToPoint.op /*, ...modifications.op*/]);
-    const path = mergeArrayItems([...busline.path, ...lineToPoint.path /*, ...modifications.path*/]);
-    const user = mergeArrayItems([...busline.user, ...lineToPoint.user /*, ...modifications.user*/], "_id");
+    const op = mergeArrayItems([...busline.op, ...lineToPoint.op]);
+    const path = mergeArrayItems([...busline.path, ...lineToPoint.path]).filter((key) => canViewConvoyeurTeam(req.user) || key !== "team"); // clés sans « / » (pathToKey)
+    // Le filtre n'affiche que le nom de l'auteur : email, rôle et département ne sortent plus.
+    const user = mergeArrayItems([...busline.user, ...lineToPoint.user], "_id").map(({ _id, firstName, lastName }) => ({ _id, firstName, lastName }));
 
     return res.status(200).send({
       ok: true,
@@ -899,8 +448,14 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     }
 
     // --- security
-    if (!isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user: req.user!, ignorePolicy: true })) {
+    if (!isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user: req.user! })) {
       throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+    }
+    // PATCHES:READ est porté par des rôles à périmètre (référent de classe, administrateur CLE…) :
+    // sans filtre, l'historique national du plan de transport était lisible par tous.
+    const scopedCenterIds = await getCenterIdsInUserScope(req.user);
+    if (scopedCenterIds !== null && scopedCenterIds.length === 0) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- query
@@ -908,7 +463,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     const { cohort: cohortName } = value;
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const lines = await LigneBusModel.find({ cohort: cohort.name });
+    const lines = await LigneBusModel.find({ cohort: cohort.name, ...(scopedCenterIds === null ? {} : { centerId: { $in: scopedCenterIds } }) });
     if (lines.length > 0) {
       const lineIds = lines.map((line) => line._id);
       const lineSet = {};
@@ -951,8 +506,16 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       const db = mongoose.connection.db;
       let patches: any[] = [];
 
+      // PL8 (25/09/2026, résiduel de H58) : ne garder la branche `{ cohortId: cohort._id }` du `$or`
+      // que pour ADMIN — pour un référent scopé, elle contournait le périmètre par centre et
+      // renvoyait l'historique national du cohort. Même bascule qu'au L466 (scopedCenterIds).
+      const patchesFilter = scopedCenterIds === null ? { $or: [{ ref: { $in: lineIds } }, { cohortId: cohort._id }] } : { ref: { $in: lineIds } };
+      // PL8 : l'auteur d'un patch n'est projeté que sur {_id, firstName, lastName} pour un non-admin,
+      // comme le fait déjà /patches/filter-options (L397) — email, rôle et département ne sortent plus.
+      const projectPatchUser = (user: any) => (scopedCenterIds === null || !user ? user : { _id: user._id, firstName: user.firstName, lastName: user.lastName });
+
       // --- lignebus patches...
-      let cursor = db.collection("lignebus_patches").find({ $or: [{ ref: { $in: lineIds } }, { cohortId: cohort._id }] });
+      let cursor = db.collection("lignebus_patches").find(patchesFilter);
       for await (const doc of cursor) {
         if (doc.ops && filterUserFunction(doc)) {
           const bus = lineSet[doc.ref];
@@ -960,6 +523,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
             if (
               filterOpFunction(op) &&
               !HIDDEN_FIELDS.includes(op.path) &&
+              !(isConvoyeurTeamPath(op.path) && !canViewConvoyeurTeam(req.user)) &&
               (!IGNORED_VALUES.includes(op.value) || op.path.match(/\/[0-9]+$/)) &&
               (!IGNORED_VALUES.includes(op.originalValue) || op.op === "create")
             ) {
@@ -972,7 +536,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
                 path: op.path,
                 value: op.value,
                 originalValue: op.originalValue,
-                user: doc.user,
+                user: projectPatchUser(doc.user),
               });
             }
           }
@@ -996,7 +560,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
                 path: op.path,
                 value: op.value,
                 originalValue: op.originalValue,
-                user: doc.user,
+                user: projectPatchUser(doc.user),
               });
             }
           }

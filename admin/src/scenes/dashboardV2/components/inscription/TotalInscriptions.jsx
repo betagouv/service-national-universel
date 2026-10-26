@@ -2,6 +2,7 @@ import React from "react";
 import LineChart from "../graphs/LineChart";
 import ButtonSecondary from "@/components/ui/buttons/ButtonSecondary";
 import * as XLSX from "xlsx";
+import { safeAoaToSheet } from "@/utils/file";
 import FileSaver from "file-saver";
 
 export default function TotalInscription({ totalInscriptions, goal }) {
@@ -39,7 +40,7 @@ export default function TotalInscription({ totalInscriptions, goal }) {
 
   const exportData = () => {
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-    var worksheet = XLSX.utils.aoa_to_sheet([
+    var worksheet = safeAoaToSheet([
       ["Objectifs", goal],
       [
         "Mois",

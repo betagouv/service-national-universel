@@ -4,8 +4,6 @@ import * as request from "supertest";
 import { ConfigModule } from "@nestjs/config";
 import { Logger } from "@nestjs/common";
 import { HealthCheckController } from "../../src/infra/HealthCheck.controller";
-import { SENTRY_PROVIDER } from "../../src/infra/shared/Sentry.provider";
-import * as Sentry from "@sentry/nestjs";
 
 describe("HealthCheckController", () => {
     let app: INestApplication;
@@ -18,13 +16,7 @@ describe("HealthCheckController", () => {
                 }),
             ],
             controllers: [HealthCheckController],
-            providers: [
-                Logger,
-                {
-                    provide: SENTRY_PROVIDER,
-                    useValue: Sentry,
-                },
-            ],
+            providers: [Logger],
         }).compile();
 
         app = moduleFixture.createNestApplication({ logger: false });
@@ -46,4 +38,20 @@ describe("HealthCheckController", () => {
             });
         });
     });
-}); 
+
+    describe("GET /testsentry", () => {
+        it("n'existe plus : levait une 500 et un événement Sentry à la demande, sans authentification", async () => {
+            await request(app.getHttpServer()).get("/testsentry").expect(404);
+        });
+    });
+
+    describe("GET / (PL12)", () => {
+        it("ne renvoie plus la version déployée (release) sans authentification", async () => {
+            const response = await request(app.getHttpServer()).get("/").expect(200);
+
+            expect(response.body).toEqual({ status: "ok" });
+            expect(response.body.release).toBeUndefined();
+            expect(JSON.stringify(response.body)).not.toContain("test-version");
+        });
+    });
+});
