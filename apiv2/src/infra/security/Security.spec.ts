@@ -1,11 +1,16 @@
+import { Body, Controller, INestApplication, Post } from "@nestjs/common";
+import { NestExpressApplication } from "@nestjs/platform-express";
+import { Test } from "@nestjs/testing";
 import * as express from "express";
 import * as request from "supertest";
+import * as zlib from "zlib";
 import * as basicAuth from "express-basic-auth";
 import { MemoryStore } from "express-rate-limit";
 
 import { hostGuard, hotesAutorises } from "./HostGuard";
 import { RATE_LIMITS, estRouteCouteuse, jetonCookieAdmin, normaliserIp, rateLimiter } from "./RateLimit";
 import { bullBoardIpAllowlist, masquerSecrets } from "./BullBoardSecurity";
+import { parseursSansDecompression } from "./ParseursCorps";
 
 describe("HostGuard (L46)", () => {
     const app = express();
@@ -159,5 +164,62 @@ describe("Bull Board (M79)", () => {
             await request(app).get("/queues").auth("admin", `mauvais-${i}`).expect(401);
         }
         await request(app).get("/queues").auth("admin", "secret").expect(429);
+    });
+});
+
+describe("Parseurs de corps sans décompression (CVE-2026-111497)", () => {
+    @Controller()
+    class EchoController {
+        @Post("echo")
+        echo(@Body() body: unknown) {
+            return body;
+        }
+    }
+
+    let app: INestApplication;
+
+    beforeAll(async () => {
+        const moduleRef = await Test.createTestingModule({ controllers: [EchoController] }).compile();
+        app = moduleRef.createNestApplication<NestExpressApplication>({ bodyParser: false, logger: false });
+        parseursSansDecompression(app as NestExpressApplication);
+        await app.init();
+    });
+
+    afterAll(async () => {
+        await app.close();
+    });
+
+    const json = Buffer.from(JSON.stringify({ a: 1 }));
+
+    it.each([
+        ["br", zlib.brotliCompressSync(json)],
+        ["gzip", zlib.gzipSync(json)],
+        ["deflate", zlib.deflateSync(json)],
+    ])("refuse en 415 un corps JSON compressé en %s, sans le décompresser", async (encoding, corps) => {
+        await request(app.getHttpServer())
+            .post("/echo")
+            .set("Content-Type", "application/json")
+            .set("Content-Encoding", encoding)
+            .send(corps)
+            .expect(415);
+    });
+
+    it("refuse en 415 un corps urlencoded compressé", async () => {
+        await request(app.getHttpServer())
+            .post("/echo")
+            .set("Content-Type", "application/x-www-form-urlencoded")
+            .set("Content-Encoding", "br")
+            .send(zlib.brotliCompressSync(Buffer.from("a=1")))
+            .expect(415);
+    });
+
+    it("lit toujours un corps JSON non compressé", async () => {
+        const res = await request(app.getHttpServer()).post("/echo").send({ a: 1 }).expect(201);
+        expect(res.body).toEqual({ a: 1 });
+    });
+
+    it("lit toujours un corps urlencoded imbriqué (extended, comme le parseur par défaut de Nest)", async () => {
+        const res = await request(app.getHttpServer()).post("/echo").type("form").send("a[b]=1").expect(201);
+        expect(res.body).toEqual({ a: { b: "1" } });
     });
 });
