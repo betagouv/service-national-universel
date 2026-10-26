@@ -78,11 +78,11 @@ jobs:
           fi
           echo "build=true" >> "$GITHUB_OUTPUT"
 
-      # Node 20 comme l'image Clever Cloud (engines ^20.17 : dernière 20.x).
+      # Node 24 comme l'image Clever Cloud (engines ^24.11 : dernière 24.x).
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         if: steps.changes.outputs.build == 'true'
         with:
-          node-version: "20"
+          node-version: "24"
 
       # build.sh installe globalement la version de turbo du lockfile : le runner est éphémère.
       # CC_DEPLOYMENT_ID n'est pas défini : le script ne vide pas le répertoire de travail.

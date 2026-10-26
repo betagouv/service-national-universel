@@ -48,8 +48,8 @@
     "snupport-app"
   ],
   "engines": {
-    "node": "^20.17",
-    "npm": "^10.8",
+    "node": "^24.11",
+    "npm": "^11",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "devDependencies": {

@@ -26,7 +26,7 @@ runs:
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: "20.17"
+        node-version: "24"
 
     # Les runners self-hosted sont persistants : node_modules survit d'un job a l'autre.
     # Quand il correspond deja au package-lock courant, restaurer l'archive depuis le cache

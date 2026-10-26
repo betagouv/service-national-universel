@@ -79,8 +79,8 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "engines": {
-    "node": "^20.17",
-    "npm": "^10.8",
+    "node": "^24.11",
+    "npm": "^11",
     "yarn": "\ud83c\udf4e This project uses NPM, please do not use YARN. \ud83c\udf4e"
   }
 }
