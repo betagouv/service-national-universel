@@ -32,8 +32,8 @@
         "@bull-board/express": "^6.10.1",
         "@bull-board/nestjs": "^6.10.1",
         "@elastic/elasticsearch": "^8.17.1",
-        "@fast-csv/parse": "^5.0.2",
         "@fast-csv/format": "^5.0.2",
+        "@fast-csv/parse": "^5.0.2",
         "@getbrevo/brevo": "^2.2.0",
         "@nestjs-cls/transactional": "^3.0.3",
         "@nestjs/bullmq": "^11.0.2",
@@ -64,7 +64,7 @@
         "reflect-metadata": "^0.2.0",
         "rxjs": "^7.8.1",
         "snu-lib": "*",
-        "uuid": "^10.0.0",
+        "uuid": "^11.1.1",
         "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
     },
     "devDependencies": {
@@ -80,7 +80,6 @@
         "@types/node": "^20.3.1",
         "@types/nodemailer": "^8.0.2",
         "@types/supertest": "^6.0.0",
-        "@types/uuid": "^10.0.0",
         "@typescript-eslint/eslint-plugin": "^8.0.0",
         "@typescript-eslint/parser": "^8.0.0",
         "arch-unit-ts": "^1.0.8",
