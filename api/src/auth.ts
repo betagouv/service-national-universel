@@ -1101,7 +1101,11 @@ class Auth {
       user.forgotPasswordResetExpires = "";
       user.passwordResetRequired = false;
       user.passwordChangedAt = Date.now();
+      // Le verrou posé par les échecs tombe avec le mot de passe qu'il protégeait (SNU-157) : sinon
+      // le nouveau mot de passe, juste, est refusé comme faux (PM5) jusqu'à l'échéance du blocage.
+      // Le lien prouve la possession de la boîte mail ; le mot de passe posé n'est connu de personne d'autre.
       user.loginAttempts = 0;
+      user.nextLoginAttemptIn = null;
       await user.save();
       return res.status(200).send({ ok: true });
     } catch (error) {

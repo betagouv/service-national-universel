@@ -402,6 +402,36 @@ describe("PM6 — reset_password : compteur et verrou sur le mot de passe couran
   });
 });
 
+// SNU-157 : le verrou posé par les échecs survivait à la réinitialisation. Le nouveau mot de passe,
+// juste, était alors refusé comme « incorrect » (réponse PM5) jusqu'à l'échéance du blocage.
+describe("SNU-157 — forgot_password_reset lève le verrou de connexion", () => {
+  const NEW_PASSWORD = PASSWORD + "Nouveau1";
+  const TOKEN = "a".repeat(40);
+  const lockedByFailures = () => ({
+    loginAttempts: 13,
+    nextLoginAttemptIn: new Date(Date.now() + 60 * 60 * 1000),
+    forgotPasswordResetToken: TOKEN,
+    forgotPasswordResetExpires: new Date(Date.now() + 60 * 60 * 1000),
+  });
+
+  it.each([
+    ["/young", () => createYoung(lockedByFailures()), YoungModel],
+    ["/referent", () => createReferentHelper({ ...getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, password: PASSWORD }), ...lockedByFailures() } as any), ReferentModel],
+  ])("connecte %s avec le nouveau mot de passe juste après la réinitialisation", async (path, create, model: any) => {
+    const user = await create();
+    const app = getAppHelper();
+
+    const reset = await request(app).post(`${path}/forgot_password_reset`).send({ token: TOKEN, password: NEW_PASSWORD });
+    expect(reset.status).toBe(200);
+
+    const after = await model.findById(user._id);
+    expect({ loginAttempts: after.loginAttempts, nextLoginAttemptIn: after.nextLoginAttemptIn }).toEqual({ loginAttempts: 0, nextLoginAttemptIn: null });
+
+    const res = await request(app).post(`${path}/signin`).send({ email: user.email, password: NEW_PASSWORD });
+    expect(res.status).toBe(200);
+  });
+});
+
 describe("M5 — plafond de 3 essais 2FA", () => {
   it("ne laisse pas dépasser 3 essais de code 2FA en parallèle", async () => {
     (config as any).ENABLE_2FA = true;
