@@ -1,9 +1,10 @@
-FROM node:20.17-alpine AS base
+FROM node:24.22.1-alpine3.23 AS base
 
 RUN apk --no-cache add bash mongodb-tools jq curl util-linux gettext-envsubst
 RUN curl -L https://github.com/rwynn/monstache/releases/download/v6.7.14/monstache_v6.7.14_linux_x86_64.tar.gz | tar -xvz && mv monstache /usr/local/bin
-# clever-tools 4+ exige Node 22+, 5+ Node 24+ : 3.14.0 est la dernière version compatible avec cette image Node 20.
-RUN npm install --global --ignore-scripts clever-tools@3.14.0
+# Même version que les workflows (clever-tools 5 exige Node 24+). docker_start.sh n'utilise que
+# `login --token --secret`, `stop --app` et `restart --quiet --app`, inchangés depuis la 3.x.
+RUN npm install --global --ignore-scripts clever-tools@5.0.2
 
 WORKDIR /build/devops/anonymization
 

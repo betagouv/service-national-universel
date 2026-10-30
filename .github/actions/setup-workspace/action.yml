@@ -26,17 +26,22 @@ runs:
     - name: Use Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: "20.17"
+        node-version: "24"
 
     # Les runners self-hosted sont persistants : node_modules survit d'un job a l'autre.
     # Quand il correspond deja au package-lock courant, restaurer l'archive depuis le cache
     # GitHub (~305 Mo, plusieurs minutes) ne fait que reecrire a l'identique ce qui est
     # deja sur le disque. Sur ubuntu-latest le temoin n'existe jamais, donc rien ne change.
+    # Le temoin et la cle de cache portent l'ABI de Node en plus du lockfile : apres une montee
+    # de Node sans changement de lockfile, un node_modules installe sous l'ancienne version
+    # (binaires natifs compiles pour l'ancienne ABI) ne doit pas etre reutilise.
     - name: Detect usable node_modules
       id: nm
       shell: bash
       run: |
-        H="${{ hashFiles('**/package-lock.json') }}"
+        ABI="abi$(node -p process.versions.modules)"
+        echo "abi=$ABI" >> "$GITHUB_OUTPUT"
+        H="$ABI-${{ hashFiles('**/package-lock.json') }}"
         if [ -f node_modules/.snu-lock ] && [ "$(cat node_modules/.snu-lock)" = "$H" ]; then
           echo "fresh=true" >> "$GITHUB_OUTPUT"
           echo "node_modules deja aligne sur package-lock : cache et npm ci ignores."
@@ -63,9 +68,9 @@ runs:
           packages/ds/node_modules
           packages/lib/node_modules
           packages/log-redaction/node_modules
-        key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
+        key: ${{ runner.os }}-${{ steps.nm.outputs.abi }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
-          ${{ runner.os }}-nodemodules-
+          ${{ runner.os }}-${{ steps.nm.outputs.abi }}-nodemodules-
 
     # Les scripts d'installation des dependances ne s'executent pas : un paquet npm
     # compromis ne peut rien lancer pendant `npm ci`. Seuls les scripts dont le depot
@@ -84,7 +89,7 @@ runs:
       shell: bash
       run: |
         mkdir -p node_modules
-        echo "${{ hashFiles('**/package-lock.json') }}" > node_modules/.snu-lock
+        echo "${{ steps.nm.outputs.abi }}-${{ hashFiles('**/package-lock.json') }}" > node_modules/.snu-lock
 
     - name: Build packages
       if: inputs.build != ''

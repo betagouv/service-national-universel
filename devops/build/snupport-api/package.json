@@ -2,7 +2,7 @@
   "name": "snupport-api",
   "version": "1.0.0",
   "engines": {
-    "node": "^20.17"
+    "node": "^24.11"
   },
   "scripts": {
     "start": "node snupport-api/src/index.js"
