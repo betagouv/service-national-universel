@@ -10,6 +10,11 @@
   "prettier": {
     "printWidth": 180
   },
+  "overrides": {
+    "postcss": "^8.5.29",
+    "postcss-selector-parser": "^7.1.6",
+    "source-map-js": "^1.2.2"
+  },
   "dependencies": {
     "@headlessui/react": "1.7.18",
     "@heroicons/react": "^2.0.18",
