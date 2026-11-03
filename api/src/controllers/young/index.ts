@@ -385,7 +385,7 @@ router.get(
     requestValidatorMiddleware({
       params: Joi.object({ id: idSchema().required() }),
     }),
-    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE]),
+    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
   ],
   async (req: UserRequest, res) => {
     try {
