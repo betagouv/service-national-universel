@@ -58,7 +58,8 @@ const Signin: React.FC = () => {
       } else if (e.code === ERRORS.PASSWORD_RESET_REQUIRED) {
         setError({
           text: "Votre mot de passe doit être réinitialisé.",
-          subText: "Par mesure de sécurité, un e-mail contenant le lien de réinitialisation vient de vous être envoyé.",
+          subText:
+            "Par mesure de sécurité, un e-mail contenant le lien de réinitialisation vient de vous être envoyé. Utilisez le plus récent et choisissez un mot de passe différent de l'actuel.",
         });
       } else {
         setError({
