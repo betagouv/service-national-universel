@@ -142,6 +142,12 @@ schema.index({ classeId: -1 });
 schema.index({ department: 1 });
 schema.index({ region: 1 });
 schema.index({ updatedAt: 1, status: 1 });
+// Recherche du compte par jeton de réinitialisation (`Auth.forgotPasswordReset`) : sans index, chaque
+// tentative parcourt toute la collection. Index partiel : le champ vaut "" par défaut, seuls les comptes
+// ayant une demande en cours y entrent, ce qui le garde minuscule. La requête (égalité sur un jeton non
+// vide) est incluse dans le filtre, donc le planificateur peut l'utiliser. Créé au démarrage par
+// l'autoIndex de Mongoose (`background: true`).
+schema.index({ forgotPasswordResetToken: 1 }, { partialFilterExpression: { forgotPasswordResetToken: { $gt: "" } } });
 
 export type YoungDocument<T = {}> = DocumentExtended<YoungType & T>;
 type SchemaExtended = YoungDocument & UserExtension & { previousStatus?: YoungType["status"] };
