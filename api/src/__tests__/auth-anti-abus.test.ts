@@ -432,6 +432,78 @@ describe("SNU-157 — forgot_password_reset lève le verrou de connexion", () =>
   });
 });
 
+// Logs de prod du 1er au 5/11/2026 : chaque demande de lien écrasait le jeton précédent. Le volontaire
+// en réinitialisation imposée recevait un lien à la connexion, redemandait aussitôt par « Mot de passe
+// oublié », puis ouvrait le premier e-mail arrivé : 400 « lien expiré ou invalide ».
+describe("Réinitialisation — une nouvelle demande ne périme pas le lien déjà reçu", () => {
+  const NEW_PASSWORD = PASSWORD + "Nouveau1";
+
+  // Jetons effectivement envoyés, dans l'ordre : c'est ce que le titulaire trouve dans sa boîte.
+  function sentTokens(): string[] {
+    return (sendTemplate as jest.Mock).mock.calls
+      .map(([, { params }]) => params?.cta)
+      .filter((cta) => typeof cta === "string" && cta.includes("/auth/reset?token="))
+      .map((cta) => cta.split("token=")[1]);
+  }
+
+  beforeEach(() => (sendTemplate as jest.Mock).mockClear());
+
+  it.each([
+    ["/young", () => createYoung(), YoungModel],
+    ["/referent", () => createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, password: PASSWORD } as any)), ReferentModel],
+  ])("%s : deux demandes successives envoient le même lien, et le premier reçu fonctionne", async (path, create, model: any) => {
+    const user = await create();
+    const app = getAppHelper();
+
+    expect((await request(app).post(`${path}/forgot_password`).send({ email: user.email })).status).toBe(200);
+    const first = await model.findById(user._id);
+    expect((await request(app).post(`${path}/forgot_password`).send({ email: user.email })).status).toBe(200);
+    const second = await model.findById(user._id);
+
+    const tokens = sentTokens();
+    expect(tokens).toHaveLength(2);
+    expect(tokens[1]).toBe(tokens[0]);
+    // L'échéance n'est pas repoussée par la seconde demande.
+    expect(second.forgotPasswordResetExpires.getTime()).toBe(first.forgotPasswordResetExpires.getTime());
+
+    const reset = await request(app).post(`${path}/forgot_password_reset`).send({ token: tokens[0], password: NEW_PASSWORD });
+    expect(reset.status).toBe(200);
+  });
+
+  it("le lien envoyé par la connexion en réinitialisation imposée survit à « Mot de passe oublié »", async () => {
+    const young = await createYoung({ passwordResetRequired: true });
+    const app = getAppHelper();
+
+    const signinRes = await signin(app, young.email, PASSWORD);
+    expect(signinRes.body.code).toBe("PASSWORD_RESET_REQUIRED");
+    expect((await request(app).post("/young/forgot_password").send({ email: young.email })).status).toBe(200);
+
+    const tokens = sentTokens();
+    expect(tokens).toHaveLength(2);
+    expect(tokens[1]).toBe(tokens[0]);
+
+    const reset = await request(app).post("/young/forgot_password_reset").send({ token: tokens[0], password: NEW_PASSWORD });
+    expect(reset.status).toBe(200);
+    expect((await signin(app, young.email, NEW_PASSWORD)).status).toBe(200);
+  });
+
+  it.each([
+    ["proche de l'échéance", 30 * 60 * 1000],
+    ["expiré", -60 * 1000],
+  ])("un jeton %s est remplacé par un nouveau, valable 2 h", async (_label, remainingMs) => {
+    const OLD_TOKEN = "b".repeat(40);
+    const young = await createYoung({ forgotPasswordResetToken: OLD_TOKEN, forgotPasswordResetExpires: new Date(Date.now() + remainingMs) });
+    const app = getAppHelper();
+
+    expect((await request(app).post("/young/forgot_password").send({ email: young.email })).status).toBe(200);
+
+    const after = await YoungModel.findById(young._id);
+    expect(after!.forgotPasswordResetToken).not.toBe(OLD_TOKEN);
+    expect(sentTokens()).toEqual([after!.forgotPasswordResetToken]);
+    expect(after!.forgotPasswordResetExpires!.getTime() - Date.now()).toBeGreaterThan(110 * 60 * 1000);
+  });
+});
+
 describe("M5 — plafond de 3 essais 2FA", () => {
   it("ne laisse pas dépasser 3 essais de code 2FA en parallèle", async () => {
     (config as any).ENABLE_2FA = true;

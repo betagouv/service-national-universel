@@ -51,6 +51,10 @@ import { getAcl } from "./services/iam/Permission.service";
 // Délai minimal entre deux envois du lien de réinitialisation imposée à un même compte.
 const PASSWORD_RESET_RESEND_DELAY_MS = 5 * 60 * 1000;
 
+// En deçà de cette validité restante, le lien en cours n'est plus renvoyé : un nouveau jeton part.
+// Au-delà, renvoyer le même jeton garde valables les e-mails déjà reçus (voir sendPasswordResetLink).
+export const PASSWORD_RESET_TOKEN_MIN_REMAINING_MS = 60 * 60 * 1000;
+
 // Le trust token ("cet appareil a déjà passé le 2FA") est lié au compte qui l'a obtenu :
 // sans cette liaison, le nom du cookie (`trust_token-<_id>`) est la seule chose qui porte
 // l'identité, et il est choisi par le client — n'importe quel trust token valide (ou même
@@ -1044,9 +1048,25 @@ class Auth {
     }
   }
 
+  /**
+   * Un jeton encore valable au moins PASSWORD_RESET_TOKEN_MIN_REMAINING_MS est renvoyé tel quel, avec
+   * son échéance d'origine. Sinon, chaque demande écrasait le jeton précédent : le volontaire en
+   * réinitialisation imposée reçoit un lien à la connexion, clique aussitôt sur « Mot de passe oublié »,
+   * puis ouvre le premier e-mail arrivé — mort. Logs de prod du 1er au 5/11/2026 : 29 % de premières
+   * tentatives refusées (400) après une connexion refusée, 0 % sans.
+   *
+   * Sécurité inchangée : le jeton part vers la même adresse, sa durée de vie n'est pas prolongée,
+   * les quotas d'envoi restent ceux de la route.
+   */
   async sendPasswordResetLink(user, cta: string) {
-    const token = await crypto.randomBytes(20).toString("hex");
-    user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });
+    const expiresAt = user.forgotPasswordResetExpires ? new Date(user.forgotPasswordResetExpires).getTime() : 0;
+    let token = user.forgotPasswordResetToken;
+    if (!token || expiresAt - Date.now() < PASSWORD_RESET_TOKEN_MIN_REMAINING_MS) {
+      token = crypto.randomBytes(20).toString("hex");
+      user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });
+    }
+    // Sauvegarde dans les deux cas : l'appelant de la réinitialisation imposée compte dessus, et le temps
+    // de réponse reste le même qu'un jeton soit créé ou renvoyé (PM5).
     await user.save();
 
     // PM5 (25/09/2026) : l'appel Brevo n'est plus attendu avant de répondre — sinon la présence ou
