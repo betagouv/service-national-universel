@@ -9,6 +9,7 @@ import { Redirect } from "react-router-dom";
 import api from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import PasswordEye from "../../components/PasswordEye";
+import { ERRORS } from "snu-lib";
 import { translate } from "../../utils";
 
 export default function ResetPassword({ location }) {
@@ -34,7 +35,16 @@ export default function ResetPassword({ location }) {
                 toastr.success("Mot de passe créé");
                 setRedirect(true);
               } catch (e) {
-                return toastr.error(translate(e && e.code));
+                // Le bouton restait bloqué en chargement après un refus : setSubmitting n'était jamais rappelé.
+                actions.setSubmitting(false);
+                if (e?.code === ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID) {
+                  return toastr.error(
+                    "Ce lien n'est plus valable",
+                    "Il est valable 2 heures et ne sert qu'une fois. Chaque nouvelle demande remplace le lien précédent : utilisez le dernier e-mail reçu, ou demandez un nouveau lien.",
+                    { timeOut: 15000 },
+                  );
+                }
+                return toastr.error(translate(e && e.code), "", { timeOut: 15000 });
               }
               actions.setSubmitting(false);
             }}>
@@ -47,7 +57,7 @@ export default function ResetPassword({ location }) {
                     <PasswordEye autoComplete="new-password" value={values.password} onChange={handleChange} />
                     <p className="text-xs text-red-500">{errors.password}</p>
                     <p className="mt-2 text-sm font-medium text-brand-grey">
-                      👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole
+                      👉 Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole, et être différent de l&apos;ancien
                     </p>
                   </div>
                   <LoadingButton

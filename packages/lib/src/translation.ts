@@ -195,7 +195,7 @@ const translate = (value) => {
     case "PASSWORD_TOKEN_EXPIRED_OR_INVALID":
       return "Lien expiré ou token invalide";
     case "PASSWORD_RESET_REQUIRED":
-      return "Par mesure de sécurité, votre mot de passe doit être réinitialisé. Un e-mail contenant le lien de réinitialisation vient de vous être envoyé.";
+      return "Par mesure de sécurité, votre mot de passe doit être réinitialisé. Un e-mail contenant le lien de réinitialisation vient de vous être envoyé : utilisez le plus récent et choisissez un mot de passe différent de l'actuel.";
     case "EMAIL_VALIDATION_TOKEN_EXPIRED_OR_INVALID":
       return "Le code d'activation saisi n'est pas valide ou a expiré";
     case "USER_ALREADY_REGISTERED":
@@ -269,7 +269,7 @@ const translate = (value) => {
     case "PASSWORD_NOT_MATCH":
       return "Les mots de passe ne correspondent pas";
     case "NEW_PASSWORD_IDENTICAL_PASSWORD":
-      return "Le nouveau mot de passe est identique à l'ancien";
+      return "Ce mot de passe est celui que vous utilisiez déjà. Par mesure de sécurité, choisissez-en un nouveau, différent de l'ancien.";
     case "YOUNG_NOT_FOUND":
       return "Jeune(s) introuvable(s)";
     case "cniNew":
