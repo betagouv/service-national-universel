@@ -8,12 +8,39 @@ import Error from "../../components/error";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { InputPassword } from "@snu/ds/dsfr";
+import { ERRORS } from "snu-lib";
 
 type Errors = {
   text?: string;
+  subText?: string;
+  code?: string;
   password?: string;
   passwordConfirm?: string;
 };
+
+/**
+ * Les deux refus les plus fréquents en production (logs du 1er au 5/11/2026) : le nouveau mot de passe
+ * identique à l'ancien — typiquement après une réinitialisation imposée, quand le volontaire retape le
+ * mot de passe qu'il connaît — et le lien périmé, remplacé par un plus récent ou déjà utilisé.
+ */
+function resetErrorMessage(code?: string): Errors {
+  if (code === ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD) {
+    return {
+      code,
+      text: "Ce mot de passe est celui que vous utilisiez déjà.",
+      subText: "Par mesure de sécurité, il ne peut plus être utilisé : choisissez-en un nouveau, différent de l'ancien.",
+    };
+  }
+  if (code === ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID) {
+    return {
+      code,
+      text: "Ce lien de réinitialisation n'est plus valable.",
+      subText:
+        "Il est valable 2 heures et ne sert qu'une fois. Chaque nouvelle demande remplace le lien précédent : utilisez uniquement le dernier e-mail reçu, ou demandez un nouveau lien.",
+    };
+  }
+  return { code, text: `Une erreur s'est produite : ${translate(code)}` };
+}
 
 function validate(password: string, passwordConfirm: string): Errors {
   const errors: Errors = {};
@@ -48,11 +75,15 @@ export default function Reset() {
     setLoading(true);
     try {
       const res = await api.post("/young/forgot_password_reset", { password, token });
-      if (!res.ok) return setError({ text: translate(res.code) });
-      toastr.success("Mot de passe changé avec succès", "");
+      if (!res.ok) {
+        setError(resetErrorMessage(res.code));
+        setLoading(false);
+        return;
+      }
+      toastr.success("Mot de passe changé avec succès", "Vous pouvez vous connecter avec votre nouveau mot de passe.");
       history.push("/auth");
     } catch (e) {
-      setError({ text: `Une erreur s'est produite : ${translate(e && e.code)}` });
+      setError(resetErrorMessage(e?.code));
     }
     setLoading(false);
   };
@@ -64,6 +95,12 @@ export default function Reset() {
         <RightArrow className="inline-block" />
         Mon espace volontaire
       </p>
+      <p className="mb-4 text-base text-[#3A3A3A]">Choisissez un nouveau mot de passe, différent de celui que vous utilisiez jusqu&apos;ici.</p>
+      {error?.code === ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID && (
+        <p className="mb-4">
+          <Link to="/auth/forgot">Recevoir un nouveau lien de réinitialisation</Link>
+        </p>
+      )}
       <form onSubmit={(e) => handleSubmit(e)}>
         <InputPassword label="Mot de passe" name="password" value={password} onChange={setPassword} error={error?.password} />
         <InputPassword label="Confirmez votre mot de passe" name="passwordConfirm" value={passwordConfirm} onChange={setPasswordConfirm} error={error?.passwordConfirm} />
