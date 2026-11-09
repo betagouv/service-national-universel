@@ -23,6 +23,7 @@ const checkCoherence = require("./checkCoherence");
 const checkMissingInProgressWhenValidated = require("./checkMissingInProgress");
 const referentDepartmentOnBoarding = require("./ReferentDepartmentOnBoarding");
 const deleteLegalRepresentatives = require("./deleteLegalRepresentatives");
+const autoValidatePhase2 = require("./autoValidatePhase2");
 
 // doubt ? -> https://crontab.guru/
 
@@ -92,6 +93,7 @@ const CRONS = [
   cron("checkMissingInProgressWhenValidated", "42 1 * * *", checkMissingInProgressWhenValidated.handler),
   cron("referentDepartmentOnBoarding", "0 10 * * *", referentDepartmentOnBoarding.handler),
   cron("deleteLegalRepresentatives", "0 8 * * 1", deleteLegalRepresentatives.handler),
+  cron("autoValidatePhase2", "30 6 * * *", autoValidatePhase2.handler),
 ];
 
 module.exports = CRONS;

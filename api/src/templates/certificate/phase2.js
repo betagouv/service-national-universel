@@ -3,8 +3,10 @@ const { initDocument, getMinistres, FONT, FONT_BOLD, FONT_SIZE, LINE_GAP, FILL_C
 const { config } = require("../../config");
 const { logger } = require("../../logger");
 const { withPipeStream } = require("../utils");
+const { PHASE2_EXCEPTIONAL_VALIDATION } = require("snu-lib");
 
 function render(doc, young) {
+  const exceptional = young.phase2ExceptionalValidation?.reason === PHASE2_EXCEPTIONAL_VALIDATION.REASON;
   const d = young.statusPhase2ValidatedAt;
   if (!d) throw new Error("Date de validation de la phase 2 non trouvée");
   const ministresData = getMinistres(d);
@@ -21,7 +23,7 @@ function render(doc, young) {
   }
 
   doc
-    .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 280, { continued: true })
+    .text(`félicite${ministresData.ministres.length > 1 ? "nt" : ""} `, 150, 280, { continued: true, width: page.width - 300 })
     .font(FONT_BOLD)
     .text(`${young.firstName} ${young.lastName}`, { continued: true })
     .font(FONT)
@@ -30,9 +32,11 @@ function render(doc, young) {
     .text(young.cohort, { continued: true })
     .font(FONT)
     .text(",")
-    .text("pour la réalisation de ses ", { continued: true })
+    .text(exceptional ? "pour la réalisation de sa " : "pour la réalisation de ses ", { continued: true, width: page.width - 300 })
     .font(FONT_BOLD)
-    .text("84 heures de mission d'intérêt général", { continued: true })
+    .text(exceptional ? "mission d'intérêt général, reconnue au titre de la validation exceptionnelle des cohortes 2025" : "84 heures de mission d'intérêt général", {
+      continued: true,
+    })
     .font(FONT)
     .text(",")
     .text("validant la ", { continued: true })
