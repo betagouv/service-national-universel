@@ -6,7 +6,7 @@
     "start": "vite",
     "build": "vite build --mode \"$VITE_ENVIRONMENT\"",
     "check-types": "tsc -p tsconfig.ci.json --emitDeclarationOnly",
-    "test": "node --experimental-default-type=module --test src/utils/__tests__/",
+    "test": "node --no-warnings=MODULE_TYPELESS_PACKAGE_JSON --test 'src/utils/__tests__/**/{*.test,*-test,*_test,test-*,test}.{js,mjs,cjs}'",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint --ext .js --fix src",
     "clean": "rm -fr node_modules .turbo build .swc"
@@ -112,8 +112,8 @@
     "@rollup/rollup-linux-x64-gnu": "4.9.5"
   },
   "engines": {
-    "node": "^20.17",
-    "npm": "^10.8",
+    "node": "^24.11",
+    "npm": "^11",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   }
 }

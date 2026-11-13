@@ -178,20 +178,25 @@ describe("tempFileUpload", () => {
 
 describe("tempFileUpload : fichier trop gros suivi d'autres fichiers (délai d'envoi court)", () => {
   let uploadDir: string;
-  let app: express.Express;
   let handlerCalls: number;
-  beforeEach(() => {
-    uploadDir = fs.mkdtempSync(path.join(workDir, "upload-"));
-    handlerCalls = 0;
-    app = express();
-    app.post("/upload", ...tempFileUpload({ tempFileDir: uploadDir, uploadTimeout: 300 }), (req, res) => {
+  const makeApp = (uploadTimeout?: number) => {
+    const app = express();
+    app.post("/upload", ...tempFileUpload({ tempFileDir: uploadDir, uploadTimeout }), (req, res) => {
       handlerCalls++;
       res.send({ ok: true });
     });
+    return app;
+  };
+  beforeEach(() => {
+    uploadDir = fs.mkdtempSync(path.join(workDir, "upload-"));
+    handlerCalls = 0;
   });
 
+  // Délai d'envoi par défaut : ce test ne compte pas sur lui. Avec 300 ms, une pause du runner pendant l'envoi de « gros »
+  // (10 Mo, avant la limite) déclenchait le délai d'express-fileupload, qui appelle next() sans erreur : le gestionnaire
+  // répondait 200 sur les fichiers déjà reçus (échec intermittent en CI).
   it("répond 413 en JSON, ne garde aucun fichier et n'appelle pas le gestionnaire", async () => {
-    const req = request(await localServer(app))
+    const req = request(await localServer(makeApp()))
       .post("/upload")
       .attach("gros", Buffer.alloc(MAX_FILE_SIZE + 1, "a"), "gros.txt");
     for (let i = 0; i < 20; i++) req.attach(`petit${i}`, Buffer.alloc(1, "a"), `petit-${i}.txt`);
@@ -207,7 +212,7 @@ describe("tempFileUpload : fichier trop gros suivi d'autres fichiers (délai d'e
   // encore, et le client perd la réponse (EPIPE ou ECONNRESET) selon le timing. En keep-alive, le serveur lit tout ce qui
   // est envoyé ; le corps s'arrête ensuite en plein fichier « moyen », que seul le délai d'envoi peut abandonner.
   it("ne laisse pas de fichier partiel quand un fichier plus gros que la limite précède un fichier moyen", async () => {
-    const server = app.listen(0, "127.0.0.1");
+    const server = makeApp(300).listen(0, "127.0.0.1");
     await once(server, "listening");
     const { port } = server.address() as AddressInfo;
     const agent = new http.Agent({ keepAlive: true });

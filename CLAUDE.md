@@ -60,12 +60,12 @@ Le chemin de `snu-lib` doit contenir le nom du worktree.
 
 ## Environnement
 
-- **Node 20 obligatoire** (`engines: ^20.17`). Le `node` par défaut de la machine
-  peut être plus récent ; `jsonwebtoken` meurt alors au chargement sur
+- **Node 24 obligatoire** (`engines: ^24.11`). Le `node` par défaut de la machine
+  peut être plus récent ; à partir de Node 25, `jsonwebtoken` meurt au chargement sur
   `Cannot read properties of undefined (reading 'prototype')` dans
-  `buffer-equal-constant-time`, et **toute suite touchant au JWT devient
-  inexécutable**. Préfixer :
-  `export PATH="$(brew --prefix node@20)/bin:$PATH"`.
+  `buffer-equal-constant-time` (`SlowBuffer` retiré), et **toute suite touchant au
+  JWT devient inexécutable**. Installer `brew install node@24`, puis préfixer :
+  `export PATH="$(brew --prefix node@24)/bin:$PATH"`.
 - MongoDB de test : conteneur `snu-test-mongo` sur `localhost:27017`.
 
 ## Tests
