@@ -12,7 +12,6 @@
   },
   "overrides": {
     "postcss": "^8.5.29",
-    "postcss-selector-parser": "^7.1.6",
     "source-map-js": "^1.2.2"
   },
   "dependencies": {
