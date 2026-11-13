@@ -1,11 +1,11 @@
 import express, { Response } from "express";
 import passport from "passport";
-import { SUB_ROLES, ROLES, canViewEtablissement, ClasseSchoolYear } from "snu-lib";
+import { SUB_ROLES, canViewEtablissement } from "snu-lib";
 import { ReferentDto } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
-import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
+import { EtablissementModel, ReferentModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 import { buildUniqueClasseKey } from "../classe/classeService";
 import { isEtablissementInUserScope } from "./etablissementScope";
@@ -16,22 +16,18 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
   try {
     if (!canViewEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const searchField = req.user.role === ROLES.REFERENT_CLASSE ? "_id" : req.user.subRole === SUB_ROLES.referent_etablissement ? "referentEtablissementIds" : "coordinateurIds";
+    // GOO-165 (P25b) : REFERENT_CLASSE retiré — `canViewEtablissement` ci-dessus ne laisse déjà
+    // passer que ADMIN/REFERENT_REGION/REFERENT_DEPARTMENT, la branche REFERENT_CLASSE était
+    // inatteignable (et `isDecommissionedRole()`, verrou P24, la bloquait de toute façon en amont).
+    const searchField = req.user.subRole === SUB_ROLES.referent_etablissement ? "referentEtablissementIds" : "coordinateurIds";
     const query = {};
-    let valueField: any = { $in: [req.user._id] };
-    if (req.user.role === ROLES.REFERENT_CLASSE) {
-      const classes = await ClasseModel.find({ referentClasseIds: { $in: req.user._id } });
-      if (!classes || classes.length === 0) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const lastClasse = classes.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classes[0];
-      valueField = lastClasse.etablissementId;
-    }
+    const valueField: any = { $in: [req.user._id] };
     query[searchField] = valueField;
     const etablissement = await EtablissementModel.findOne(query)?.lean();
     if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     await populateEtablissementWithCoordinateur(etablissement);
     await populateEtablissementWithReferent(etablissement);
-    if (req.user.role === ROLES.REFERENT_CLASSE) await populateEtablissementWithClasse(etablissement, req.user);
 
     const uniqueKey = buildUniqueClasseKey(etablissement);
 
@@ -89,18 +85,6 @@ async function populateEtablissementWithCoordinateur(etablissement) {
 async function populateEtablissementWithReferent(etablissement) {
   const referents = await ReferentModel.find({ _id: { $in: etablissement.referentEtablissementIds } }).lean();
   etablissement.referents = referents.map(toReferentDto);
-  return etablissement;
-}
-
-async function populateEtablissementWithClasse(etablissement, user) {
-  let classes;
-  if (user.role === ROLES.REFERENT_CLASSE) {
-    const classe = await ClasseModel.findOne({ referentClasseIds: { $in: user._id } });
-    classes = [classe];
-  } else {
-    classes = await ClasseModel.find({ etablissementId: etablissement._id }).lean();
-  }
-  etablissement.classes = classes;
   return etablissement;
 }
 

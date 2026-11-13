@@ -24,7 +24,7 @@
  */
 import { ROLES, ReferentType, UserDto } from "snu-lib";
 
-import { ApplicationModel, ClasseModel, EtablissementModel, ReferentModel, SessionPhase1Model, StructureModel, YoungModel } from "../models";
+import { ApplicationModel, ReferentModel, SessionPhase1Model, StructureModel, YoungModel } from "../models";
 import { isReferentReadableByUser } from "../referent/referentScope";
 import { NOT_A_PROPOSAL } from "../application/applicationProposal";
 
@@ -36,12 +36,6 @@ const toDepartments = (value?: string | string[] | null): string[] => (Array.isA
 function shareDepartment(userDepartments: string[] = [], departments: (string | undefined | null)[] = []): boolean {
   const target = departments.filter(Boolean) as string[];
   return userDepartments.filter(Boolean).some((department) => target.includes(department));
-}
-
-/** Établissements dont l'appelant est chef d'établissement ou coordinateur. */
-async function getEtablissementIds(user: UserDto): Promise<string[]> {
-  const etablissements = await EtablissementModel.find({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] }, { _id: 1 }).lean();
-  return etablissements.map((etablissement) => etablissement._id.toString());
 }
 
 /** Structures de l'appelant : la sienne et, pour un superviseur, celles de son réseau. */
@@ -83,16 +77,6 @@ async function isYoungInScope(
     if (shareDepartment(toDepartments(user.department), [young.department, young.schoolDepartment])) return true;
     if (!young.sessionPhase1Id) return false;
     return !!(await SessionPhase1Model.exists({ _id: young.sessionPhase1Id, department: { $in: toDepartments(user.department) } }));
-  }
-
-  if (user.role === ROLES.ADMINISTRATEUR_CLE) {
-    const etablissementIds = await getEtablissementIds(user);
-    return !!young.etablissementId && etablissementIds.includes(String(young.etablissementId));
-  }
-
-  if (user.role === ROLES.REFERENT_CLASSE) {
-    if (!young.classeId) return false;
-    return !!(await ClasseModel.exists({ _id: young.classeId, referentClasseIds: user._id }));
   }
 
   if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
