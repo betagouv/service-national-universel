@@ -15,6 +15,7 @@ export * from "./constants/featureFlags";
 export * from "./constants/featureFlags";
 export * from "./constants/functionalErrors";
 export * from "./constants/plan-de-transport";
+export * from "./constants/phase2";
 export * from "./constants/referentConstants";
 export * from "./constants/referentiel";
 export * from "./constants/referentiel";

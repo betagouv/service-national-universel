@@ -1,0 +1,5 @@
+export const PHASE2_EXCEPTIONAL_VALIDATION = {
+  REASON: "2025_42_HOURS",
+  COHORT_YEAR: 2025,
+  MIN_HOURS: 42,
+} as const;
