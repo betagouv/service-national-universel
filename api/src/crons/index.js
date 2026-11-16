@@ -78,8 +78,6 @@ const CRONS = [
   cron("noticePushMission", "2 9 1,16 * *", noticePushMission.handler),
   cron("apiEngagement", "10 */6 * * *", apiEngagement.handler),
   cron("deleteInactiveRefs", "0 0 * * *", deleteInactiveRefs.handler),
-  // jeVeuxAiderDaily (synchro des missions JVA) coupé (SNU-158). Le code reste dans
-  // missionsJVA/ ; le job répétable est supprimé au prochain démarrage par scheduleCrons().
   cron("contratRelance", "0 6 * * *", contratRelance.handler),
   cron("missionOutdated", "0 8 * * *", [missionOutdated.handler, missionOutdated.handlerNotice1Week]),
   cron("applicationOutaded", "0 7 * * *", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]),
