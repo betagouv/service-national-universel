@@ -478,6 +478,10 @@ class Auth {
       await resetLoginAttempts(this.model, user._id);
       user.set({ loginAttempts: 0, nextLoginAttemptIn: null });
 
+      // Young account access is closed globally, independently of registration status.
+      if (isYoung(user)) {
+        return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
       if (user?.status === ReferentStatus.INACTIVE) {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
       }
@@ -586,6 +590,9 @@ class Auth {
 
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       if (user.status === "DELETED" || (user as any).anonymized) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      if (isYoung(user)) {
+        return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
       // Rôle décommissionné (GOO-56, P24) : le code 2FA a pu être émis avant la décommission.
       if (isReferent(user) && isDecommissionedRole(user)) {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
@@ -751,6 +758,7 @@ class Auth {
       const { token_email_validation } = value;
       const user = await consumeEmailValidationAttempt(this.model, { email: req.user.email, emailVerified: "false" });
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      if (isYoung(user)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.tokenEmailValidation !== token_email_validation) {
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
@@ -846,6 +854,9 @@ class Auth {
 
     try {
       const { user } = req;
+      if (isYoung(user)) {
+        return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -879,6 +890,9 @@ class Auth {
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     try {
       const { user } = req;
+      if (isYoung(user)) {
+        return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
       if (user?.status === ReferentStatus.INACTIVE) {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
       }
@@ -985,6 +999,7 @@ class Auth {
     try {
       const now = new Date();
       const user = await this.model.findById(req.user._id);
+      if (isYoung(user)) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
       // PM6 (25/09/2026, résiduel de M4) : même verrou que `checkPassword` — sans lui, une session
       // volée ou une XSS peut soumettre le mot de passe courant sans aucune limite de tentatives.
@@ -1038,6 +1053,7 @@ class Auth {
       // Rôle décommissionné (GOO-56, P24) : même réponse « neutre » que pour un compte désactivé,
       // pour ne pas transformer cette route en oracle sur le rôle du compte (M66).
       if (!user || user?.status === ReferentStatus.INACTIVE || (isReferent(user) && isDecommissionedRole(user))) return res.status(200).send({ ok: true });
+      if (isYoung(user)) return res.status(200).send({ ok: true });
 
       await this.sendPasswordResetLink(user, cta);
 
@@ -1110,6 +1126,7 @@ class Auth {
         deletedAt: { $exists: false },
       });
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      if (isYoung(user)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       const match = await user.comparePassword(password);
       if (match) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
       if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && !user.registredAt) {

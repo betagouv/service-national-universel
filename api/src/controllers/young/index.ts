@@ -1,7 +1,6 @@
 import express, { Response } from "express";
 import passport from "passport";
 import crypto from "crypto";
-import jwt from "jsonwebtoken";
 import Joi from "joi";
 import mime from "mime-types";
 import fs from "fs";
@@ -15,11 +14,10 @@ import { YoungModel, ApplicationModel, CohortModel, ApplicationDocument, Mission
 import AuthObject from "../../auth";
 import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../../middlewares/rateLimit";
 import { requireJsonBody } from "../../middlewares/requireJsonBody";
-import { uploadFile, validatePassword, ERRORS, isYoung, isReferent, getCcOfYoung, getFile } from "../../utils";
+import { uploadFile, ERRORS, isYoung, isReferent, getCcOfYoung, getFile } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { sanitizeEmailText } from "../../email/emailInput";
-import { setSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
 import { validateId, idSchema } from "../../utils/validator";
 import { safePathSegment } from "../../utils/pathSegment";
 import patches from "../patches";
@@ -58,7 +56,6 @@ import {
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
 import { keepOnlyUnsharedEmails } from "../../services/rgpdEmailGuard";
-import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import { scanFile } from "../../utils/virusScanner";
 import { UserRequest } from "../request";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
@@ -123,47 +120,9 @@ router.post("/check_password", passport.authenticate("young", { session: false, 
 // signup_verify`, route distincte, est appelé — depuis admin/src/scenes/auth/signupInvite.jsx).
 // Supprimée plutôt que corrigée, en l'absence d'appelant à préserver.
 
-// PL3 (rate limiter) + PM31 (requireJsonBody, déjà posé sur /signin) : cette route ouvre une session
-// complète contre email + mot de passe + jeton d'invitation, comme /signin.
-router.post("/signup_invite", youngSigninLimiter, requireJsonBody, async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({
-      invitationToken: Joi.string().required(),
-      email: Joi.string().lowercase().trim().email().required(),
-      password: Joi.string().required(),
-    })
-      .unknown()
-      .validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const { email, password, invitationToken } = value;
-    const young = await YoungModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!young) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
-
-    // @ts-expect-error FIXME: legacy field ?
-    if (young.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.YOUNG_ALREADY_REGISTERED });
-
-    if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
-    young.set({ password });
-    young.set({ registredAt: Date.now() });
-    young.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
-    young.set({ invitationToken: "" });
-    young.set({ invitationExpires: null });
-
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
-
-    await young.save({ fromUser: req.user });
-
-    return res.status(200).send({ data: serializeYoung(young, young), ok: true });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
+// Young access is closed globally: invitations must not create sessions either.
+router.post("/signup_invite", (_req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 });
 
 router.post(

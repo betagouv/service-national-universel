@@ -693,12 +693,13 @@ describe("Referent", () => {
         }),
       );
     });
-    it("should return 200 if young found", async () => {
+    it("should return 403 because young impersonation is closed globally", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const res = await request(await getAppHelperWithAcl())
         .post("/referent/signin_as/young/" + young._id)
         .send();
-      expect(res.statusCode).toEqual(200);
+      expect(res.statusCode).toEqual(403);
+      expect(res.headers["set-cookie"]).toBeUndefined();
     });
     it("should return a jwt token", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());

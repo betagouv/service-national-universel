@@ -3,12 +3,11 @@ import Joi from "joi";
 import { Response, NextFunction } from "express";
 
 import { config } from "../config";
-import { ReferentModel, YoungModel } from "../models";
+import { ReferentModel } from "../models";
 import { getToken } from "../passport";
 import { checkJwtSigninVersion } from "../jwt-options";
 import { getAcl } from "../services/iam/Permission.service";
 import { UserRequest } from "../controllers/request";
-import { ROLE_JEUNE } from "snu-lib";
 
 interface JwtPayload {
   __v: string;
@@ -35,16 +34,11 @@ const optionalAuth = async (req: UserRequest, _: Response, next: NextFunction) =
       if (error || !checkJwtSigninVersion(value)) return next();
 
       const { _id, passwordChangedAt, lastLogoutAt } = value;
-      let user = await ReferentModel.findById(_id);
+      // Young access is closed globally; optional authentication stays anonymous for them.
+      const user = await ReferentModel.findById(_id);
       if (user) {
         // @ts-expect-error mapping user to UserDto
         user.acl = await getAcl(user);
-      } else {
-        user = await YoungModel.findById(_id);
-        if (user) {
-          // @ts-expect-error mapping user to UserDto
-          user.acl = await getAcl({ roles: [ROLE_JEUNE] } as any);
-        }
       }
 
       if (user) {

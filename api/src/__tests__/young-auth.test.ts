@@ -50,11 +50,12 @@ describe("Young Auth", () => {
       const res = await request(getAppHelper()).post("/young/signin").send({ email: user.email, password: "foo" });
       expect(res.status).toBe(401);
     });
-    it("should return 200 and a token when user exists and password match", async () => {
+    it("should reject even a correct password because young access is closed globally", async () => {
       const fixture = getNewYoungFixture();
       const user = await createYoungHelper({ ...fixture, password: "bar", email: fixture.email?.toLowerCase() });
       const res = await request(getAppHelper()).post("/young/signin").send({ email: user.email, password: "bar" });
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(401);
+      expect(res.headers["set-cookie"]).toBeUndefined();
     });
   });
   describe("POST /young/signup", () => {
@@ -88,7 +89,7 @@ describe("Young Auth", () => {
   });
 
   describe("GET /young/signin_token", () => {
-    it("should return 200", async () => {
+    it("should reject young sessions without saving activity", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       young.set = jest.fn();
       young.save = jest.fn();
@@ -97,9 +98,9 @@ describe("Young Auth", () => {
       }));
 
       const res = await request(getAppHelper(young)).get("/young/signin_token").set("Cookie", ["jwt_young=blah"]);
-      expect(res.status).toBe(200);
-      expect(young.set).toHaveBeenCalled();
-      expect(young.save).toHaveBeenCalled();
+      expect(res.status).toBe(401);
+      expect(young.set).not.toHaveBeenCalled();
+      expect(young.save).not.toHaveBeenCalled();
     });
   });
 
@@ -137,20 +138,21 @@ describe("Young Auth", () => {
       expect(res.status).toBe(401);
     });
 
-    it("should return return 422 when verifyPassword !== newPassword", async () => {
+    it("should reject young access before checking password confirmation", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: "foo" });
 
       res = await request(getAppHelper(young))
         .post("/young/reset_password")
         .send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD + "HOP" });
-      expect(res.status).toBe(422);
+      expect(res.status).toBe(401);
     });
 
-    it("should return return 200 when password is changed", async () => {
+    it("should reject password changes without issuing a session", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), password: "foo" });
 
       res = await request(getAppHelper(young)).post("/young/reset_password").send({ password: "foo", verifyPassword: VALID_PASSWORD, newPassword: VALID_PASSWORD });
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(401);
+      expect(res.headers["set-cookie"]).toBeUndefined();
     });
   });
 
@@ -201,7 +203,7 @@ describe("Young Auth", () => {
       expect(res.body.code).toBe("PASSWORD_TOKEN_EXPIRED_OR_INVALID");
     });
 
-    it("should return 401 when new password is identical as last password", async () => {
+    it("should reject young password resets even when the new password matches the old one", async () => {
       const fixture = getNewYoungFixture();
       const token = await crypto.randomBytes(20).toString("hex");
       await createYoungHelper({
@@ -212,10 +214,11 @@ describe("Young Auth", () => {
         password: VALID_PASSWORD,
       });
       const res = await request(getAppHelper()).post("/young/forgot_password_reset").send({ password: VALID_PASSWORD, token });
-      expect(res.status).toBe(401);
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("PASSWORD_TOKEN_EXPIRED_OR_INVALID");
     });
 
-    it("should return return 200 otherwise", async () => {
+    it("should reject a valid young reset token without consuming it", async () => {
       const fixture = getNewYoungFixture();
       const token = await crypto.randomBytes(20).toString("hex");
       const young = await createYoungHelper({
@@ -225,11 +228,12 @@ describe("Young Auth", () => {
         forgotPasswordResetToken: token,
       });
       const res = await request(getAppHelper()).post("/young/forgot_password_reset").send({ password: VALID_PASSWORD, token });
-      expect(res.status).toBe(200);
+      expect(res.status).toBe(400);
+      expect(res.body.code).toBe("PASSWORD_TOKEN_EXPIRED_OR_INVALID");
 
       const updatedYoung = await getYoungByIdHelper(young.id);
-      expect(updatedYoung?.forgotPasswordResetExpires).toBeFalsy();
-      expect(updatedYoung?.forgotPasswordResetToken).toBeFalsy();
+      expect(updatedYoung?.forgotPasswordResetExpires).toBeTruthy();
+      expect(updatedYoung?.forgotPasswordResetToken).toBe(token);
     });
   });
 });
