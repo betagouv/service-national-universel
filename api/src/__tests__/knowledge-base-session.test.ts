@@ -106,7 +106,7 @@ describe("GET /signin/token depuis la base de connaissance", () => {
     expect(res.body.knowledgeBaseToken).toBeNull();
   });
 
-  it("ne renvoie ni santé, ni représentants légaux, ni coordonnées d'un volontaire", async () => {
+  it("refuse désormais toute session volontaire sur le support", async () => {
     const young = await createYoungHelper({ ...getNewYoungFixture(), source: "CLE" } as any);
 
     const res = await request(getAppHelper())
@@ -114,12 +114,8 @@ describe("GET /signin/token depuis la base de connaissance", () => {
       .set("Origin", config.KNOWLEDGEBASE_URL)
       .set("Cookie", `jwt_young=${signSession(young)}`);
 
-    expect(res.status).toBe(200);
-    expect(Object.keys(res.body.user).sort()).toEqual(expect.arrayContaining(["allowedRole", "initials", "source"]));
-    expect(Object.keys(res.body.user).every((key) => ["role", "subRole", "source", "initials", "allowedRole"].includes(key))).toBe(true);
-    expect(res.body.user.allowedRole).toBe("young");
-    expect(res.body.user.source).toBe("CLE");
-    expect(res.body.user.email).toBeUndefined();
+    expect(res.status).toBe(401);
+    expect(res.body.user).toEqual({ restriction: "public" });
   });
 
   it("ignore le cookie quand l'origine n'est ni la KB ni un front de l'API", async () => {

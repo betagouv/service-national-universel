@@ -54,6 +54,8 @@ async function validateUser(userModel: Model<any>, jwtPayload: JwtPayload, done:
       // Compte supprimé/anonymisé : on rejette même un JWT encore valide, pour invalider
       // les sessions existantes (un jeune connecté avant anonymisation ne doit plus l'être).
       if (user.status === "DELETED" || user.anonymized) return done(null, false);
+      // Young access is closed globally, including existing and impersonated sessions.
+      if (userModel === YoungModel) return done(null, false);
       // Compte référent désactivé : la connexion le refuse déjà, mais un JWT émis avant la
       // désactivation restait valable jusqu'à son expiration (GOO-5).
       if (userModel === ReferentModel && user.status === ReferentStatus.INACTIVE) return done(null, false);

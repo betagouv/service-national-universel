@@ -235,6 +235,9 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     }
     const { id, type } = params;
 
+    // Global young-access closure also forbids creating an impersonated young session.
+    if (type === "young") return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     // PH14 (lot P27) : ce refus vit ici et non dans `canSigninAs` (packages/lib/src/roles.ts),
     // dont la branche CLE disparaît en P25 — l'auto-impersonation et le cumul de sessions déjà
     // empruntées doivent rester bloqués indépendamment du rôle.
