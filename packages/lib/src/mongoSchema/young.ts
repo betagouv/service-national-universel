@@ -349,7 +349,7 @@ export const YoungSchema = {
       { _id: false },
     ),
     documentation: {
-      description: "Validation exceptionnelle de la phase 2 des cohortes 2025 à partir de 42 heures, le 1er décembre 2026",
+      description: "Validation exceptionnelle de la phase 2 des cohortes 2025 à partir de 42 heures, déclenchée manuellement",
     },
   },
   statusPhase2Contract: {
