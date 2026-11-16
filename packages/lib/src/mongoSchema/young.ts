@@ -345,13 +345,11 @@ export const YoungSchema = {
         hoursDone: { type: Number, required: true },
         cohortId: String,
         cohort: String,
-        notifiedAt: Date,
-        notificationLockedUntil: Date,
       },
       { _id: false },
     ),
     documentation: {
-      description: "Validation exceptionnelle de la phase 2 des cohortes 2025 à partir de 42 heures, et suivi de sa notification",
+      description: "Validation exceptionnelle de la phase 2 des cohortes 2025 à partir de 42 heures, le 1er décembre 2026",
     },
   },
   statusPhase2Contract: {

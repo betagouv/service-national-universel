@@ -201,7 +201,7 @@ type Phase2ValidationOptions = {
 };
 
 // Effets communs aux validations ordinaires et exceptionnelles. L'appelant sauvegarde le jeune.
-// Le cron diffère les notifications jusqu'à la validation de sa transaction.
+// Le script de validation exceptionnelle désactive toutes les notifications.
 export async function validateYoungPhase2(
   young: YoungDocument,
   pendingApplications: ApplicationDocument[],
@@ -513,7 +513,7 @@ export function inSevenDays() {
 export const getCcOfYoung = ({ template, young }) => {
   if (!young || !template) return [];
   let cc: { name: string; email: string }[] = [];
-  if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template) || template === config.PHASE2_EXCEPTIONAL_VALIDATION_TEMPLATE_ID) {
+  if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
     if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
     if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
   }

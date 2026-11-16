@@ -14,12 +14,12 @@ function youngFixture(exceptional: boolean, hours: string): YoungType {
     cohort: "Session 2025",
     statusPhase1: YOUNG_STATUS_PHASE1.DONE,
     statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
-    statusPhase2ValidatedAt: new Date("2026-11-09T08:00:00+01:00"),
+    statusPhase2ValidatedAt: new Date("2026-12-01T08:00:00+01:00"),
     phase2NumberHoursDone: hours,
     phase2ExceptionalValidation: exceptional
       ? {
           reason: PHASE2_EXCEPTIONAL_VALIDATION.REASON,
-          validatedAt: new Date("2026-11-09T08:00:00+01:00"),
+          validatedAt: new Date("2026-12-01T08:00:00+01:00"),
           hoursDone: Number(hours),
         }
       : undefined,
