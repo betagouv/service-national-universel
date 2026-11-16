@@ -15,12 +15,10 @@ const STATUS_COLOR = {
   info: "#0288d1",
 };
 
-const postMessage = async ({ title, text, author_name, color, channel }) => {
-  // `channel` permet de router un message vers un canal dedie ; sinon canal par defaut.
-  const targetChannel = channel || config.SLACK_BOT_CHANNEL;
-  if (!config.SLACK_BOT_TOKEN || !targetChannel) return captureMessage("NO SLACK CREDENTIALS");
+const postMessage = async ({ title, text, author_name, color }) => {
+  if (!config.SLACK_BOT_TOKEN || !config.SLACK_BOT_CHANNEL) return captureMessage("NO SLACK CREDENTIALS");
   const payload = {
-    channel: targetChannel,
+    channel: config.SLACK_BOT_CHANNEL,
     attachments: [
       {
         title,
@@ -48,7 +46,7 @@ const postMessage = async ({ title, text, author_name, color, channel }) => {
         capture(error);
       });
   } else {
-    logger.debug("slack", { channel: targetChannel, attachments: payload?.attachments });
+    logger.debug("slack", payload?.attachments);
   }
 };
 
