@@ -3,7 +3,6 @@ const missionOutdated = require("./missionOutdated");
 const noticePushMission = require("./noticePushMission");
 const contratRelance = require("./contratRelance");
 const applicationPending = require("./applicationPending");
-const jeVeuxAiderDaily = require("./missionsJVA/JeVeuxAiderDaily");
 const loginAttempts = require("./loginAttempts");
 const syncReferentSupport = require("./syncReferentSupport");
 const syncContactSupport = require("./syncContactSupport");
@@ -54,7 +53,6 @@ const everyHours = (x) => `0 */${x} * * *`;
 // applicationPending.handler() : tous les lundis à 9h00
 // noticePushMission.handler() : Le 1er et le 16 du mois en cours à 9h02
 // apiEngagement.handler() : toutes les 6 heures à la 10ème minute
-// jeVeuxAiderDaily.handler() : toutes les 6 heures à la 7ème minute
 // contratRelance.handler() : tous les jours à 6h00
 // missionOutdated.handler() : tous les jours à 8h00
 // applicationOutaded.handler() : tous les jours à 7h00
@@ -80,7 +78,6 @@ const CRONS = [
   cron("noticePushMission", "2 9 1,16 * *", noticePushMission.handler),
   cron("apiEngagement", "10 */6 * * *", apiEngagement.handler),
   cron("deleteInactiveRefs", "0 0 * * *", deleteInactiveRefs.handler),
-  cron("jeVeuxAiderDaily", "15 */6 * * *", jeVeuxAiderDaily.handler),
   cron("contratRelance", "0 6 * * *", contratRelance.handler),
   cron("missionOutdated", "0 8 * * *", [missionOutdated.handler, missionOutdated.handlerNotice1Week]),
   cron("applicationOutaded", "0 7 * * *", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]),

@@ -1,11 +1,7 @@
-const { logger } = require("../src/logger");
-
 module.exports = {
-  async up() {
-    logger.info("Running fix-missions-jva-endAt-2026");
-    await require("../src/scripts/mission/FixMissionMissingEndAt").handler();
-    logger.info("Done fix-missions-jva-endAt-2026");
-  },
+  // Appliquée en 2025. Le script qu'elle lançait (FixMissionMissingEndAt) lisait les missions
+  // JVA sur l'API Engagement ; il a été supprimé avec la synchro JVA (SNU-158).
+  async up() {},
 
   async down() {},
 };
