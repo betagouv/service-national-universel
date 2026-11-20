@@ -14,7 +14,7 @@ import { createYoungHelper } from "./helpers/young";
 import { YoungModel } from "../models";
 import { config } from "../config";
 import { SENDINBLUE_TEMPLATES } from "snu-lib";
-import { sendTemplate } from "../brevo";
+import { sendEmail, sendTemplate } from "../brevo";
 import { MAX_EMAIL_VALIDATION_ATTEMPTS, MAX_2FA_ATTEMPTS, MAX_LOGIN_ATTEMPTS_BEFORE_DELAY } from "../services/auth/attemptCounters";
 
 const PASSWORD = "SuperSecret1234!";
@@ -23,7 +23,7 @@ const NEW_EMAIL = "nouvelle.adresse@example.com";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
-  sendEmail: () => Promise.resolve(),
+  sendEmail: jest.fn(() => Promise.resolve()),
   sendTemplate: jest.fn(() => Promise.resolve()),
   syncContact: () => Promise.resolve(),
   createContact: () => Promise.resolve(),
@@ -46,6 +46,7 @@ afterEach(async () => {
   resetAppAuth();
   await clearDatabase();
   (sendTemplate as jest.Mock).mockClear();
+  (sendEmail as jest.Mock).mockClear();
 });
 
 jest.setTimeout(120000);
@@ -78,7 +79,7 @@ describe("changement d'email : le code part à la nouvelle adresse", () => {
   });
 
   it("le code redemandé valide bien le changement, et seulement lui", async () => {
-    const young = await createYoung({ emailVerified: "true" });
+    const young = await createYoung({ emailVerified: "true", forgotPasswordResetToken: "jeton-existant" });
     const app = getAppHelper(young as any, "young");
     await request(app).post("/young/email").send({ email: NEW_EMAIL, password: PASSWORD });
     await request(app).get("/young/email-validation/token");
@@ -90,6 +91,12 @@ describe("changement d'email : le code part à la nouvelle adresse", () => {
     const after = await YoungModel.findById(young._id);
     expect(after!.email).toBe(NEW_EMAIL);
     expect(after!.newEmail).toBeFalsy();
+
+    // GOO-200 : ce parcours en libre-service (mot de passe déjà vérifié) ne doit PAS être affecté
+    // par la révocation/notification ajoutée pour le parcours référent-initié.
+    expect(after!.lastLogoutAt).toBeFalsy();
+    expect(after!.forgotPasswordResetToken).toBe("jeton-existant");
+    expect(sendEmail).not.toHaveBeenCalled();
   });
 
   it("continue d'envoyer le code de validation à l'adresse du compte pour un email non validé", async () => {
@@ -119,6 +126,30 @@ describe("changement d'email : le code part à la nouvelle adresse", () => {
     const after = await YoungModel.findById(young._id);
     expect(after!.attemptsEmailValidation).toBe(MAX_EMAIL_VALIDATION_ATTEMPTS);
     expect(after!.email).toBe(young.email);
+  });
+
+  it("une demande en libre-service efface un signalement de demande référent resté en attente (GOO-200)", async () => {
+    const young = await createYoung({
+      emailVerified: "true",
+      newEmail: "adresse-posee-par-un-referent@example.com",
+      newEmailRequestedByReferent: true,
+      forgotPasswordResetToken: "jeton-existant",
+    });
+    const app = getAppHelper(young as any, "young");
+
+    const demande = await request(app).post("/young/email").send({ email: NEW_EMAIL, password: PASSWORD });
+    expect(demande.status).toBe(200);
+
+    const stored = await YoungModel.findById(young._id);
+    expect(stored!.newEmailRequestedByReferent).toBeFalsy();
+
+    const res = await request(app).post("/young/email-validation/new-email").send({ token_email_validation: String(stored!.tokenEmailValidation) });
+    expect(res.status).toBe(200);
+
+    const after = await YoungModel.findById(young._id);
+    expect(after!.lastLogoutAt).toBeFalsy();
+    expect(after!.forgotPasswordResetToken).toBe("jeton-existant");
+    expect(sendEmail).not.toHaveBeenCalled();
   });
 });
 
