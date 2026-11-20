@@ -78,11 +78,11 @@ jobs:
           fi
           echo "build=true" >> "$GITHUB_OUTPUT"
 
-      # Node 20 comme l'image Clever Cloud (engines ^20.17 : dernière 20.x).
+      # Node 24 comme l'image Clever Cloud (engines ^24.11 : dernière 24.x).
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         if: steps.changes.outputs.build == 'true'
         with:
-          node-version: "20"
+          node-version: "24"
 
       # build.sh installe globalement la version de turbo du lockfile : le runner est éphémère.
       # CC_DEPLOYMENT_ID n'est pas défini : le script ne vide pas le répertoire de travail.
@@ -95,3 +95,45 @@ jobs:
           APP: ${{ matrix.app }}
           VITE_ENVIRONMENT: ci
         run: devops/build/build.sh "$APP" "/tmp/build-$APP"
+
+  # knowledge-base-public est hors des workspaces npm (lockfile et .nvmrc propres) : build.sh ne
+  # le couvre pas, et sans ce job son build sous une nouvelle version de Node n'aurait lieu qu'au
+  # déploiement de la base de connaissance. Sans NEXT_PUBLIC_ENVIRONMENT, l'application vise
+  # localhost : les appels d'API du pré-rendu échouent sans faire échouer le build.
+  build-kb:
+    name: build (knowledge-base-public)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          fetch-depth: 2
+          persist-credentials: false
+
+      - name: Fichiers modifiés
+        id: changes
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" = "pull_request" ]; then
+            changed=$(git diff --name-only HEAD^1 HEAD -- knowledge-base-public .github/workflows/build-production.yml)
+            if [ -z "$changed" ]; then
+              echo "::notice::La PR ne touche pas knowledge-base-public : build non lancé."
+              echo "build=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+            echo "$changed"
+          fi
+          echo "build=true" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: steps.changes.outputs.build == 'true'
+        with:
+          node-version-file: knowledge-base-public/.nvmrc
+
+      - name: Build de production
+        if: steps.changes.outputs.build == 'true'
+        working-directory: knowledge-base-public
+        run: |
+          npm ci --no-audit --no-fund
+          npm run build

@@ -5,8 +5,10 @@ import { capture, captureMessage } from "../sentry";
 import CRONS from "../crons";
 
 import { captureCheckIn } from "@sentry/node";
-import { MonitorConfig } from "@sentry/types";
 import { logStartedTask, logSucceedTask, logFailedTask } from "./taskLoggerService";
+
+// @sentry/types est déprécié depuis Sentry 9 : le type se déduit de captureCheckIn.
+type MonitorConfig = NonNullable<Parameters<typeof captureCheckIn>[1]>;
 
 const CRONS_QUEUE = `${config.TASK_QUEUE_PREFIX}_crons`;
 const CONCURRENCY = 2;

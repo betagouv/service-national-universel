@@ -4,8 +4,8 @@
   "description": "",
   "main": "index.js",
   "engines": {
-    "node": "^20.17",
-    "npm": "^10.8",
+    "node": "^24.11",
+    "npm": "^11",
     "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
   },
   "scripts": {
@@ -37,9 +37,8 @@
     "@fast-csv/format": "^5.0.0",
     "@fast-csv/parse": "^5.0.0",
     "@godaddy/terminus": "^4.12.1",
-    "@sentry/node": "^8.25.0",
-    "@sentry/profiling-node": "^8.25.0",
-    "@sentry/utils": "^8.25.0",
+    "@sentry/node": "^9.47.2",
+    "@sentry/profiling-node": "^9.47.2",
     "@snu/log-redaction": "*",
     "@tanstack/react-query": "^5.29.0",
     "archiver": "^7.0.1",
