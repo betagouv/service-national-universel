@@ -2,9 +2,14 @@ import { UserDto } from "./dto";
 import { ReferentStatus } from "./constants/referentConstants";
 import {
   ASSIGNABLE_ROLES_LIST,
+  canDeletePatchesHistory,
+  canDownloadYoungDocuments,
+  canEditYoung,
   canInviteUser,
+  canInviteYoung,
   canSigninAs,
   canUpdateReferent,
+  canViewReferent,
   DECOMMISSIONED_ROLES,
   getYoungFieldsHiddenFrom,
   isDecommissionedRole,
@@ -35,10 +40,10 @@ describe("canSigninAs function", () => {
     expect(canSigninAs(actor, target, "referent")).toBe(false);
   });
 
-  it("should return true if actor is referent department and target is in same department", () => {
+  it("should return false if actor is referent department and target is administrateur CLE (GOO-165 : rôle décommissionné)", () => {
     const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["dep1"] } as UserDto;
     const target = { role: ROLES.ADMINISTRATEUR_CLE, department: ["dep1"], region: "region1" };
-    expect(canSigninAs(actor, target, "referent")).toBe(true);
+    expect(canSigninAs(actor, target, "referent")).toBe(false);
   });
 
   it("should return true if actor is referent region and target is in same region", () => {
@@ -243,5 +248,104 @@ describe("décommissionnement P25a : helpers de recherche et de consultation", (
     for (const role of ROLES_LIST) {
       expect({ role, ok: roles.canSearchInElasticSearch(actorOf(role), index) }).toEqual({ role, ok: allowed.includes(role as any) });
     }
+  });
+});
+
+describe("décommissionnement P25b : périmètres, édition et routes réservées (GOO-165)", () => {
+  const { ADMIN, REFERENT_REGION: REG, REFERENT_DEPARTMENT: DEP, RESPONSIBLE, SUPERVISOR, HEAD_CENTER, HEAD_CENTER_ADJOINT, REFERENT_SANITAIRE, REFERENT_CLASSE, ADMINISTRATEUR_CLE } = ROLES;
+  const ADMIN_REFS = [ADMIN, REG, DEP];
+  const actorOf = (role: string) => ({ _id: "actor", role }) as unknown as UserDto;
+
+  const helperExpectations: Array<[string, string[]]> = [
+    ["canViewYoung", [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR]],
+    ["canViewNotes", ADMIN_REFS],
+    // `canAllowSNU`/`canValidateMultipleYoungsInClass` n'autorisaient QUE des rôles CLE décommissionnés
+    // (ADMINISTRATEUR_CLE, REFERENT_CLASSE) : gardes exclusives de PUT /referent/youngs et
+    // PUT .../ref-allow-snu, citées par le ticket par route (section 3), plus aucun rôle autorisé.
+    ["canAllowSNU", []],
+    ["canValidateMultipleYoungsInClass", []],
+  ];
+
+  it.each(helperExpectations)("%s : ne garde que les rôles attendus, aucun rôle décommissionné", async (name, allowed) => {
+    const roles: any = await import("./roles");
+    for (const role of ROLES_LIST) {
+      expect({ role, ok: !!roles[name](actorOf(role)) }).toEqual({ role, ok: allowed.includes(role as any) });
+    }
+  });
+
+  it("canDeletePatchesHistory : seuls admin et référents dép./rég. gardent le droit par rôle (hors propriétaire)", () => {
+    const target = { _id: "target" } as any;
+    for (const role of ROLES_LIST) {
+      const actor = { _id: "actor", role } as any;
+      expect({ role, ok: canDeletePatchesHistory(actor, target) }).toEqual({ role, ok: ADMIN_REFS.includes(role as any) });
+    }
+  });
+
+  it("canDownloadYoungDocuments : certificate/convocation réservés à admin, référents dép./rég. et structure d'accueil", () => {
+    const allowed = [...ADMIN_REFS, RESPONSIBLE, SUPERVISOR];
+    for (const role of ROLES_LIST) {
+      const actor = { role } as any;
+      expect({ role, ok: canDownloadYoungDocuments(actor, undefined, "certificate") }).toEqual({ role, ok: allowed.includes(role as any) });
+    }
+  });
+
+  it("canInviteYoung : un référent de classe ou un administrateur CLE ne peut plus inviter, même sur une cohorte CLE ouverte", () => {
+    const cohort = {
+      type: "CLE",
+      isInscriptionOpen: true,
+      inscriptionOpenForReferentClasse: true,
+      inscriptionOpenForAdministrateurCle: true,
+    } as any;
+    expect(canInviteYoung({ role: REFERENT_CLASSE } as any, cohort)).toBe(false);
+    expect(canInviteYoung({ role: ADMINISTRATEUR_CLE } as any, cohort)).toBe(false);
+    // non-régression : admin et référents dép./rég. gardent leur comportement
+    expect(canInviteYoung({ role: ADMIN } as any, cohort)).toBe(true);
+    expect(canInviteYoung({ role: REG } as any, { isInscriptionOpen: true } as any)).toBe(true);
+    expect(canInviteYoung({ role: DEP } as any, { isInscriptionOpen: true } as any)).toBe(true);
+  });
+
+  it("canEditYoung : un chef de centre ou un rôle CLE ne peut plus éditer un volontaire", () => {
+    const young = { region: "R1", department: "D1", source: "CLE" } as any;
+    for (const role of [HEAD_CENTER, HEAD_CENTER_ADJOINT, REFERENT_SANITAIRE, REFERENT_CLASSE, ADMINISTRATEUR_CLE]) {
+      expect(canEditYoung({ role } as any, young)).toBe(false);
+    }
+    // non-régression : admin et référents dép./rég. dans leur territoire gardent le droit
+    expect(canEditYoung({ role: ADMIN } as any, young)).toBe(true);
+    expect(canEditYoung({ role: REG, region: "R1" } as any, young)).toBe(true);
+    expect(canEditYoung({ role: DEP, department: ["D1"] } as any, young)).toBe(true);
+  });
+
+  it("canViewReferent : un chef de centre, un administrateur CLE ou un référent de classe ne peut plus consulter un autre référent", () => {
+    expect(canViewReferent({ id: "actor", role: HEAD_CENTER } as any, { id: "target", role: DEP } as any)).toBe(false);
+    expect(canViewReferent({ id: "actor", role: ADMINISTRATEUR_CLE } as any, { id: "target", role: REFERENT_CLASSE } as any)).toBe(false);
+    expect(canViewReferent({ id: "actor", role: REFERENT_CLASSE } as any, { id: "target", role: ADMINISTRATEUR_CLE } as any)).toBe(false);
+    // non-régression : admin et référents dép./rég. gardent le droit
+    expect(canViewReferent({ id: "actor", role: ADMIN } as any, { id: "target", role: DEP } as any)).toBe(true);
+    expect(canViewReferent({ id: "actor", role: DEP } as any, { id: "target", role: REG } as any)).toBe(true);
+  });
+
+  it("canUpdateReferent : un référent dép./rég. ne peut plus agir sur un compte chef de centre via la branche dédiée", () => {
+    const actorDep = { _id: "actor", role: DEP, department: ["D1"] } as any;
+    const headCenterTarget = { _id: "target", role: HEAD_CENTER, status: ReferentStatus.ACTIVE } as any;
+    expect(canUpdateReferent({ actor: actorDep, originalTarget: headCenterTarget, modifiedTarget: null, structure: null })).toBe(false);
+
+    const actorReg = { _id: "actor", role: REG, region: "R1", department: [] } as any;
+    expect(canUpdateReferent({ actor: actorReg, originalTarget: headCenterTarget, modifiedTarget: null, structure: null })).toBe(false);
+
+    // non-régression : un référent dép. garde le droit sur un responsable de structure de son département
+    const responsibleTarget = { _id: "resp", role: RESPONSIBLE, status: ReferentStatus.ACTIVE, department: ["D1"] } as any;
+    expect(canUpdateReferent({ actor: actorDep, originalTarget: responsibleTarget, modifiedTarget: null, structure: null })).toBe(true);
+  });
+
+  it("canSigninAs : un référent dép./rég. ne peut plus se connecter en tant qu'administrateur CLE ou référent de classe", () => {
+    const actorDep = { role: DEP, department: ["dep1"] } as UserDto;
+    const actorReg = { role: REG, region: "region1" } as UserDto;
+    const targetCle = { role: ADMINISTRATEUR_CLE, department: ["dep1"], region: "region1" };
+    const targetClasse = { role: REFERENT_CLASSE, department: ["dep1"], region: "region1" };
+
+    expect(canSigninAs(actorDep, targetCle, "referent")).toBe(false);
+    expect(canSigninAs(actorReg, targetCle, "referent")).toBe(false);
+    expect(canSigninAs(actorDep, targetClasse, "referent")).toBe(false);
+    expect(canSigninAs(actorReg, targetClasse, "referent")).toBe(false);
   });
 });
