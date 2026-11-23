@@ -12,6 +12,7 @@ import api from "../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 import { Input, InputPassword, Button } from "@snu/ds/dsfr";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 
 interface ErrorState {
   text?: string;
@@ -94,6 +95,21 @@ const Signin: React.FC = () => {
         <RightArrow />
         <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>
       </div>
+      <Alert
+        as="h2"
+        severity="info"
+        className="mb-4"
+        title="Blocage des comptes"
+        description={
+          <p>
+            À compter du{" "}
+            <strong>
+              <time dateTime="2026-12-15">15 décembre 2026</time>
+            </strong>
+            , les volontaires et leurs représentants légaux ne pourront plus se connecter à leur compte.
+          </p>
+        }
+      />
       <form onSubmit={handleSubmit}>
         <Input
           label="E-mail"
