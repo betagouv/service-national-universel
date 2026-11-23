@@ -83,7 +83,7 @@ const equivalencesOf = (young: { _id: unknown }) => MissionEquivalenceModel.find
 
 describe("Équivalences : l'identifiant vient de l'URL, jamais du corps", () => {
   describe("POST /young/:id/phase2/equivalence", () => {
-    it("un volontaire ne crée pas d'équivalence chez un autre volontaire en glissant son identifiant dans le corps", async () => {
+    it("le dépôt d'un volontaire est refusé même si le corps désigne un autre volontaire", async () => {
       const { youngA, youngB } = await givenTwoYoungs();
       const youngBBefore = await snapshotYoung(youngB._id);
 
@@ -91,14 +91,10 @@ describe("Équivalences : l'identifiant vient de l'URL, jamais du corps", () => 
         .post(`/young/${youngA._id}/phase2/equivalence`)
         .send(equivalenceBody({ id: youngB._id.toString(), youngId: youngB._id.toString() }));
 
-      expect(res.status).toEqual(200);
+      expect(res.status).toEqual(403);
+      expect(await equivalencesOf(youngA)).toHaveLength(0);
       expect(await equivalencesOf(youngB)).toHaveLength(0);
       expect(await snapshotYoung(youngB._id)).toEqual(youngBBefore);
-
-      const forA = await equivalencesOf(youngA);
-      expect(forA).toHaveLength(1);
-      expect(forA[0].status).toEqual(EQUIVALENCE_STATUS.WAITING_VERIFICATION);
-      expect(res.body.data.youngId).toEqual(youngA._id.toString());
     });
 
     it.each([[ROLES.REFERENT_DEPARTMENT], [ROLES.REFERENT_REGION]])(
@@ -266,18 +262,6 @@ describe("Équivalences : l'identifiant vient de l'URL, jamais du corps", () => 
   });
 
   describe("Non-régression : création et modification légitimes", () => {
-    it("un volontaire crée sa propre équivalence, en attente de vérification", async () => {
-      const { youngA } = await givenTwoYoungs();
-
-      const res = await request(getAppHelper(youngA)).post(`/young/${youngA._id}/phase2/equivalence`).send(equivalenceBody());
-
-      expect(res.status).toEqual(200);
-      const forA = await equivalencesOf(youngA);
-      expect(forA).toHaveLength(1);
-      expect(forA[0]).toMatchObject({ youngId: youngA._id.toString(), status: EQUIVALENCE_STATUS.WAITING_VERIFICATION, type: "BAFA", structureName: "Structure du volontaire" });
-      expect((await snapshotYoung(youngA._id))?.status_equivalence).toEqual(EQUIVALENCE_STATUS.WAITING_VERIFICATION);
-    });
-
     it.each([[ROLES.REFERENT_DEPARTMENT], [ROLES.REFERENT_REGION], [ROLES.ADMIN]])("un %s dans son périmètre crée une équivalence validée de 84 h", async (role) => {
       const { youngA } = await givenTwoYoungs();
       const actor = await actorOf(role);

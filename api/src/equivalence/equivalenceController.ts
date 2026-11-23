@@ -10,7 +10,6 @@ import {
   SENDINBLUE_TEMPLATES,
   ROLES,
   canReferentCreateEquivalence,
-  COHORT_STATUS,
   isAdmin,
   YOUNG_STATUS_PHASE1,
 } from "snu-lib";
@@ -18,7 +17,7 @@ import { capture } from "../sentry";
 import { MissionEquivalenceModel, YoungModel, CohortModel } from "../models";
 import { deleteFilesByList, getFile, isYoung as isYoungFn, isReferent, listFiles, updateYoungPhase2StatusAndHours } from "../utils";
 import { UserRequest } from "../controllers/request";
-import { notifyReferentsEquivalenceSubmitted, notifyYoungChangementStatutEquivalence, notifyYoungEquivalenceSubmitted } from "../application/applicationNotificationService";
+import { notifyYoungChangementStatutEquivalence, notifyYoungEquivalenceSubmitted } from "../application/applicationNotificationService";
 import { decrypt } from "../cryptoUtils";
 import { getMimeFromBuffer } from "../utils/file";
 import { validateId } from "../utils/validator";
@@ -113,6 +112,10 @@ router.get("/:idEquivalence", passport.authenticate("young", { session: false, f
 
 router.post("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: YoungPerimeterRequest, res) => {
   try {
+    if (!isReferent(req.user) || !EQUIVALENCE_INSTRUCTOR_ROLES.includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     // Le corps ne porte aucun identifiant : le volontaire est celui de l'URL (`req.targetYoung`), seul contrôlé par le périmètre.
     const { error, value } = createEquivalenceValidator.validate(req.body, { stripUnknown: true });
     if (error) {
@@ -121,32 +124,21 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
     }
 
     const young = req.targetYoung!;
-
-    const isYoung = isYoungFn(req.user);
-    const cohort = await CohortModel.findOne({ name: young.cohort });
-
-    if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    if (isReferent(req.user)) {
-      if (!EQUIVALENCE_INSTRUCTOR_ROLES.includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      if (isAdmin(req.user)) {
-        const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
-        if (!hasValidatedOrExemptedPhase1) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      } else {
-        if (!canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
+    if (isAdmin(req.user)) {
+      const hasValidatedOrExemptedPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED;
+      if (!hasValidatedOrExemptedPhase1) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else {
+      const cohort = await CohortModel.findOne({ name: young.cohort });
+      if (!canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const data = await MissionEquivalenceModel.create({
       ...value,
       youngId: young._id.toString(),
-      status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED",
+      status: EQUIVALENCE_STATUS.VALIDATED,
       // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
-      missionDuration: boundMissionDuration(value.missionDuration || PHASE2_TOTAL_HOURS, isYoung),
-    }); // Si c'est un jeune, on met à jour le statut d'équivalence
-    if (isYoung) {
-      young.set({ status_equivalence: "WAITING_VERIFICATION" });
-    }
+      missionDuration: value.missionDuration || PHASE2_TOTAL_HOURS,
+    });
 
     // Mise à jour du statut de la phase 2 et des heures du jeune
     await updateYoungPhase2StatusAndHours(young, req.user);
@@ -154,10 +146,6 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
     await young.save({ fromUser: req.user });
 
     await notifyYoungEquivalenceSubmitted(young);
-
-    if (isYoung) {
-      await notifyReferentsEquivalenceSubmitted(young);
-    }
 
     res.status(200).send({ ok: true, data });
   } catch (error) {
