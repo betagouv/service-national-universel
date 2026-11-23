@@ -106,7 +106,7 @@ const Signin: React.FC = () => {
             <strong>
               <time dateTime="2026-12-15">15 décembre 2026</time>
             </strong>
-            , les volontaires et leurs représentants légaux ne pourront plus se connecter à leur compte.
+            , les volontaires ne pourront plus se connecter à leur compte.
           </p>
         }
       />
