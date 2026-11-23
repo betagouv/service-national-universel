@@ -13,6 +13,7 @@ import { GoTools } from "react-icons/go";
 import { formatToActualTime, ERRORS, isInternalRedirectUrl, translate } from "snu-lib";
 import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
 import useDocumentCss from "../../hooks/useDocumentCss";
 
 export default function Signin() {
@@ -41,11 +42,29 @@ export default function Signin() {
       <div className="flex flex-1 justify-center">
         <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8" style={{ color: "rgba(58, 58, 58, 0)" }}>
-          <div className="px-16">
+          <div className="lg:px-16">
             <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
             <h2 className="mb-8 text-base font-normal text-brand-grey">
               Plateforme à destination des modérateurs, des référents, des chefs de centre, des responsable de structure, des transporteurs et des superviseurs
             </h2>
+            <Alert
+              severity="info"
+              className="mb-6 text-brand-black"
+              title="Fermeture définitive des comptes SNU"
+              description={
+                <>
+                  <p>Les comptes seront fermés aux dates suivantes :</p>
+                  <ul className="mb-0">
+                    <li>
+                      <strong>Structures</strong> : <time dateTime="2026-11-30">30 novembre 2026</time>
+                    </li>
+                    <li>
+                      <strong>Référents</strong> : <time dateTime="2026-12-15">15 décembre 2026</time>
+                    </li>
+                  </ul>
+                </>
+              }
+            />
 
             {maintenance && !localStorage?.getItem("override_maintenance") ? (
               <div className="m-4 flex items-center">
