@@ -15,6 +15,7 @@ import Voiture from "@/assets/Voiture";
 import { RiInformationLine } from "react-icons/ri";
 import ReactTooltip from "react-tooltip";
 import usePermissions from "@/hooks/usePermissions";
+import { EquivalenceSubmissionNotice } from "../MonEquivalence/EquivalenceSubmissionClosed";
 
 export default function HomePhase2() {
   const { young } = useAuth();
@@ -149,6 +150,9 @@ export default function HomePhase2() {
             <p className="mt-6 text-center text-gray-500">
               Candidatez à <strong className="text-gray-900">l'engagement de votre choix</strong> ci-dessous en toute autonomie.
             </p>
+            <div className="mx-auto mt-2 max-w-3xl text-center text-gray-500">
+              <EquivalenceSubmissionNotice />
+            </div>
           </>
         )}
         <Programs />
