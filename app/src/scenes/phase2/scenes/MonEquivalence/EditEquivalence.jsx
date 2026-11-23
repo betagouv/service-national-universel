@@ -33,7 +33,6 @@ export default function EditEquivalence() {
   const refSousType = React.useRef(null);
   const history = useHistory();
   const { id } = useParams();
-  const mode = id ? "edit" : "create";
 
   const hiddenFileInput = useRef(null);
 
@@ -164,29 +163,15 @@ export default function EditEquivalence() {
 
     try {
       setLoading(true);
-      if (mode === "create") {
-        const { ok, data: newEquivalence } = await api.post(`/young/${young._id.toString()}/phase2/equivalence`, data);
-        if (!ok) {
-          toastr.error("Oups, une erreur est survenue");
-          setLoading(false);
-          return;
-        }
-        queryClient.invalidateQueries({ queryKey: ["equivalence"] });
-        toastr.success("Votre modification d'équivalence a bien été envoyée");
-        history.push(`/phase2/equivalence/${newEquivalence._id}`);
+      const { ok, data: equivalence } = await api.put(`/young/${young._id.toString()}/phase2/equivalence/${id}`, data);
+      if (!ok) {
+        toastr.error("Oups, une erreur est survenue");
+        setLoading(false);
+        return;
       }
-
-      if (mode === "edit") {
-        const { ok, data: equivalence } = await api.put(`/young/${young._id.toString()}/phase2/equivalence/${id}`, data);
-        if (!ok) {
-          toastr.error("Oups, une erreur est survenue");
-          setLoading(false);
-          return;
-        }
-        queryClient.invalidateQueries({ queryKey: ["equivalence", id] });
-        toastr.success("Votre modification d'équivalence a bien été envoyée");
-        history.push(`/phase2/equivalence/${equivalence._id}`);
-      }
+      queryClient.invalidateQueries({ queryKey: ["equivalence", id] });
+      toastr.success("Votre modification d'équivalence a bien été envoyée");
+      history.push(`/phase2/equivalence/${equivalence._id}`);
 
       setLoading(false);
     } catch (error) {
@@ -229,9 +214,7 @@ export default function EditEquivalence() {
   if (data?._id && !["WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(data?.status)) history.push("/phase2");
 
   return (
-    <Container
-      title={mode === "create" ? "Ajouter un engagement" : "Je modifie ma demande de reconnaissance d'engagement"}
-      backlink={data?._id ? `/phase2/equivalence/${data._id}` : "/phase2"}>
+    <Container title="Je modifie ma demande de reconnaissance d'engagement" backlink={data?._id ? `/phase2/equivalence/${data._id}` : "/phase2"}>
       <div className="max-w-2xl mx-auto">
         <div className="rounded-lg border-[1px] border-blue-400 bg-blue-50">
           <div className="flex items-center px-4 py-3">
@@ -564,7 +547,7 @@ export default function EditEquivalence() {
           className="mt-4 w-full rounded-lg border-[1px] border-blue-600 bg-blue-600 py-2 text-sm font-medium leading-5 text-white hover:bg-white hover:!text-blue-600 disabled:border-blue-300 disabled:bg-blue-300 disabled:!text-white"
           disabled={loading || uploading}
           onClick={() => handleSubmit()}>
-          {loading ? "Chargement" : mode === "edit" ? "Modifier ma demande" : "Soumettre ma demande"}
+          {loading ? "Chargement" : "Modifier ma demande"}
         </button>
       </div>
     </Container>

@@ -3,7 +3,7 @@ import EngagementSrc from "@/assets/hero/phase2.png";
 import useAuth from "@/services/useAuth";
 import { Link } from "react-router-dom";
 import { YOUNG_STATUS_PHASE2 } from "../../../../utils";
-import { HiChevronDown, HiExternalLink, HiPlus, HiSearch } from "react-icons/hi";
+import { HiChevronDown, HiExternalLink, HiSearch } from "react-icons/hi";
 import { EngagementList } from "./components/EngagementList";
 import { Programs } from "./components/Programs";
 import { FAQ } from "./components/FAQ";
@@ -18,7 +18,7 @@ import usePermissions from "@/hooks/usePermissions";
 
 export default function HomePhase2() {
   const { young } = useAuth();
-  const { canViewMissions, canCreateEquivalences } = usePermissions();
+  const { canViewMissions } = usePermissions();
 
   return (
     <div className="bg-white pt-8 pb-16">
@@ -113,31 +113,7 @@ export default function HomePhase2() {
                     <RiInformationLine className="text-white" />
                   </button>
                   <ReactTooltip id="tooltip-delai" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-                    <span className="text-gray-800">
-                      Vous ne pouvez plus postuler à des missions d'engagement car le délai de réalisation est dépassé.
-                    </span>
-                  </ReactTooltip>
-                </>
-              )}
-              {canCreateEquivalences ? (
-                <Link to="/phase2/equivalence" className="border rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center">
-                  <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
-                  Ajouter un engagement réalisé
-                </Link>
-              ) : (
-                <>
-                  <button
-                    disabled
-                    data-tip
-                    data-for="tooltip-engagement-realise-home"
-                    className="border bg-gray-300 rounded-md px-3 py-2.5 text-gray-500 cursor-not-allowed text-center">
-                    <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
-                    Ajouter un engagement réalisé
-                  </button>
-                  <ReactTooltip id="tooltip-engagement-realise-home" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-                    <span className="text-gray-800">
-                      Vous ne pouvez plus ajouter un engagement déjà réalisé car le délai de réalisation est dépassé.
-                    </span>
+                    <span className="text-gray-800">Vous ne pouvez plus postuler à des missions d'engagement car le délai de réalisation est dépassé.</span>
                   </ReactTooltip>
                 </>
               )}
@@ -170,31 +146,9 @@ export default function HomePhase2() {
             <h2 id="sectionEngagement" className="text-center font-bold text-2xl md:text-4xl m-0 mt-2 md:mt-4">
               Trouvez un engagement par vous-même
             </h2>
-
-            <div className="mt-6 md:mt-12 border rounded-xl p-3 max-w-3xl mx-auto">
-              <div className="grid grid-rows-2 md:grid-rows-1 md:grid-cols-2 text-gray-500">
-                <div className="flex gap-4 items-center md:border-r border-b md:border-b-0 px-3 pb-[0.75rem] md:pb-0">
-                  <div className="rounded-full bg-blue-france-sun-113 flex items-center justify-center w-6 h-6 flex-none">
-                    <p className="text-white text-xs">1</p>
-                  </div>
-                  <p className="line-clamp-3">
-                    Candidatez à <strong className="text-gray-900">l'engagement de votre choix</strong> ci-dessous en toute autonomie
-                  </p>
-                </div>
-                <div className="flex gap-4 items-center px-3 pt-[0.75rem] md:p-0">
-                  <div className="rounded-full bg-blue-france-sun-113 flex items-center justify-center w-6 h-6 flex-none">
-                    <p className="text-white text-xs">2</p>
-                  </div>
-                  <p className="line-clamp-3">
-                    <strong className="text-gray-900">Une fois terminé</strong>,{" "}
-                    <Link to="/phase2/equivalence" className="underline underline-offset-2">
-                      ajoutez-le
-                    </Link>{" "}
-                    à vos engagements réalisés.
-                  </p>
-                </div>
-              </div>
-            </div>
+            <p className="mt-6 text-center text-gray-500">
+              Candidatez à <strong className="text-gray-900">l'engagement de votre choix</strong> ci-dessous en toute autonomie.
+            </p>
           </>
         )}
         <Programs />

@@ -1,6 +1,6 @@
 import { listFiles, deleteFilesByList } from "../utils";
 import request from "supertest";
-import { ROLES, SUB_ROLES } from "snu-lib";
+import { ERRORS, ROLES } from "snu-lib";
 import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewCohortFixture from "./fixtures/cohort";
@@ -11,7 +11,6 @@ import { createMissionEquivalenceHelpers, notExistingMissionEquivalenceId } from
 import { createFixtureMissionEquivalence } from "./fixtures/equivalence";
 import { MissionEquivalenceModel, YoungModel, ReferentModel, CohortModel } from "../models";
 import { createReferentHelper } from "./helpers/referent";
-import { COHORT_STATUS } from "snu-lib";
 import * as applicationNotificationService from "../application/applicationNotificationService";
 import { TestScenarios } from "./fixtures/scenarios";
 import { CohortBuilder } from "./fixtures/builders/CohortBuilder";
@@ -40,42 +39,26 @@ beforeEach(async () => {
 
 describe("Equivalence Routes", () => {
   describe("POST /equivalence", () => {
-    it("should return 200 when creating an equivalence", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", dateEnd: new Date("2023-07-31"), dateStart: new Date("2023-07-01") }));
-      const young = await createYoungHelper(
-        getNewYoungFixture({ cohortId: cohort._id, cohort: "Juillet 2023", statusPhase2OpenedAt: new Date("2023-08-01"), statusPhase1: "DONE" }),
-      );
-      await createReferentHelper({ role: ROLES.REFERENT_DEPARTMENT, subRole: SUB_ROLES.manager_department, department: young.department, email: "test@test.com" });
-      const body = createFixtureMissionEquivalence({
-        youngId: young._id.toString(),
-        type: "BAFA",
-        structureName: "Test Structure",
-        address: "123 Street",
-        zip: "12345",
-        city: "City",
-        startDate: new Date("2023-01-01"),
-        endDate: new Date("2024-01-02"),
-        contactFullName: "John Doe",
-        contactEmail: "john@example.com",
-        files: ["file1.pdf"],
-        missionDuration: 84,
-      });
+    it("should refuse a new equivalence submitted by a young person who has completed phase 1", async () => {
+      const { young } = await TestScenarios.adminWithYoung(new CohortBuilder().published());
+      const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
+
       const res = await request(getAppHelper(young)).post(`/young/${young._id}/phase2/equivalence`).send(body);
-      expect(res.status).toEqual(200);
+
+      expect(res.status).toEqual(403);
+      expect(res.body).toEqual({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      expect(await MissionEquivalenceModel.countDocuments({ youngId: young._id.toString() })).toBe(0);
+      expect((await YoungModel.findById(young._id))?.status_equivalence).toEqual(young.status_equivalence);
+      expect(applicationNotificationService.notifyYoungEquivalenceSubmitted).not.toHaveBeenCalled();
     });
 
-    it("should return 400 when not creating an equivalence with missing required fields", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", dateEnd: new Date("2023-07-31"), dateStart: new Date("2023-07-01") }));
-      const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, cohort: "Juillet 2023", statusPhase2OpenedAt: new Date("2023-08-01") }));
+    it("should return 400 when an admin submits an equivalence with missing required fields", async () => {
+      const { young, admin } = await TestScenarios.adminWithYoung(new CohortBuilder().published());
 
-      const body = createMissionEquivalenceHelpers({
-        youngId: young._id.toString(),
-        type: "BAFA", // Missing 'structureName', 'address', etc.
-      });
-
-      const res = await request(getAppHelper(young)).post(`/young/${young._id}/phase2/equivalence`).send(body);
+      const res = await request(getAppHelper(admin)).post(`/young/${young._id}/phase2/equivalence`).send({ type: "BAFA" });
 
       expect(res.status).toEqual(400);
+      expect(res.body).toEqual({ ok: false, code: ERRORS.INVALID_BODY });
     });
 
     it("should return 404 when the user doesn't exist", async () => {
