@@ -107,9 +107,7 @@ export default function HomeMobile() {
               <RiInformationLine className="text-white" />
             </button>
             <ReactTooltip id="tooltip-delai-pm-mobile" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-              <span className="text-gray-800">
-                Vous ne pouvez plus postuler à des missions d'engagements car le délai de réalisation est dépassé. Vous pouvez tout de même ajouter un engagement réalisé.
-              </span>
+              <span className="text-gray-800">Vous ne pouvez plus postuler à des missions d'engagement car le délai de réalisation est dépassé.</span>
             </ReactTooltip>
           </>
         )}

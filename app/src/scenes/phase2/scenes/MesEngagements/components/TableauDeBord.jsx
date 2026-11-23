@@ -5,7 +5,7 @@ import { knowledgebaseURL } from "@/config";
 import { PHASE2_TOTAL_HOURS, APPLICATION_STATUS } from "snu-lib";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/services/useAuth";
-import { HiPlus, HiSearch } from "react-icons/hi";
+import { HiSearch } from "react-icons/hi";
 import { RiMedal2Line, RiInformationLine } from "react-icons/ri";
 import InfobulleIcon from "@/assets/infobulleIcon.svg";
 import SemiCircleProgress from "./SemiCircleProgress";
@@ -40,7 +40,7 @@ const Tooltip = ({ className }) => (
 
 export default function View() {
   const { young } = useAuth();
-  const { canViewMissions, canCreateEquivalences, canAccessMilitaryPreparation } = usePermissions();
+  const { canViewMissions, canAccessMilitaryPreparation } = usePermissions();
   const phase2NumberHoursDone = young.phase2NumberHoursDone || 0;
   const applications = useQuery({ queryKey: ["application", { youngId: young._id }], queryFn: () => fetchApplications(young._id) });
   const equivalences = useQuery({ queryKey: ["equivalence", { youngId: young._id }], queryFn: () => fetchEquivalences(young._id) });
@@ -98,37 +98,11 @@ export default function View() {
                     <p>Trouver un engagement</p>
                     <RiInformationLine className="text-white" />
                   </button>
-                <ReactTooltip id="tooltip-delai-mesengagements" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-                  <span className="text-gray-800">
-                    Vous ne pouvez plus postuler à des missions d'engagement car le délai de réalisation est dépassé.
-                  </span>
-                </ReactTooltip>
-              </>
-            )}
-            {canCreateEquivalences ? (
-              <Link to="/phase2/equivalence">
-                <p className="mt-3 border bg-white rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center mx-auto w-full">
-                  <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
-                  Ajouter un engagement réalisé
-                </p>
-              </Link>
-            ) : (
-              <>
-                <button 
-                  disabled
-                  data-tip
-                  data-for="tooltip-engagement-realise-bloque"
-                  className="mt-3 border bg-gray-300 rounded-md px-3 py-2.5 text-gray-500 cursor-not-allowed text-center mx-auto w-full">
-                  <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
-                  Ajouter un engagement réalisé
-                </button>
-                <ReactTooltip id="tooltip-engagement-realise-bloque" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-                  <span className="text-gray-800">
-                    Vous ne pouvez plus ajouter un engagement déjà réalisé car le délai de réalisation est dépassé.
-                  </span>
-                </ReactTooltip>
-              </>
-            )}
+                  <ReactTooltip id="tooltip-delai-mesengagements" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                    <span className="text-gray-800">Vous ne pouvez plus postuler à des missions d'engagement car le délai de réalisation est dépassé.</span>
+                  </ReactTooltip>
+                </>
+              )}
             </div>
           </div>
         ) : null}
@@ -144,17 +118,7 @@ export default function View() {
 
       {missionsDone.length ? (
         <section id="engagements-realises" className="mt-[2rem] md:mt-[3rem]">
-          <div className="flex gap-4">
-            <h2 className="font-bold text-2xl md:text-3xl ">Engagements réalisés</h2>
-            {phase2NumberHoursDone < PHASE2_TOTAL_HOURS && canCreateEquivalences && (
-              <Link to="/phase2/equivalence">
-                <p className="text-sm font-normal bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-full md:rounded-md w-8 h-8 md:w-auto md:h-auto py-1.5 md:px-3 md:py-2.5 text-center">
-                  <HiPlus className="inline-block text-lg align-text-bottom md:mr-1" />
-                  <span className="hidden md:inline">Ajouter</span>
-                </p>
-              </Link>
-            )}
-          </div>
+          <h2 className="font-bold text-2xl md:text-3xl">Engagements réalisés</h2>
           <EngagementList cards={missionsDone} />
 
           <hr className="mt-[2rem] md:mt-[3rem]" />

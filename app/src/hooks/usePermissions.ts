@@ -1,16 +1,7 @@
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
 import { cohortAssignmentAnnouncementsIsOpenForYoung } from "@/utils/cohorts";
-import { 
-  YOUNG_SOURCE, 
-  YOUNG_STATUS, 
-  canCreateApplications, 
-  canCreateEquivalences, 
-  canViewMissions,
-  canViewMissionDetail,
-  canManageApplications,
-  canAccessMilitaryPreparation,
-} from "snu-lib";
+import { YOUNG_SOURCE, YOUNG_STATUS, canCreateApplications, canViewMissions, canViewMissionDetail, canManageApplications, canAccessMilitaryPreparation } from "snu-lib";
 import { canViewPhase2, permissionPhase1 } from "@/utils";
 
 export default function usePermissions() {
@@ -27,7 +18,6 @@ export default function usePermissions() {
     canViewMissions: canViewMissions(young, cohort),
     canViewMissionDetail: canViewMissionDetail(young),
     canCreateApplications: canCreateApplications(young, cohort),
-    canCreateEquivalences: canCreateEquivalences(young, cohort),
     canManageApplications: canManageApplications(young, cohort),
     canAccessMilitaryPreparation: canAccessMilitaryPreparation(young, cohort),
   };
