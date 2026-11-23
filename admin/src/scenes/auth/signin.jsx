@@ -50,10 +50,10 @@ export default function Signin() {
             <Alert
               severity="info"
               className="mb-6 text-brand-black"
-              title="Dates de blocage des comptes"
+              title="Fermeture définitive des comptes SNU"
               description={
                 <>
-                  <p>L’accès aux comptes sera bloqué à compter des dates suivantes :</p>
+                  <p>Les comptes seront fermés aux dates suivantes :</p>
                   <ul className="mb-0">
                     <li>
                       <strong>Structures</strong> : <time dateTime="2026-11-30">30 novembre 2026</time>

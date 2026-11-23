@@ -99,7 +99,7 @@ const Signin: React.FC = () => {
         as="h2"
         severity="info"
         className="mb-4"
-        title="Blocage des comptes"
+        title="Fermeture définitive des comptes SNU"
         description={
           <p>
             À compter du{" "}
