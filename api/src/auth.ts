@@ -43,7 +43,7 @@ import { consumeLoginAttempt, resetLoginAttempts, consume2FAAttempt, consumeEmai
 import { validateFirstName } from "./utils/validator";
 import { getFilteredSessions } from "./utils/cohort";
 
-import { ClasseModel, EtablissementModel, CohortModel } from "./models";
+import { ClasseModel, EtablissementModel, CohortModel, YoungModel } from "./models";
 import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
 import { isReferentAccessAllowed } from "./featureFlag/adminAccessRestriction";
 import { getAcl } from "./services/iam/Permission.service";
@@ -583,6 +583,10 @@ class Auth {
         .unknown()
         .validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+      // Reject closed young access before consuming an attempt or revealing whether a challenge is pending.
+      if (this.model === YoungModel) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+
       const { email, token_2fa, rememberMe } = value;
       // L'essai est consommé dans la même opération que le contrôle de plafond :
       // au-delà de 3, plus aucune requête ne matche, même en concurrence (M5).
@@ -590,9 +594,6 @@ class Auth {
 
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       if (user.status === "DELETED" || (user as any).anonymized) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
-      if (isYoung(user)) {
-        return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
-      }
       // Rôle décommissionné (GOO-56, P24) : le code 2FA a pu être émis avant la décommission.
       if (isReferent(user) && isDecommissionedRole(user)) {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });

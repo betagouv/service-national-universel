@@ -109,14 +109,15 @@ describe("global young access closure — offline authentication tests", () => {
     }
   });
 
-  it("refuses a correct pending 2FA code", async () => {
+  it("refuses a correct pending 2FA code without looking up or consuming an attempt", async () => {
     const young = youngAccount();
-    jest.mocked(consume2FAAttempt).mockResolvedValue(young);
     const res = response();
 
     await auth.signin2FA({ body: { email: young.email, token_2fa: "123456", rememberMe: true } }, res);
 
     expect(res.status).toHaveBeenCalledWith(401);
+    expect(res.send).toHaveBeenCalledWith({ ok: false, code: "EMAIL_OR_PASSWORD_INVALID" });
+    expect(consume2FAAttempt).not.toHaveBeenCalled();
     expect(young.save).not.toHaveBeenCalled();
     expect(setSessionCookie).not.toHaveBeenCalled();
   });
