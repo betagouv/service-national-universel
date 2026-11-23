@@ -84,7 +84,8 @@ async function getSessionUser(req) {
   const isSessionOf = (account) => passwordChangedAt?.getTime() === account.passwordChangedAt?.getTime() && lastLogoutAt?.getTime() === account.lastLogoutAt?.getTime();
 
   const young = await YoungModel.findById(_id);
-  if (young) return !isRevoked(young) && isSessionOf(young) ? { user: young, isYoung: true } : null;
+  // Young access is closed globally, including support-site sessions.
+  if (young) return null;
 
   const referent = await ReferentModel.findById(_id);
   if (referent) return !isRevoked(referent) && isSessionOf(referent) ? { user: referent, isYoung: false } : null;

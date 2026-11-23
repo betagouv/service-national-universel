@@ -56,6 +56,7 @@ afterAll(async () => {
 
 afterEach(async () => {
   resetAppAuth();
+  jest.mocked(sendTemplate).mockClear();
   await clearDatabase();
 });
 
@@ -63,6 +64,10 @@ jest.setTimeout(120000);
 
 async function createYoung(fields: Record<string, any> = {}) {
   return createYoungHelper({ ...getNewYoungFixture(), password: PASSWORD, ...fields } as any);
+}
+
+function createReferent(fields: Record<string, unknown> = {}) {
+  return createReferentHelper({ ...getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT }), password: PASSWORD, ...fields });
 }
 
 // getAppHelper() monte l'intégralité des routes : une app par requête ferait de
@@ -144,9 +149,7 @@ describe("PM5 — le verrou de connexion ne dépend jamais du mot de passe soumi
 
   // C2, sur la route des référents (même classe Auth, autre modèle)
   it("applique la même réponse sur /referent/signin : compte verrouillé avec le bon mot de passe == email inconnu", async () => {
-    const referent = await createReferentHelper(
-      getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, password: PASSWORD, loginAttempts: MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1, nextLoginAttemptIn: inThirtyMinutes() } as any),
-    );
+    const referent = await createReferent({ loginAttempts: MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1, nextLoginAttemptIn: inThirtyMinutes() });
     const app = getAppHelper();
 
     const onLocked = await request(app).post("/referent/signin").send({ email: referent.email, password: PASSWORD });
@@ -188,17 +191,20 @@ describe("PM5 — le verrou de connexion ne dépend jamais du mot de passe soumi
 
   // C3
   it("ne connecte jamais pendant un verrou, même avec le bon mot de passe (délai posé par les échecs, puis blocage dur)", async () => {
-    const young = await createYoung();
+    const referent = await createReferent();
     const app = getAppHelper();
-    for (let i = 0; i < MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1; i++) await signin(app, young.email, WRONG_PASSWORD);
+    const attempt = (email: string, password: string) => request(app).post("/referent/signin").send({ email, password });
+    for (let i = 0; i < MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1; i++) await attempt(referent.email, WRONG_PASSWORD);
 
-    const duringDelay = await signin(app, young.email, PASSWORD);
+    const duringDelay = await attempt(referent.email, PASSWORD);
 
-    const hardBlocked = await createYoung({ loginAttempts: 13, nextLoginAttemptIn: inOneHour() });
-    const duringBlock = await signin(app, hardBlocked.email, PASSWORD);
+    const hardBlocked = await createReferent({ loginAttempts: 13, nextLoginAttemptIn: inOneHour() });
+    const duringBlock = await attempt(hardBlocked.email, PASSWORD);
 
     for (const res of [duringDelay, duringBlock]) {
-      expect({ status: res.status, body: res.body, session: opensSession(res) }).toEqual({ status: 401, body: refusal, session: false });
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual(refusal);
+      expect(res.headers["set-cookie"]).toBeUndefined();
     }
   });
 
@@ -217,16 +223,17 @@ describe("PM5 — le verrou de connexion ne dépend jamais du mot de passe soumi
   });
 
   // C5
-  it("le 6e essai avec le bon mot de passe se connecte : le délai posé pour la suivante ne refuse pas la tentative en cours", async () => {
-    const young = await createYoung();
+  it("le 6e essai avec le bon mot de passe connecte le référent : le délai ne vaut que pour la tentative suivante", async () => {
+    const referent = await createReferent();
     const app = getAppHelper();
-    for (let i = 0; i < MAX_LOGIN_ATTEMPTS_BEFORE_DELAY; i++) await signin(app, young.email, WRONG_PASSWORD);
+    const attempt = (password: string) => request(app).post("/referent/signin").send({ email: referent.email, password });
+    for (let i = 0; i < MAX_LOGIN_ATTEMPTS_BEFORE_DELAY; i++) await attempt(WRONG_PASSWORD);
 
-    const sixth = await signin(app, young.email, PASSWORD);
+    const sixth = await attempt(PASSWORD);
 
     expect(sixth.status).toBe(200);
-    expect(opensSession(sixth)).toBe(true);
-    const after = await YoungModel.findById(young._id);
+    expect(sixth.headers["set-cookie"]).toEqual(expect.arrayContaining([expect.stringMatching(/^jwt_ref=/)]));
+    const after = await ReferentModel.findById(referent._id);
     expect(after!.loginAttempts).toBe(0);
     expect(after!.nextLoginAttemptIn).toBeNull();
   });
@@ -246,23 +253,26 @@ describe("PM5 — le verrou de connexion ne dépend jamais du mot de passe soumi
 
   // C3 sous concurrence : le verrou est décidé au moment de la consommation, pas sur le document lu avant.
   it("refuse le bon mot de passe quand le verrou a été posé entre la lecture du compte et la consommation de la tentative", async () => {
-    const young = await createYoung({ loginAttempts: MAX_LOGIN_ATTEMPTS_BEFORE_DELAY, nextLoginAttemptIn: new Date(Date.now() - 1000) });
+    const referent = await createReferent({ loginAttempts: MAX_LOGIN_ATTEMPTS_BEFORE_DELAY, nextLoginAttemptIn: new Date(Date.now() - 1000) });
     // Document lu avant le verrou : il se croit libre.
-    const stale = await YoungModel.findById(young._id);
+    const stale = await ReferentModel.findById(referent._id);
     // Une requête sœur vient de poser le délai.
-    await YoungModel.updateOne({ _id: young._id }, { $set: { loginAttempts: MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1, nextLoginAttemptIn: inThirtyMinutes() } });
-    const original = YoungModel.findOne.bind(YoungModel);
-    const findOne = jest.spyOn(YoungModel, "findOne").mockImplementation(((filter: any, ...rest: any[]) =>
-      filter?.email === young.email ? Promise.resolve(stale) : (original as any)(filter, ...rest)) as any);
+    await ReferentModel.updateOne({ _id: referent._id }, { $set: { loginAttempts: MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1, nextLoginAttemptIn: inThirtyMinutes() } });
+    const original = ReferentModel.findOne.bind(ReferentModel);
+    const findOne = jest
+      .spyOn(ReferentModel, "findOne")
+      .mockImplementation(((filter: any, ...rest: any[]) => (filter?.email === referent.email ? Promise.resolve(stale) : (original as any)(filter, ...rest))) as any);
 
     try {
-      const res = await signin(getAppHelper(), young.email, PASSWORD);
+      const res = await request(getAppHelper()).post("/referent/signin").send({ email: referent.email, password: PASSWORD });
 
-      expect({ status: res.status, body: res.body, session: opensSession(res) }).toEqual({ status: 401, body: refusal, session: false });
+      expect(res.status).toBe(401);
+      expect(res.body).toEqual(refusal);
+      expect(res.headers["set-cookie"]).toBeUndefined();
     } finally {
       findOne.mockRestore();
     }
-    const after = await YoungModel.findById(young._id);
+    const after = await ReferentModel.findById(referent._id);
     expect(after!.loginAttempts).toBe(MAX_LOGIN_ATTEMPTS_BEFORE_DELAY + 1);
   });
 });
@@ -332,8 +342,8 @@ describe("consumeLoginAttempt — le verrou est décidé dans l'opération atomi
 });
 
 describe("PM5 — oracle d'existence de compte sur /young|referent/signin (résiduel de M4)", () => {
-  it("ne bloque pas la réponse de forgot_password sur l'envoi Brevo (email existant)", async () => {
-    const young = await createYoung();
+  it("ne bloque pas la réponse de referent/forgot_password sur l'envoi Brevo (email existant)", async () => {
+    const referent = await createReferent();
     let resolveSend: () => void = () => {};
     const pending = new Promise<void>((resolve) => {
       resolveSend = resolve;
@@ -341,13 +351,24 @@ describe("PM5 — oracle d'existence de compte sur /young|referent/signin (rési
     (sendTemplate as jest.Mock).mockImplementationOnce(() => pending);
 
     try {
-      const res = await request(getAppHelper()).post("/young/forgot_password").send({ email: young.email });
+      const res = await request(getAppHelper()).post("/referent/forgot_password").send({ email: referent.email });
       expect(res.status).toBe(200);
       // La promesse Brevo n'est toujours pas résolue : la réponse n'a pas pu l'attendre.
       expect(sendTemplate).toHaveBeenCalled();
     } finally {
       resolveSend();
     }
+  });
+
+  it("répond pareil sur young/forgot_password pour un compte existant et un email inconnu, sans envoi Brevo", async () => {
+    const young = await createYoung();
+    const app = getAppHelper();
+    for (const email of [young.email, "inconnu@example.org"]) {
+      const res = await request(app).post("/young/forgot_password").send({ email });
+      expect(res.status).toBe(200);
+      expect(res.body).toEqual({ ok: true });
+    }
+    expect(sendTemplate).not.toHaveBeenCalled();
   });
 
   it("ne bloque pas la réponse de referent/signup_retry sur l'envoi Brevo (compte existant)", async () => {
@@ -370,16 +391,18 @@ describe("PM5 — oracle d'existence de compte sur /young|referent/signin (rési
 
 describe("PM6 — reset_password : compteur et verrou sur le mot de passe courant", () => {
   function resetPassword(app, password: string) {
-    return request(app).post("/young/reset_password").send({ password, verifyPassword: PASSWORD + "Nouveau1", newPassword: PASSWORD + "Nouveau1" });
+    return request(app)
+      .post("/referent/reset_password")
+      .send({ password, verifyPassword: PASSWORD + "Nouveau1", newPassword: PASSWORD + "Nouveau1" });
   }
 
   it("compte les échecs sur le mot de passe courant et verrouille au-delà du plafond", async () => {
-    const young = await createYoung();
-    const app = getAppHelper(young);
+    const referent = await createReferent();
+    const app = getAppHelper(referent);
 
     await Promise.all(Array.from({ length: 10 }, () => resetPassword(app, WRONG_PASSWORD)));
 
-    const after = await YoungModel.findById(young._id);
+    const after = await ReferentModel.findById(referent._id);
     // Les tentatives sont comptées sans perte, mais pas au-delà du délai posé à la 6e : les suivantes
     // trouvent le verrou et sont refusées sans rien consommer.
     expect(after!.loginAttempts).toBeGreaterThan(1);
@@ -391,13 +414,13 @@ describe("PM6 — reset_password : compteur et verrou sur le mot de passe couran
   });
 
   it("ne consomme aucune tentative quand le mot de passe courant est bon du premier coup", async () => {
-    const young = await createYoung();
-    const app = getAppHelper(young);
+    const referent = await createReferent();
+    const app = getAppHelper(referent);
 
     const res = await resetPassword(app, PASSWORD);
     expect(res.status).toBe(200);
 
-    const after = await YoungModel.findById(young._id);
+    const after = await ReferentModel.findById(referent._id);
     expect(after!.loginAttempts).toBe(0);
   });
 });
@@ -414,20 +437,17 @@ describe("SNU-157 — forgot_password_reset lève le verrou de connexion", () =>
     forgotPasswordResetExpires: new Date(Date.now() + 60 * 60 * 1000),
   });
 
-  it.each([
-    ["/young", () => createYoung(lockedByFailures()), YoungModel],
-    ["/referent", () => createReferentHelper({ ...getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, password: PASSWORD }), ...lockedByFailures() } as any), ReferentModel],
-  ])("connecte %s avec le nouveau mot de passe juste après la réinitialisation", async (path, create, model: any) => {
-    const user = await create();
+  it("connecte le référent avec le nouveau mot de passe juste après la réinitialisation", async () => {
+    const user = await createReferent(lockedByFailures());
     const app = getAppHelper();
 
-    const reset = await request(app).post(`${path}/forgot_password_reset`).send({ token: TOKEN, password: NEW_PASSWORD });
+    const reset = await request(app).post("/referent/forgot_password_reset").send({ token: TOKEN, password: NEW_PASSWORD });
     expect(reset.status).toBe(200);
 
-    const after = await model.findById(user._id);
-    expect({ loginAttempts: after.loginAttempts, nextLoginAttemptIn: after.nextLoginAttemptIn }).toEqual({ loginAttempts: 0, nextLoginAttemptIn: null });
+    const after = await ReferentModel.findById(user._id);
+    expect({ loginAttempts: after!.loginAttempts, nextLoginAttemptIn: after!.nextLoginAttemptIn }).toEqual({ loginAttempts: 0, nextLoginAttemptIn: null });
 
-    const res = await request(app).post(`${path}/signin`).send({ email: user.email, password: NEW_PASSWORD });
+    const res = await request(app).post("/referent/signin").send({ email: user.email, password: NEW_PASSWORD });
     expect(res.status).toBe(200);
   });
 });
@@ -446,45 +466,41 @@ describe("Réinitialisation — une nouvelle demande ne périme pas le lien déj
       .map((cta) => cta.split("token=")[1]);
   }
 
-  beforeEach(() => (sendTemplate as jest.Mock).mockClear());
-
-  it.each([
-    ["/young", () => createYoung(), YoungModel],
-    ["/referent", () => createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, password: PASSWORD } as any)), ReferentModel],
-  ])("%s : deux demandes successives envoient le même lien, et le premier reçu fonctionne", async (path, create, model: any) => {
-    const user = await create();
+  it("deux demandes successives envoient le même lien au référent, et le premier reçu fonctionne", async () => {
+    const user = await createReferent();
     const app = getAppHelper();
 
-    expect((await request(app).post(`${path}/forgot_password`).send({ email: user.email })).status).toBe(200);
-    const first = await model.findById(user._id);
-    expect((await request(app).post(`${path}/forgot_password`).send({ email: user.email })).status).toBe(200);
-    const second = await model.findById(user._id);
+    expect((await request(app).post("/referent/forgot_password").send({ email: user.email })).status).toBe(200);
+    const first = await ReferentModel.findById(user._id);
+    expect((await request(app).post("/referent/forgot_password").send({ email: user.email })).status).toBe(200);
+    const second = await ReferentModel.findById(user._id);
 
     const tokens = sentTokens();
     expect(tokens).toHaveLength(2);
     expect(tokens[1]).toBe(tokens[0]);
     // L'échéance n'est pas repoussée par la seconde demande.
-    expect(second.forgotPasswordResetExpires.getTime()).toBe(first.forgotPasswordResetExpires.getTime());
+    expect(second!.forgotPasswordResetExpires!.getTime()).toBe(first!.forgotPasswordResetExpires!.getTime());
 
-    const reset = await request(app).post(`${path}/forgot_password_reset`).send({ token: tokens[0], password: NEW_PASSWORD });
+    const reset = await request(app).post("/referent/forgot_password_reset").send({ token: tokens[0], password: NEW_PASSWORD });
     expect(reset.status).toBe(200);
   });
 
   it("le lien envoyé par la connexion en réinitialisation imposée survit à « Mot de passe oublié »", async () => {
-    const young = await createYoung({ passwordResetRequired: true });
+    const referent = await createReferent({ passwordResetRequired: true });
     const app = getAppHelper();
+    const attempt = (password: string) => request(app).post("/referent/signin").send({ email: referent.email, password });
 
-    const signinRes = await signin(app, young.email, PASSWORD);
+    const signinRes = await attempt(PASSWORD);
     expect(signinRes.body.code).toBe("PASSWORD_RESET_REQUIRED");
-    expect((await request(app).post("/young/forgot_password").send({ email: young.email })).status).toBe(200);
+    expect((await request(app).post("/referent/forgot_password").send({ email: referent.email })).status).toBe(200);
 
     const tokens = sentTokens();
     expect(tokens).toHaveLength(2);
     expect(tokens[1]).toBe(tokens[0]);
 
-    const reset = await request(app).post("/young/forgot_password_reset").send({ token: tokens[0], password: NEW_PASSWORD });
+    const reset = await request(app).post("/referent/forgot_password_reset").send({ token: tokens[0], password: NEW_PASSWORD });
     expect(reset.status).toBe(200);
-    expect((await signin(app, young.email, NEW_PASSWORD)).status).toBe(200);
+    expect((await attempt(NEW_PASSWORD)).status).toBe(200);
   });
 
   it.each([
@@ -492,12 +508,12 @@ describe("Réinitialisation — une nouvelle demande ne périme pas le lien déj
     ["expiré", -60 * 1000],
   ])("un jeton %s est remplacé par un nouveau, valable 2 h", async (_label, remainingMs) => {
     const OLD_TOKEN = "b".repeat(40);
-    const young = await createYoung({ forgotPasswordResetToken: OLD_TOKEN, forgotPasswordResetExpires: new Date(Date.now() + remainingMs) });
+    const referent = await createReferent({ forgotPasswordResetToken: OLD_TOKEN, forgotPasswordResetExpires: new Date(Date.now() + remainingMs) });
     const app = getAppHelper();
 
-    expect((await request(app).post("/young/forgot_password").send({ email: young.email })).status).toBe(200);
+    expect((await request(app).post("/referent/forgot_password").send({ email: referent.email })).status).toBe(200);
 
-    const after = await YoungModel.findById(young._id);
+    const after = await ReferentModel.findById(referent._id);
     expect(after!.forgotPasswordResetToken).not.toBe(OLD_TOKEN);
     expect(sentTokens()).toEqual([after!.forgotPasswordResetToken]);
     expect(after!.forgotPasswordResetExpires!.getTime() - Date.now()).toBeGreaterThan(110 * 60 * 1000);
@@ -505,9 +521,9 @@ describe("Réinitialisation — une nouvelle demande ne périme pas le lien déj
 });
 
 describe("M5 — plafond de 3 essais 2FA", () => {
-  it("ne laisse pas dépasser 3 essais de code 2FA en parallèle", async () => {
+  it("ne laisse pas dépasser 3 essais de code 2FA en parallèle pour un référent", async () => {
     (config as any).ENABLE_2FA = true;
-    const young = await createYoung({
+    const referent = await createReferent({
       token2FA: "123456",
       attempts2FA: 0,
       token2FAExpires: new Date(Date.now() + 10 * 60 * 1000),
@@ -515,13 +531,14 @@ describe("M5 — plafond de 3 essais 2FA", () => {
     const app = getAppHelper();
     const BURST = 10;
 
-    await Promise.all(
-      Array.from({ length: BURST }, () => request(app).post("/young/signin-2fa").send({ email: young.email, token_2fa: "000000", rememberMe: false })),
+    const responses = await Promise.all(
+      Array.from({ length: BURST }, () => request(app).post("/referent/signin-2fa").send({ email: referent.email, token_2fa: "000000", rememberMe: false })),
     );
 
-    const after = await YoungModel.findById(young._id);
+    const after = await ReferentModel.findById(referent._id);
     // Le compteur doit saturer à 3 : au-delà, findOne({attempts2FA: {$lt: 3}})
     // ne renvoie plus rien et la route refuse sans consommer d'essai.
+    for (const res of responses) expect(res.status).toBe(400);
     expect(after!.attempts2FA).toBe(3);
   });
 });
@@ -705,39 +722,7 @@ describe("M42/M65 — rate limiting des routes d'auth", () => {
   });
 });
 
-describe("PL3 — rate limiting de /young/signup_invite", () => {
-  // M43 : /young/signup_verify est supprimée (voir young.test.ts), le test de rafale sur cette
-  // route n'a plus d'objet ; celui sur signup_invite, route sœur partageant le même
-  // youngSigninLimiter, reste la non-régression de PL3.
-  it("bloque une rafale de signup_invite venant de la même IP", async () => {
-    const app = getAppHelper();
-    const statuses: number[] = [];
-
-    for (let i = 0; i < 25; i++) {
-      const res = await request(app)
-        .post("/young/signup_invite")
-        .set("Content-Type", "application/json")
-        .send({ invitationToken: `jeton-${i}`, email: `x-${i}@example.org`, password: WRONG_PASSWORD });
-      statuses.push(res.status);
-    }
-
-    expect(statuses).toContain(429);
-  });
-});
-
 describe("PM31 — requireJsonBody sur les routes d'activation (login CSRF résiduel)", () => {
-  it("refuse young/signup_invite en dehors de application/json", async () => {
-    const res = await request(getAppHelper()).post("/young/signup_invite").type("form").send({ invitationToken: "x", email: "x@example.org", password: "x" });
-
-    expect(res.status).toBe(415);
-  });
-
-  it("accepte young/signup_invite en JSON (avant l'échec métier attendu sur un jeton invalide)", async () => {
-    const res = await request(getAppHelper()).post("/young/signup_invite").set("Content-Type", "application/json").send({ invitationToken: "x", email: "x@example.org", password: "x" });
-
-    expect(res.status).not.toBe(415);
-  });
-
   it("refuse referent/signup_invite en dehors de application/json", async () => {
     const res = await request(getAppHelper())
       .post("/referent/signup_invite")

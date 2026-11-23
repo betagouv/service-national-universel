@@ -3,6 +3,8 @@ import { validateUser } from "../passport";
 import { FeatureFlagModel, ReferentModel, YoungModel } from "../models";
 import { JWT_SIGNIN_VERSION } from "../jwt-options";
 
+jest.mock("../sentry", () => ({ capture: jest.fn(), captureMessage: jest.fn() }));
+
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
@@ -90,7 +92,7 @@ describe("passport.validateUser — rôles décommissionnés (GOO-56, lot P24)",
     expect(done).toHaveBeenCalledWith(null, user);
   });
 
-  it("ne s'applique pas à un jeune (pas de rôle référent)", async () => {
+  it("refuse désormais toute session jeune, même sans rôle référent", async () => {
     const young: any = {
       _id: "507f1f77bcf86cd799439014",
       status: "VALIDATED",
@@ -102,7 +104,20 @@ describe("passport.validateUser — rôles décommissionnés (GOO-56, lot P24)",
     const done = jest.fn();
     await validateUser(YoungModel, fakeJwtPayload(young), done);
 
-    expect(done).toHaveBeenCalledWith(null, young);
+    expect(done).toHaveBeenCalledWith(null, false);
+  });
+
+  it.each(["IN_PROGRESS", "WITHDRAWN"])("refuse un jeune %s même avec un JWT et des timestamps encore valides", async (status) => {
+    const young: any = {
+      _id: "507f1f77bcf86cd799439015",
+      status,
+      passwordChangedAt: null,
+      lastLogoutAt: null,
+    };
+    jest.spyOn(YoungModel, "findById").mockResolvedValue(young);
+    const done = jest.fn();
+    await validateUser(YoungModel, fakeJwtPayload(young), done);
+    expect(done).toHaveBeenCalledWith(null, false);
   });
 });
 
@@ -115,7 +130,7 @@ describe("passport.validateUser — PL7 (lot P27, audit du 25/09/2026) : l'usurp
     jest.restoreAllMocks();
   });
 
-  it("attribue impersonatedBy même quand la cible impersonée est un jeune (YoungModel)", async () => {
+  it("refuse aussi les anciennes sessions d'impersonation d'un jeune", async () => {
     const admin: any = { _id: "507f1f77bcf86cd799439021", role: ROLES.ADMIN };
     const young: any = {
       _id: "507f1f77bcf86cd799439022",
@@ -130,11 +145,9 @@ describe("passport.validateUser — PL7 (lot P27, audit du 25/09/2026) : l'usurp
     const done = jest.fn();
     await validateUser(YoungModel, payload, done);
 
-    // Avant correctif : le code interrogeait `userModel` (YoungModel ici), qui ne contient jamais
-    // d'admin — impersonatedBy restait indéfiniment vide, sans trace de l'auteur réel.
-    expect(referentFindById).toHaveBeenCalledWith(admin._id);
-    expect(done).toHaveBeenCalledWith(null, young);
-    expect(young.impersonatedBy).toBe(admin);
+    expect(referentFindById).not.toHaveBeenCalled();
+    expect(done).toHaveBeenCalledWith(null, false);
+    expect(young.impersonatedBy).toBeUndefined();
   });
 
   it("continue de fonctionner quand la cible impersonée est elle-même un référent (ReferentModel)", async () => {
@@ -238,7 +251,7 @@ describe("passport.validateUser — verrouillage temporaire de l'accès référe
     expect(done).toHaveBeenCalledWith(null, false);
   });
 
-  it("ne s'applique pas aux jeunes", async () => {
+  it("refuse les jeunes sans consulter le verrouillage référent", async () => {
     const findOne = mockAccessRestriction(verrouillage);
     const young: any = { _id: HORS_LISTE, status: "VALIDATED", passwordChangedAt: null, lastLogoutAt: null };
     jest.spyOn(YoungModel, "findById").mockResolvedValue(young);
@@ -247,6 +260,6 @@ describe("passport.validateUser — verrouillage temporaire de l'accès référe
     await validateUser(YoungModel, fakeJwtPayload(young), done);
 
     expect(findOne).not.toHaveBeenCalled();
-    expect(done).toHaveBeenCalledWith(null, young);
+    expect(done).toHaveBeenCalledWith(null, false);
   });
 });

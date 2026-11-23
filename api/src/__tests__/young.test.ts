@@ -374,70 +374,30 @@ describe("Young", () => {
   });
 
   describe("POST /young/signup_invite", () => {
-    it("should return 400 when invitation token is not provided", async () => {
-      await deleteYoungByEmailHelper("foo@example.org");
-      const young = await createYoungHelper({ ...getNewYoungFixture(), email: "foo@example.org" });
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_invite")
-        .send({
-          email: young.email,
-          password: "Test1234567!",
-        });
-      expect(res.statusCode).toEqual(400);
-    });
-    it("should return 404 when invitation is expired", async () => {
-      await deleteYoungByEmailHelper("foo@example.org");
-      const invitationToken = Date.now().toString();
+    it.each([
+      { label: "a valid invitation", expired: false, sendToken: true, password: "Test1234567!", format: "json" },
+      { label: "an expired invitation", expired: true, sendToken: true, password: "Test1234567!", format: "json" },
+      { label: "no invitation token", expired: false, sendToken: false, password: "Test1234567!", format: "json" },
+      { label: "an invalid password", expired: false, sendToken: true, password: "Test1234567", format: "json" },
+      { label: "a form submission", expired: false, sendToken: true, password: "Test1234567!", format: "form" },
+    ])("refuses $label without consuming the invitation or issuing a session", async ({ expired, sendToken, password, format }) => {
+      const invitationToken = "pending-invitation";
       const young = await createYoungHelper({
         ...getNewYoungFixture(),
-        email: "foo@example.org",
         invitationToken,
-        invitationExpires: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
+        invitationExpires: new Date(Date.now() + (expired ? -60_000 : 60_000)),
       });
-      const res = await request(await getAppHelperWithAcl())
+      const res = await request(getAppHelper())
         .post("/young/signup_invite")
-        .send({
-          email: young.email,
-          invitationToken,
-          password: "Test1234567!",
-        });
-      expect(res.statusCode).toEqual(404);
-    });
-    it("should return 400 when password is not valid", async () => {
-      await deleteYoungByEmailHelper("foo@example.org");
-      const invitationToken = Date.now().toString();
-      const young = await createYoungHelper({
-        ...getNewYoungFixture(),
-        email: "foo@example.org",
-        invitationToken,
-        invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-      });
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_invite")
-        .send({
-          email: young.email,
-          invitationToken,
-          password: "Test1234567",
-        });
-      expect(res.statusCode).toEqual(400);
-    });
-    it("should return 200 when young found", async () => {
-      await deleteYoungByEmailHelper("foo@example.org");
-      const invitationToken = Date.now().toString();
-      const young = await createYoungHelper({
-        ...getNewYoungFixture(),
-        email: "foo@example.org",
-        invitationToken,
-        invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
-      });
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/signup_invite")
-        .send({
-          email: young.email,
-          password: "Test1234567!",
-          invitationToken,
-        });
-      expect(res.statusCode).toEqual(200);
+        .type(format)
+        .send({ email: young.email, password, ...(sendToken ? { invitationToken } : {}) });
+
+      expect(res.status).toBe(403);
+      expect(res.body).toEqual({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      expect(res.headers["set-cookie"]).toBeUndefined();
+      const after = await YoungModel.findById(young._id);
+      expect(after!.invitationToken).toBe(invitationToken);
+      expect(after!.invitationExpires).toEqual(young.invitationExpires);
     });
   });
 
